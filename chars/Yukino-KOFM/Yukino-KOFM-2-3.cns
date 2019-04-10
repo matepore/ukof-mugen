@@ -1,0 +1,987 @@
+;===============================================================================
+;EN ESTA SECCION SE ENCUENTRABN TODOS LOS ESTADOS DE -2 Y -3
+;DEL CHAR LA MODIFICACION SIN AUTORIZACION PUEDE SIGNIFICAR
+;UNA FALLA TOTAL EN EL MISMO
+;-------------------------------------------------------------------------------
+
+;---------------Special KO detect
+[Statedef 169]
+type = S
+physics = S
+anim = 999
+poweradd = 0
+sprpriority = -1
+velset = 0,0
+ctrl = 0
+facep2 = 1
+
+[State 220, 3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 169
+;-------------------------------------------------------------------------------
+[Statedef -2]
+
+;-------------------------------------------------------------------------------
+;Inpedir remates despues de especial
+[State 1000, VarSet]
+type = VarSet
+trigger1 = p2stateno = [5100,5499]
+trigger2 = p2Movetype != H
+v = 19
+value = 0
+
+[State 1000, StateTypeSet]
+type = StateTypeSet
+trigger1 = var(19)= 1
+movetype = I
+ignorehitpause = 1
+;-------------------------------------------------------------------------------
+[State -2, VarSet]
+type = VarSet
+trigger1 = stateno = [200,699]
+trigger1 = enemy,movetype = H && enemy,statetype = A
+trigger1 = var(15) = 0 && numexplod(4150) <= 0
+v = 13
+value = 1
+ignorehitpause = 1
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = enemy,movetype != H
+trigger2 = stateno = [1200,1250]
+v = 13
+value = 0
+;-------------------------------------------------------------------------------
+[State -2, VarSet]
+type = VarSet
+trigger1 = p2movetype != H
+v = 13
+value = 0
+;-------------------------------------------------------------------------------
+;No Pasar Atras del Oponente (KOF Style)
+[State -2, Width]
+type = Width
+trigger1 = Movetype != H
+edge = 20-(Statetype = A)*3,0
+ignorehitpause =1
+;-------------------------------------------------------------------------------
+[State -2, Explod]
+type = Explod
+triggerall = anim = 5260
+trigger1 = time = [0,20]
+trigger1 = gametime%5 = 0
+anim = 4135
+pos = 0,-45
+postype = p1
+facing = 1
+vfacing = 1
+bindtime = 1
+random = 100,70
+removetime = -2
+sprpriority = 9
+
+[State -2, Explod]
+type = Explod
+triggerall = anim = 5260
+trigger1 = time = [0,20]
+trigger1 = gametime%5 = 0
+anim = 4145
+pos = 0,-45
+postype = p1
+facing = 1
+vfacing = 1
+bindtime = 1
+random = 100,70
+removetime = -2
+sprpriority = 9
+
+;-------------------------------------------------------------------------------
+[State -2, Helper]
+type = Helper
+triggerall = numhelper(9910) <= 0
+trigger1 = winKo = 1 && movehit && stateno = [899,4999]
+trigger2 = winKo = 1 && Projhittime(1000) >= 0 && Projhittime(1000) <= 1
+trigger3 = winKo = 1 && Projhittime(1200) >= 0 && Projhittime(1200) <= 1
+trigger4 = winKo = 1 && Projhittime(1500) >= 0 && Projhittime(1500) <= 1
+trigger5 = winKo = 1 && Projhittime(2095) >= 0 && Projhittime(2095) <= 1
+trigger6 = winKo = 1 && Projhittime(2105) >= 0 && Projhittime(2105) <= 1
+trigger7 = winKo = 1 && Projhittime(2353) >= 0 && Projhittime(2353) <= 1
+trigger8 = winKo = 1 && Projhittime(2400) >= 0 && Projhittime(2400) <= 1
+trigger9 = winKo = 1 && Projhittime(1000) >= 0 && Projhittime(1000) <= 1
+trigger10 = winKo = 1 && Projhittime(3601) >= 0 && Projhittime(3601) <= 1
+trigger11 = winKo = 1 && anim = 2054
+trigger12 = winKo = 1 && stateno = 2350 && p2stateno = [5000,5050]
+helpertype = normal
+name = "KO Flash"
+Id = 9910
+stateno = 9910
+pos = 0,0
+postype = p1
+facing = 1
+ignorehitpause = 1
+supermove = 1
+pausemove = 1
+pausemovetime = 99999
+supermovetime = 99999
+ownpal = 1
+
+[State -2]
+type = AssertSpecial
+trigger1 = WinKO
+trigger1 = RoundState = 3
+trigger1 = var(12) = 0
+flag = NoBarDisplay
+ignorehitpause = 1
+supermove = 1
+pausemove = 1
+
+[state -2, PlaySound]
+type = playsnd
+trigger1 = WinKO
+trigger1 = RoundState = 3
+trigger1 = var(12) = 0
+IgnoreHitPause = 1
+persistent = 0
+value = s5200,0
+volumescale = 255
+
+[state -2, varset]
+type = varset
+trigger1 = RoundState = 3
+IgnoreHitPause = 1
+v = 12
+value = 1
+
+[state -2, varset]
+type = varset
+trigger1 = RoundState = 2
+IgnoreHitPause = 1
+v = 12
+value = 0
+
+;-------------------------------------------------------------------------------
+[State -2, AssertSpecial]
+type = AssertSpecial
+trigger1 = gametime%2 = 0
+flag = noshadow
+ignorehitpause = 1
+
+[State 1000, RemoveExplod]
+type = RemoveExplod
+trigger1 = stateno != 650
+id = 651
+
+[State -2, RemoveExplod]
+type = RemoveExplod
+trigger1 = stateno != [2075,2086]
+id = 2087
+
+;-------------------------------------------------------------------------------
+;Variables y Explods de Quemar
+[State 2300, Burn]
+type = Varset
+trigger1 = Projhittime(1000) >= 0 && Projhittime(1000) <= 1
+trigger2 = Projhittime(1200) >= 0 && Projhittime(1200) <= 1
+trigger3 = Projhittime(1500) >= 0 && Projhittime(1500) <= 1
+trigger4 = Projhittime(2095) >= 0 && Projhittime(2095) <= 1
+trigger5 = Projhittime(2105) >= 0 && Projhittime(2105) <= 1
+trigger6 = Projhittime(2353) >= 0 && Projhittime(2353) <= 1
+trigger7 = Projhittime(2400) >= 0 && Projhittime(2400) <= 1
+trigger8 = Projhittime(1000) >= 0 && Projhittime(1000) <= 1
+trigger9 = Projhittime(3601) >= 0 && Projhittime(3601) <= 1
+trigger10 = Anim = 810
+trigger10 = Movehit
+trigger11 = Anim = 1105
+trigger11 = Movehit
+trigger12 = Anim = 1206
+trigger12 = Movehit
+trigger13 = Anim = 1106
+trigger13 = Movehit
+trigger14 = Anim = 1170
+trigger14 = Movehit
+trigger15 = Anim = 1175
+trigger15 = Movehit
+trigger16 = Anim = 1300
+trigger16 = Movehit
+trigger17 = Anim = 1301
+trigger17 = Movehit
+trigger18 = Anim = 1303
+trigger18 = Movehit
+trigger19 = Anim = 610
+trigger19 = Movehit
+trigger20 = Anim = 2000
+trigger20 = Movehit
+trigger21 = Anim = 2340
+trigger21 = Movehit
+trigger22 = Anim = 2054
+trigger22 = Movehit
+trigger23 = Anim = 2305
+trigger23 = Movehit
+trigger24 = Anim = 305
+trigger24 = Movehit
+trigger25 = Anim = 2086
+trigger25 = Movehit
+persistent = 0
+ignorehitpause = 1
+var(25) = 1
+
+[State -2,explods]
+type = Explod
+triggerall = p2movetype = H
+trigger1 = Projhittime(1000) >= 0 && Projhittime(1000) <= 20
+trigger1 = Random < 70
+trigger2 = Projhittime(1200) >= 0 && Projhittime(1200) <= 20
+trigger2 = Random < 70
+trigger3 = Projhittime(1500) >= 0 && Projhittime(1500) <= 20
+trigger3 = Random < 70
+trigger4 = Projhittime(2095) >= 0 && Projhittime(2095) <= 20
+trigger4 = Random < 70
+trigger5 = Projhittime(2105) >= 0 && Projhittime(2105) <= 20
+trigger5 = Random < 70
+trigger6 = Projhittime(2353) >= 0 && Projhittime(2353) <= 20
+trigger6 = Random < 70
+trigger7 = Projhittime(2400) >= 0 && Projhittime(2400) <= 20
+trigger7 = Random < 70
+trigger8 = Projhittime(1000) >= 0 && Projhittime(1000) <= 20
+trigger8 = Random < 70
+trigger9 = Projhittime(3601) >= 0 && Projhittime(3601) <= 20
+trigger9 = Random < 70
+trigger10 = Anim = 810
+trigger10 = Random < 50
+trigger10 = Movehit
+trigger11 = Anim = 1105
+trigger11 = Random < 50
+trigger11 = Movehit
+trigger12 = Anim = 1206
+trigger12 = Random < 50
+trigger12 = Movehit
+trigger13 = Anim = 1106
+trigger13 = Random < 50
+trigger13 = Movehit
+trigger14 = Anim = 1170
+trigger14 = Random < 50
+trigger14 = Movehit
+trigger15 = Anim = 1175
+trigger15 = Random < 50
+trigger15 = Movehit
+trigger16 = Anim = 1300
+trigger16 = Random < 50
+trigger16 = Movehit
+trigger17 = Anim = 1301
+trigger17 = Random < 50
+trigger17 = Movehit
+trigger18 = Anim = 1303
+trigger18 = Random < 50
+trigger18 = Movehit
+trigger19 = Anim = 610
+trigger19 = Random < 50
+trigger19 = Movehit
+trigger20 = Anim = 2000
+trigger20 = Random < 50
+trigger20 = Movehit
+trigger21 = Anim = 2340
+trigger21 = Random < 50
+trigger21 = Movehit
+trigger22 = Anim = 2054
+trigger22 = AnimElemtime(1) >= 0
+trigger22 = Random < 50
+trigger23 = Anim = 2305
+trigger23 = Random < 50
+trigger23 = Movehit
+trigger24 = Anim = 305
+trigger24 = Random < 50
+trigger24 = Movehit
+trigger25 = Anim = 2086
+trigger25 = Random < 50
+trigger25 = Movehit
+anim = 4130
+pos = 0,-50
+postype = p2
+sprpriority = 9
+bindtime = 1
+random = 100,100
+ownpal = 1
+ignorehitpause = 1
+
+[State -2,explods 2]
+type = Explod
+triggerall = p2movetype = H
+trigger1 = Projhittime(1000) >= 0 && Projhittime(1000) <= 20
+trigger1 = Random < 70
+trigger2 = Projhittime(1200) >= 0 && Projhittime(1200) <= 20
+trigger2 = Random < 70
+trigger3 = Projhittime(1500) >= 0 && Projhittime(1500) <= 20
+trigger3 = Random < 70
+trigger4 = Projhittime(2095) >= 0 && Projhittime(2095) <= 20
+trigger4 = Random < 70
+trigger5 = Projhittime(2105) >= 0 && Projhittime(2105) <= 20
+trigger5 = Random < 70
+trigger6 = Projhittime(2353) >= 0 && Projhittime(2353) <= 20
+trigger6 = Random < 70
+trigger7 = Projhittime(2400) >= 0 && Projhittime(2400) <= 20
+trigger7 = Random < 70
+trigger8 = Projhittime(1000) >= 0 && Projhittime(1000) <= 20
+trigger8 = Random < 70
+trigger9 = Projhittime(3601) >= 0 && Projhittime(3601) <= 20
+trigger9 = Random < 70
+trigger10 = Anim = 810
+trigger10 = Random < 50
+trigger10 = Movehit
+trigger11 = Anim = 1105
+trigger11 = Random < 50
+trigger11 = Movehit
+trigger12 = Anim = 1206
+trigger12 = Random < 50
+trigger12 = Movehit
+trigger13 = Anim = 1106
+trigger13 = Random < 50
+trigger13 = Movehit
+trigger14 = Anim = 1170
+trigger14 = Random < 50
+trigger14 = Movehit
+trigger15 = Anim = 1175
+trigger15 = Random < 50
+trigger15 = Movehit
+trigger16 = Anim = 1300
+trigger16 = Random < 50
+trigger16 = Movehit
+trigger17 = Anim = 1301
+trigger17 = Random < 50
+trigger17 = Movehit
+trigger18 = Anim = 1303
+trigger18 = Random < 50
+trigger18 = Movehit
+trigger19 = Anim = 610
+trigger19 = Random < 50
+trigger19 = Movehit
+trigger20 = Anim = 2000
+trigger20 = Random < 50
+trigger20 = Movehit
+trigger21 = Anim = 2340
+trigger21 = Random < 50
+trigger21 = Movehit
+trigger22 = Anim = 2054
+trigger22 = AnimElemtime(1) >= 0
+trigger22 = Random < 50
+trigger23 = Anim = 2305
+trigger23 = Random < 50
+trigger23 = Movehit
+trigger24 = Anim = 305
+trigger24 = Random < 50
+trigger24 = Movehit
+trigger25 = Anim = 2086
+trigger25 = Random < 50
+trigger25 = Movehit
+anim = 4140
+pos = 0,-50
+postype = p2
+sprpriority = 9
+bindtime = 1
+random = 100,100
+ownpal = 1
+ignorehitpause = 1
+
+[State -2,explods 2]
+type = Explod
+triggerall = p2movetype = H
+trigger1 = Projhittime(1000) >= 0 && Projhittime(1000) <= 20
+trigger1 = Random < 70
+trigger2 = Projhittime(1200) >= 0 && Projhittime(1200) <= 20
+trigger2 = Random < 70
+trigger3 = Projhittime(1500) >= 0 && Projhittime(1500) <= 20
+trigger3 = Random < 70
+trigger4 = Projhittime(2095) >= 0 && Projhittime(2095) <= 20
+trigger4 = Random < 70
+trigger5 = Projhittime(2105) >= 0 && Projhittime(2105) <= 20
+trigger5 = Random < 70
+trigger6 = Projhittime(2353) >= 0 && Projhittime(2353) <= 20
+trigger6 = Random < 70
+trigger7 = Projhittime(2400) >= 0 && Projhittime(2400) <= 20
+trigger7 = Random < 70
+trigger8 = Projhittime(1000) >= 0 && Projhittime(1000) <= 20
+trigger8 = Random < 70
+trigger9 = Projhittime(3601) >= 0 && Projhittime(3601) <= 20
+trigger9 = Random < 70
+trigger10 = Anim = 810
+trigger10 = Random < 50
+trigger10 = Movehit
+trigger11 = Anim = 1105
+trigger11 = Random < 50
+trigger11 = Movehit
+trigger12 = Anim = 1206
+trigger12 = Random < 50
+trigger12 = Movehit
+trigger13 = Anim = 1106
+trigger13 = Random < 50
+trigger13 = Movehit
+trigger14 = Anim = 1170
+trigger14 = Random < 50
+trigger14 = Movehit
+trigger15 = Anim = 1175
+trigger15 = Random < 50
+trigger15 = Movehit
+trigger16 = Anim = 1300
+trigger16 = Random < 50
+trigger16 = Movehit
+trigger17 = Anim = 1301
+trigger17 = Random < 50
+trigger17 = Movehit
+trigger18 = Anim = 1303
+trigger18 = Random < 50
+trigger18 = Movehit
+trigger19 = Anim = 610
+trigger19 = Random < 50
+trigger19 = Movehit
+trigger20 = Anim = 2000
+trigger20 = Random < 50
+trigger20 = Movehit
+trigger21 = Anim = 2340
+trigger21 = Random < 50
+trigger21 = Movehit
+trigger22 = Anim = 2054
+trigger22 = AnimElemtime(1) >= 0
+trigger22 = Random < 50
+trigger23 = Anim = 2305
+trigger23 = Random < 50
+trigger23 = Movehit
+trigger24 = Anim = 305
+trigger24 = Random < 50
+trigger24 = Movehit
+trigger25 = Anim = 2086
+trigger25 = Random < 50
+trigger25 = Movehit
+anim = 4145
+pos = 0,-50
+postype = p2
+sprpriority = 9
+bindtime = 1
+random = 100,100
+ownpal = 1
+ignorehitpause = 1
+
+[State -2,explods 2]
+type = Explod
+triggerall = p2movetype = H
+trigger1 = Projhittime(1000) >= 0 && Projhittime(1000) <= 20
+trigger1 = Random < 70
+trigger2 = Projhittime(1200) >= 0 && Projhittime(1200) <= 20
+trigger2 = Random < 70
+trigger3 = Projhittime(1500) >= 0 && Projhittime(1500) <= 20
+trigger3 = Random < 70
+trigger4 = Projhittime(2095) >= 0 && Projhittime(2095) <= 20
+trigger4 = Random < 70
+trigger5 = Projhittime(2105) >= 0 && Projhittime(2105) <= 20
+trigger5 = Random < 70
+trigger6 = Projhittime(2353) >= 0 && Projhittime(2353) <= 20
+trigger6 = Random < 70
+trigger7 = Projhittime(2400) >= 0 && Projhittime(2400) <= 20
+trigger7 = Random < 70
+trigger8 = Projhittime(1000) >= 0 && Projhittime(1000) <= 20
+trigger8 = Random < 70
+trigger9 = Projhittime(3601) >= 0 && Projhittime(3601) <= 20
+trigger9 = Random < 70
+trigger10 = Anim = 810
+trigger10 = Random < 50
+trigger10 = Movehit
+trigger11 = Anim = 1105
+trigger11 = Random < 50
+trigger11 = Movehit
+trigger12 = Anim = 1206
+trigger12 = Random < 50
+trigger12 = Movehit
+trigger13 = Anim = 1106
+trigger13 = Random < 50
+trigger13 = Movehit
+trigger14 = Anim = 1170
+trigger14 = Random < 50
+trigger14 = Movehit
+trigger15 = Anim = 1175
+trigger15 = Random < 50
+trigger15 = Movehit
+trigger16 = Anim = 1300
+trigger16 = Random < 50
+trigger16 = Movehit
+trigger17 = Anim = 1301
+trigger17 = Random < 50
+trigger17 = Movehit
+trigger18 = Anim = 1303
+trigger18 = Random < 50
+trigger18 = Movehit
+trigger19 = Anim = 610
+trigger19 = Random < 50
+trigger19 = Movehit
+trigger20 = Anim = 2000
+trigger20 = Random < 50
+trigger20 = Movehit
+trigger21 = Anim = 2340
+trigger21 = Random < 50
+trigger21 = Movehit
+trigger22 = Anim = 2054
+trigger22 = AnimElemtime(1) >= 0
+trigger22 = Random < 50
+trigger23 = Anim = 2305
+trigger23 = Random < 50
+trigger23 = Movehit
+trigger24 = Anim = 305
+trigger24 = Random < 50
+trigger24 = Movehit
+trigger25 = Anim = 2086
+trigger25 = Random < 50
+trigger25 = Movehit
+anim = 4135
+pos = 0,-50
+postype = p2
+sprpriority = 9
+bindtime = 1
+random = 100,100
+ownpal = 1
+ignorehitpause = 1
+
+;P2 en el Suelo
+[State 1000, explods]
+type = Explod
+triggerall = (p2stateno = [5100,5460]) && p2movetype = H
+trigger1 = var(25) > 0 && Random < 100
+anim = 4146
+pos = 0,0
+facing = -1
+postype = p2
+sprpriority = 999
+bindtime = 1
+random = 100,0
+ownpal = 1
+supermove = 1
+ignorehitpause = 1
+
+[State 1000, explods]
+type = Explod
+triggerall = (p2stateno = [5100,5460]) && p2movetype = H
+trigger1 = var(25) > 0 && Random < 100
+anim = 4135
+pos = 0,0
+postype = p2
+sprpriority = 999
+bindtime = 1
+random = 100,100
+ownpal = 1
+supermove = 1
+ignorehitpause = 1
+
+[State 1000, VarSet]
+type = VarSet
+trigger1 = p2movetype != H
+v = 25
+value = 0
+persistent = 0
+;-------------------------------------------------------------------------------
+
+[State -2, EnvColor]
+type = EnvColor
+trigger1 = Projhittime(2025) >= 0 && Projhittime(2025) <= 1
+trigger2 = Projhittime(2105) >= 0 && Projhittime(2105) <= 1
+trigger3 = Projhittime(2400) >= 0 && Projhittime(2400) <= 1
+trigger4 = Projhittime(3601) >= 0 && Projhittime(3601) <= 1
+trigger5 = Projhittime(3701) >= 0 && Projhittime(3701) <= 1
+trigger6 = Projhittime(2095) >= 0 && Projhittime(2095) <= 1
+trigger7 = Projhittime(2353) >= 0 && Projhittime(2353) <= 1
+value = 255,255,255
+time = 1
+under = 1
+
+;-------------------------------------------------------------------------------
+;Pausa de ataques
+[State -3, Slow Down]
+type = Pause
+triggerall = RoundState = 2
+trigger1 = ProjHitTime(2095) = [12,20]
+trigger2 = ProjHitTime(1500) = [10,20]
+trigger3 = ProjHitTime(2302) = [10,30]
+trigger4 = ProjHitTime(2300) = [5,20]
+trigger5 = ProjHitTime(2353) = [5,20]
+trigger6 = ProjHitTime(2400) = [5,30]
+trigger7 = ProjHitTime(1000) = [1,16]
+trigger8 = ProjHitTime(2351) = [20,35]
+time = 1
+movetime = 0
+ignorehitpause = 1
+;-------------------------------------------------------------------------------
+[State -2, ChangeState]
+type = ChangeState
+value = 190
+triggerall = TeamMode = Turns
+trigger1 = stateno = 5900
+
+[State -2, VarSet]
+type = VarSet
+triggerall = RoundState = [0,1]
+trigger1 = RoundNo = 1
+trigger2 = TeamMode = Turns
+trigger2 = RoundsExisted = 0
+value = Life
+
+[State -2, VarSet]
+type = VarSet
+triggerall = Var(22) = [0,100]
+triggerall = Time = 1
+trigger1 = RoundNo = 1
+trigger2 = RoundsExisted = 0
+value = const(data.life)
+
+;-------------------------------------------------------------------------------
+[State -2, AfterImage]
+type = AfterImage
+trigger1 = movetype = H
+time = 0
+
+[State -2, PalFX]
+type = PalFX
+trigger1 = enemy,var(46) != 0
+trigger1 = gametime%3 = 0
+time = 1
+add = 0,0,100
+mul = 256,256,256
+color = 256
+ignorehitpause = 1
+
+[State -2,]
+type = StopSnd
+trigger1 = Anim != 100
+trigger2 = Movetype = H
+channel = 6
+;-------------------------------------------------------------------------------
+[State -2, 4]
+type = VarRandom
+triggerall = Time = 1
+trigger1 = stateno = 5000
+trigger2 = stateno = 5010
+trigger3 = stateno = 5020
+v = 4
+range = 0,30
+
+[State -2, 5]
+type = PlaySnd
+triggerall = Time = 1
+triggerall = Var(4) = [0,3]
+triggerall = alive = 1
+trigger1 = stateno = 5000
+trigger2 = stateno = 5010
+trigger3 = stateno = 5020
+value = s5000,0
+channel = 0
+
+[State -2, 6]
+type = PlaySnd
+triggerall = Time = 1
+triggerall = Var(4) = [4,7]
+triggerall = alive = 1
+trigger1 = stateno = 5000
+trigger2 = stateno = 5010
+trigger3 = stateno = 5020
+value = s5000,1
+channel = 0
+
+[State -2, 6]
+type = PlaySnd
+triggerall = Time = 1
+triggerall = Var(4) = [8,11]
+triggerall = alive = 1
+trigger1 = stateno = 5000
+trigger2 = stateno = 5010
+trigger3 = stateno = 5020
+value = s5000,2
+channel = 0
+
+[State -2, 6]
+type = PlaySnd
+triggerall = Time = 1
+triggerall = Var(4) = [12,15]
+triggerall = alive = 1
+trigger1 = stateno = 5000
+trigger2 = stateno = 5010
+trigger3 = stateno = 5020
+value = s5000,3
+channel = 0
+
+[State -2, 6]
+type = PlaySnd
+triggerall = Time = 1
+triggerall = Var(4) = [16,19]
+triggerall = alive = 1
+trigger1 = stateno = 5000
+trigger2 = stateno = 5010
+trigger3 = stateno = 5020
+value = s5000,4
+channel = 0
+
+[State -2, 6]
+type = PlaySnd
+triggerall = Time = 1
+triggerall = Var(4) = [20,30]
+triggerall = alive = 1
+trigger1 = stateno = 5000
+trigger2 = stateno = 5010
+trigger3 = stateno = 5020
+value = s5000,4
+channel = 0
+
+[State -2]
+type = PlaySnd
+Triggerall = Alive = 1
+triggerall = Time = 1
+trigger1 = (stateno = 5100) && (anim = 5100 || anim = 5101 || anim = 5102)
+value = S5000,7
+;===============================================================================
+
+[State -2, No sound in Guanding KO]
+type = AssertSpecial
+triggerall = prevstateno = [120,152]
+trigger1 = stateno = 5000 || stateno = 5010 || stateno = 5070
+trigger1 = statetype != A
+flag = Nokosnd
+ignorehitpause = 1
+
+[State -2, Guarding KO]
+type = ChangeState
+trigger1 = prevstateno = [120,152]
+;triggerall = statetype != A
+trigger1 = !alive
+value = 6010
+ignorehitpause = 1
+
+[State -2, Sexy KO]
+type = Helper
+triggerall = NumHelper(6969) = 0
+trigger1 = !alive
+trigger1 = matchover || teammode = turns
+helpertype = normal
+name = "Sexy KO detect"
+id = 6969
+postype = p1
+pos = 0,0
+stateno = 169
+keyctrl = 0
+ownpal = 1
+facep2 = 0
+ignorehitpause = 1
+
+[State 1000, ChangeAnim]
+type = ChangeAnim
+trigger1 = anim = 5000
+trigger1 = time >= 0
+trigger1 = NumHelper(6969) = 1
+trigger1 = anim != 25030
+value = 25030
+ignorehitpause
+;-------------------------------------------------------------------------------
+[State 100, StopSnd]
+type = StopSnd
+trigger1 = stateno != 910 && stateno != 911
+channel = 8
+
+[State 100, StopSnd]
+type = StopSnd
+trigger1 = stateno != 910 && stateno != 911
+channel = 9
+
+[State 100, StopSnd]
+type = StopSnd
+trigger1 = stateno != 2000
+channel = 10
+
+[State 100, StopSnd]
+type = StopSnd
+trigger1 = stateno != 2400
+channel = 11
+
+[State 100, StopSnd]
+type = StopSnd
+trigger1 = roundstate = 2
+channel = 12
+
+[State 100, StopSnd]
+type = StopSnd
+trigger1 = movetype = H
+channel = 4
+ignorehitpause = 1
+
+[State 100, StopSnd]
+type = StopSnd
+trigger1 = movetype = H
+channel = 5
+ignorehitpause = 1
+;-------------------------------------------------------------------------------
+[Statedef -3]
+
+;--------------------------------------------------------------------------------
+[State -3, noautoturn]
+type = AssertSpecial
+trigger1 = BackEdgeBodyDist < 23
+flag = noautoturn
+
+[State -3, コマンドを入れたらVarをON]
+type = VarSet
+trigger1 = command = "jump"
+trigger1 = ctrl
+trigger1 = statetype = S
+v = 3
+value = 1
+
+[State -3, sysvarを引継ぐ]
+type = VarSet
+trigger1 = Var(3) = 1
+trigger1 = stateno = 40
+trigger1 = AnimTime = 0
+var(3) = ifelse(sysvar(1)=0, 2, ifelse(sysvar(1)=1, 3, 4))
+
+[State -3, varをOFFにするステート]
+type = VarSet
+triggerall = Time = 2
+trigger1 = stateno = 50
+trigger2 = stateno != [40,59]
+v = 3
+value = 0
+
+[State -3, 前にボタンを押してたら前にも加速]
+type = VelAdd
+trigger1 = var(3) = 3
+trigger1 = stateno = 50
+x = 2
+
+[State -3, 後ろなら後ろに加速]
+type = VelAdd
+trigger1 = var(3) = 4
+trigger1 = stateno = 50
+x = -2.1
+
+[State -3, varをOFFにするステート]
+type = VarSet
+trigger1 = Var(3) != 0
+trigger2 = prevstateno = 100
+trigger2 = AnimTime = 0
+v = 2
+value = 1
+
+[State -3, varをOFFにするステート]
+type = VarSet
+trigger1 = statetype != A
+trigger1 = stateno != 40
+v = 2
+value = 0
+
+[State -3, Afterimage]
+type = Afterimage
+trigger1 = var(3) >= 1
+trigger1 = stateno = 50
+trigger2 = AnimTime = 0
+trigger2 = prevstateno = 100 ;RUN_FWD
+trigger2 = sysvar(1) = 1
+time = 2
+length = 7
+PalBright = 0,0,0
+PalContrast = 256,256,256
+PalAdd = 0,0,0
+PalMul = 1,1,1
+FrameGap = 3
+
+[State -3, Afterimagetime]
+type = Afterimagetime
+triggerall = Var(2) = 1
+triggerall = Stateno != 0
+trigger1 = stateno = 50
+trigger1 = time%2 = 0
+time = 2
+;-------------------------------------------------------------------------------
+;Critical Hit system
+[State -3, VarSet]
+type = VarSet
+triggerall = Movetype != H
+trigger1 = Roundstate = 2 && Random%7<2;Gametime%8=0
+var(9) = Ifelse(Random < 200,1,0)
+ignorehitpause = 1
+persistent = 1
+
+[State -3, VarAdd]
+type = VarAdd
+triggerall = Movetype != H && Stateno = 1170
+triggerall = Numtarget = 1
+triggerall = Target,Time = 1
+trigger1 = Var(9) && Movehit = 1
+var(10) = 11
+ignorehitpause =1
+persistent = 1
+
+[State -3, EnvColor]
+type = EnvColor
+triggerall = Movetype != H && Stateno = 1170
+triggerall = Numtarget = 1
+triggerall = Target,Time = 1
+trigger1 = Var(9) && Movehit = 1
+value = 255,255,255
+time = 1
+under = 1
+ignorehitpause = 1
+persistent = 1
+
+[State -3, EnvShake]
+type = EnvShake
+triggerall = Movetype != H && Stateno = 1170
+triggerall = Numtarget = 1
+triggerall = Target,Time = 1
+trigger1 = Var(9) && Movehit = 1
+time = 13
+freq = 160
+ampl = -6
+phase = 0
+ignorehitpause = 1
+persistent = 1
+
+[State -3, TargetLifeAdd]
+type = TargetLifeAdd
+triggerall = Movetype != H && Stateno = 1170
+triggerall = Numtarget = 1
+triggerall = Target,Time = 1
+trigger1 = Var(9) && Movehit = 1
+value = (5+(Target,Gethitvar(Damage)%10)*10)*-1
+kill = 1
+ignorehitpause =1
+persistent =1
+
+[State -3, Helper]
+type = Helper
+triggerall = Movetype != H && Stateno = 1170
+triggerall = Numtarget = 1
+triggerall = Target,Time = 1
+trigger1 = Var(9) && Movehit = 1
+helpertype = normal
+name = "Slow Motion"
+stateno = 1260
+id = 1260
+pos = 0,0
+postype = p1
+facing = 1
+keyctrl = 0
+ownpal = 1
+ignorehitpause = 1
+supermove = 1
+pausemove = 1
+pausemovetime = 99999
+supermovetime = 99999
+
+[State -3, AssertSpecial]
+type = AssertSpecial
+trigger1 = var(10) = 11
+flag = nojugglecheck
+
+[State -3, VarSet]
+type = VarSet
+trigger1 = p2movetype != H
+v = 10
+value = 0
+
+[state -3, debug output]
+type = DisplayToClipboard
+trigger1 = 1
+text="Var(13): %d, hitshake: %d"
+params =var(13), (enemy,hitpausetime)
+ignorehitpause = 1

@@ -1,0 +1,3285 @@
+;===========================================================================================================================
+;Igniz Eagrose Version, original char by Gonzo-, re-written by Eagrose
+;CNS file part: Normal Moves
+;===========================================================================================================================
+;-------------------------------------------------------------------------------
+; Stand Light Punch
+[Statedef 200]
+type    = S
+movetype= A
+physics = S
+juggle  = 4
+velset = 0,0
+ctrl = 0
+anim = 200
+poweradd = 0
+sprpriority = 2
+facep2 = 1
+
+[State 200, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = time = 0
+value = S0,3
+channel = ifelse(IsHelper(97864),20,0)
+
+[State 200, PlaySnd]; ---- sound
+type = PlaySnd
+trigger1 = time = 0
+value = S0,4
+
+[State 200, HitDef]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = S,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MA    ;HLAFDP+-
+guardflag = M    ;MHLA
+getpower = floor(75*fvar(10)),floor(38*fvar(10))
+;givepower = 0, 0
+;affectteam =    ;B,E,F
+animtype = Light    ;light,medium,hard,back,up,diagup
+air.animtype = light    ;light,medium,hard,back,up,diagup
+;fall.animtype =
+priority = 3, Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(20*fvar(3)),0
+pausetime = 5,6
+sparkno = 0
+guard.sparkno = 40
+sparkxy = -10,-80
+hitsound = S0,6
+guardsound = S0,10
+ground.type = High      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+air.type = High    ;Defaults to ground.type
+ground.slidetime = 7    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+guard.slidetime = 7    ;Defaults to guard.hittime
+ground.hittime = 7    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+guard.hittime = 7    ;Defaults to ground.hittime
+air.hittime = 8    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+yaccel = 0.4    ;y acceleration
+ground.velocity = -4.5,0
+guard.velocity = -4.5    ;Defaults to x_velocity of ground.velocity
+air.velocity = -1.4,-3   ;Defaults to 0,0
+airguard.velocity = -2.5,-2    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+;p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 0
+;fall.xvelocity = 0    ;Defaults to no change
+;fall.yvelocity = -4.5    ;Defaults to -4.5
+;fall.recover = 1
+;fall.recovertime = 4
+;fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+;down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+;palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+;envshake.time = 0
+;envshake.freq = 0
+;envshake.ampl = 0
+;envshake.phase = 0
+;fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+[State 200, ChangeState]; ---- Stand Strong Punch AI
+type = ChangeState
+value = 210
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+Trigger1 = P2bodydist X >= -7
+Trigger1 = P2bodydist X <= 80+floor(ifelse(6>fvar(31),6-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -100-floor(ifelse(6>fvar(31),6-fvar(31),0)*(EnemyNear(floor(fvar(36))),vel Y)+(ifelse(6>fvar(31),6-fvar(31),0)*6/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(6>fvar(31),6-fvar(31),0)*(EnemyNear(floor(fvar(36))),vel Y)+(ifelse(6>fvar(31),6-fvar(31),0)*6/2)*fvar(30))
+Trigger2 = P2bodydist X >= -7
+Trigger2 = P2bodydist X <= 80-18
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 200, ChangeState]; ---- Crouching Strong Punch AI
+type = ChangeState
+value = 310
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 82+floor(ifelse(7>fvar(31),7-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -64-floor(ifelse(7>fvar(31),7-fvar(31),0)*(fvar(29))+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(7>fvar(31),7-fvar(31),0)*(fvar(29))+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30))
+Trigger2 = P2bodydist X >= -5
+Trigger2 = P2bodydist X <= 82-16
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 230, ChangeState]; ---- Crouching Strong Kick AI
+type = ChangeState
+value = 330
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+TriggerAll = power < 1000
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 90+floor(ifelse(11>fvar(31),11-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -36-floor(ifelse(11>fvar(31),11-fvar(31),0)*(fvar(29))+(ifelse(11>fvar(31),11-fvar(31),0)*11/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(11>fvar(31),11-fvar(31),0)*(fvar(29))+(ifelse(11>fvar(31),11-fvar(31),0)*11/2)*fvar(30))
+Trigger2 = P2bodydist X >= -7
+Trigger2 = P2bodydist X <= 90-18
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 200, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;-------------------------------------------------------------------------------
+; Stand Strong Punch
+[Statedef 210]
+type    = S
+movetype= A
+physics = S
+juggle  = 6
+poweradd = 0
+ctrl = 0
+velset = 0,0
+anim = 205
+sprpriority = 2
+facep2 = 1
+
+[State 210, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = time = 4
+value = S0,21
+channel = ifelse(IsHelper(97864),20,0)
+
+[State 210, PlaySnd]; ---- sound
+type = playsnd
+trigger1 = time = 0
+value = S0,4
+
+[State 210, HitDef]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = S,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MA    ;HLAFDP+-
+guardflag = MA    ;MHLA
+getpower = floor(125*fvar(10)),floor(75*fvar(10))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = Hard    ;light,medium,hard,back,up,diagup
+air.animtype = Hard    ;light,medium,hard,back,up,diagup
+;fall.animtype =
+priority = 4,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(57*fvar(3)),0
+pausetime = 10,16
+;guard.pause ,0
+sparkno = 1
+guard.sparkno = 40
+sparkxy = -10,-80
+hitsound = S0,7
+guardsound = S0,10
+ground.type = High      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+air.type = High    ;Defaults to ground.type
+ground.slidetime = 10    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 10    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 12    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+yaccel = 0.4    ;y acceleration
+ground.velocity = -9,0
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = -1.4,-3    ;Defaults to 0,0
+airguard.velocity = -5,-.8    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 0
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.recover = 1
+fall.recovertime = 4
+fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 12
+envshake.freq = 120
+envshake.ampl = 5
+envshake.phase = 120
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+[State 210, ChangeState]; ---- Crouching Strong Kick AI
+type = ChangeState
+value = 330
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+TriggerAll = power < 1000
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 90+floor(ifelse(11>fvar(31),11-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -36-floor(ifelse(11>fvar(31),11-fvar(31),0)*(fvar(29))+(ifelse(11>fvar(31),11-fvar(31),0)*11/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(11>fvar(31),11-fvar(31),0)*(fvar(29))+(ifelse(11>fvar(31),11-fvar(31),0)*11/2)*fvar(30))
+Trigger2 = P2bodydist X >= -5
+Trigger2 = P2bodydist X <= 90-24
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 210, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; Stand Light Kick
+[Statedef 230]
+type    = S
+movetype= A
+physics = S
+juggle  = 4
+poweradd = 0
+ctrl = 0
+velset = 0,0
+anim = 210
+sprpriority = 2
+facep2 = 1
+
+[State 230, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = time = 0
+value = S0,3
+channel = ifelse(IsHelper(97864),20,0)
+
+[State 230, PlaySnd]; ---- sound
+type = PlaySnd
+trigger1 = time = 0
+value = S0,5
+
+[State 230, HitDef]
+type = HitDef
+trigger1 = animelem = 3
+attr = S,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MA    ;HLAFDP+-
+guardflag = MA    ;MHLA
+getpower = floor(75*fvar(10)),floor(38*fvar(10))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = medium    ;light,medium,hard,back,up,diagup
+air.animtype = medium    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 3,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(26*fvar(3)),0
+pausetime = 4,5
+;guard.pause ,0
+sparkno = 0
+guard.sparkno = 40
+sparkxy = -10,-57
+hitsound = S0,8
+guardsound = S0,10
+ground.type = Low      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+air.type = Low    ;Defaults to ground.type
+ground.slidetime = 8    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 9    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 10    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+yaccel = 0.4    ;y acceleration
+ground.velocity = -5,0
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = -2.5,-3.5    ;Defaults to 0,0
+airguard.velocity = -4,-1.75    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 0
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.recover = 1
+fall.recovertime = 4
+fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 0
+;envshake.freq = 0
+;envshake.ampl = 0
+;envshake.phase = 0
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+[State 230, ChangeState]; ---- Stand Strong Punch AI
+type = ChangeState
+value = 210
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+Trigger1 = P2bodydist X >= -7
+Trigger1 = P2bodydist X <= 80+floor(ifelse(7>fvar(31),7-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -100-floor(ifelse(7>fvar(31),7-fvar(31),0)*(EnemyNear(floor(fvar(36))),vel Y)+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(7>fvar(31),7-fvar(31),0)*(EnemyNear(floor(fvar(36))),vel Y)+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30))
+Trigger2 = P2bodydist X >= -7
+Trigger2 = P2bodydist X <= 80-20
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 230, ChangeState]; ---- Crouching Strong Punch AI
+type = ChangeState
+value = 310
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 82+floor(ifelse(7>fvar(31),7-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -64-floor(ifelse(7>fvar(31),7-fvar(31),0)*(fvar(29))+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(7>fvar(31),7-fvar(31),0)*(fvar(29))+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30))
+Trigger2 = P2bodydist X >= -5
+Trigger2 = P2bodydist X <= 82-18
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 230, ChangeState]; ---- Stand Strong Kick AI
+type = ChangeState
+value = 240
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+Trigger1 = P2bodydist X >= -9
+Trigger1 = P2bodydist X <= 115+floor(ifelse(8>fvar(31),8-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -67-floor(ifelse(8>fvar(31),8-fvar(31),0)*(fvar(29))+(ifelse(8>fvar(31),8-fvar(31),0)*8/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(8>fvar(31),8-fvar(31),0)*(fvar(29))+(ifelse(8>fvar(31),8-fvar(31),0)*8/2)*fvar(30))
+Trigger2 = P2bodydist X >= -5
+Trigger2 = P2bodydist X <= 115-20
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 230, ChangeState]; ---- Crouching Strong Kick AI
+type = ChangeState
+value = 330
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+TriggerAll = power < 1000
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 80+floor(ifelse(11>fvar(31),11-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -36-floor(ifelse(11>fvar(31),11-fvar(31),0)*(fvar(29))+(ifelse(11>fvar(31),11-fvar(31),0)*11/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(11>fvar(31),11-fvar(31),0)*(fvar(29))+(ifelse(11>fvar(31),11-fvar(31),0)*11/2)*fvar(30))
+Trigger2 = P2bodydist X >= -5
+Trigger2 = P2bodydist X <= 80-24
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 230, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; Standing Strong Kick
+[Statedef 240]
+type    = S
+movetype= A
+physics = S
+juggle  = 6
+poweradd = 0
+ctrl = 0
+velset = 0,0
+anim = 215
+sprpriority = 2
+facep2 = 1
+
+[State 240, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = time = 0
+value = S0,21
+channel = ifelse(IsHelper(97864),20,0)
+
+[State 240, PlaySnd]; ---- sound
+type = playsnd
+trigger1 = time = 0
+value = S0,5
+
+[State 240, HitDef]
+type = HitDef
+trigger1 = animelem = 2
+attr = S,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MA    ;HLAFDP+-
+guardflag = MA    ;MHLA
+getpower = floor(125*fvar(10)),floor(75*fvar(10))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = Medium    ;light,medium,hard,back,up,diagup
+air.animtype = Medium    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 4,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(53*fvar(3)),0
+pausetime = 6,7
+;guard.pause ,0
+sparkno = 1
+guard.sparkno = 40
+sparkxy = -10,-60
+hitsound = S0,9
+guardsound = S0,10
+ground.type = Low     ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+;air.type = High    ;Defaults to ground.type
+ground.slidetime = 13    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 13    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 15    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+yaccel = 0.4    ;y acceleration
+ground.velocity = -8,0
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = -3.5,-3.5    ;Defaults to 0,0
+;airguard.velocity = 0,0    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 0
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.recover = 1
+fall.recovertime = 4
+fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 7
+envshake.freq = 120
+envshake.ampl = 5
+envshake.phase = 120
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+[State 240, 4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;-------------------------------------------------------------------------------
+; Crouching Light Punch
+[Statedef 300]
+type    = C
+movetype= A
+physics = C
+juggle  = 4
+velset = 0,0
+ctrl = 0
+anim = 300
+poweradd = 0
+sprpriority = 2
+facep2 = 1
+
+[State 300, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = time = 0
+value = S0,3
+channel = ifelse(IsHelper(97864),20,0)
+
+[State 300, PlaySnd]; ---- sound
+type = PlaySnd
+trigger1 = time = 0
+value = S0,4
+
+[State 300, HitDef]
+type = HitDef
+trigger1 = AnimElem = 2
+attr = C,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MA    ;HLAFDP+-
+guardflag = L    ;MHLA
+getpower = floor(75*fvar(10)), floor(38*fvar(10))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = light    ;light,medium,hard,back,up,diagup
+air.animtype = light    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 3,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(23*fvar(3)),0
+pausetime = 5,6
+;guard.pause ,0
+sparkno = 0
+guard.sparkno = 40
+sparkxy = -10, -48
+hitsound = S0,6
+guardsound = S0,10
+ground.type = Low      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+;air.type = High    ;Defaults to ground.type
+ground.slidetime = 6    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 6    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 8    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+yaccel = 0.4    ;y acceleration
+ground.velocity = -5,0
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = -1.4,0    ;Defaults to 0,0
+;airguard.velocity = 0,0    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 0
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.recover = 1
+fall.recovertime = 4
+fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 0
+;envshake.freq = 0
+;envshake.ampl = 0
+;envshake.phase = 0
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+[State 300, ChangeState]; ---- Stand Strong Punch AI
+type = ChangeState
+value = 210
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+Trigger1 = P2bodydist X >= -7
+Trigger1 = P2bodydist X <= 80+floor(ifelse(7>fvar(31),7-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -100-floor(ifelse(7>fvar(31),7-fvar(31),0)*(EnemyNear(floor(fvar(36))),vel Y)+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(7>fvar(31),7-fvar(31),0)*(EnemyNear(floor(fvar(36))),vel Y)+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30))
+Trigger1 = P2StateType = A
+;Trigger2 = P2bodydist X >= -7
+;Trigger2 = P2bodydist X <= 80-20
+;Trigger2 = P2StateType = S
+
+[State 300, ChangeState]; ---- Crouching Strong Punch AI
+type = ChangeState
+value = 310
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 82+floor(ifelse(7>fvar(31),7-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -64-floor(ifelse(7>fvar(31),7-fvar(31),0)*(fvar(29))+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(7>fvar(31),7-fvar(31),0)*(fvar(29))+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30))
+Trigger2 = P2bodydist X >= -5
+Trigger2 = P2bodydist X <= 82-18
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 300, ChangeState]; ---- Stand Strong Kick AI
+type = ChangeState
+value = 240
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2StateType = A
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 115+floor(ifelse(9>fvar(31),9-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -67-floor(ifelse(9>fvar(31),9-fvar(31),0)*(fvar(29))+(ifelse(9>fvar(31),9-fvar(31),0)*9/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(9>fvar(31),9-fvar(31),0)*(fvar(29))+(ifelse(9>fvar(31),9-fvar(31),0)*9/2)*fvar(30))
+Trigger1 = P2StateType = A
+;Trigger2 = P2bodydist X >= -5
+;Trigger2 = P2bodydist X <= 115-20
+;Trigger2 = P2StateType = S
+
+[State 300, ChangeState]; ---- Crouching Light Kick AI
+type = ChangeState
+value = 320
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+;TriggerAll = power < 1000
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 115+floor(ifelse(5>fvar(31),5-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -36-floor(ifelse(5>fvar(31),5-fvar(31),0)*(fvar(29))+(ifelse(5>fvar(31),5-fvar(31),0)*5/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(5>fvar(31),5-fvar(31),0)*(fvar(29))+(ifelse(5>fvar(31),5-fvar(31),0)*5/2)*fvar(30))
+Trigger2 = P2bodydist X >= -5
+Trigger2 = P2bodydist X <= 115-12
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 300, ChangeState]; ---- Crouching Strong Kick AI
+type = ChangeState
+value = 330
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+TriggerAll = power < 1000
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 80+floor(ifelse(11>fvar(31),11-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -36-floor(ifelse(11>fvar(31),11-fvar(31),0)*(fvar(29))+(ifelse(11>fvar(31),11-fvar(31),0)*11/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(11>fvar(31),11-fvar(31),0)*(fvar(29))+(ifelse(11>fvar(31),11-fvar(31),0)*11/2)*fvar(30))
+;Trigger2 = P2bodydist X >= -5
+;Trigger2 = P2bodydist X <= 80
+;Trigger2 = P2StateType = S
+
+[State 300, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 11
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; Crouching Strong Punch
+[Statedef 310]
+type    = C
+movetype= A
+physics = C
+juggle  = 6
+poweradd = 0
+ctrl = 0
+velset = 0,0
+anim = 310
+sprpriority = 2
+facep2 = 1
+
+[State 310, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = time = 0
+value = S0,21
+channel = ifelse(IsHelper(97864),20,0)
+
+[State 310, PlaySnd]; ---- sound
+type = playsnd
+trigger1 = time = 0
+value = S0,4
+
+[State 310, HitDef]
+type = HitDef
+trigger1 = AnimElem = 3
+attr = C,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MA    ;HLAFDP+-
+guardflag = L    ;MHLA
+getpower = floor(125*fvar(10)),floor(75*fvar(10))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = hard    ;light,medium,hard,back,up,diagup
+air.animtype = hard    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 4,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(57*fvar(3)),0
+pausetime = 11,14
+;guard.pause ,0
+sparkno = 1
+guard.sparkno = 40
+sparkxy = -10,-47
+hitsound = S0,7
+guardsound = S0,10
+ground.type = low      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+;air.type = High    ;Defaults to ground.type
+ground.slidetime = 10    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 10    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 12    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+yaccel = 0.4    ;y acceleration
+ground.velocity = -9,0
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = -3,-1.4    ;Defaults to 0,0
+airguard.velocity = -5,-.8    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 0
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.recover = 1
+fall.recovertime = 4
+fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 12
+envshake.freq = 120
+envshake.ampl = 5
+envshake.phase = 120
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+[State 310, ChangeState]; ---- Crouching Strong Kick AI
+type = ChangeState
+value = 330
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+TriggerAll = power < 1000
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 80+floor(ifelse(11>fvar(31),11-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -36-floor(ifelse(11>fvar(31),11-fvar(31),0)*(fvar(29))+(ifelse(11>fvar(31),11-fvar(31),0)*11/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(11>fvar(31),11-fvar(31),0)*(fvar(29))+(ifelse(11>fvar(31),11-fvar(31),0)*11/2)*fvar(30))
+Trigger2 = P2bodydist X >= -5
+Trigger2 = P2bodydist X <= 80-37
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 310, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 11
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; Crouching Light Kick
+[Statedef 320]
+type    = C
+movetype= A
+physics = C
+juggle  = 4
+poweradd = 0
+ctrl = 0
+velset = 0,0
+anim = 320
+sprpriority = 2
+facep2 = 1
+
+[State 320, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = time = 0
+value = S0,3
+channel = ifelse(IsHelper(97864),20,0)
+
+[State 320, PlaySnd]; ---- sound
+type = PlaySnd
+trigger1 = time = 0
+value = S0,5
+
+[State 320, HitDef]
+type = HitDef
+trigger1 = animelem = 2
+attr = C,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MA    ;HLAFDP+-
+guardflag = L    ;MHLA
+getpower = floor(75*fvar(10)),floor(38*fvar(10))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = Medium    ;light,medium,hard,back,up,diagup
+air.animtype = Medium    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 3,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(26*fvar(3)),0
+pausetime = 5,6
+;guard.pause ,0
+sparkno = 0
+guard.sparkno = 40
+sparkxy = -10,-37
+hitsound = S0,8
+guardsound = S0,10
+ground.type = Low      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+;air.type = High    ;Defaults to ground.type
+ground.slidetime = 8    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 8    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 10    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+yaccel = 0.4    ;y acceleration
+ground.velocity = -5,0
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = -2.5,-1.5    ;Defaults to 0,0
+;airguard.velocity = 0,0    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 0
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.recover = 1
+fall.recovertime = 4
+fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 0
+;envshake.freq = 0
+;envshake.ampl = 0
+;envshake.phase = 0
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+[State 320, ChangeState]; ---- Stand Strong Punch AI
+type = ChangeState
+value = 210
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+Trigger1 = P2bodydist X >= -7
+Trigger1 = P2bodydist X <= 80+floor(ifelse(7>fvar(31),7-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -100-floor(ifelse(7>fvar(31),7-fvar(31),0)*(EnemyNear(floor(fvar(36))),vel Y)+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(7>fvar(31),7-fvar(31),0)*(EnemyNear(floor(fvar(36))),vel Y)+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30))
+;Trigger2 = P2bodydist X >= -7
+;Trigger2 = P2bodydist X <= 50
+;Trigger2 = P2StateType = S
+
+[State 320, ChangeState]; ---- Crouching Strong Punch AI
+type = ChangeState
+value = 310
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 86+floor(ifelse(7>fvar(31),7-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -64-floor(ifelse(7>fvar(31),7-fvar(31),0)*(fvar(29))+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(7>fvar(31),7-fvar(31),0)*(fvar(29))+(ifelse(7>fvar(31),7-fvar(31),0)*7/2)*fvar(30))
+Trigger2 = P2bodydist X >= -5
+Trigger2 = P2bodydist X <= 86-18
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 320, ChangeState]; ---- Stand Strong Kick AI
+type = ChangeState
+value = 240
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2StateType = A
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 115+floor(ifelse(9>fvar(31),9-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -67-floor(ifelse(9>fvar(31),9-fvar(31),0)*(fvar(29))+(ifelse(9>fvar(31),9-fvar(31),0)*9/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(9>fvar(31),9-fvar(31),0)*(fvar(29))+(ifelse(9>fvar(31),9-fvar(31),0)*9/2)*fvar(30))
+;Trigger2 = P2bodydist X >= -5
+;Trigger2 = P2bodydist X <= 75
+;Trigger2 = P2StateType = S
+
+[State 320, ChangeState]; ---- Crouching Strong Kick AI
+type = ChangeState
+value = 330
+TriggerAll = var(59)
+TriggerAll = RoundState = 2
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = P2StateType != L
+TriggerAll = P2movetype = H
+;TriggerAll = P2StateNo != [120,159]
+TriggerAll = !InGuardDist
+;TriggerAll = !EnemyNear(floor(fvar(36))),NumProj
+TriggerAll = Random<=var(59)*85
+TriggerAll = power < 1000
+Trigger1 = P2bodydist X >= -5
+Trigger1 = P2bodydist X <= 80+floor(ifelse(11>fvar(31),11-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))
+Trigger1 = P2bodydist y >= -36-floor(ifelse(11>fvar(31),11-fvar(31),0)*(fvar(29))+(ifelse(11>fvar(31),11-fvar(31),0)*11/2)*fvar(30)+fvar(32))
+Trigger1 = P2bodydist y <= 0-floor(ifelse(11>fvar(31),11-fvar(31),0)*(fvar(29))+(ifelse(11>fvar(31),11-fvar(31),0)*11/2)*fvar(30))
+Trigger2 = P2bodydist X >= -5
+Trigger2 = P2bodydist X <= 80-24
+Trigger2 = P2StateType = S || P2StateType = C
+
+[State 320, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 11
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; Crouching Strong Kick
+[Statedef 330]
+type    = C
+movetype= A
+physics = C
+juggle  = 15
+poweradd = 0
+ctrl = 0
+velset = 0,0
+anim = 330
+sprpriority = 2
+facep2 = 1
+
+[State 330, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = time = 0
+value = S0,22
+channel = ifelse(IsHelper(97864),20,0)
+
+[State 330, HitDef]
+type = HitDef
+trigger1 = animelem = 6
+attr = C,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MA    ;HLAFDP+-
+guardflag = L    ;MHLA
+getpower = floor(125*fvar(10)),floor(75*fvar(10))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = back    ;light,medium,hard,back,up,diagup
+air.animtype = back    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 4,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(70*fvar(3)),0
+pausetime = 5,5
+;guard.pause ,0
+sparkno = 1
+guard.sparkno = 40
+sparkxy = -10,-10
+hitsound = S0,7
+guardsound = S0,10
+ground.type = Trip      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+;air.type = High    ;Defaults to ground.type
+ground.slidetime =10    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 10    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 20    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+yaccel = 0.4    ;y acceleration
+ground.velocity = -4.5,-4
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = -4.5,-4    ;Defaults to 0,0
+;airguard.velocity = 0,0    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 1
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.recover = 1
+fall.recovertime = 4
+fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 5
+envshake.freq = 120
+envshake.ampl = 5
+envshake.phase = 120
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+[State 330, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 11
+ctrl = 1
+
+;-------------------------------------------------------------------------------
+; knock / guard cancel knock
+[Statedef 500]
+type    = S
+movetype= A
+physics = S
+ctrl = 0
+velset = 0,0
+anim = 220
+sprpriority = 2
+juggle = 0
+poweradd = 0
+
+[State 500, PowerAdd]; ---- guard cancel knock
+type = PowerAdd
+triggerall = prevstateno = 150 || prevstateno = 152
+trigger1 = time = 0
+value = -1000
+ignorehitpause = 1
+
+[State 500, PlaySnd]; ---- guard cancel knock
+type = PlaySnd
+triggerall = prevstateno = 150 || prevstateno = 152
+trigger1 = time = 0
+value = 700,3
+ignorehitpause = 1
+
+[State 500, Explod]; ---- guard cancel knock
+type = Explod
+triggerall = prevstateno = 150 || prevstateno = 152
+trigger1 = Time = 0
+trigger2 = Time = 2
+anim = 514
+postype = p1
+pos = 0,-78
+sprpriority = 5
+bindtime = 1
+removetime = -2
+supermove = 1
+pausemove = 1
+ownpal = 1
+ignorehitpause = 1
+
+[State 500, PalFx]; ---- guard cancel knock
+type = PalFx
+trigger1 = prevstateno = 150 || prevstateno = 152
+trigger1 = time = 0
+time = 5
+add = 50,50,250
+ignorehitpause = 1
+
+[State 1000, EnvColor]; ---- guard cancel knock
+type = EnvColor
+triggerall = prevstateno = 150 || prevstateno = 152
+trigger1 = animelem = 12
+trigger2 = animelem = 17
+value = 255,255,255
+time = 1
+;under = 1
+ignorehitpause = 1
+
+[State 500, HitBy]; ---- knock vincible
+type = NULL;HitBy
+triggerall = !(prevstateno = 150 || prevstateno = 152)
+trigger1 = animelem = 1, >=0
+trigger1 = animelem = 20, <0
+value = SCA, NA,SA,HA,NT,ST,HT,NP,SP,HP,AA,AT,AP
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 500, NotHitBy]; ---- guard cancel knock invincible completely
+type = NotHitBy
+triggerall = prevstateno = 150 || prevstateno = 152
+trigger1 = 1
+;trigger1 = animelem = 1, >=0
+;trigger1 = animelem = 20, <0
+time = 2
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 500, Pause]; ---- guard cancel knock
+type = Pause
+trigger1 = prevstateno = 150 || prevstateno = 152
+trigger1 = Time = 0
+time = 3
+movetime = 3
+ignorehitpause = 1
+
+[state 500, assertspecial]; ---- guard cancel knock
+type = assertspecial
+trigger1 = prevstateno = 150 || prevstateno = 152
+trigger1 = time = [0,2]
+flag = nobg
+flag2 = nofg
+
+[State 500, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = time = 1
+value = S0,22
+channel = ifelse(IsHelper(97864),20,0)
+
+[State 500, PlaySnd]; ---- sound
+type = playsnd
+trigger1 = time = 1
+value = S0,5
+
+[State 500, ReversalDef]; ---- guard cancel knock reversal
+type = null;ReversalDef
+triggerall = prevstateno = 150 || prevstateno = 153
+trigger1 = animelem = 8,>=0
+trigger1 = animelem = 12,<0
+reversal.attr = SC, NA,SA
+priority = 99999, miss
+sparkno = -1
+numhits = 0
+p2facing = 1
+p2stateno = 2705
+guard.dist = 0
+ignorehitpause = 1
+
+[State 500, HitDef]
+type = HitDef
+trigger1 = animelem = 12
+attr = S,SA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MA    ;HLAFDP+-
+guardflag = M    ;MHLA
+getpower = IfElse((prevstateno = 150 || prevstateno = 152),0,floor(250*fvar(10))),IfElse((prevstateno = 150 || prevstateno = 152),0,floor(125*fvar(10)))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = Medium    ;light,medium,hard,back,up,diagup
+air.animtype = Medium    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 4,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(60*fvar(3)),floor(6*fvar(3))
+pausetime = 7,13
+sparkno = 2
+guard.sparkno = 40
+sparkxy = -10,-60
+hitsound = S0,17
+guardsound = S0,10
+ground.type = low      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+;air.type = High    ;Defaults to ground.type
+ground.slidetime = 9    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 11    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 20    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+;yaccel = 0.5    ;y acceleration
+ground.velocity = 0,0    ;-1.5
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = 0,-3.2  ;-1.2  ;Defaults to 0,0
+;airguard.velocity = 0,0    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+forcestand = 1
+fall = 0
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.recover = 1
+fall.recovertime = 4
+fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 9
+envshake.freq = 120
+envshake.ampl = 5
+envshake.phase = 120
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+[State 500, ReversalDef]; ---- guard cancel knock reversal
+type = null;ReversalDef
+triggerall = prevstateno = 150 || prevstateno = 152
+trigger1 = animelem = 16,>=0
+trigger1 = animelem = 20,<0
+reversal.attr = SC, NA,SA
+priority = 99999, miss
+sparkno = -1
+numhits = 0
+p2facing = 1
+p2stateno = 2705
+guard.dist = 0
+ignorehitpause = 1
+
+[State 500, HitDef]
+type = HitDef
+trigger1 = animelem = 20
+attr = S,SA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MA    ;HLAFDP+-
+guardflag = M    ;MHLA
+getpower = IfElse((prevstateno = 150 || prevstateno = 152),0,floor(250*fvar(10))),IfElse((prevstateno = 150 || prevstateno = 152),0,floor(125*fvar(10)))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = medium    ;light,medium,hard,back,up,diagup
+air.animtype = medium    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 4,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(60*fvar(3)),floor(6*fvar(3))
+pausetime = 2,2
+;guard.pause ,0
+sparkno = 2
+guard.sparkno = 40
+sparkxy = -10,-60
+hitsound = S0,17
+guardsound = S0,10
+ground.type = low      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+;air.type = High    ;Defaults to ground.type
+ground.slidetime = 3    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 5    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 0    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+;yaccel = 0.5    ;y acceleration
+ground.velocity = -6,15
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = -6,15    ;Defaults to 0,0
+;airguard.velocity = 0,0    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+air.juggle = 15
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 1
+fall.recover = 0
+;fall.recovertime = 4
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.damage = 0
+air.fall = 1
+air.fall.recover = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 6
+envshake.freq = 120
+envshake.ampl = 5
+envshake.phase = 120
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+[State 500, ChangeState] ; ---- Negative Genesis AI
+type = ChangeState
+triggerall = var(59)
+triggerall = !inguarddist
+triggerAll = (var(59) < 13 && movecontact) || (var(59) >= 13 && movehit)
+TriggerAll = Random<=var(59)*85
+trigger1 = EnemyNear(floor(fvar(36))),movetype = H
+;trigger1 = EnemyNear(floor(fvar(36))),stateno != [120,159]
+trigger1 = AnimElem = 12, >0
+trigger1 = AnimElem = 17, <0
+value = ifelse((P2bodydist X <= 58+floor(ifelse(13>fvar(31),13-fvar(31),0)*(-facing*EnemyNear(floor(fvar(36))),facing*fvar(28)))),1020,1030)
+
+[State 500, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;-------------------------------------------------------------------------------
+; Jump Light Punch
+[Statedef 600]
+type    = A
+movetype= A
+physics = A
+juggle  = 4
+poweradd = 0
+ctrl = 0
+anim = 600
+sprpriority = 2
+
+[State 600, PlaySnd]; ---- sound
+type = PlaySnd
+trigger1 = Time = 1
+value = S0, 4
+
+[State 600, HitDef]
+type = HitDef
+trigger1 = Time = 0
+attr = A,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MAF    ;HLAFDP+-
+guardflag = HA    ;MHLA
+getpower = floor(150*fvar(10)),floor(75*fvar(10))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = light    ;light,medium,hard,back,up,diagup
+air.animtype = light    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 3,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(25*fvar(3)),0
+pausetime = 7,8
+;guard.pause ,0
+sparkno = 0
+guard.sparkno = 40
+sparkxy = -10,-58
+hitsound = S0,6
+guardsound = S0,10
+ground.type = High      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+;air.type = High    ;Defaults to ground.type
+ground.slidetime = 5    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 7    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 20    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+;yaccel = 0.5    ;y acceleration
+ground.velocity = -4,0
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = -1.3,-3    ;Defaults to 0,0
+;airguard.velocity = 0,0    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 0
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.recover = 1
+fall.recovertime = 4
+fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 0
+;envshake.freq = 0
+;envshake.ampl = 0
+;envshake.phase = 0
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+[State 600, CtrlSet]
+type = CtrlSet
+trigger1 = Time = 12
+value = 1
+
+;---------------------------------------------------------------------------
+; Jump Strong Punch
+[Statedef 610]
+type    = A
+movetype= A
+physics = A
+juggle  = 4
+poweradd = 0
+ctrl = 0
+anim = 600
+sprpriority = 2
+
+[State 610, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = time = 0
+value = S0,21
+channel = ifelse(IsHelper(97864),20,0)
+
+[State 610, PlaySnd]; ---- sound
+type = PlaySnd
+trigger1 = Time = 1
+value = S0,4
+
+[State 610, HitDef]
+type = HitDef
+trigger1 = Time = 0
+attr = A,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MAF    ;HLAFDP+-
+guardflag = HA    ;MHLA
+getpower = floor(200*fvar(10)),floor(100*fvar(10))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = medium    ;light,medium,hard,back,up,diagup
+air.animtype = medium    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 4,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(70*fvar(3)),0
+pausetime = 12,12
+;guard.pause ,0
+sparkno = 1
+guard.sparkno = 40
+sparkxy = -10,-55
+hitsound = S0,7
+guardsound = S0,10
+ground.type = High      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+;air.type = High    ;Defaults to ground.type
+ground.slidetime = 15    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 17    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 20    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+;yaccel = 0.5    ;y acceleration
+ground.velocity = -5,0
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = -3,-4    ;Defaults to 0,0
+;airguard.velocity = 0,0    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 0
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.recover = 1
+fall.recovertime = 4
+fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 11
+envshake.freq = 120
+envshake.ampl = 5
+envshake.phase = 120
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+;---------------------------------------------------------------------------
+; Jump Light Kick
+[Statedef 630]
+type    = A
+movetype= A
+physics = A
+juggle  = 4
+poweradd = 0
+ctrl = 0
+anim = 600
+sprpriority = 2
+
+[State 630, PlaySnd]; ---- sound
+type = PlaySnd
+trigger1 = Time = 1
+value = S0, 5
+
+[State 630, HitDef]
+type = HitDef
+trigger1 = Time = 0
+attr = A,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MAF    ;HLAFDP+-
+guardflag = HA    ;MHLA
+getpower = floor(150*fvar(10)),floor(75*fvar(10))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = light    ;light,medium,hard,back,up,diagup
+air.animtype = light    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 3,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(30*fvar(3)),0
+pausetime = 7,8
+;guard.pause ,0
+sparkno = 0
+guard.sparkno = 40
+sparkxy = -5,-35
+hitsound = S0,8
+guardsound = S0,10
+ground.type = High      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+;air.type = High    ;Defaults to ground.type
+ground.slidetime = 6    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 8    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 20    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+;yaccel = 0.5    ;y acceleration
+ground.velocity = -4.5,0
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = -2.5,-3    ;Defaults to 0,0
+;airguard.velocity = 0,0    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 0
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.recover = 1
+fall.recovertime = 4
+fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 0
+;envshake.freq = 0
+;envshake.ampl = 0
+;envshake.phase = 0
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+[State 630, CtrlSet]
+type = CtrlSet
+trigger1 = Time = 14
+value = 1
+
+;---------------------------------------------------------------------------
+;Jump Strong Kick
+[Statedef 640]
+type    = A
+movetype= A
+physics = A
+juggle  = 4
+poweradd = 0
+ctrl = 0
+anim = 600
+sprpriority = 2
+
+[State 640, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = time = 0
+value = S0,21
+channel = ifelse(IsHelper(97864),20,0)
+
+[State 640, PlaySnd]; ---- sound
+type = PlaySnd
+trigger1 = Time = 1
+value = S0, 5
+
+[State 640, HitDef]
+type = HitDef
+trigger1 = Time = 0
+attr = A,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MAF    ;HLAFDP+-
+guardflag = HA    ;MHLA
+getpower = floor(200*fvar(10)),floor(100*fvar(10))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = hard   ;light,medium,hard,back,up,diagup
+air.animtype = hard    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 4,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(70*fvar(3)),0
+pausetime = 12,12
+;guard.pause ,0
+sparkno = 2
+guard.sparkno = 40
+sparkxy = -10,-40
+hitsound = S0,9
+guardsound = S0,10
+ground.type = High      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+;air.type = High    ;Defaults to ground.type
+ground.slidetime = 15    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 17    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 20    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+;yaccel = 0.5    ;y acceleration
+ground.velocity = -5.5,0
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = -3.5,-4    ;Defaults to 0,0
+;airguard.velocity = 0,0    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+;p2facing = 1
+;p1stateno = 0
+;p2stateno = 0
+;p2getp1state = 1
+;forcestand = 0
+fall = 0
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.recover = 1
+fall.recovertime = 4
+fall.damage = 0
+;air.fall = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 11
+envshake.freq = 120
+envshake.ampl = 5
+envshake.phase = 120
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+;---------------------------------------------------------------------------
+; air knock
+[Statedef 510]
+type    = A
+movetype= A
+physics = N
+juggle  = 6
+poweradd = 0
+ctrl = 0
+anim = 600
+sprpriority = 2
+
+[State 510, HitBy]; ---- air knock invincible
+type = HitBy
+trigger1 = animelem = 1,>=0
+trigger1 = animelem = 2,<0
+value = SCA, SA,HA,HT,NP,SP,HP
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 510, Helper]; ---- slide back sound helper
+type = Helper
+trigger1 = time = 0
+name = "sound"
+postype = p1
+pos = 0,0
+sprpriority = 2
+stateno = 513
+helpertype = normal
+keyctrl = 0
+persistent = 0
+ignorehitpause = 1
+
+[State 510, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = time = 0
+value = S0,22
+channel = ifelse(IsHelper(97864),20,0)
+
+[State 510, PlaySnd]; ---- sound
+type = PlaySnd
+trigger1 = Time = 1
+value = S0,5
+
+[State 510, ReversalDef]
+type = NULL;ReversalDef
+trigger1 = animelem = 1,>=0
+trigger1 = animelem = 2,<0
+reversal.attr = SC, NA
+priority = 99999, miss
+sparkno = -1
+numhits = 0
+p2facing = 1
+p2stateno = 2705
+guard.dist = 0
+ignorehitpause = 1
+
+[State 510, HitDef]
+type = HitDef
+trigger1 = animelem = 2
+attr = A,NA    ;SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+hitflag = MAF    ;HLAFDP+-
+guardflag = HA    ;MHLA
+getpower = floor(500*fvar(10)),floor(250*fvar(10))
+;givepower = 0,0
+;affectteam = E    ;B,E,F
+animtype = Med    ;light,medium,hard,back,up,diagup
+air.animtype = Med    ;light,medium,hard,back,up,diagup
+;fall.animtype = Back
+priority = 4,Hit    ;Hit,Miss,Dodge 3 4 7 99999 9999999
+damage = floor(90*fvar(3)),floor(9*fvar(3))
+pausetime = 17,17
+;guard.pause ,0
+sparkno = 2
+guard.sparkno = 41
+sparkxy = -10,-40
+hitsound = S0,17
+guardsound = S0,10
+ground.type = High      ;Hign,Low,Trip,None ;High/Low have no effect if Back, If hit from behind, High will be displayed Low
+;air.type = High    ;Defaults to ground.type
+ground.slidetime = 15    ;don't include pausetime ;applicable only to hits that keep P2 on the ground
+;guard.slidetime = 0    ;Defaults to guard.hittime
+ground.hittime = 17    ;Applicable only to hits that keep P2 on the ground ;Defaults to 0
+;guard.hittime = 0        ;Defaults to ground.hittime
+air.hittime = 20    ;has no effect if fall=1, default 20
+;guard.ctrltime  = 0    ;Defaults to guard.slidetime
+;airguard.ctrltime = 0
+;guard.dist = 320    ;useful for trigger inguarddist
+;yaccel = 0.5    ;y acceleration
+ground.velocity = 0,0
+;guard.velocity = 0    ;Defaults to x_velocity of ground.velocity
+air.velocity = 0,0    ;Defaults to 0,0
+;airguard.velocity = 0,0    ;Defaults to x_velocity*1.5, y_velocity/2 of air.velocity
+;ground.cornerpush.veloff = 0    ;If arg1 of attr is "A", default value is 0. Otherwise,defaults to 1.3*guard.velocity.
+;air.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.velof
+;down.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;guard.cornerpush.veloff = 0    ;Defaults to ground.cornerpush.veloff
+;airguard.cornerpush.veloff = 0    ;Defaults to guard.cornerpush.veloff
+;air.juggle = 0
+;mindist = 0,0
+;maxdist = 0,0
+;snap = 0,0
+sprpriority = 2
+;p1sprpriority = 0;(winmugen only)
+;p2sprpriority = 0;(winmugen only)
+;p1facing = 0
+p1getp2facing = 0
+p2facing = 1
+;p1stateno = 0
+p2stateno = 511
+;p2getp1state = 1
+;forcestand = 0
+fall = 1
+fall.recover = 0
+;fall.recovertime = 4
+;fall.xvelocity = 0    ;Defaults to no change
+fall.yvelocity = -4.5    ;Defaults to -4.5
+fall.damage = 0
+air.fall = 1
+air.fall.recover = 0
+;down.velocity = 0,0    ;gethit while lying down ;Defaults to air.velocity
+;down.hit
+down.bounce = 0
+;id = 0
+;chainID = -1
+;nochainID = -1
+;hitonce = 1
+kill = 1
+guard.kill = 1
+fall.kill = 1
+numhits = 1
+palfx.time = 0
+;palfx.mul = 0,0,0
+;palfx.add = 0,0,0
+envshake.time = 16
+envshake.freq = 120
+envshake.ampl = 5
+envshake.phase = 120
+fall.envshake.time = 0
+;fall.envshake.freq = 0
+;fall.envshake.ampl = 0
+;fall.envshake.phase = 0
+;ignorehitpause =
+;persistent =
+
+;[State 191, 1]
+;type = targetstate
+;trigger1 = movehit
+;trigger1 = hitshakeover = 1
+;value = 511
+
+[State 510, StateTypeSet]
+type = StateTypeSet
+trigger1 = animelem = 2, >=0
+statetype = A       ;S,A,C,L
+movetype = A        ;I,A,H
+physics = A         ;A,C,S,N
+ignorehitpause = 1
+persistent = 0
+
+[State 510, StateTypeSet]
+type = StateTypeSet
+trigger1 = animelem = 3, >=0
+statetype = A       ;S,A,C,L
+movetype = I        ;I,A,H
+physics = A         ;A,C,S,N
+ignorehitpause = 1
+persistent = 0
+
+; air knock victim -------------------------------------------------------------
+[Statedef 511]
+type = A
+physics = N
+movetype = H
+ctrl = 0
+velset = 0,0
+sprpriority = -1
+
+[State 511, VelAdd]
+type = VelAdd
+trigger1 = Time >= 17
+trigger1 = hitshakeover
+x = -6
+y = -3
+persistent = 0
+
+[State 511, VelAdd]
+type = VelAdd
+trigger1 = Time > 20
+trigger1 = hitshakeover = 1
+y = .6
+
+[State 511, ChangeAnim2]
+type = ChangeAnim2
+trigger1 = Time = 0
+value = 2111
+
+[State 511, ChangeState]
+type = ChangeState
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 512
+
+; air knock victim 2 -----------------------------------------------------------
+[Statedef 512]
+type = L
+physics = N
+movetype = H
+ctrl = 0
+velset = 0,0
+
+[State 512, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+
+[State 512, VelSet]
+type = VelSet
+trigger1 = time = [0,10]
+x = -2.8
+
+[State 512, MakeDust]
+type = MakeDust
+trigger1 = time = [0,26]
+postype = p2
+pos = 30,0
+
+[State 512, VelSet]
+type = VelSet
+trigger1 = time = [10,17]
+x = -.8
+
+[State 512, VelSet]
+type = VelSet
+trigger1 = time = [18,26]
+x = -.1
+
+[State 512, ChangeAnim2]
+type = ChangeAnim2
+trigger1 = Time = 0
+value = 2112
+
+[State 512, ChangeAnim2]
+type = Changeanim2
+trigger1 = Time = 19
+value = 2113
+
+[State 512, SelfState]
+type = SelfState
+trigger1 = alive = 0
+trigger1 = Time = 29
+value = 5150
+
+[State 512, SelfState]
+type = SelfState
+trigger1 = Time = 33
+trigger1 = alive = 1
+value = 5120
+
+;---------------------------------------------------------------------------
+; kick throw
+[Statedef 800]
+type    = S
+movetype= A
+physics = S
+juggle  = 0
+velset = 0,0
+ctrl = 0
+anim = 800
+sprpriority = 2
+
+[State 800, HitBy]
+type = NULL;HitBy
+Trigger1 = 1
+value = SCA,NT,ST,HT
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 800, HitDef]
+type = HitDef
+;Triggerall = P2BodyDist X=[-5,17]
+Trigger1 = 1;Time = 0
+pausetime = 0,0
+attr = ,AT
+hitflag = M-
+priority = 3, Miss
+sparkno = -1
+sprpriority = 2
+p2facing = 1
+p1stateno = 801
+p2stateno = 802
+guard.dist = 0
+fall = 1
+fall.recover = 0
+id = ifelse(IsHelper(97864),97800,800)
+
+[State 800, ChangeState]
+type = ChangeState
+Triggerall = AnimTime = 0
+Trigger1 = !var(59)
+value = 0
+ctrl = 1
+
+[State 800, ChangeState]; ---- AI using
+type = ChangeState
+Triggerall = AnimTime = 0
+;**************反应速度及频率意识
+TriggerAll = EnemyNear(floor(fvar(36))),Time >= var(55)
+TriggerAll = Random<=var(59)*85
+;**************分支条件
+Trigger1 = var(59)
+;Trigger1 = EnemyNear(floor(fvar(36))),movetype=A || ifelse((NumEnemy=2 && EnemyNear(0),alive && EnemyNear(1),alive),EnemyNear(floor(fvar(36))+1),movetype=A,0)
+Trigger1 = inguarddist
+value = 910
+;ctrl = 1
+
+[State 800, ChangeState]; ---- Void Genocide AI
+type = ChangeState
+Triggerall = AnimTime = 0
+TriggerAll = Random<=var(59)*85
+Trigger1 = var(59)
+;Trigger1 = EnemyNear(floor(fvar(36))),CTRL
+Trigger1 = life < ceil(lifemax/3*2)
+value = 1040
+
+[State 800, ChangeState]; ---- Stand Light Kick AI
+type = ChangeState
+Triggerall = AnimTime = 0
+Trigger1 = var(59)
+value = ifelse(P2statetype = C,230,320)
+
+; kick throw p1state -----------------------------------------------------------
+[Statedef 801]
+type    = S
+movetype= A
+physics = N
+anim = 801
+poweradd = floor(250*fvar(10))
+
+[State 801, NotHitBy]
+type = NotHitBy
+trigger1 =  1
+value = SCA
+time = 2
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 801, Width]
+type = Width
+trigger1 = 1
+edge = 60,0
+
+[State 801, Width]
+type = Width
+trigger1 = 1
+edge = 0,30
+
+[State 801, PlaySnd]; ---- sound
+type = PlaySnd
+trigger1 = animelem = 7
+value = S0,5
+
+[State 801, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 1
+id = ifelse(IsHelper(97864),97800,800)
+pos = 40, 0
+
+[State 801, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 10
+id = ifelse(IsHelper(97864),97800,800)
+pos = 40, -30
+
+[State 801, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 11
+id = ifelse(IsHelper(97864),97800,800)
+pos = 40, -40
+
+[State 801, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 12
+id = ifelse(IsHelper(97864),97800,800)
+pos = 40, -50
+
+[State 801, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 13
+id = ifelse(IsHelper(97864),97800,800)
+pos = 36, -60
+
+[State 801, Targetstate]
+type = Targetstate
+trigger1 = AnimElem = 13
+id = ifelse(IsHelper(97864),97800,800)
+value = 803
+
+[State 803, LifeAdd]
+type = targetLifeAdd
+trigger1 = AnimElem = 13,=5
+id = ifelse(IsHelper(97864),97800,800)
+value = floor(-100*fvar(3))
+absolute = 1
+
+[State 801, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; kick throw P2STATE -----------------------------------------------------------
+[Statedef 802]
+type    = S
+movetype= H
+physics = N
+velset = 0,0
+
+[State 802, ChangeAnim2]
+type = ChangeAnim2
+Trigger1 = time = 0
+value = 802
+
+;[State 810, ]
+;type = ChangeState
+;trigger1 = Time = 20
+;value = 803
+
+; kick throw P2STATE FALL ------------------------------------------------------
+[Statedef 803]
+type    = A
+movetype= H
+physics = N
+velset = 4,-10
+
+[State 803, ChangeAnim2]
+type = ChangeAnim2
+Trigger1 = Time = 0
+value = 803
+
+;[State 803, LifeAdd]
+;type = LifeAdd
+;Trigger1 = Time = 5
+;value = -100
+;absolute = 1
+
+[State 803, Turn]
+type = Turn
+Trigger1 = animelem = 1
+value = 1
+
+[State 803, VelAdd]; ---- Gravity
+type = VelAdd
+Trigger1 = time > 0
+y = .6
+x = -.03
+
+[State 803, VelSet]
+type = VelSet
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+y = 15
+
+[State 803, SelfState]
+type = SelfState
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 5100
+
+;-------------------------------------------------------------------------------
+; punch throw
+[Statedef 810]
+type    = S
+movetype= A
+physics = S
+juggle  = 0
+velset = 0,0
+ctrl = 0
+anim = 800
+sprpriority = 2
+
+[State 810, HitBy]
+type = NULL;HitBy
+Trigger1 = 1
+value = SCA,NT,ST,HT
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 810, HitDef]
+type = HitDef
+;Triggerall = P2BodyDist X=[-5,17]
+Trigger1 = 1;Time = 0
+animtype  = Up
+attr = , AT
+hitflag = M-
+priority = 3, Miss
+sparkno = -1
+sprpriority = 1
+p2facing = 1
+p1stateno = 811
+p2stateno = 812
+guard.dist = 0
+fall = 1
+fall.recover = 0
+id = ifelse(IsHelper(97864),97810,810)
+
+[State 810, ChangeState]
+type = ChangeState
+Triggerall = AnimTime = 0
+Trigger1 = !var(59)
+value = 0
+ctrl = 1
+
+[State 800, ChangeState]; ---- AI using
+type = ChangeState
+Triggerall = AnimTime = 0
+;**************反应速度及频率意识
+TriggerAll = EnemyNear(floor(fvar(36))),Time >= var(55)
+TriggerAll = Random<=var(59)*85
+;**************分支条件
+Trigger1 = var(59)
+;Trigger1 = EnemyNear(floor(fvar(36))),movetype=A || ifelse((NumEnemy=2 && EnemyNear(0),alive && EnemyNear(1),alive),EnemyNear(floor(fvar(36))+1),movetype=A,0)
+Trigger1 = inguarddist
+value = 910;120
+;ctrl = 1
+
+[State 800, ChangeState]; ---- Void Genocide AI
+type = ChangeState
+Triggerall = AnimTime = 0
+TriggerAll = Random<=var(59)*85
+Trigger1 = var(59)
+;Trigger1 = EnemyNear(floor(fvar(36))),CTRL
+Trigger1 = life < ceil(lifemax/3*2)
+value = 1040
+
+[State 800, ChangeState] ; ---- Stand Light Punch AI
+type = ChangeState
+Triggerall = AnimTime = 0
+Trigger1 = var(59)
+value = ifelse(P2statetype = S && random <= 500,200,300)
+
+; punch throw p1state ----------------------------------------------------------
+[Statedef 811]
+type    = S
+movetype= A
+physics = N
+anim = 810
+poweradd = floor(250*fvar(10))
+sprpriority = 2
+
+[State 801, NotHitBy]
+type = NotHitBy
+trigger1 =  1
+value = SCA
+time = 2
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 811, Explod]; ---- throw success spark
+type = Explod
+trigger1 = AnimElem = 2
+anim = 511
+postype = p1
+pos = 45,-78
+sprpriority = 4
+
+[State 811, PlaySnd]; ---- throw success sound
+type = PlaySnd
+trigger1 = animelem = 2
+value = S0,11
+
+[State 811, Width]
+type = Width
+trigger1 = 1
+edge = 60,0
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 1
+id = ifelse(IsHelper(97864),97810,810)
+pos = 48,0
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 2
+id = ifelse(IsHelper(97864),97810,810)
+pos = 48,0
+
+[State 810, EnvShake]
+type = EnvShake
+trigger1 = AnimElem = 2
+time = 50
+freq = 0
+ampl = -20
+;phase = 90
+ignorehitpause = 1
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 3
+id = ifelse(IsHelper(97864),97810,810)
+pos = 42,-81
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 4
+id = ifelse(IsHelper(97864),97810,810)
+pos = 38, -81
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 5
+id = ifelse(IsHelper(97864),97810,810)
+pos = 35,-98
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 6
+id = ifelse(IsHelper(97864),97810,810)
+pos = 29,-101
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 7
+id = ifelse(IsHelper(97864),97810,810)
+pos = 27,-104
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 8
+id = ifelse(IsHelper(97864),97810,810)
+pos = 26,-104
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 9
+id = ifelse(IsHelper(97864),97810,810)
+pos = 25,-106
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 10
+id = ifelse(IsHelper(97864),97810,810)
+pos = 23,-115
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 11
+id = ifelse(IsHelper(97864),97810,810)
+pos = 20,-124
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 12
+id = ifelse(IsHelper(97864),97810,810)
+pos = 15,-130
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 13
+id = ifelse(IsHelper(97864),97810,810)
+pos = 0,-126
+
+[State 810, Targetstate]
+type = Targetstate
+trigger1 = AnimElem = 13
+id = ifelse(IsHelper(97864),97810,810)
+value = 814
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 14
+id = ifelse(IsHelper(97864),97810,810)
+pos = 0, -100
+
+[State 810, TargetBind]
+type = TargetBind
+trigger1 = AnimElem = 15
+id = ifelse(IsHelper(97864),97810,810)
+pos = 20,-63
+
+[State 810, Targetstate]
+type = Targetstate
+trigger1 = AnimElem = 16
+id = ifelse(IsHelper(97864),97810,810)
+value = 813
+
+[State 803, LifeAdd]
+type = targetLifeAdd
+trigger1 = AnimElem = 19
+id = ifelse(IsHelper(97864),97810,810)
+value = floor(-100*fvar(3))
+absolute = 1
+
+[State 810, PlaySnd]; ---- hit ground sound
+type = PlaySnd
+trigger1 = AnimElem = 18
+value = S0,13
+
+[State 810, Explod]; ---- hit ground spark
+type = Explod
+trigger1 = AnimElem = 18
+anim = 518
+postype = p1
+pos = 63,0
+sprpriority = -1
+
+[State 810, Explod]; ---- hit ground spark
+type = Explod
+trigger1 = AnimElem = 18
+anim = 515
+postype = p1
+pos = 63,0
+sprpriority = 6
+
+[State 810, Explod]; ---- hit ground spark
+type = Explod
+trigger1 = AnimElem = 18
+anim = 516
+postype = p1
+pos = 63,0
+sprpriority = -2
+
+[State 810, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; punch throw P2STATE ----------------------------------------------------------
+[Statedef 812]
+type    = A
+movetype= H
+physics = N
+velset = 0,0
+sprpriority = -1
+
+[State 812, ChangeAnim2]
+type = ChangeAnim2
+trigger1 = time = 0
+value = 811
+
+[State 812, ScreenBound]
+type = null;ScreenBound
+trigger1 = 1
+movecamera = 1,0
+
+; punch throw P2STATE FALL -----------------------------------------------------
+[Statedef 813]
+type    = A
+movetype= H
+physics = N
+velset = 0,0
+sprpriority = 5
+
+[State 813, ChangeAnim]
+type = ChangeAnim
+trigger1 = time = 0
+trigger1 = AnimExist(5101)
+value = 5101
+
+[State 813, ChangeAnim]
+type = ChangeAnim
+trigger1 = time = 0
+trigger1 = AnimExist(5171) && !AnimExist(5101)
+value = 5171
+
+[State 813, ChangeAnim]
+type = ChangeAnim
+trigger1 = time = 0
+trigger1 = AnimExist(5172) && !AnimExist(5101) && !AnimExist(5171)
+value = 5172
+
+[State 813, ChangeAnim2]
+type = ChangeAnim2
+trigger1 = time = 0
+trigger1 = !AnimExist(5172) && !AnimExist(5101) && !AnimExist(5171)
+value = 811
+
+[State 813, ScreenBound]
+type = null;ScreenBound
+trigger1 = 1
+movecamera = 1,0
+
+[State 813, Velset]; ---- fall
+type = Velset
+trigger1 = time >= 0
+y = 10
+x = -6
+
+[State 813, Velset]; ---- slide back
+type = Velset
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+x = -2
+
+;[State 813, LifeAdd]
+;type = LifeAdd
+;trigger1 = Vel Y > 0
+;trigger1 = Pos Y >= 0
+;value = -100
+;absolute = 1
+
+[State 813, SelfState]
+type = null;selfState
+trigger1 = AnimExist(5172) ||  AnimExist(5101) ||  AnimExist(5171)
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 5101
+
+[State 813, Velset]
+type = Velset
+;trigger1 = !AnimExist(5172) && !AnimExist(5101) && !AnimExist(5171)
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+y = 15
+
+[State 813, SelfState]
+type = SelfState
+;trigger1 = !AnimExist(5172) && !AnimExist(5101) && !AnimExist(5171)
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 5100
+
+; punch throw P2STATE ----------------------------------------------------------
+[Statedef 814]
+type    = A
+movetype= H
+physics = N
+velset = 0,0
+sprpriority = 5
+
+[State 814, ChangeAnim2]
+type = ChangeAnim2
+trigger1 = time = 0
+value = 813
+
+[State 814, ScreenBound]
+type = null;ScreenBound
+trigger1 = 1
+movecamera = 1,0
+
+;-------------------------------------------------------------------------------
+; dodge bwd / guard cancel dodge bwd - Presmatic Cloak
+[Statedef 900]
+type = S
+movetype = I
+physics = S
+anim = 900
+velset = 0,0
+ctrl = 0
+sprpriority = 1
+poweradd = IfElse((prevstateno = 150 || prevstateno = 152),-1000,0)
+
+[State 900, HitBy]
+type = HitBy
+triggerall = !(prevstateno = 150 || prevstateno = 152)
+trigger1 = 1
+;trigger1 = animelem = 1, >=0
+;trigger1 = animelem = 8, <0
+value = SCA, NT,ST,HT
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 900, HitBy]
+type = notHitBy
+triggerall = prevstateno = 150 || prevstateno = 152
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 900, VarSet]; ---- var(1) Trans changing
+type = VarSet
+trigger1 = 1
+var(1) = 256
+persistent = 0
+
+[State 900, VarAdd]; ---- var(1) Trans changing
+type = VarAdd
+triggerall = var(1) = [0,256]
+triggerall = (256-var(1)) = [0,256]
+trigger1 = AnimElem = 1, >= 0
+trigger1 = AnimElem = 6, < 0
+var(1) = -14
+
+[State 900, VarAdd]; ---- var(1) Trans changing
+type = VarAdd
+triggerall = var(1) = [0,256]
+triggerall = (256-var(1)) = [0,256]
+trigger1 = AnimElem = 6, >= 0
+trigger1 = Animtime <= 0
+var(1) = 14
+
+[State 900, Trans]
+type = Trans
+trigger1 = !IsHelper(97864) ; ---- Not Shadow Clone Igniz
+trans = addalpha
+alpha = (var(1)*2),256-var(1)
+ignorehitpause = 1
+;persistent =
+
+[State 900, Trans]
+type = Trans
+trigger1 = IsHelper(97864) ; ---- Is Shadow Clone Igniz
+trans = add
+ignorehitpause = 1
+;persistent =
+
+;[state 900, Trans]
+;type = Trans
+;trigger1 = time = [0,17]
+;trans = addalpha
+;alpha = 256,time*13
+
+;[state 900, Trans]
+;type = Trans
+;trigger1 = time = [18,33]
+;trans = addalpha
+;alpha = 33+((time-18)*13),256-((time-18)*13)
+
+[State 900, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 900, Explod]; ---- guard cancel dodge spark
+type = Explod
+trigger1 = Time = 0
+trigger1 = prevstateno = 150 || prevstateno = 152
+anim = 514
+postype = p1
+pos = 0,-78
+sprpriority = 4
+supermove = 1
+pausemove = 1
+ownpal = 1
+ignorehitpause = 1
+
+[State 900, PalFx]; ---- guard cancel dodge
+type = PalFx
+trigger1 = Time = 0
+trigger1 = prevstateno = 150 || prevstateno = 152
+time = 5
+add = 50,50,250
+ignorehitpause = 1
+
+[State 900, Pause]
+type = Pause
+trigger1 = Time = 0
+trigger1 = prevstateno = 150 || prevstateno = 152
+time = 8
+movetime = 8
+
+[State 900, SprPriority]
+type = SprPriority
+Trigger1 = Time = 0
+value = -1
+
+[State 900, Afterimage]
+type = Afterimage
+;TRIGGERALL = palno != 12
+triggerall = !IsHelper
+triggerall = roundstate != 0
+trigger1 = time = 0
+time = 25
+length = 5
+palbright = 0,0,ifelse(fvar(4)=0,30,0)
+palcontrast = 175,175,175;125,125,125
+paladd = 0,0,ifelse(fvar(4)=0,15,0)
+palmul = .60,.60,ifelse(fvar(4)=0,.70,.60)
+timegap = 2
+framegap = 1
+trans = add
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+;[State 840, 2]
+;type = afterimage
+;trigger1 = animelem = 1
+;time = 10
+;length = 8
+;PalBright   =   0,  0,  0
+;PalContrast = 255,255,255
+;PalAdd      =   50,  50,  0
+;PalMul      =  1,1,1
+;FrameGap = 2
+;ignorehitpause = 1
+
+[State 900, Velset]
+type = Velset
+trigger1 = animelem = 3
+trigger2 = animelem = 4
+trigger3 = animelem = 5
+trigger4 = animelem = 6
+x = 7.2
+
+[State 900, Velset]
+type = Velset
+trigger1 = animtime = 0
+x = 0
+
+[State 900, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = Time = 2
+value = S0,72
+channel = ifelse(IsHelper(97864),20,0)
+volume = 255
+
+[State 900, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;-------------------------------------------------------------------------------
+; dodge fwd / guard cancel dodge fwd - Presmatic Cloak
+[Statedef 910]
+type = S
+movetype = I
+physics = S
+anim = 910
+velset = 0,0
+ctrl = 0
+sprpriority = 1
+poweradd = IfElse((prevstateno = 150 || prevstateno = 152),-1000,0)
+
+[State 910, HitBy]
+type = HitBy
+triggerall = !(prevstateno = 150 || prevstateno = 152)
+trigger1 = 1
+;trigger1 = animelem = 1, >=0
+;trigger1 = animelem = 7, <1
+value = SCA, NT,ST,HT
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 910, HitBy]
+type = notHitBy
+triggerall = prevstateno = 150 || prevstateno = 152
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 910, VarSet]; ---- var(1) Trans changing
+type = VarSet
+trigger1 = 1
+var(1) = 256
+persistent = 0
+
+[State 910, VarAdd]; ---- var(1) Trans changing
+type = VarAdd
+triggerall = var(1) = [0,256]
+triggerall = (256-var(1)) = [0,256]
+trigger1 = AnimElem = 1, >= 0
+trigger1 = AnimElem = 5, < 0
+var(1) = -14
+
+[State 910, VarAdd]; ---- var(1) Trans changing
+type = VarAdd
+triggerall = var(1) = [0,256]
+triggerall = (256-var(1)) = [0,256]
+trigger1 = AnimElem = 5, >= 0
+trigger1 = Animtime <= 0
+var(1) = 14
+
+[State 910, Trans]
+type = Trans
+trigger1 = !IsHelper(97864) ; ---- Not Shadow Clone Igniz
+trans = addalpha
+alpha = (var(1)*2),256-var(1)
+ignorehitpause = 1
+;persistent =
+
+[State 910, Trans]
+type = Trans
+trigger1 = IsHelper(97864) ; ---- Is Shadow Clone Igniz
+trans = add
+ignorehitpause = 1
+;persistent =
+
+;[state 910, Trans]
+;type = Trans
+;trigger1 = time = [0,16]
+;trans = addalpha
+;alpha = 256,time*13
+
+;[state 910, Trans]
+;type = Trans
+;trigger1 = time = [17,30]
+;trans = addalpha
+;alpha = 33+((time-17)*13),256-((time-17)*13)
+
+[State 910, Explod]; ---- guard cancel dodge spark
+type = Explod
+triggerall = prevstateno = 150 || prevstateno = 152
+trigger1 = Time = 0
+trigger2 = Time = 2
+anim = 514
+postype = p1
+pos = 0,-78
+sprpriority = 4
+supermove = 1
+pausemove = 1
+ownpal = 1
+ignorehitpause = 1
+
+[State 910, PalFx]; ---- guard cancel dodge
+type = PalFx
+trigger1 = Time = 0
+trigger1 = prevstateno = 150 || prevstateno = 152
+time = 5
+add = 50,50,250
+ignorehitpause = 1
+
+[State 910, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 910, Pause]
+type = Pause
+trigger1 = Time = 0
+trigger1 = prevstateno = 150 || prevstateno = 152
+time = 8
+movetime = 8
+
+[State 910, SprPriority]
+type = SprPriority
+Trigger1 = Time = 0
+value = -1
+
+[State 900, Afterimage]
+type = Afterimage
+;TRIGGERALL = palno != 12
+triggerall = !IsHelper
+triggerall = roundstate != 0
+trigger1 = time = 0
+time = 22
+length = 5
+palbright = 0,0,ifelse(fvar(4)=0,30,0)
+palcontrast = 175,175,175;125,125,125
+paladd = 0,0,ifelse(fvar(4)=0,15,0)
+palmul = .60,.60,ifelse(fvar(4)=0,.70,.60)
+timegap = 2
+framegap = 1
+trans = add
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+;[State 840, 2]
+;type = afterimage
+;trigger1 = animelem = 1
+;time = 10
+;length = 8
+;PalBright   =   0,  0,  0
+;PalContrast = 255,255,255
+;PalAdd      =   50,  50,  0
+;PalMul      =  1,1,1
+;FrameGap = 2
+;ignorehitpause = 1
+
+[State 910, Velset]
+type = Velset
+trigger1 = animelem = 3
+trigger2 = animelem = 4
+trigger3 = animelem = 5
+trigger4 = animelem = 6
+x = -6.2
+
+[State 910, Velset]
+type = Velset
+trigger1 = animtime = 0
+x = 0
+
+[State 910, PlaySnd]; ---- voice
+type = PlaySnd
+trigger1 = Time = 2
+value = S0,72
+channel = ifelse(IsHelper(97864),20,0)
+volume = 255
+
+[State 910, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+
+
+
+
+

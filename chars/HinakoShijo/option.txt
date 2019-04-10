@@ -1,0 +1,526 @@
+;=====================================================================
+;  Option File For "Refuse Hinako Shijo"             Made By OG子 OGヲ
+;                                       Ver. 1.0            2007/10/01
+;=====================================================================
+
+[Statedef 5901]
+type			= U
+movetype		= U
+physics			= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+
+
+
+
+
+
+
+
+
+;-------------------------------------------------------------------------------------------------------------
+; ここから
+;-------------------------------------------------------------------------------------------------------------
+
+
+;---------------------------------------------------------------------
+; 新MUGEN用処理を行うか
+;---------------------------------------------------------------------
+; 新MUGEN用処理を行います。
+; trigger1が「0」のときは、何もしない。
+; trigger1が「1」のときは、新MUGEN用の処理を行うようになります。
+;
+; 初期値0
+
+[State 5901, New MUGEN Proccesing]
+type		= VarSet
+triggerall	= IsHelper
+trigger1	= 0
+var(55)		= 1
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; モード設定
+;---------------------------------------------------------------------
+; キャラ性能モードを設定します。
+; モード値が「1」以上の時は、"○○無視"や"○○ペナルティ"系の設定を有効にします。
+; 「AIレベル」「基本攻撃力倍率」「基本防御力倍率」「パワーゲージ上昇倍率」等の倍率系には適用されません。
+;
+; var(57)の値が「0」のときは、通常モード。
+;
+; var(57)の値が「1」のときは、対強キャラ用モード。
+; オプションの「ダメージ無視をするか？」以降にあるような各種無効系システムが有効になります。
+;
+; var(57)の値が「2」のときは、強モード。
+; AI時に11、12Pカラーの時は最初からこれになります。
+;
+; 値の範囲は0～2
+; 初期値0
+
+[State 5901, Char Mode]
+type		= VarSet
+triggerall	= RoundsExisted = 0
+trigger1	= !IsHelper
+var(57)		= 0
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; AIレベル
+;---------------------------------------------------------------------
+; AIの強さを設定します。
+; 数字が大きいほど強いです。
+; Lv5以下から挑発をするようになります。
+;
+; var(39)の値の範囲は1～8
+; 初期値8
+
+[State 5901, AI Level]
+type		= VarSet
+trigger1	= IsHelper
+var(39)		= 8
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; 強制的にAIを起動させる
+;---------------------------------------------------------------------
+; AIを強制的に起動させます。
+; trigger1が「0」のときは、何もしない。
+; trigger1が「1」のときは、強制的にAIを起動。
+;
+; 初期値0
+
+[State 5901, Force AI Start Up]
+type		= VarSet
+triggerall	= !IsHelper
+trigger1	= 0
+var(1)		= (Var(1) | 32)
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; AIの起き攻め確率補正
+;---------------------------------------------------------------------
+; AI操作時の起き攻め確率を補正します。
+; var(57)を100(100%)にしたからって、AIが100%起き攻めするわけではありません。
+; 起き攻めするかどうかについて、AIの判断を100%優先するというものです。
+; 例えばこの値を50(50%)にしたら100%の時の半分の確率でAIは起き攻めをする事になります。
+; なので、この値を0(0%)にした場合はAIの判断を完全に無視するという事になるので、
+; 実際の起き攻め確率も0%になります。
+;
+; var(57)の値の範囲は0～100
+; 初期値70
+
+[State 5901, Get Up Attack Rate Correct]
+type		= VarSet
+trigger1	= IsHelper
+var(57)		= 70
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; 基本攻撃力倍率
+;---------------------------------------------------------------------
+; 攻撃力にこの値分の掛け率を補正します。
+; 2倍にしたら与えるダメージも2倍になります。
+;
+; fvar(3)の値の範囲は0.0001～10000.0
+; 初期値1.0
+
+[State 5901, Base Attack Correct]
+type		= VarSet
+trigger1	= IsHelper
+fvar(3)		= 1.0
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; 基本防御力倍率
+;---------------------------------------------------------------------
+; 防御力にこの値分の掛け率を補正します。
+; 2倍にしたら喰らうダメージは半分になります。
+;
+; fvar(4)の値の範囲は0.0001～10000.0
+; 初期値1.0
+
+[State 5901, Base Defense Correct]
+type		= VarSet
+trigger1	= IsHelper
+fvar(4)		= 1.0
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; パワーゲージ上昇倍率
+;---------------------------------------------------------------------
+; 技のヒットや喰らいなどによるパワーゲージ上昇にこの値分の掛け率を補正します。
+; 2倍にしたら上昇量も2倍になります。
+;
+; fvar(5)の値の範囲は0.0000～10000.0
+; 初期値1.0
+
+[State 5901, Base Power Gauge Correct]
+type		= VarSet
+trigger1	= IsHelper
+fvar(5)		= 1.0
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ガードクラッシュ値倍率
+;---------------------------------------------------------------------
+; ガードクラッシュ値にこの値分の掛け率を補正します。
+; 2倍にしたら与えるガードクラッシュ値も2倍になります。
+;
+; fvar(7)の値の範囲は0.0000～10000.0
+; 初期値1.0
+
+[State 5901, Base Guard Crush Correct]
+type		= VarSet
+trigger1	= IsHelper
+fvar(7)		= 1.0
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; モード系情報の表示開始座標
+;---------------------------------------------------------------------
+; 値は1P側基準の座標系です。
+;
+; 各々の値の範囲は0～511
+; var(10)の初期値36
+; var(58)の初期値50
+
+;------------------- 開始x座標
+[State 5901, Base Pos X]
+type		= VarSet
+trigger1	= IsHelper
+var(10)		= 36
+ignorehitpause	= 1
+
+;------------------- 開始y座標
+[State 5901, Base Pos Y]
+type		= VarSet
+trigger1	= IsHelper
+var(58)		= 50
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; 攻撃力補正タイプ
+;---------------------------------------------------------------------
+; 攻撃力補正の仕方を設定します。
+; trigger1が「0」のときは、通常の攻撃補正タイプ。
+; trigger1が「1」のときは、相手のHPが1000以上なら、または相手の防御力が100以上なら、
+; 相手のdata比率に合わせた攻撃力補正が掛かります。
+;
+; 初期値0
+
+[State 5901, User Config Attack Rate Type]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= RoundsExisted = 0
+trigger1	= 0
+var(22)		= (Var(22) | 16)
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ダメージ無視をするか？(連続・連携技で食らう総ダメージ用)
+;---------------------------------------------------------------------
+; 連続・連携技で受ける総ダメージの上限を設定します。
+; var(0)の値が「0」以下の時は上限無しで普通にダメージ処理をします。
+; var(0)の値が「0」を超える時はその値を上限として処理をし、上限を超えたらペナルティを発動します。
+; ただしこの項目はモード設定値が「1」以上のときのみ有効になります。
+; しかしmugenの仕様上、相手のステートに引き込まれてLifeSet 0されたら即死するのは無理ゲーです。
+; もろもろそういった場合、この項目でそれらを制限する事は出来ません。
+;
+; 上限設定時、値の有効な範囲 0～1023
+; 初期値800
+
+[State 5901, VarSet]
+type		= VarSet
+triggerall	= !IsHelper
+trigger1	= 1
+var(0)		= 800
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; パワーゲージダメージ無視をするか？(連続で食らう総ダメージ用)
+;---------------------------------------------------------------------
+; パワーゲージに連続で受ける総ダメージの上限を設定します。
+; var(58)の値が「0」以下の時は上限無しで普通にパワーダメージ処理をします。
+; var(58)の値が「0」を超える時はその値を上限として処理をし、上限を超えたらペナルティを発動します。
+; ただしこの項目はモード設定値が「1」以上のときのみ有効になります。
+; あとたぶんこの項目は同時に戦う2on2みたいなチーム戦だと不具合が発生する気がします。
+;
+; 上限設定時、値の有効な範囲 0～5110 (10の倍数のみ有効)
+; 初期値1100
+
+[State 5901, VarSet]
+type		= VarSet
+triggerall	= !IsHelper
+trigger1	= 1
+var(58)		= 1100
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; 自分以外の長すぎるSuperPauseにペナルティを付けるフレーム
+;---------------------------------------------------------------------
+; 自分以外のSuperPause等が長すぎる場合、それを強制的に解除します。
+; var(15)の値が「0」以下の時は特に何も行いません。
+; var(15)の値が「0」を超える時は、そのフレーム間自分以外のSuperPause等があった場合は、
+; それを強制的に解除して自分が動けるようにします。
+; ただしこの項目はモード設定値が「1」以上のときのみ有効になります。
+;
+; 値の範囲は0～
+; 初期値8 * 60
+
+[State 5901, VarSet]
+type		= VarSet
+triggerall	= IsHelper
+trigger1	= 1
+var(15)		= 8 * 60
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; バグステートやループで固まるステートにペナルティを付けるフレーム
+;---------------------------------------------------------------------
+; バグステートやループで固まるステートだった場合、それを強制的に解除します。
+; var(16)の値が「0」以下の時は特に何も行いません。
+; var(16)の値が「0」を超える時は、同ステートでそのフレーム間時間が経過した場合は、
+; それを強制的に解除して自分が動けるようにします。
+; ただしこの項目はモード設定値が「1」以上のときのみ有効になります。
+;
+; 値の範囲は0～
+; 初期値6 * 60
+
+[State 5901, VarSet]
+type		= VarSet
+triggerall	= IsHelper
+trigger1	= 1
+var(16)		= 6 * 60
+ignorehitpause	= 1
+
+
+;-------------------------------------------------------------------------------------------------------------
+; ここまで
+;-------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;---------------------------------------------------------------------------- オプションの反映
+;------------------- 新MUGEN用処理
+[State 5901, New MUGEN Proccesing]
+type		= VarSet
+triggerall	= IsHelper
+trigger1	= Var(55)
+var(1)		= (Var(1) | 256)
+ignorehitpause	= 1
+
+;------------------- 基本設定
+[State 5901, Char Mode]
+type		= VarSet
+triggerall	= RoundsExisted = 0
+trigger1	= !IsHelper
+var(32)		= (Var(32) | 7) - 7
+ignorehitpause	= 1
+
+[State 5901, Char Mode]
+type		= VarSet
+triggerall	= RoundsExisted = 0
+trigger1	= !IsHelper
+var(32)		= (Var(32) | (4*(Var(57)=0) + 3*(Var(57)=1) + 2*(Var(57)=2) + 1*(Var(57)=3) + 0*(Var(57)=4)))
+ignorehitpause	= 1
+
+;------------------- AIレベル
+[State 5901, AI Level]
+type		= VarSet
+trigger1	= IsHelper
+var(39)		= IfElse( Var(39) > 0, IfElse( Var(39) < 8, Var(39), 8 ), 1 )
+ignorehitpause	= 1
+
+;------------------- 起き攻め確率補正
+[State 5901, Get Up Attack Rate Correct]
+type		= VarSet
+trigger1	= IsHelper
+var(12)		= IfElse( Var(57) > 0, IfElse( Var(57) < 100, Var(57), 100 ), 0 )
+ignorehitpause	= 1
+
+;------------------- 基本攻撃力倍率
+[State 5901, Base Attack Correct]
+type		= VarSet
+trigger1	= IsHelper
+fvar(3)		= IfElse( FVar(3) > 0.0001, IfElse( FVar(3) < 10000.0, FVar(3), 10000.0 ), 0.0001 )
+ignorehitpause	= 1
+
+;------------------- 基本防御力倍率
+[State 5901, Base Defense Correct]
+type		= VarSet
+trigger1	= IsHelper
+fvar(4)		= IfElse( FVar(4) > 0.0001, IfElse( FVar(4) < 10000.0, FVar(4), 10000.0 ), 0.0001 )
+ignorehitpause	= 1
+
+;------------------- パワーゲージ上昇倍率
+[State 5901, Base Power Gauge Correct]
+type		= VarSet
+trigger1	= IsHelper
+fvar(5)		= IfElse( FVar(5) > 0, IfElse( FVar(5) < 10000.0, FVar(5), 10000.0 ), 0 )
+ignorehitpause	= 1
+
+;------------------- ガードクラッシュ値倍率
+[State 5901, Base Guard Crush Correct]
+type		= VarSet
+trigger1	= IsHelper
+fvar(7)		= IfElse( FVar(7) > 0, IfElse( FVar(7) < 10000.0, FVar(7), 10000.0 ), 0 )
+ignorehitpause	= 1
+
+;------------------- モード系情報の表示開始座標
+[State 5901, Play Config Base Pos X]
+type		= VarSet
+trigger1	= IsHelper
+var(10)		= IfElse( Var(10) >= 0, IfElse( Var(10) < 511, Var(10), 511 ), 0 )
+ignorehitpause	= 1
+
+[State 5901, Play Config Base Pos Y]
+type		= VarSet
+trigger1	= IsHelper
+var(10)		= (Var(10) | (512 * IfElse( Var(58) >= 0, IfElse( Var(58) < 511, Var(58), 511 ), 0 )))
+ignorehitpause	= 1
+
+;------------------- 1フレで食らうダメージ
+[State 5901, Damage NotHit Init]
+type		= VarSet
+triggerall	= !IsHelper
+trigger1	= 1
+var(20)		= 0
+ignorehitpause	= 1
+
+;------------------- 連続・連携技で食らう総ダメージ
+[State 5901, Damage NotHit Init]
+type		= VarAdd
+triggerall	= !IsHelper
+trigger1	= 1
+var(20)		= 1024 * IfElse( Var(0) <= 0, 0, IfElse( Var(0) < 1024, Var(0), 1023 ) )
+ignorehitpause	= 1
+
+;------------------- パワーゲージ、連続で食らう総ダメージ
+[State 5901, Damage NotHit Init]
+type		= VarAdd
+triggerall	= !IsHelper
+trigger1	= 1
+var(20)		= 1048576 * IfElse( Var(58) <= 0, 0, IfElse( Var(58) < 5111, Var(58) / 10, 511 ) )
+ignorehitpause	= 1
+
+;------------------- 自分以外の長すぎるSuperPauseにペナルティを付けるフレーム
+[State 5901, Another SuperPause Time]
+type		= VarSet
+triggerall	= IsHelper
+trigger1	= 1
+var(15)		= IfElse( Var(15) > 0, Var(15), 0 )
+ignorehitpause	= 1
+
+;------------------- バグステートやループで固まるステートにペナルティを付けるフレーム
+[State 5901, Bug Loop State Reset]
+type		= VarSet
+triggerall	= IsHelper
+trigger1	= 1
+var(16)		= IfElse( Var(16) > 0, Var(16), 0 )
+ignorehitpause	= 1
+;---------------------------------------------------------------------------- オプションの反映
+
+
+;------------------- 終了
+[State 5901, End Helper]
+type		= ChangeState
+triggerall	= IsHelper
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+[State 5901, End Helper]
+type		= ChangeState
+triggerall	= IsHelper
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+[State 5901, End Helper]
+type		= ChangeState
+triggerall	= IsHelper
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+[State 5901, Branch Player]
+type		= ChangeState
+trigger1	= (Var(1) & 8388608)
+value		= 5905
+ignorehitpause	= 1
+
+[State 5901, Branch Player]
+type		= ChangeState
+trigger1	= (Var(1) & 8388608)
+value		= 5905
+ignorehitpause	= 1
+
+[State 5901, Branch Player]
+type		= ChangeState
+trigger1	= (Var(1) & 8388608)
+value		= 5905
+ignorehitpause	= 1
+
+[State 5901, Branch Player] ;Intro for round 1
+type		= ChangeState
+triggerall	= RoundState < 2
+trigger1	= RoundNo = 1
+value		= 190
+ignorehitpause	= 1
+
+[State 5901, Branch Player] ;Intro for round 1
+type		= ChangeState
+triggerall	= RoundState < 2
+trigger1	= RoundNo = 1
+value		= 190
+ignorehitpause	= 1
+
+[State 5901, Branch Player] ;Intro for round 1
+type		= ChangeState
+triggerall	= RoundState < 2
+trigger1	= RoundNo = 1
+value		= 190
+ignorehitpause	= 1
+
+[State 5901, End Player]
+type		= ChangeState
+trigger1	= 1
+value		= 0
+ctrl		= RoundState = 2
+ignorehitpause	= 1
+
+[State 5901, End Player]
+type		= ChangeState
+trigger1	= 1
+value		= 0
+ctrl		= RoundState = 2
+ignorehitpause	= 1
+
+[State 5901, End Player]
+type		= ChangeState
+trigger1	= 1
+value		= 0
+ctrl		= RoundState = 2
+ignorehitpause	= 1

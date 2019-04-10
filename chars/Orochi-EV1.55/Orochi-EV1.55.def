@@ -1,0 +1,331 @@
+[Info]
+name ="Orochi Eagrose Version"
+displayname ="Orochi-EV"
+author ="Orochi Herman,Eagrose"
+VersionDate =11,08,2012
+mugenversion =14,04,2001
+pal.defaults =1,2,3,4,5,6
+
+;pal 1-6 normal mode
+;pal 7-11 inner mode
+;pal 12 nightmare mode
+
+[Files]
+sprite =Orochi-EV.sff
+anim =Orochi-EV.air
+
+sound =Orochi-EV.snd
+;sound =Orochi-EV-DIY-BGM.snd
+
+cmd =Orochi-EV.cmd
+;cmd =Orochi-EV(半圆优化).cmd
+
+cns =Orochi-EV.cns
+stcommon =common1.cns
+st =Orochi-EV.cns
+pal1=Pals/Orochi-EV-Shin.act
+pal2=Pals/Orochi-EV-Green-Pants.act
+pal3=Pals/Orochi-EV-Red-Pants.act
+pal4=Pals/Orochi-EV-Blue-Pants.act
+pal5=Pals/Orochi-EV-Cyan-Pants.act
+pal6=Pals/Orochi-EV-Grey-Pants.act
+pal7=Pals/Orochi-EV-Shin.act
+pal8=Pals/Orochi-EV-Green-Pants.act
+pal9=Pals/Orochi-EV-Red-Pants.act
+pal10=Pals/Orochi-EV-Blue-Pants.act
+pal11=Pals/Orochi-EV-Cyan-Pants.act
+pal12=Pals/Orochi-EV-Shin.act
+st1=States/Orochi-EV-Override.cns
+st2=States/Orochi-EV-N.cns
+st3=States/Orochi-EV-S.cns
+st4=States/Orochi-EV-H.cns
+st5=States/Orochi-EV-Helpers.cns
+st6=States/Orochi-EV-2.cns
+st7=States/Orochi-EV-AI.cns
+st8=States/Orochi-EV-AI-Learning.cns
+st9=States/Orochi-EV-GOD.cns
+
+
+
+;
+; Variable usage record for Orochi.
+;
+; VAR(0)  = Soul Extraction Scaler / Mu ni kaerou Randomizer
+; VAR(1)  = Per-State Randomizer.
+; VAR(2)  = Palfx numerator
+; VAR(3)  = Palfx segment indicator
+; VAR(4)  = Black Surge Timer
+; VAR(5)  = Black Surge Pos Multiplier
+; VAR(6)  = Black Surge Pos Recorder
+; VAR(7)  = Black Surge Secondary Timer
+; VAR(8)  = Shattering Mirror Evaluator
+; VAR(9)  = Shattering Mirror Victim indicator
+; Var(10)  = Detects existence of the reflector
+; ==removed== ==used== Var(11)  = Indicates Soul Extraction instance.
+; Var(12)  = Indicates Power Charging instance.
+; ==removed== ==used== Var(13)  = Mu ni Kaerou movehit counter.
+; Var(14)  = Black Surge movehit counter.
+; Var(15)  = Lightning Strike Target ID
+; Var(16)  = Mu ni Kaerou Indicator
+; ==removed== ==used== Var(17)  = Indicates Orochi was hurt.
+; ==removed== ==used== Var(18)  = Indicates the duration Orochi was hurt.
+; ==removed== ==used== Var(19)  = Super Combo system triggering mechanism.
+;			 0 = No super moves can be performed.
+;			 1 = DM Moves can be performed.
+;			 2 = SDMs (and HSDMs) can be performed.
+; ==removed== Var(20)  = Indicates start of super bar decrement (Extra Mode).
+; Var(21)  = Switches PALFX on for Orochi. Different from the switching
+;			 triggers below.
+; ==removed== Var(22)  = Alternative Movehit trigger for overhead kick.
+; Var(23)  = Palfx segment indicator.
+; Var(24)  = Palfx segment counter.
+; ==removed== Var(25)  = DM/SDM Indicator. (migrated from sysvar(4))
+; Var(26)  = Returns the hitpausetimes of certain projectiles.
+; Var(27)  = Signals the palfx not to process when at 0. Defaults to 1 everytime, unless asserted.
+; ==removed== Var(28)  = RTN Extra functions (rerouted from var2)
+; ==removed== Var(29)  = RTN Damage control system (spliced from var24, causing palfx conflicts.)
+
+; Definitions:
+; Switch is a function that can be toggled by the user.
+; Identifiers are what the logic system bases triggering on.
+;
+; In here, Switches are used (from Orochi.ai) to control the system
+; settings based on user preferences. Identifiers are the units that
+; implement the user's preference.
+;
+;
+; Var(31)  = Gameplay Mode Switch
+;		     0 = Selection based on pallete.
+;			 1 = Crossover / Catalyst Mode (best of everything)
+;			 2 = KOF97 Advanced Mode (BOSS)
+;			 3 = KOF97 Extra Mode (BOSS)
+;			 4 = KOF97 Advanced Mode (PSX)
+;			 5 = KOF97 Extra Mode (PSX)
+;			 6 = KOF98 Advanced Mode
+;			 7 = KOF98 Extra Mode
+;			 8 = KOF99 Mode
+;			 9 = KOF2K Mode
+;			10 = KOF2K1 Mode
+;			11 = KOF2K2 Mode
+;			12 = KOF2K3 Mode?!
+;			13 = CVS C Groove
+;			14 = CVS A Groove
+;			15 = CVS P Groove
+;			16 = CVS S Groove
+;			17 = CVS N Groove
+;			18 = CVS K Groove
+;			19 = SVC Mode
+;			20 = CUSTOM MODE
+;			21 = DYNAMIC (MENU-DRIVEN)
+;		    22 = Randomize, keep picked mode from match 1
+;			23 = Randomize, pick new mode each new match.
+;			24 = NGBC
+; Var(32)  = Gameplay Mode Identifier
+;			 0 = Crossover / Catalyst Mode (best of everything)
+;			 1 = KOF97 Advanced Mode (BOSS)
+;			 2 = KOF97 Extra Mode (BOSS)
+;			 3 = KOF97 Advanced Mode (PSX)
+;			 4 = KOF97 Extra Mode (PSX)
+;			 5 = KOF98 Advanced Mode
+;			 6 = KOF98 Extra Mode
+;			 7 = KOF99 Mode
+;			 8 = KOF2K Mode
+;			 9 = KOF2K1 Mode
+;			10 = KOF2K2 Mode
+;			11 = KOF2K3 Mode?!
+;			12 = CVS C Groove
+;			13 = CVS A Groove
+;			14 = CVS P Groove
+;			15 = CVS S Groove
+;			16 = CVS N Groove
+;			17 = CVS K Groove
+;			18 = SVC Mode
+;			19 = CUSTOM MODE
+;			20 = DYNAMIC (MENU-DRIVEN)
+;			21 = NGBC
+; Var(33)  = Air Guarding Flag
+; Var(34)  = Dodging System (Avoid)
+;			 0 = Disabled
+;			 1 = Enabled
+;			 2 = Enabled with Counterattack Command
+; Var(35)  = Dodging System Identifier
+;			 0 = Disabled
+;			 1 = Enabled
+;			 2 = Enabled with Counterattack Command
+; ==removed== Var(36) 
+;          = Rolling System (Avoid)
+;			 0 = Disabled
+;			 1 = Enabled
+;			 2 = Enabled but KOF99 Style
+; ==removed== Var(37) 
+;          = Rolling System Identifier
+;			 0 = Disabled
+;			 1 = Enabled
+;			 2 = Enabled but KOF99 Style
+; Var(38)  = Moving Getup
+;			 0 = Disabled
+;			 1 = Enabled
+; Var(39)  = Sound Type
+;			 0 = Catalyst (JoJo/MVC2)
+;			 1 = KOF97
+;			 2 = KOF98
+;			 3 = KOF99
+;			 4 = KOF2K
+;			 5 = KOF2K1
+;			 6 = KOF2K2 (variable sound system)
+;			 7 = KOF2K3 (variable sound system)
+;			 8 = CVS2
+;			 9 = SVC
+;		    10 = Randomize, keep picked mode from match 1
+;			11 = Randomize, pick new mode each new match.
+; Var(40)  = Sound Type Identifier
+;			 0 = Catalyst (JoJo/MVC2)
+;			 1 = KOF97
+;			 2 = KOF98
+;			 3 = KOF99
+;			 4 = KOF2K
+;			 5 = KOF2K1
+;			 6 = KOF2K2
+;			 7 = KOF2K3
+;			 8 = CVS2
+;			 9 = SVC
+;			10 = NGBC
+; ==removed== Var(41)  = Button layout Switch
+;			 0 = 6 Button layout
+;			 1 = 4 Button layout
+;			 2 = 4 Button layout (boss)		
+; ==removed== Var(42)  = Button layout identifier
+;			 0 = 6 Button layout
+;			 1 = 4 Button layout
+;			 2 = 4 Button layout (boss)		
+; ==removed== Var(43)  = Power Charging
+;			 0 = Disabled
+;			 1 = Enabled
+;			 2 = Rationalized (KOF98-- less time required when lost a round)
+; ==removed== Var(44)  = Power Charging Identifier
+;			 0 = Disabled
+;			 1 = Enabled
+;			 2 = Rationalized (KOF98-- less time required when lost a round)
+; Var(45)  = Chain Combo system
+;			 0 = Disabled
+;			 1 = Enabled
+; Var(46)  = Chain Combo system Identifier
+;			 0 = Disabled
+;			 1 = Enabled
+; Var(47)  = Super Combo System
+;			 0 = LV1-3 System with SDM as LV3 (KOF2k-2k2 & CVS-A)
+;			 1 = LV1-3 With Power Max for SDM (Advanced)
+;			 2 = LV1-3 Power System with low vitality DM bonus, SDM only at low life+super stock (KOF99)
+;		 	 3 = Streaking System (LV1-3 with power descent on powerup) (SVC Chaos)
+;			 4 = Single Shot (CVS-P), Most powerful SDM version always executed.
+;			 5 = Rage Gague (CVS-K), When filled, Most powerful SDM always executed.
+;			 6 = Charged Power (with low vitality DM bonus) (Extra)
+; Var(48)  = Super Combo System Identifier
+;			 0 = LV1-3 System with SDM as LV3 (KOF2k-2k1 & CVS-C)
+;			 1 = LV1-3 With Power Max for SDM (Advanced)
+;			 2 = LV1-3 Power System with low vitality DM bonus, SDM only at low life+super stock (KOF99)
+;		 	 3 = Streaking System (LV1-3 with power descent on powerup) (SVC Chaos)
+;			 4 = Single Shot (CVS-P), Most powerful SDM version always executed.
+;			 5 = Rage Gague (CVS-K), When filled, Most powerful SDM always executed.
+;			 6 = Charged Power (with low vitality DM bonus) (Extra)
+;			 7 = Variable Power Max (enables cancels on certain specials, max enables 1 free dm, collectible
+;				 to SDM. Enables HSDMs. (KOF2k2)
+; Var(49)  = Low Life DM bonus
+;			 0 = Disabled
+;			 1 = Enabled
+; Var(50)  = Low Life DM bonus Identifier
+;			 0 = Disabled
+;			 1 = Enabled
+; Var(51)  = Running Type
+;			 0 = Run
+;			 1 = Dash
+;			 2 = Combination (if held further, run, if not, dash)
+; Var(52)  = Running Type Identifier
+;			 0 = Run
+;			 1 = Dash
+;			 2 = Combination (if held further, run, if not, dash)
+; ==removed== ==AI using==  Var(53)  
+;         = SDM using two stocks
+;			 0 = Disabled
+;			 1 = Enabled on absolute command (when 2 stocks appear, sdm is performed)
+;			 2 = Enabled on chosen command (on two stocks, you can choose to perform the SDM)
+; Var(54)  = SDM using two stocks Identifier
+;			 0 = Disabled
+;			 1 = Enabled on absolute command (when 2 stocks appear, sdm is performed)
+;			 2 = Enabled on chosen command (on two stocks, you can choose to perform the SDM)
+; ==removed== ==AI using== Var(55) ;AI反应速度设定 
+;          = DM Spark Type 
+;            0 = Dependent on mode chosen.
+;			 1 = KOF97
+;			 2 = KOF98
+;			 3 = KOF99
+;			 4 = KOF2K-2K1
+;			 5 = KOF2K2
+;			 6 = KOF2K3
+;			 7 = CVS- C-A-P
+;			 8 = CVS- S-N-K
+;			 9 = SVC Chaos
+;			10  = NGBC
+;		    11 = Randomize, keep picked mode from match 1
+;			12 = Randomize, pick new mode each new match.
+; ==removed== ==AI using== Var(56) 不可攻撃判定
+;              = DM Spark Type Identifier
+;			 0 = KOF97
+;			 1 = KOF98
+;			 2 = KOF99
+;			 3 = KOF2K-2K1
+;			 4 = KOF2K2
+;			 5 = KOF2K3
+;			 6 = CVS- C-A-P
+;			 7 = CVS- S-N-K
+;			 8 = SVC Chaos
+;			 9 = NGBC
+
+; ==removed== ==AI using== Var(57) 投技判定  
+;             = Animation Quality
+; ==removed== Var(58)  = Animation Quality Identifier
+; ==removed== ==AI using== Var(59) AI启动 
+;             = Alpha Transparency Method
+
+;
+;
+; sysvar(0)   Temp   Set by state 5081 (HITL_SLIDE) to 1 to prevent
+;                    showing ground hit frame in state 5110 (HIT_LIEDOWN).
+;                    Used by guarding states.
+; sysvar(1)   Temp   Used by state 40 (Jump Start) amd 45 (Air Jump Start)
+;                    to keep track of which way to jump.
+;                    Used by state 5100 and 5110 to remember downward
+;                    velocity of player just before hitting the ground.
+; sysvar(2)   Temp   Used to determine running jumps from run state.
+;					 Used because prevstateno was unreliable. >:(
+; sysvar(3)   Temp   Used in state 5080 for storing the anim # to display.
+; sysvar(4)   Temp   Used as dash and backdash determiner.
+
+; ==removed== FVAR(1)  =1 Attack multiplier
+; ==removed== FVAR(2)  = Return to Nothingness/Bright Light/Mu ni Kaerou attack multiplier.
+; ==removed== FVAR(3)  = General Attackmulset
+; FVAR(4)  = black Surge attack multiplier.
+; ==removed== FVAR(5)  = PowerAdd subtractor.
+
+; ==AI using== fvar(30)  重力加速度计算
+; ==AI using== fvar(36)  最近之活敌判断
+; ==AI using== fvar(37)  无限连启动指令 
+; ==AI using== fvar(39)  连续技启动指令
+
+
+; Channel 0 = Voice
+; CHannel 1 = Woosh and Sound effects
+; Channel 2 = ?
+; Channel 3 = Hitsounds
+; Channel 4 = Charge Sound
+; channel 8 = Soul Extraction Loop Sound
+; Channel 9 = Mu Ni Kaerou Environment Right Pan
+; Channel 10 = Mu Ni Kaerou Environment Left Pan
+; Channel 20 = Striker Chris voice
+; Channel 21 = Striker Shermie voice
+; Channel 22 = Striker Yashiro voice
+; Channel 23 = Striker Yashiro charge sound
+
+[Arcade]
+intro.storyboard=
+ending.storyboard=

@@ -1,0 +1,1845 @@
+;===========================================================================================================================
+;Orochi Eagrose Version, original char by Orochi Herman, re-written by Eagrose
+;CNS file part: Basic Data
+;===========================================================================================================================
+; Player constants.
+; Format (case insensitive):
+; [Groupname]        
+; Constant Name =  Value  
+
+[Data]
+life = 3000  ; Amount of life to start with
+power = 5000 ; Maximum power level (for supers)
+;DO NOT set this below 5000,otherwise some SuperMove might be disabled
+attack = 100  ; 100% attack power (more is stronger)
+;NOT suggestion to adjust damage from here, cause P2STATE damage not affected by this.
+defence = 100  ; 100% defensive power (more is stronger)
+fall.defence_up = 50  ; Def goes up by 50% everytime player is hit on ground
+liedown.time = 50  ; Time player takes before getting up from HIT_LIEDOWN
+airjuggle = 15  ;points of juggling
+sparkno = 2  ; Default spark number
+guard.sparkno = 40  ; Default guard spark number
+KO.echo = 0  ; Set to 1 to enable echo on KO
+volume = 100
+
+; Variables with this index and above will not have their values
+; reset to 0 between rounds or matches. There are 60 int variables,
+; indexed from 0 to 59, and 40 float variables, indexed from 0 to 39.
+; If omitted, then it defaults to 60 and 40 for integer and float
+; variables repectively, meaning that none are persistent, i.e. all
+; are reset. If you want your variables to persist between matches,
+; you need to override state 5900 from common1.cns.
+IntPersistIndex = 50
+FloatPersistIndex = 40
+
+[Size]
+xscale = 1.0 ;1.05 ;1.0526315789473684210526315789474  ; Horizontal scaling factor.
+yscale = 1.0 ;1.07 ;1.0714285714285714285714285714286  ; Vertical scaling factor.
+ground.back = 16  ; Player width (back, ground)
+ground.front = 15  ; Player width (front, ground)
+air.back = 9  ; Player width (back, air)
+air.front = 10  ; Player width (front, air)
+air.height = 60
+height = 40  ; Height of player (for opponent to jump over)
+attack.dist = 140 ;218  ; Default attack distance
+proj.attack.dist = 80 ;320  ; Default attack distance for projectiles
+proj.doscale = 1  ; Set to 1 to scale projectiles too
+head.pos = -15, -120  ; Approximate position of head
+mid.pos = -11, -86  ; Approximate position of midsection
+shadowoffset = 0  ; Number of pixels to vertically offset the shadow
+draw.offset = 0,0  ; Player drawing offset in pixels (x, y)
+
+[Velocity]
+walk.fwd = 2.5  ; Walk forward
+walk.back = -2.5  ; Walk backward
+run.fwd  = 7.0, 0  ; Run forward (x, y)  - if y<0, player will hop
+run.back = -12.2,-4  ; Run backward (x, y) - if y=0, player will run
+jump.neu = 0,-10.64;51606750488  ; Neutral jumping velocity (x, y)
+jump.back = -2.7  ; Jump back Speed (x, y)
+jump.fwd = 2.5  ; Jump forward Speed (x, y)
+runjump.back = -3.8,0 ; Running jump speeds (opt)
+runjump.fwd = 3.8,0
+airjump.neu = 0,-8.1
+airjump.back = -2.55  ; Air jump speeds (opt)
+airjump.fwd = 2.5
+
+[Movement]
+airjump.num = 0  ; Number of air jumps allowed (opt)
+airjump.height = 35  ; Minimum distance from ground before you can air jump (opt)
+yaccel = 0.55 ;0.645161271095276  ; Vertical acceleration
+stand.friction = .85  ; Friction coefficient when standing
+crouch.friction = .82  ; Friction coefficient when crouching
+
+;-------------------------------------------------------------------------------
+; Format:
+; [Statedef STATENO]
+; type = ?      S/C/A/L  stand/crouch/air/liedown
+; movetype = ?  I/A/H    idle/attack/gethit
+; physics = ?   S/C/A/N  stand/crouch/air/none
+; juggle = ?             air juggle points move requires
+;
+; [State STATENO, ?]     ? - any number you choose
+; type = ?
+; ...
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+; Lose ( by Time over )
+[Statedef 170]
+type = S
+ctrl = 0
+anim = 170
+velset = 0,0
+
+[State 170, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 170, Afterimage]
+type = NULL;Afterimage
+;triggerall = var(18) = 0   ;Catalyst Stand Anim Only
+triggerall = roundstate != 0
+trigger1 = time = 0
+trans = add
+Paladd = 15,0,15
+PalContrast =  250, 250, 250
+PalBright = 0,0,0
+time    =  -1
+length  = 15
+TimeGap = 1
+FrameGap = 1
+
+[State 170, AfterImageTime]; ---- destroy afterimage
+type = AfterImageTime
+trigger1 = time  = 30
+time = 0
+ignorehitpause = 1
+
+[state 170, Trans]
+type = Trans
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+trigger1 = time = [35,235]
+trans = addalpha
+alpha = 256-(time+20),(time)
+ignorehitpause = 1
+
+[state 170, Trans]
+type = Trans
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+trigger1 = time = [235,255]
+trans = addalpha
+alpha = 0,time
+ignorehitpause = 1
+
+[State 170, AssertSpecial]
+type = AssertSpecial
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+trigger1 = time >= 255
+flag = invisible
+ignorehitpause = 1
+
+[State 170, AssertSpecial]
+type = AssertSpecial
+trigger1 = Time = [0,270]
+flag = RoundNotOver
+ignorehitpause = 1
+
+[State 191, PlaySnd]
+type = stopsnd
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = time = 0
+channel = 10
+ignorehitpause = 1
+
+[State 191, PlaySnd]; ---- horror BG music
+type = PlaySnd
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = time = 0
+value = S9999,2
+channel = 10
+ignorehitpause = 1
+
+[State 181, AssertSpecial]
+type = AssertSpecial
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = Time = [0,2900/2]
+flag = RoundNotOver
+flag2 = nomusic
+
+;---------------------------------------------------------------------------
+; DRAWGAME (Time over)
+[Statedef 175]
+type = S
+ctrl = 0
+velset = 0,0
+
+[State 175, 1] ; If no anim, use go to lose state.
+type = ChangeState
+trigger1 = Time = 0
+value = 170
+
+;-------------------------------------------------------------------------------
+; Win state decider
+[Statedef 180]
+type = S
+
+[state 180, playsnd]; ---- usage unknown
+type = NULL;playsnd
+trigger1 = roundstate = 0
+value = f30,0
+abspan = 0
+persistent = 0
+
+[State 180, VarRandom]
+type = VarRandom
+trigger1 = time = 0
+v = 1
+range = 1,3
+ignorehitpause = 1
+
+;[state 180, varset]; ---- unused
+;type = varset
+;trigger1 = command = "holdx"
+;trigger2 = command = "holdc"
+ ;var(1) = 0
+
+;[state 180, varset]; ---- unused
+;type = varset
+;trigger1 = command = "holdy"
+;trigger2 = command = "holda"
+;var(1) = 1
+
+;[state 180, varset]; ---- unused
+;type = varset
+;trigger1 = command = "holdz"
+;trigger2 = command = "holdb"
+;var(1) = 2
+
+[State 180, ChangeState]
+type = ChangeState
+trigger1 = var(1) = [1,3]
+value = 180 + var(1)
+
+;-------------------------------------------------------------------------------
+; Win pose 1
+[Statedef 181]
+type = S
+ctrl = 0
+anim = 181
+velset = 0,0
+sprpriority = 1
+
+;=====================论外=====================
+[State 5900, 1] ;Clear all int variables
+type = null;VarRangeSet
+trigger1 = palno = 9
+value = 0
+persistent = 0
+
+[State 5900, 2] ;Clear all float variables
+type = null;VarRangeSet
+trigger1 = palno = 9
+fvalue = 0
+persistent = 0
+;=====================论外END=====================
+
+[State 181, Afterimage]
+type = NULL;Afterimage
+;triggerall = var(18) = 0   ;Catalyst Stand Anim Only
+triggerall = roundstate != 0
+trigger1 = time = 0
+trans = add
+Paladd = 15,0,15
+PalContrast =  250, 250, 250
+PalBright = 0,0,0
+time    =  -1
+length  = 15
+TimeGap = 1
+FrameGap = 1
+
+[state 181, playsnd]
+type = playsnd
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)))
+trigger1 = animelem = 6, =1
+value = s1,2
+channel = 0
+
+[state 181, playsnd];论外
+type = playsnd
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = animelem = 6, =1
+value = s1,14
+channel = 0
+
+[state 181, playsnd]
+type = playsnd
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)))
+trigger1 = animelem = 23, =1
+value = s1,3
+channel = 0
+
+[state 181, playsnd];论外
+type = playsnd
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = animelem = 23, =1
+value = s1,11
+channel = 0
+
+[State 181, Explod]; ---- ground sky
+type = Explod
+trigger1 = animelem = 6
+anim  = 18101
+postype = p1
+pos = 0,0
+ignorehitpause = 1
+ownpal = 1
+removetime = -1
+sprpriority = -3
+bindtime = -1
+scale = const(size.xscale), const(size.yscale)
+supermove = 1
+pausemove = 1
+
+[State 181, Explod]; ----  Back Light
+type = Explod
+trigger1 = animelem = 6
+anim  = 18102
+postype = p1
+pos = 0,0
+ignorehitpause = 1
+ownpal = 1
+;removetime = -1
+sprpriority = -3
+bindtime = -1
+scale = const(size.xscale), const(size.yscale)
+supermove = 1
+pausemove = 1
+
+[state 181, assertspecial]
+type = assertspecial
+trigger1 = time = [0,181]
+flag = roundnotover
+
+[State 181, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 191, PlaySnd]
+type = stopsnd
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = time = 0
+channel = 10
+ignorehitpause = 1
+
+[State 191, PlaySnd]; ---- horror BG music
+type = PlaySnd
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = time = 0
+value = S9999,1
+channel = 10
+ignorehitpause = 1
+
+[State 181, AssertSpecial]
+type = AssertSpecial
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = Time = [0,2820/2]
+flag = RoundNotOver
+
+[State 181, AssertSpecial]
+type = AssertSpecial
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = 1
+flag = nomusic
+
+[State 0, Explod];chris
+type = Explod
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = !numexplod(8090)
+anim = 8090
+ID = 8090
+pos = 40,0
+postype = p1  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+supermove = 1
+pausemove = 1
+scale = 1,1
+sprpriority = 2
+ontop = 0
+shadow = -1,-1,-1
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+[State 0, Explod];chris fire
+type = Explod
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = !numexplod(8094)
+trigger1 = time >= 68
+anim = 8094
+ID = 8094
+pos = 60,-78
+postype = p1  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+supermove = 1
+pausemove = 1
+scale = 1,1
+sprpriority = 3
+ontop = 0
+shadow = -1,-1,-1
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+[State 0, Explod];shermie
+type = Explod
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = !numexplod(8091)
+anim = 8091
+ID = 8091
+pos = 10,0
+postype = p1  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+supermove = 1
+pausemove = 1
+scale = 1,1
+sprpriority = 3
+ontop = 0
+shadow = -1,-1,-1
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+[State 0, Explod];yashiro
+type = Explod
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = !numexplod(8092)
+anim = 8092
+ID = 8092
+pos = -20,0
+postype = p1  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+supermove = 1
+pausemove = 1
+scale = 1,1
+sprpriority = 4
+ontop = 0
+shadow = -1,-1,-1
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+[State 0, Explod];Geonitz
+type = Explod
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = !numexplod(8093)
+anim = 8093
+ID = 8093
+pos = -45,2
+postype = p1  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+supermove = 1
+pausemove = 1
+scale = 1,1
+sprpriority = 5
+ontop = 0
+shadow = -1,-1,-1
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+; Win pose 2
+[Statedef 182]
+type = S
+ctrl = 0
+anim = 182
+velset = 0,0
+
+[State 182, Afterimage]
+type = null;Afterimage
+;triggerall = var(18) = 0   ;Catalyst Stand Anim Only
+triggerall = roundstate != 0
+trigger1 = time = 0
+trans = add
+Paladd = 15,0,15
+PalContrast =  250, 250, 250
+PalBright = 0,0,0
+time    =  -1
+length  = 15
+TimeGap = 1
+FrameGap = 1
+
+[state 182, playsnd]
+type = playsnd
+trigger1 = animelem = 9,=1
+value = s1,4
+channel = 0
+
+[State 182, Explod]; ---- ground sky
+type = Explod
+trigger1 = animelem = 3
+anim  = 18101
+postype = p1
+pos = 0,0
+ignorehitpause = 1
+ownpal = 1
+removetime = -1
+sprpriority = -3
+bindtime = -1
+scale = const(size.xscale), const(size.yscale)
+
+[state 182, assertspecial]
+type = assertspecial
+trigger1 = time = [0,181]
+flag = roundnotover
+
+[State 182, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+;-------------------------------------------------------------------------------
+; Win pose 3
+[Statedef 183]
+type = S
+ctrl = 0
+anim = 183
+velset = 0,0
+
+[State 183, Afterimage]
+type = null;Afterimage
+;triggerall = var(18) = 0   ;Catalyst Stand Anim Only
+triggerall = roundstate != 0
+trigger1 = time = 0
+trans = add
+Paladd = 15,0,15
+PalContrast =  250, 250, 250
+PalBright = 0,0,0
+time    =  -1
+length  = 15
+TimeGap = 1
+FrameGap = 1
+
+[state 183, playsnd]
+type = playsnd
+trigger1 = animelem = 5
+value = s0,19
+;s0,19(Catalyst) s2,20(other mode) null(97 original)
+
+
+[State 183, Explod]; ---- blood
+type = Explod
+trigger1 = animelem = 4
+anim  = 18301
+postype = p1
+pos = 0,0
+ignorehitpause = 1
+ownpal = 1
+;removetime = -1
+sprpriority = 3
+bindtime = -1
+scale = const(size.xscale), const(size.yscale) + ifelse(const(size.yscale) != 1, .008, 0)
+
+[State 183, Explod]; ---- ground sky
+type = Explod
+trigger1 = animelem = 5
+anim  = 18101
+postype = p1
+pos = 0,0
+ignorehitpause = 1
+ownpal = 1
+removetime = -1
+sprpriority = -3
+bindtime = -1
+scale = const(size.xscale), const(size.yscale)
+
+[state 183, assertspecial]
+type = assertspecial
+trigger1 = time = [0,181]
+flag = roundnotover
+
+[State 183, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+;-------------------------------------------------------------------------------
+; PREINTRO
+[Statedef 190]
+type = S
+ctrl = 0
+velset = 0,0
+
+[state 190, varrandom]
+type = varrandom
+trigger1 = time = 0
+v = 1;
+range = 1,2
+
+[State 190, ChangeState];nomal mode
+type = ChangeState
+triggerall = (palno = [1,6]) && !((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+trigger1 = var(1) = [1,2]
+value = 190 + var(1)
+
+[State 190, ChangeState];inner mode
+type = ChangeState
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+Trigger1 = var(40) != -1 ;梦魇无援护则不跳转
+value = 193
+
+[State 190, ChangeState];梦魇无援护
+type = ChangeState
+triggerall = (palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+Trigger1 = var(40) = -1 ;梦魇无援护
+value = 190 + var(1)
+
+[state 190, varrandom]
+type = null;varrandom
+triggerall = palno = 12
+trigger1 = time = 0
+v = 1;
+range = 1,3
+
+[State 190, ChangeState];nightmare shin mode
+type = null;ChangeState
+triggerall = palno = 12
+trigger1 = var(1) = [1,3]
+value = 190 + var(1)
+
+;-------------------------------------------------------------------------------
+; Intro pose 1
+[Statedef 191]
+type = S
+ctrl = 0
+anim = 190
+velset = 0,0,0
+
+[State 191, PlaySnd]
+type = PlaySnd
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = time = 0
+value = S9999,0
+ignorehitpause = 1
+
+[State 191, AssertSpecial]
+type = AssertSpecial
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = 1
+flag = nomusic
+
+[State 191, ChangeAnim]   ; Freeze animation until PreIntro is over
+type = ChangeAnim
+trigger1 = RoundState = 0
+value = 190
+
+[state 191, playsnd]; ---- mizuchi intro music
+type = playsnd
+trigger1 = RoundState != 0
+value = s9,0
+channel = 5
+persistent = 0
+
+[State 191, AssertSpecial]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[state 191, playsnd]
+type = playsnd
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)))
+trigger1 = animelem = 11, =1
+value = s1,0
+channel = 0
+
+[state 191, playsnd];论外
+type = playsnd
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = animelem = 11, =1
+value = s1,15
+channel = 0
+
+[state 191, playsnd]
+type = playsnd
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)))
+trigger1 = animelem = 27, =1
+value = s1,1
+channel = 0
+
+[state 191, playsnd];论外
+type = playsnd
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = animelem = 27, =1
+value = s1,16
+channel = 0
+
+[state 191, playsnd]
+type = playsnd
+trigger1 = animelem = 27, =3 ;28,=1
+value = s0,23
+
+[State 191, Explod]; ----  Intro blaze
+type = Explod
+trigger1 = animelem = 27 ;28,=1
+id = 19001
+anim  = 19002 ;1
+postype = p1
+pos = 0,0
+ignorehitpause = 1
+ownpal = 1
+;removetime = -1
+sprpriority = 3
+bindtime = -1
+scale = const(size.xscale), const(size.yscale)
+supermove = 1
+pausemove = 1
+
+[State 191, ModifyExplod]
+type = ModifyExplod
+;trigger1 = time = 205
+trigger1 = animelem = 27, =68
+id = 19001
+sprpriority = -3
+
+[state 191, varset]; --- Switches PALFX on for Orochi.
+type = varset
+trigger1 = animelem = 27, =68
+;trigger1 = animtime = 0
+var(21) = 1
+
+[state 191, varset]; ---- Signals the palfx not to process when at 0. Defaults to 1 everytime, unless asserted.
+type = varset
+trigger1 = animelem = 27, =68
+;trigger1 = animtime = 0
+var(27) = 1
+
+[State 2802, VarSet]; ---- fvar(12) BGPalFX
+type = VarSet
+trigger1 = 1
+fvar(12) = 50
+persistent = 0
+
+[State 2802, VarSet]; ---- fvar(12) BGPalFX
+type = VarAdd
+trigger1 = fvar(12) < 255
+fvar(12) = 1.16
+
+[State 2802, VarSet]; ---- fvar(12) BGPalFX
+type = VarSet
+trigger1 = fvar(12) >= 255
+fvar(12) = 255
+
+[State 0, BGPalFX]
+type = BGPalFX
+trigger1 = animelem = 27, <0
+time = 1
+add = 0,0,0
+mul = floor(fvar(12)),floor(fvar(12)),floor(fvar(12))
+;sinadd = 0,0,0,10
+;invertall = 0
+;color = 256
+ignorehitpause = 1
+;persistent =
+
+[State 0, PalFXWiz]
+type = ALLPalFX
+trigger1 = animelem = 27
+time = 65
+add = 0,0,0
+mul = 256,256,256
+sinadd = 50,50,50,11
+invertall = 0
+color = 256
+;ignorehitpause = 0
+persistent = 0
+
+[State 191, ChangeState]
+type = ChangeState
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100))
+trigger1 = animtime = 0
+value = 701101
+
+[State 191, ChangeState]; ---- Change to stand state when done
+type = ChangeState
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)))
+trigger1 = animtime = 0
+value = 0
+
+;-------------------------------------------------------------------------------
+; Intro pose 2
+[Statedef 192]
+type = S
+ctrl = 0
+anim = 192
+velset = 0,0,0
+
+[state 193, playsnd]
+type = playsnd
+trigger1 = time = 0
+value = s9,0
+channel = 5
+
+[State 193, ChangeAnim]   ; Freeze animation until PreIntro is over
+type = ChangeAnim
+trigger1 = RoundState = 0
+value = 192
+
+[State 193, AssertSpecial]   ; Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[state 193, playsnd]
+type = playsnd
+trigger1 = animelem = 17, 1
+value = s1,0
+channel = 0
+
+[state 193, playsnd]
+type = playsnd
+trigger1 = animelem = 33, =1
+value = s1,1
+channel = 0
+
+[state 193, playsnd]
+type = playsnd
+trigger1 = animelem = 33, =3 ;28,1
+value = s0,23
+
+[State 193, Explod]
+type = Explod
+trigger1 = animelem = 33 ;28,1
+id = 19001
+anim  = 19002 ;1
+postype = p1
+pos = 0,0
+ignorehitpause = 1
+ownpal = 1
+;removetime = -1
+sprpriority = 3
+bindtime = -1
+scale = const(size.xscale), const(size.yscale)
+
+[State 193, ModifyExplod0]
+type = ModifyExplod
+;trigger1 = time = 205
+trigger1 = animelem = 33, =68
+id = 19001
+sprpriority = -3
+
+[state 193, varset]    ; Switches PALFX on for Orochi.
+type = varset
+trigger1 = animtime = 0
+var(21) = 1
+
+[state 193, varset]    ;Signals the palfx not to process when at 0. Defaults to 1 everytime, unless asserted.
+type = varset
+trigger1 = animtime = 0
+var(27) = 1
+
+[State 2802, VarSet]; ---- fvar(12) BGPalFX
+type = VarSet
+trigger1 = 1
+fvar(12) = 50
+persistent = 0
+
+[State 2802, VarSet]; ---- fvar(12) BGPalFX
+type = VarAdd
+trigger1 = fvar(12) < 255
+fvar(12) = 0.95
+
+[State 2802, VarSet]; ---- fvar(12) BGPalFX
+type = VarSet
+trigger1 = fvar(12) >= 255
+fvar(12) = 255
+
+[State 0, BGPalFX]
+type = BGPalFX
+trigger1 = fvar(12) < 255
+trigger1 = animelem = 33, <0
+time = 1
+add = 0,0,0
+mul = floor(fvar(12)),floor(fvar(12)),floor(fvar(12))
+;sinadd = 0,0,0,10
+;invertall = 0
+;color = 256
+ignorehitpause = 1
+;persistent =
+
+[State 0, PalFXWiz]
+type = ALLPalFX
+trigger1 = animelem = 33
+time = 65
+add = 0,0,0
+mul = 256,256,256
+sinadd = 50,50,50,11
+invertall = 0
+color = 256
+;ignorehitpause = 0
+persistent = 0
+
+[State 193, ChangeState]   ; Change to stand state when done
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;-------------------------------------------------------------------------------
+; Intro pose 3
+[Statedef 193]
+type = S
+ctrl = 0
+anim = 191
+velset = 0,0,0
+
+[State 192, ChangeAnim]   ; Freeze animation until PreIntro is over
+type = ChangeAnim
+triggerall = anim = 191
+trigger1 = RoundState = 0
+value = 191
+
+[state 192, playsnd]; ---- mizuchi intro music
+type = playsnd
+triggerall = anim = 191
+trigger1 = RoundState != 0
+value = s9,0
+channel = 5
+persistent = 0
+
+[State 192, AssertSpecial]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 193, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 1
+movecamera = 0,0
+ignorehitpause = 1
+;persistent =
+
+[State 193, PosAdd]
+type = PosAdd
+triggerall = anim = 191
+trigger1 = 1
+x = -46
+y = 0
+ignorehitpause = 1
+persistent = 0
+
+[State 192, Explod]; ---- Ground Sky
+type = Explod
+triggerall = anim = 191
+trigger1 = animelem = 1, =10
+anim  = 18101
+id = 18101
+postype = p1
+pos = -4,3 ;6
+ignorehitpause = 1
+ownpal = 1
+removetime = -1
+sprpriority = -3
+bindtime = -1
+scale = const(size.xscale), const(size.yscale)
+
+[state 192, removeexplod]
+type = removeexplod
+triggerall = anim = 191
+trigger1 = animelem = 19
+id = 18101
+
+[state 192, playsnd]
+type = playsnd
+triggerall = anim = 191
+trigger1 = animelem = 1, =10
+value = s1,0
+
+[state 192, playsnd]
+type = playsnd
+triggerall = anim = 191
+trigger1 = animelem = 19
+value = s1,1
+
+[state 192, playsnd]
+type = playsnd
+triggerall = anim = 191
+trigger1 = animelem = 51
+value = s1,4
+
+[state 192, playsnd]
+type = playsnd
+triggerall = anim = 191
+trigger1 = animelem = 19, =3 ;28,=1
+value = s0,23
+
+[State 192, Explod]
+type = Explod
+triggerall = anim = 191
+trigger1 = animelem = 19 ;28,=1
+id = 19001
+anim  = 19002 ;1
+postype = p1
+pos = 0,0
+ignorehitpause = 1
+ownpal = 1
+;removetime = -1
+sprpriority = 3
+bindtime = -1
+scale = const(size.xscale), const(size.yscale)
+
+[State 192, ModifyExplod0]
+type = ModifyExplod
+triggerall = anim = 191
+;trigger1 = time = 205
+trigger1 = animelem = 19, =68
+id = 19001
+sprpriority = -3
+
+[state 192, varset]    ; Switches PALFX on for Orochi.
+type = varset
+triggerall = anim = 191
+trigger1 = animelem = 51
+var(21) = 1
+
+[state 192, varset]    ; Signals the palfx not to process when at 0. Defaults to 1 everytime, unless asserted.
+type = varset
+triggerall = anim = 191
+trigger1 = animelem = 51
+var(27) = 1
+
+[State 2802, VarSet]; ---- fvar(12) BGPalFX
+type = VarSet
+triggerall = anim = 191
+trigger1 = 1
+fvar(12) = 50
+persistent = 0
+
+[State 2802, VarSet]; ---- fvar(12) BGPalFX
+type = VarAdd
+triggerall = anim = 191
+trigger1 = fvar(12) < 255
+fvar(12) = 2.31
+
+[State 2802, VarSet]; ---- fvar(12) BGPalFX
+type = VarSet
+triggerall = anim = 191
+trigger1 = fvar(12) >= 255
+fvar(12) = 255
+
+[State 0, BGPalFX]
+type = BGPalFX
+triggerall = anim = 191
+trigger1 = fvar(12) < 255
+trigger1 = animelem = 19, <0
+time = 1
+add = 0,0,0
+mul = floor(fvar(12)),floor(fvar(12)),floor(fvar(12))
+;sinadd = 0,0,0,10
+;invertall = 0
+;color = 256
+ignorehitpause = 1
+;persistent =
+
+[State 0, PalFXWiz]
+type = ALLPalFX
+triggerall = anim = 191
+trigger1 = animelem = 19
+time = 65
+add = 0,0,0
+mul = 256,256,256
+sinadd = 50,50,50,11
+invertall = 0
+color = 256
+;ignorehitpause = 0
+persistent = 0
+
+[State 193, Helper]
+type = Helper
+triggerall = anim = 191
+trigger1 = 1
+helpertype = normal ;player
+name = "chris intro"
+ID = 8010
+stateno = 8010
+pos = -25,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 1
+supermove = 1
+pausemove = 1
+;size.xscale (float)
+;size.yscale (float)
+;size.ground.back (int)
+;size.ground.front (int)
+;size.air.back (int)
+;size.air.front (int)
+;size.height (int)
+;size.proj.doscale (int)
+;size.head.pos (int,int)
+;size.mid.pos (int,int)
+;size.shadowoffset (int)
+ignorehitpause = 1
+persistent = 0
+
+[State 193, Helper]
+type = Helper
+triggerall = anim = 191
+trigger1 = 1
+helpertype = normal ;player
+name = "shermie intro"
+ID = 8020
+stateno = 8020
+pos = 60,0
+postype = p1    ;p2,front,back,left,right
+facing = -1
+keyctrl = 0
+ownpal = 1
+supermove = 1
+pausemove = 1
+;size.xscale (float)
+;size.yscale (float)
+;size.ground.back (int)
+;size.ground.front (int)
+;size.air.back (int)
+;size.air.front (int)
+;size.height (int)
+;size.proj.doscale (int)
+;size.head.pos (int,int)
+;size.mid.pos (int,int)
+;size.shadowoffset (int)
+ignorehitpause = 1
+persistent = 0
+
+[State 193, Helper]
+type = Helper
+triggerall = anim = 191
+trigger1 = 1
+helpertype = normal ;player
+name = "yashiro intro"
+ID = 8030
+stateno = 8030
+pos = 35,0
+postype = p1    ;p2,front,back,left,right
+facing = -1
+keyctrl = 0
+ownpal = 1
+supermove = 1
+pausemove = 1
+;size.xscale (float)
+;size.yscale (float)
+;size.ground.back (int)
+;size.ground.front (int)
+;size.air.back (int)
+;size.air.front (int)
+;size.height (int)
+;size.proj.doscale (int)
+;size.head.pos (int,int)
+;size.mid.pos (int,int)
+;size.shadowoffset (int)
+ignorehitpause = 1
+persistent = 0
+
+[State 193, Helper]
+type = Helper
+triggerall = anim = 191
+trigger1 = 1
+helpertype = normal ;player
+name = "goenitz intro"
+ID = 8040
+stateno = 8040
+pos = 80,0
+postype = p1    ;p2,front,back,left,right
+facing = -1
+keyctrl = 0
+ownpal = 1
+supermove = 1
+pausemove = 1
+;size.xscale (float)
+;size.yscale (float)
+;size.ground.back (int)
+;size.ground.front (int)
+;size.air.back (int)
+;size.air.front (int)
+;size.height (int)
+;size.proj.doscale (int)
+;size.head.pos (int,int)
+;size.mid.pos (int,int)
+;size.shadowoffset (int)
+ignorehitpause = 1
+persistent = 0
+
+[State 193, ChangeAnim]
+type = ChangeAnim
+triggerall = anim = 191
+trigger1 = animelem = 77
+;trigger1 = animtime = 0
+value = 20
+ignorehitpause = 1
+persistent = 0
+
+[State 193, PosAdd]
+type = PosAdd
+triggerall = anim = 20
+trigger1 = AnimElemTime(1) < floor(46/2)
+;trigger1 = animelem = 1, >=0
+x = 2
+y = 0
+
+[State 192, ChangeState]   ; Change to stand state when done
+type = ChangeState
+;trigger1 = AnimTime = 0
+triggerall = anim = 20
+trigger1 = AnimElemTime(1) = floor(46/2)
+value = 0
+
+;-------------------------------------------------------------------------------
+; Taunt Intro
+[Statedef 194]
+type = S
+ctrl = 0
+anim = 194
+velset = 0,0
+
+[State 194, AssertSpecial]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+ignoreHitPause = 1
+
+[state 194, playsnd]; ---- fist bone sound
+type = playsnd
+trigger1 = animelem = 3
+trigger2 = animelem = 10
+value = s0,38
+
+[state 194, playsnd]; ---- voice
+type = playsnd
+trigger1 = animelem = 15
+value = s1,5
+channel = 0
+
+[state 194, playsnd]; ---- voice
+type = playsnd
+trigger1 = animelem = 17
+value = s0,32
+
+[State 194, EnvShake]
+type = EnvShake
+trigger1 = animelem = 17
+time = 10
+freq = 60
+ampl = -4
+phase = 90
+ignorehitpause = 1
+
+[State 194, Explod]
+type = Explod
+trigger1 = animelem = 16
+anim = 197
+ID = 197
+pos = 40*const(size.xscale),-114*const(size.yscale)
+postype = p1  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -2
+scale = 1,1
+sprpriority = 1
+ontop = 0
+shadow = 0,0,0
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+[State 194, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;-------------------------------------------------------------------------------
+; Unused
+; INTRO VS GILL (from VK)
+;[Statedef 55087719]
+;type = S
+;ctrl = 0
+;anim = 20 ;* facin+((Name = "Gill" && Facing = -1)*10000)
+;velset = 0,0,0
+;sprpriority = 0
+
+;[state haha]
+;type = varset
+;trigger1 = time = 0
+;var(21) = 1
+
+;[state haha]
+;type = varset
+;trigger1 = animtime = 0
+;var(27) = 1
+
+;[State 191, 7] ;Intro over, set v9 to 1
+;type = AssertSpecial
+;trigger1 = Time < 108
+;flag = intro
+
+;[State 191, 7]
+;type = NotHitBy
+;trigger1 = 1
+;value = SCA
+;ignorehitpause = 1
+;supermovetime = 99999
+;pausemovetime = 99999
+
+;[State 191, 7]
+;type = PlayerPush
+;trigger1 = 1
+;value = 0
+
+;[State 191, 7] ;Intro over, set v9 to 1
+;type = PosAdd
+;trigger1 = Time = 3
+;x = -262
+
+;[State 191, 7]
+;type = VelSet
+;trigger1 = Time = 3
+;x = const(velocity.walk.fwd.x) ;2.5
+;persistent = 0
+
+;[State 191, 7] ;Intro over, set v9 to 1
+;type = Width
+;trigger1 = Time < 108
+;edge = -999,-999
+
+;[State 191, 7]
+;type = VelSet
+;trigger1 = Time = 108
+;x = 0
+
+;[State 900,5]
+;type = AllPalFX
+;triggerall = RoundState < 2 && Time > 2
+;trigger1 = Command = "x"
+;trigger2 = Command = "y"
+;trigger3 = Command = "z"
+;trigger4 = Command = "a"
+;trigger5 = Command = "b"
+;trigger6 = Command = "c"
+;mul = 0,0,0
+;time = 14
+;Persistent = 0
+
+;[State 900,5]
+;type = AllPalFX
+;triggerall = RoundState < 2 && Time > 2
+;triggerall = NumEnemy = 1
+;trigger1 = Enemy(0), Command = "x"
+;trigger2 = Enemy(0), Command = "y"
+;trigger3 = Enemy(0), Command = "z"
+;trigger4 = Enemy(0), Command = "a"
+;trigger5 = Enemy(0), Command = "b"
+;trigger6 = Enemy(0), Command = "c"
+;mul = 0,0,0
+;time = 14
+;Persistent = 0
+
+;[State 900,5]
+;type = AllPalFX
+;triggerall = RoundState < 2 && Time > 2
+;triggerall = NumEnemy = 2
+;trigger1 = Enemy(1), Command = "x"
+;trigger2 = Enemy(1), Command = "y"
+;trigger3 = Enemy(1), Command = "z"
+;trigger4 = Enemy(1), Command = "a"
+;trigger5 = Enemy(1), Command = "b"
+;trigger6 = Enemy(1), Command = "c"
+;mul = 0,0,0
+;time = 14
+;Persistent = 0
+
+;[State 900,5]
+;type = AllPalFX
+;triggerall = RoundState < 2 && Time > 2
+;triggerall = NumPartner = 1
+;trigger1 = Partner, Command = "x"
+;trigger2 = Partner, Command = "y"
+;trigger3 = Partner, Command = "z"
+;trigger4 = Partner, Command = "a"
+;trigger5 = Partner, Command = "b"
+;trigger6 = Partner, Command = "c"
+;mul = 0,0,0
+;time = 14
+;Persistent = 0
+
+;[State 900,5]
+;type = VelSet
+;triggerall = RoundState < 2 && Time > 2
+;trigger1 = Command = "x"
+;trigger2 = Command = "y"
+;trigger3 = Command = "z"
+;trigger4 = Command = "a"
+;trigger5 = Command = "b"
+;trigger6 = Command = "c"
+;x = 0
+;Persistent = 0
+
+;[State 900,5]
+;type = VelSet
+;triggerall = RoundState < 2 && Time > 2
+;triggerall = NumEnemy = 1
+;trigger1 = Enemy(0), Command = "x"
+;trigger2 = Enemy(0), Command = "y"
+;trigger3 = Enemy(0), Command = "z"
+;trigger4 = Enemy(0), Command = "a"
+;trigger5 = Enemy(0), Command = "b"
+;trigger6 = Enemy(0), Command = "c"
+;x = 0
+;Persistent = 0
+
+;[State 900,5]
+;type = VelSet
+;triggerall = RoundState < 2 && Time > 2
+;triggerall = NumEnemy = 2
+;trigger1 = Enemy(1), Command = "x"
+;trigger2 = Enemy(1), Command = "y"
+;trigger3 = Enemy(1), Command = "z"
+;trigger4 = Enemy(1), Command = "a"
+;trigger5 = Enemy(1), Command = "b"
+;trigger6 = Enemy(1), Command = "c"
+;x = 0
+;Persistent = 0
+
+;[State 900,5]
+;type = VelSet
+;triggerall = RoundState < 2 && Time > 2
+;triggerall = NumPartner = 1
+;trigger1 = Partner, Command = "x"
+;trigger2 = Partner, Command = "y"
+;trigger3 = Partner, Command = "z"
+;trigger4 = Partner, Command = "a"
+;trigger5 = Partner, Command = "b"
+;trigger6 = Partner, Command = "c"
+;x = 0
+;Persistent = 0
+
+;[State 900,5]
+;type = PosAdd
+;triggerall = RoundState < 2 && Time > 2
+;trigger1 = Command = "x"
+;trigger2 = Command = "y"
+;trigger3 = Command = "z"
+;trigger4 = Command = "a"
+;trigger5 = Command = "b"
+;trigger6 = Command = "c"
+;x = 262-(time*2)
+;Persistent = 0
+
+;[State 900,5]
+;type = PosAdd
+;triggerall = RoundState < 2 && Time > 2
+;triggerall = NumEnemy = 1
+;trigger1 = Enemy(0), Command = "x"
+;trigger2 = Enemy(0), Command = "y"
+;trigger3 = Enemy(0), Command = "z"
+;trigger4 = Enemy(0), Command = "a"
+;trigger5 = Enemy(0), Command = "b"
+;trigger6 = Enemy(0), Command = "c"
+;x = 262-(time*2)
+;Persistent = 0
+
+;[State 900,5]
+;type = PosAdd
+;triggerall = RoundState < 2 && Time > 2
+;triggerall = NumEnemy = 2
+;trigger1 = Enemy(1), Command = "x"
+;trigger2 = Enemy(1), Command = "y"
+;trigger3 = Enemy(1), Command = "z"
+;trigger4 = Enemy(1), Command = "a"
+;trigger5 = Enemy(1), Command = "b"
+;trigger6 = Enemy(1), Command = "c"
+;x = 262-(time*2)
+;Persistent = 0
+
+;[State 900,5]
+;type = PosAdd
+;triggerall = RoundState < 2 && Time > 2
+;triggerall = NumPartner = 1
+;trigger1 = Partner, Command = "x"
+;trigger2 = Partner, Command = "y"
+;trigger3 = Partner, Command = "z"
+;trigger4 = Partner, Command = "a"
+;trigger5 = Partner, Command = "b"
+;trigger6 = Partner, Command = "c"
+;x = 262-(time*2)
+;Persistent = 0
+
+;[State 900,5]
+;type = SelfState
+;triggerall = RoundState < 2 && Time > 2
+;trigger1 = Command = "x"
+;trigger2 = Command = "y"
+;trigger3 = Command = "z"
+;trigger4 = Command = "a"
+;trigger5 = Command = "b"
+;trigger6 = Command = "c"
+;value = 0
+;Persistent = 0
+
+;[State 900,5]
+;type = SelfState
+;triggerall = RoundState < 2 && Time > 2
+;triggerall = NumEnemy = 1
+;trigger1 = Enemy(0), Command = "x"
+;trigger2 = Enemy(0), Command = "y"
+;trigger3 = Enemy(0), Command = "z"
+;trigger4 = Enemy(0), Command = "a"
+;trigger5 = Enemy(0), Command = "b"
+;trigger6 = Enemy(0), Command = "c"
+;value = 0
+;Persistent = 0
+
+;[State 900,5]
+;type = SelfState
+;triggerall = RoundState < 2 && Time > 2
+;triggerall = NumEnemy = 2
+;trigger1 = Enemy(1), Command = "x"
+;trigger2 = Enemy(1), Command = "y"
+;trigger3 = Enemy(1), Command = "z"
+;trigger4 = Enemy(1), Command = "a"
+;trigger5 = Enemy(1), Command = "b"
+;trigger6 = Enemy(1), Command = "c"
+;value = 0
+;Persistent = 0
+
+;[State 900,5]
+;type = SelfState
+;triggerall = RoundState < 2 && Time > 2
+;triggerall = NumPartner = 1
+;trigger1 = Partner, Command = "x"
+;trigger2 = Partner, Command = "y"
+;trigger3 = Partner, Command = "z"
+;trigger4 = Partner, Command = "a"
+;trigger5 = Partner, Command = "b"
+;trigger6 = Partner, Command = "c"
+;value = 0
+;Persistent = 0
+
+;[State 101, 3]
+;type = SelfState
+;trigger1 = Time = 108
+;value = 0
+
+;-------------------------------------------------------------------------------
+; Taunt
+[Statedef 195]
+type = S
+ctrl = 0
+anim = 195
+velset = 0,0
+movetype = I
+physics = S
+sprpriority = 2
+
+[state 195, playsnd]; ---- fist bone sound
+type = playsnd
+trigger1 = animelem = 3
+trigger2 = animelem = 10
+value = s0,38
+channel = 0
+
+[State 195, CtrlSet]
+type = CtrlSet
+trigger1 = animelem >= 6
+value = 1
+
+[State 195, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+
+;---------------------------------------------------------------------------
+; Nightmare Mode Lose - HIT_AIRFALLRECOVER
+[Statedef 3500]
+type    = A
+movetype= I
+physics = N
+anim = 5210
+ctrl = 0
+velset = 0,0
+
+[State 5210, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+time = -1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 5210, PalFX] ;Blink white
+type = PalFX
+trigger1 = Time = [0,7]
+time = 2
+add = 256,0,0
+
+[State 5210, PosFreeze]
+type = PosFreeze
+trigger1 = Time = 0
+value = 4
+
+[State 5210, 2] ;Turn if not facing opponent
+type = Turn
+trigger1 = Time = 0
+trigger1 = p2dist X < -20
+
+[State 5210, 1]
+type = Veladd
+trigger1 = Time <= 4
+y = -1
+
+[State 5210, VelAdd]
+type = VelAdd;Gravity
+trigger1 = Time >= 4
+y = .5
+
+[State 5210, ChangeState] ;Land on ground
+type = ChangeState
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 5150
+ctrl = 0
+
+;---------------------------------------------------------------------------
+; Orochi's Unholy Life - teammode dead HIT_AIRFALLRECOVER
+[Statedef 3510]
+type    = A
+movetype= I
+physics = N
+anim = 5210
+ctrl = 0
+velset = 0,0
+
+[State 0, PlaySnd]
+type = PlaySnd
+trigger1 = 1
+value = S11,0
+volume = 100
+channel = -1
+ignorehitpause = 1
+persistent = 0
+
+[State 5210, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+time = -1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 5210, PalFX] ;Blink white
+type = PalFX
+trigger1 = Time = 0
+time = 3
+add = 256,0,0
+
+[State 5210, PosFreeze]
+type = PosFreeze
+trigger1 = Time = 0
+value = 4
+
+[State 5210, 2] ;Turn if not facing opponent
+type = Turn
+trigger1 = Time = 0
+trigger1 = p2dist X < -20
+
+[State 5210, 1]
+type = Veladd
+trigger1 = Time <= 4
+y = -1
+
+[State 5210, VelAdd]
+type = VelAdd;Gravity
+trigger1 = Time >= 4
+y = .5
+
+[State 5210, ChangeState] ;Land on ground
+type = ChangeState
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 3511
+ctrl = 0
+
+;---------------------------------------------------------------------------
+; Orochi's Unholy Life - teammode real dead orochi
+[Statedef 3511]
+type    = S
+movetype= I
+physics = N
+anim = 3501
+ctrl = 0
+velset = 0,0
+
+[State 5210, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+time = -1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 0, Helper]
+type = Helper
+trigger1 = !numhelper(3512)
+helpertype = normal ;player
+name = "teammode fake dead orochi"
+ID = 3512
+stateno = 3512
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+ignorehitpause =  1
+
+[State 0, ScreenBound];do not corrupt facing of battle between "partner vs enemy"
+type = ScreenBound
+trigger1 = numhelper(3512)
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PosSet];do not corrupt facing of battle between "partner vs enemy"
+type = PosSet
+trigger1 = Numenemy != 2
+trigger1 = numhelper(3512)
+x = ifelse(enemynear,Pos X>=0,-9999,9999)
+y = 9999
+ignorehitpause = 1
+
+[State 0, PosSet];do not corrupt facing of battle between "partner vs enemy"
+type = PosSet
+trigger1 = Numenemy = 2
+trigger1 = numhelper(3512)
+x = 9999
+y = 9999
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+trigger1 = numhelper(3512)
+value = 5150
+ctrl = 0
+ignorehitpause = 1
+
+;---------------------------------------------------------------------------
+; Orochi's Unholy Life - Teammode fake dead orochi
+[Statedef 3512]
+type    = S
+movetype= I
+physics = N
+anim = 3501
+ctrl = 0
+velset = 0,0
+
+[State 5210, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+time = -1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+y = 0
+ignorehitpause = 1
+
+[state 170, Trans]
+type = Trans
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = Name = "Orochi Eagrose Version"
+trigger1 = time = [35+120,235+120]
+trans = addalpha
+alpha = 256-(time-120+20),(time-120)
+ignorehitpause = 1
+
+[state 170, Trans]
+type = Trans
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = Name = "Orochi Eagrose Version"
+trigger1 = time = [235+120,255+120]
+trans = addalpha
+alpha = 0,time-120
+ignorehitpause = 1
+
+[State 170, AssertSpecial]
+type = AssertSpecial
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = Name = "Orochi Eagrose Version"
+trigger1 = time >= 255+120
+flag = invisible
+ignorehitpause = 1
+
+[State 170, AssertSpecial]
+type = AssertSpecial
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = Name = "Orochi Eagrose Version"
+trigger1 = Time = [0,270+120]
+flag = RoundNotOver
+ignorehitpause = 1
+
+
+

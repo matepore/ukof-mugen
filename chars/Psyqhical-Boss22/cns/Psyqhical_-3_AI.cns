@@ -1,0 +1,3048 @@
+[Statedef -3]
+
+[State -3, poweradd adjustment multiplier];能量获取速度
+type = VarSet
+trigger1 = !Ishelper && !Time
+fvar(10) = 1.0
+ignorehitpause = 1
+;poweradd adjustment multiplier (positive float is acceptable)
+;suggestions:
+;set to 0.25 - 0.3 if you want psyqhical to gain power like a common character.
+;set to 1.0 if you want psyqhical to gain power as a mighty BOSS.
+
+[State -3];伤害自动调整
+type = VarSet
+trigger1 = !Ishelper
+fvar(32) = 0
+ignorehitpause = 1
+;Automatic adjustment of hurt
+;1 = on
+;0 = off
+
+[State -3];即死,大伤害免疫
+type = VarSet
+trigger1 = !Ishelper
+fvar(33) = 1
+ignorehitpause = 1
+;Switch of Immunity to Instant K.O. and Enormous Damage
+;1 = on
+;0 = off
+
+[State -3, Adjust global damage];全体伤害选择,最低标准.
+type = VarSet
+trigger1 = !Ishelper && !Time
+fvar(34) = 50.0
+ignorehitpause = 1
+;Adjust all attack damage
+;All the damage, only is used. A special case with automatic adjustment
+
+[State 02um BG];02um隐超特效
+type = Explod
+triggerall = 1   ; 1 = ON 0 = OFF
+triggerall =  RoundState = 2
+triggerall = !numexplod(40001)
+triggerall = !numhelper(40001)
+trigger1 = stateno = 2040
+trigger2 = stateno = 2060
+id = 40001
+anim = 9999
+pos = 0,-125
+removetime = 260
+
+[State End];死星开关
+type = Explod
+triggerall = 1   ; 1 = ON 0 = OFF
+triggerall = RoundState = 2
+trigger1 = power >= 5000 && (life < 222 || life < lifemax*0.222)
+id = 2070
+anim = 9999
+pos = 0,-125
+removetime = 1
+
+[State -3, AI]
+Type = VarSet
+V = 59
+Value = 3 ;<---------var(59) AI开关,难度分级,1-3级可调
+IgnoreHitPause = 1
+Triggerall = !var(59)
+Triggerall = RoundState = [1,2]
+Trigger1   = Command = "AI0"  || Command = "AI1"
+Trigger2   = Command = "AI2"  || Command = "AI3"
+Trigger3   = Command = "AI4"  || Command = "AI5"
+Trigger4   = Command = "AI6"  || Command = "AI7"
+Trigger5   = Command = "AI8"  || Command = "AI9"
+Trigger6   = Command = "AI10" || Command = "AI11"
+Trigger7   = Command = "AI12" || Command = "AI13"
+Trigger8   = Command = "AI14" || Command = "AI15"
+Trigger9   = Command = "AI16" || Command = "AI17"
+Trigger10  = Command = "AI18" || Command = "AI19"
+Trigger11  = Command = "AI20" || Command = "AI21"
+Trigger12  = Command = "AI22" || Command = "AI23"
+Trigger13  = Command = "AI24" || Command = "AI25"
+Trigger14  = Command = "AI26" || Command = "AI27"
+Trigger15  = Command = "AI28" || Command = "AI29"
+Trigger16  = Command = "AI30" || Command = "AI31"
+Trigger17  = Command = "AI32" || Command = "AI33"
+Trigger18  = Command = "AI34" || Command = "AI35"
+Trigger19  = Command = "AI36" || Command = "AI37"
+Trigger20  = Command = "AI38" || Command = "AI39"
+Trigger21  = Command = "AI40" || Command = "AI41"
+Trigger22  = Command = "AI42" || Command = "AI43"
+Trigger23  = Command = "AI44" || Command = "AI45"
+Trigger24  = Command = "AI46" || Command = "AI47"
+Trigger25  = Command = "AI48" || Command = "AI49"
+Trigger26  = Command = "AI50" || NumExplod(10000)
+Trigger27  = NumHelper(10000) && Helper(10000),Var(59)
+
+[State -3, Helper_AI]
+type = Helper
+TriggerAll = !NumHelper(10000)
+TriggerAll = Alive && roundstate = 2
+TriggerAll = Var(59) = 0 && Ctrl
+Trigger1 = PrevStateNo = [191,194]
+Trigger2 = PrevStateNo = 5900
+HelperType = Player
+Name = "Psyqhical_Helper_AI"
+ID = 10000
+StateNo = 10000
+Pos = 0,0
+PosType = p1
+KeyCtrl = 1
+PauseMoveTime = 2147483647
+SuperMoveTime = 2147483647
+Persistent = 0
+
+[State AI ON_OFF];XOR
+type = Explod
+triggerall = !var(59) && !ishelper
+triggerall = !numexplod(10000) && roundstate = 2
+trigger1 = command = "a" ^^ command = "a2"
+trigger2 = command = "b" ^^ command = "b2"
+trigger3 = command = "c" ^^ command = "c2"
+trigger4 = command = "x" ^^ command = "x2"
+trigger5 = command = "y" ^^ command = "y2"
+trigger6 = command = "z" ^^ command = "z2"
+trigger7 = command = "up" ^^ command = "up2"
+trigger8 = command = "fwd" ^^ command = "fwd2"
+trigger9 = command = "back" ^^ command = "back2"
+trigger10 = command = "down" ^^ command = "down2"
+trigger11 = command = "start" ^^ command = "start2"
+id = 10000
+anim = 9999
+scale = 0,0
+pos = 0,-125
+bindtime = -1
+removetime = 9999
+ignorehitpause = 1
+
+[State -3]
+type = RemoveExplod
+trigger1 = Numexplod(10000)
+trigger1 = var(59)
+ID = 10000
+
+[State -3,VarSet]
+type = VarSet
+trigger1 = !IsHelper
+v = 48
+value = GameTime + ((Name = "Psyqhical-Boss") + 8055)
+ignorehitpause = 1
+
+[State -3]
+type = VarSet
+Trigger1 = fvar(30) != EnemyNear(floor(fvar(36))),const(movement.yaccel)
+Trigger1 = EnemyNear(floor(fvar(36))),stateno != [5000,5210]
+Trigger1 = EnemyNear(floor(fvar(36))),Vel Y != 0
+fvar(30) = EnemyNear(floor(fvar(36))),const(movement.yaccel)
+ignorehitpause = 1
+
+[State -3]
+type = VarSet
+Trigger1 = fvar(30) != EnemyNear(floor(fvar(36))),GetHitVar(yaccel)
+Trigger1 = EnemyNear(floor(fvar(36))),stateno = [5000,5210]
+Trigger2 = fvar(30) != EnemyNear(floor(fvar(36))),GetHitVar(yaccel)
+Trigger2 = EnemyNear(floor(fvar(36))),stateno = [5000,5210]
+fvar(30) = EnemyNear(floor(fvar(36))),GetHitVar(yaccel)
+ignorehitpause = 1
+
+[State -3]
+type = VarSet
+Trigger1 = fvar(30) != 0
+Trigger1 = EnemyNear(floor(fvar(36))),Vel Y = 0
+fvar(30) = 0
+ignorehitpause = 1
+
+[State -3]
+type = VarSet
+Triggerall = Facing != EnemyNear(floor(fvar(36))),Facing
+Trigger1 = fvar(31) != EnemyNear(floor(fvar(36))),Vel X
+fvar(31) = EnemyNear(floor(fvar(36))),Vel X
+ignorehitpause = 1
+
+[State -3]
+type = VarSet
+Triggerall = Facing  = EnemyNear(floor(fvar(36))),Facing
+Trigger1 = fvar(31) !=-EnemyNear(floor(fvar(36))),Vel X
+fvar(31) = -EnemyNear(floor(fvar(36))),Vel X
+ignorehitpause = 1
+
+[State -3]
+type = VarSet
+Trigger1 = fvar(31) != 0
+Trigger1 = EnemyNear(floor(fvar(36))),Vel X = 0
+fvar(31) = 0
+ignorehitpause = 1
+
+[State -3,VarSet]
+type = VarSet
+trigger1 = !helper(35002),var(6)
+fvar(35) = fvar(34) * Ceil(EnemyNear(fvar(36)),Const(data.defence)*0.01)
+ignorehitpause = 1
+
+[State -3]
+type = VarSet
+trigger1 = NumEnemy = 1
+fvar(36) = 0
+
+[State -3]
+type = VarSet
+trigger1 = NumEnemy = 2
+trigger1 = EnemyNear(0),Alive
+trigger1 = EnemyNear(1),Alive
+fvar(36) = IfElse(((Abs(Pos X - EnemyNear(0),Pos X)) < (Abs(Pos X - EnemyNear(1),Pos X))),0,1)
+ignorehitpause = 1
+
+[State -3]
+type = VarSet
+trigger1 = NumEnemy = 2
+trigger1 = !EnemyNear(0),Alive || !EnemyNear(1),Alive
+fvar(36) = IfElse(EnemyNear(0),Alive,0,1)
+ignorehitpause = 1
+
+[State AI]
+type = null;ChangeState
+value = enemy,stateno
+triggerall = !var(59)
+triggerall = roundstate = 2
+triggerall = ctrl || stateno = 20 || stateno = 101
+trigger1 = InGuardDist
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------LV  3-------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+[State -1, End]
+type = ChangeState
+value = 2070
+triggerall = Numexplod(2070)
+triggerall = roundstate = 2
+triggerall = statetype != A
+triggerall = ctrl || stateno = 20 || stateno = 101
+trigger1 = var(59) > 2
+
+[State AI,如你所愿,鞭尸!]
+type = ChangeState
+value = 2040
+triggerall = var(59)
+triggerall = statetype != A
+triggerall = prevstateno != 2040
+triggerall = WinKo
+triggerall = roundstate = 3
+trigger1 = ctrl
+trigger2 = stateno = 1010
+trigger3 = stateno = 1012
+trigger4 = stateno = 1031
+Persistent = 0
+
+[State AI]
+type = ChangeState
+value = 1060
+triggerall = var(59) && !ishelper
+triggerall = statetype != A
+triggerall = BackEdgeBodyDist <= 50
+triggerall = EnemyNear(floor(fvar(36))),pos y >= 0
+trigger1 = EnemyNear(floor(fvar(36))),Life < Life && roundstate = 3 && ctrl
+Persistent = 0
+
+[State AI]
+type = ChangeState
+value = 1070
+;triggerall = var(59) > 2
+;triggerall = power >= 3000
+triggerall = roundstate = 2 && !IsHelper && Palno = 6
+triggerall = !numhelper(1071) && !numhelper(1076)
+triggerall = ctrl || stateno = 20 || stateno = 101
+trigger1 = statetype != A
+
+[State AI]
+type = ChangeState
+value = 2060
+triggerall = var(59) > 2
+triggerall = power >= 3000  && var(6) = 0
+triggerall = roundstate = 2 && !IsHelper
+triggerall = numhelper(1071) && !numhelper(2060)
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = P2bodydist y = [-150-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(6*6/2)*fvar(30)),0-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(6*6/2)*fvar(30))]
+triggerall = enemynear(fvar(36)),statetype != L
+triggerall = enemynear(fvar(36)),stateno != 5120
+triggerall = enemynear(fvar(36)),movetype = I || enemynear(fvar(36)),movetype = A
+trigger1 = statetype != A
+
+[State -3]
+type = ChangeState
+value = 800
+TriggerAll = var(59)
+TriggerAll = roundstate = 2 && !IsHelper
+TriggerAll = Ctrl || stateno = 20 || stateno = 101
+TriggerAll = StateType != A
+TriggerAll = prevstateno != 800
+TriggerAll = EnemyNear(floor(fvar(36))),statetype != A
+TriggerAll = EnemyNear(floor(fvar(36))),statetype != L
+TriggerAll = EnemyNear(floor(fvar(36))),movetype != H
+TriggerAll = P2bodyDist X = [-25,25]
+Trigger1 = EnemyNear(floor(fvar(36))),stateno != 5120
+
+[State -3]
+Type = ChangeState
+value = 800
+TriggerAll = var(59)
+TriggerAll = roundstate = 2 && !IsHelper
+TriggerAll = StateType != A
+TriggerAll = P2StateType != A
+TriggerAll = P2StateType != L
+TriggerAll = P2MoveType != H
+TriggerAll = Ctrl || stateno = 20 || stateno = 101
+TriggerAll = BackEdgeBodyDist <= 60
+TriggerAll = P2bodyDist X = [-25,25]
+Trigger1 = Random <= var(59)*40
+Trigger2 = P2StateNo = [120,159]
+
+[State -3]
+type = ChangeState
+value = 800
+TriggerAll = var(59)
+TriggerAll = roundstate = 2 && !IsHelper
+TriggerAll = StateType != A
+TriggerAll = P2MoveType != A
+TriggerAll = P2StateType != L
+TriggerAll = P2bodyDist X = [-25,25]
+TriggerAll = Ctrl || stateno = 20 || stateno = 101 || (animtime = 0 && (stateno = [1060,1061]))
+TriggerAll = P2MoveType = A && prevstateno != 800
+Trigger1 = EnemyNear(floor(fvar(36))),Time >= 0
+Trigger2 = (PrevStateNo=[5000,5270]) && EnemyNear(floor(fvar(36))),Time >= 0
+Trigger3 = (PrevStateNo=[120,159]) && EnemyNear(floor(fvar(36))),Time >= 0
+
+[State -3]
+type = ChangeState
+value = 800
+TriggerAll = var(59)
+TriggerAll = StateType != A
+TriggerAll = roundstate = 2 && !IsHelper
+TriggerAll = P2StateType != L
+TriggerAll = P2StateType != A
+TriggerAll = P2bodyDist X = [-25,25]
+TriggerAll = Ctrl || stateno = 20 || stateno = 101
+TriggerAll = EnemyNear(floor(fvar(36))),AnimTime <= -1
+TriggerAll = (PrevStateNo=[5000,5270]) || (PrevStateNo=[120,159]) || prevstateno = 700
+TriggerAll = EnemyNear(floor(fvar(36))),ctrl = 0
+Trigger1 = EnemyNear(floor(fvar(36))),Time >= 0
+
+[State 3,AI]
+type = ChangeState
+value = ifelse(random < 500,1061,1060);300
+triggerall = var(59) > 2
+triggerAll = roundstate = 2 && !IsHelper
+triggerAll = StateType != A
+TriggerAll = Ctrl || stateno = 20 || stateno = 100 || (stateno = 52 && Time >= 3) || stateno = 101 || (stateno = 800 && Time >= 3)
+triggerall = P2bodydist X = [0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*fvar(31)),70+floor(0*fvar(31))]
+triggerall = P2bodydist y = [-80-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(1*1/2)*fvar(30)),0-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(1*1/2)*fvar(30))]
+trigger1 = EnemyNear(floor(fvar(36))),statetype != L
+trigger1 = EnemyNear(floor(fvar(36))),Movetype != H
+trigger1 = EnemyNear(floor(fvar(36))),facing != facing
+
+[State 3,AI]
+type = ChangeState
+value = 300
+triggerall = var(59) > 2
+triggerAll = roundstate = 2 && !IsHelper
+triggerAll = StateType != A
+TriggerAll = Ctrl || stateno = 20 || stateno = 100 || (stateno = 52 && Time >= 3) || stateno = 101 || (stateno = 800 && Time >= 3)
+triggerall = P2bodydist X = [0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*fvar(31)),70+floor(0*fvar(31))]
+triggerall = P2bodydist y = [-80-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(1*1/2)*fvar(30)),0-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(1*1/2)*fvar(30))]
+trigger1 = EnemyNear(floor(fvar(36))),statetype != L
+trigger1 = EnemyNear(floor(fvar(36))),Movetype != H
+trigger1 = EnemyNear(floor(fvar(36))),facing = facing
+
+[State 3,AI]
+type = ChangeState
+value = 300
+triggerall = var(59) > 2
+triggerall = power >= 1000
+triggerAll = roundstate = 2 && !IsHelper
+triggerAll = StateType != A
+triggerall = stateno = [150,151]
+triggerall = P2bodydist X = [0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*fvar(31)),70+floor(0*fvar(31))]
+triggerall = P2bodydist y = [-80-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(1*1/2)*fvar(30)),0-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(1*1/2)*fvar(30))]
+triggerall = EnemyNear(floor(fvar(36))),ctrl = 0
+triggerall = EnemyNear(floor(fvar(36))),statetype != L
+trigger1 = EnemyNear(floor(fvar(36))),movetype = A
+trigger1 = EnemyNear(floor(fvar(36))),animtime < -4
+trigger2 = EnemyNear(floor(fvar(36))),statetype = A
+
+[State 3,AI]
+type = ChangeState
+value = 300
+triggerall = var(59) > 2
+triggerAll = roundstate = 2 && !IsHelper
+triggerAll = StateType != A
+TriggerAll = Ctrl || stateno = 20 || stateno = 100 || (stateno = 52 && Time >= 3) || stateno = 101 || (stateno = 800 && Time >= 3)
+triggerall = P2bodydist X = [0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*fvar(31)),70+floor(0*fvar(31))]
+triggerall = P2bodydist y = [-80-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(1*1/2)*fvar(30)),0-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(1*1/2)*fvar(30))]
+triggerall = EnemyNear(floor(fvar(36))),stateno = [120,155]
+trigger1 = EnemyNear(floor(fvar(36))),hitpausetime
+trigger2 = EnemyNear(floor(fvar(36))),facing = facing
+
+[State AI]
+type = ChangeState
+value = 1020
+triggerall = var(59)
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = ctrl || stateno = 20 || stateno = 101  || (stateno = 300 && anim = 300 && animelem = 2,<= 0)
+triggerall = EnemyNear(floor(fvar(36))),pos y < -200
+trigger1 = EnemyNear(floor(fvar(36))),Movetype != H
+
+[State AI]
+type = ChangeState
+value = 1060
+triggerall = var(59)
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = stateno = 300 && anim = 300 && animelem = 2,<= 0
+trigger1 = P2bodydist X < 0
+trigger2 = EnemyNear(floor(fvar(36))),Movetype = A
+
+[State -3]
+Type = ChangeState
+Value = 1030
+TriggerAll = roundstate = 2 && !IsHelper
+TriggerAll = Var(59) > 2
+TriggerAll = StateType != A && PrevStateNo != 1030
+TriggerAll = Ctrl || stateno = 20 || stateno = 100 || (stateno = 52 && Time >= 3) || stateno = 101 || (stateno = 300 && anim = 300 && animelem = 2,<= 0)
+TriggerAll = IfElse(Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0,(Abs(P2Dist X) <= 60),1)
+triggerall = EnemyNear(floor(fvar(36))),statetype != A
+triggerall = EnemyNear(floor(fvar(36))),ctrl = 0
+triggerall = EnemyNear(floor(fvar(36))),Movetype = A
+triggerall = enemynear(fvar(36)),HitDefAttr = SCA,AA,AP
+triggerall = P2bodydist X = [-50-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),70+floor(0*(fvar(31)))]
+triggerall = P2bodydist y = [-40-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(0*0/2)*fvar(30)),0-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(0*0/2)*fvar(30))]
+Trigger1 = InGuardDist || (Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0 && P2MoveType = A)
+Trigger1 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger2 = InGuardDist || Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0
+Trigger2 = Enemy(0),NumProj = 0 && Enemy(1),NumProj = 0
+Trigger3 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger3 = P2BodyDist X < 0
+Trigger4 = EnemyNear(floor(fvar(36))),Vel X > 0
+Trigger4 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+
+[State AI]
+type = ChangeState
+value = 1030
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A && PrevStateNo != 1030
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101  || (stateno = 300 && anim = 300 && animelem = 2,<= 0) || stateno = [120,159]
+triggerall = P2bodydist X = [-50-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),70+floor(0*(fvar(31)))]
+triggerall = P2bodydist y = [-40-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(0*0/2)*fvar(30)),0-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(0*0/2)*fvar(30))]
+triggerall = InGuardDist
+triggerall = EnemyNear(floor(fvar(36))),Movetype = A
+triggerall = EnemyNear(floor(fvar(36))),ctrl = 0
+triggerall = enemynear(fvar(36)),HitDefAttr = SCA,AA,AP
+trigger1 = enemynear(fvar(36)),statetype = A
+trigger1 = enemynear(fvar(36)),stateno > 999
+trigger2 = enemynear(fvar(36)),statetype != A
+
+[State AI]
+type = ChangeState
+value = 1030
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A && PrevStateNo != 1030
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101 || (stateno = 300 && anim = 300 && animelem = 2,<= 0) || stateno = [120,159]
+triggerall = P2bodydist X = [-50-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),70+floor(0*(fvar(31)))]
+triggerall = P2bodydist y = [-70-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(0*0/2)*fvar(30)),0-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(0*0/2)*fvar(30))]
+triggerall = InGuardDist
+triggerall = EnemyNear(floor(fvar(36))),Movetype = A
+triggerall = EnemyNear(floor(fvar(36))),ctrl = 0
+triggerall = enemynear(fvar(36)),HitDefAttr = SCA,AA,AP
+triggerall = enemynear(fvar(36)),statetype = A
+trigger1 = enemynear(fvar(36)),vel y > 0
+
+[State AI]
+type = ChangeState
+value = 215
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 1 && !numhelper(1051)
+triggerall = p2bodydist X = [-5-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(4*(fvar(31))),40+floor(4*(fvar(31)))]
+triggerall = EnemyNear(floor(fvar(36))),Movetype != A
+triggerall = enemynear(fvar(36)),Statetype != A
+triggerall = enemynear(fvar(36)),Statetype != L
+trigger1 = ctrl || stateno = 20 || stateno = 101 || (stateno = 300 && anim = 300 && animelem = 2,<= 0) || stateno = [120,159]
+
+[State AI]
+type = ChangeState
+value = 230
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 1 && !numhelper(1051)
+triggerall = p2bodydist X = [10-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(4*(fvar(31))),90+floor(4*(fvar(31)))]
+triggerall = EnemyNear(floor(fvar(36))),Movetype != A
+triggerall = enemynear(fvar(36)),Statetype != A
+triggerall = enemynear(fvar(36)),Statetype != L
+trigger1 = ctrl || stateno = 20 || stateno = 101 || (stateno = 300 && anim = 300 && animelem = 2,<= 0) || stateno = [120,159]
+trigger2 = stateno = 215 || stateno = 230
+trigger2 = Movehit
+
+[State -3]
+Type = ChangeState
+Value = 120
+TriggerAll = roundstate = 2 && !IsHelper
+TriggerAll = NumHelPer(35000) > 0
+TriggerAll = NumHelPer(35001) > 0
+TriggerAll = Var(59)
+TriggerAll = Var(6) = 0
+TriggerAll = StateType != A
+TriggerAll = Ctrl || stateno = 20 || stateno = 100 || (stateno = 52 && Time >= 3) || stateno = 101
+TriggerAll = Helper(35000),Var(2) = 0
+TriggerAll = IfElse(Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0,(Abs(P2Dist X) <= 60),1)
+Trigger1 = InGuardDist || (Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0 && P2MoveType = A)
+Trigger1 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger2 = InGuardDist || Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0
+Trigger2 = Enemy(0),NumProj > 0 || Enemy(1),NumProj > 0
+Trigger3 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger3 = P2BodyDist X < 0
+Trigger4 = EnemyNear(floor(fvar(36))),Vel X > 0
+Trigger4 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger5 = InGuardDist
+Trigger5 = Helper(35000),Var(53)
+
+[State AI]
+type = ChangeState
+value = 2055
+triggerall = var(59) > 2
+triggerall = power >= 1000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = FrontEdgeBodyDist > 150
+triggerall = P2bodydist X > 0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(10*(fvar(31)))
+trigger1 = numtarget && var(12) < 2 && power >= 3000
+trigger1 = enemynear(fvar(36)),stateno = [1027,1028]
+trigger1 = enemynear(fvar(36)),vel y < 1
+trigger2 = numtarget && var(12)
+trigger2 = enemynear(fvar(36)),stateno = 1028
+trigger2 = enemynear(fvar(36)),vel y < 1
+
+[State AI]
+type = ChangeState
+value = 1060
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = statetype != A
+triggerall = var(6) = 0 && var(10) = 0
+triggerall = FrontEdgeBodyDist < 150
+triggerall = P2bodydist X > 0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(10*(fvar(31)))
+trigger1 = numtarget
+trigger1 = enemynear(fvar(36)),movetype = H
+trigger1 = enemynear(fvar(36)),stateno = [1025,1027]
+
+[State AI]
+type = ChangeState
+value = 1082
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = FrontEdgeBodyDist < 150
+triggerall = P2bodydist X > 0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(10*(fvar(31)))
+trigger1 = var(10) = 1 && var(12) = 0
+trigger1 = enemynear(fvar(36)),statetype = A
+trigger1 = enemynear(fvar(36)),movetype = H
+trigger1 = P2bodydist y < -50-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(10*10/2)*fvar(30))
+
+[State AI]
+type = ChangeState
+value = 1082
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 1 && var(12) < 2
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = enemynear(fvar(36)),ctrl = 0
+triggerall = enemynear(fvar(36)),statetype != L
+triggerall = enemynear(fvar(36)),movetype = H
+triggerall = enemynear(fvar(36)),stateno != [120,159]
+triggerall = P2bodydist y = [-150-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(6*6/2)*fvar(30)),0-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(6*6/2)*fvar(30))]
+trigger1 = !numhelper(1051)
+
+[State 3,AI]
+type = ChangeState
+value = 1010
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0 && var(12) = 2
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = enemynear(fvar(36)),movetype = H
+triggerall = enemynear(fvar(36)),statetype = A
+trigger1 = enemynear(fvar(36)),stateno = 1027
+trigger2 = enemynear(fvar(36)),stateno = 1028
+trigger2 = enemynear(fvar(36)),vel y < 0
+
+[State AI]
+type = ChangeState
+value = 1020
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = enemynear(fvar(36)),statetype = A
+triggerall = enemynear(fvar(36)),movetype = H
+triggerall = enemynear(fvar(36)),stateno = 1028
+triggerall = enemynear(fvar(36)),vel y > 0
+trigger1 = enemynear(fvar(36)),pos y >= -100-floor(10*(vel Y)+(10*10/2)*vel y)
+trigger2 = var(12) = 2 && enemynear(fvar(36)),vel y > 1
+
+[State AI]
+type = ChangeState
+value = 2055
+triggerall = var(59) > 2
+triggerall = power >= 1000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = enemynear(fvar(36)),movetype != H
+triggerall = enemynear(fvar(36)),statetype = A
+triggerall = enemynear(fvar(36)),vel y < 0
+trigger1 = P2bodydist X = [10-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(20*(fvar(31))),250+floor(20*(fvar(31)))]
+trigger1 = P2bodydist y = [-150-floor(20*(EnemyNear(floor(fvar(36))),vel Y)+(20*20/2)*fvar(30)),0-floor(20*(EnemyNear(floor(fvar(36))),vel Y)+(20*20/2)*fvar(30))]
+
+[State AI]
+type = ChangeState
+value = 2050
+triggerall = var(59) > 2
+triggerall = power >= 2000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = statetype != A
+triggerall = var(6) = 0
+trigger1 = enemynear(fvar(36)),vel x = 0
+trigger1 = P2bodydist X > 100-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31)))
+trigger1 = enemynear(fvar(36)),stateno = 5120 || (enemynear(fvar(36)),statetype = L && (enemynear(fvar(36)),stateno != [5100,5110]))
+trigger1 = enemynear(fvar(36)),time <= 5 && !numhelper(1071)
+trigger2 = numhelper(1051) && projhittime(1000) = [1,30]
+trigger2 = enemynear(fvar(36)),stateno = [2020,2030]
+trigger3 = numtarget && var(12) = 1 && !numhelper(1071)
+trigger3 = enemynear(fvar(36)),stateno = [1025,1027]
+trigger3 = power >= 4000
+
+[State AI]
+type = ChangeState
+value = 2040
+triggerall = var(59) > 2
+triggerall = power >= 3000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = enemynear(fvar(36)),ctrl = 0
+triggerall = enemynear(fvar(36)),movetype = H
+triggerall = enemynear(fvar(36)),statetype != L
+trigger1 = var(6) = 1
+trigger1 = ctrl || stateno = 20 || stateno = 101
+trigger1 = enemynear(fvar(36)),BackEdgeBodyDist < 30
+trigger1 = P2bodydist X = [-10-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(36*(fvar(31))),60+floor(36*(fvar(31)))]
+trigger2 = numhelper(1051) && numhelper(1071)
+trigger2 = enemynear(fvar(36)),stateno = [2020,2030]
+trigger2 = stateno = 1050 && var(6) = 0
+trigger3 = var(6) = 0 || var(7) > 555
+trigger3 = stateno = 1010 || stateno = 1012
+trigger3 = projhittime(1000) = 1 && time = [30,50]
+
+[State AI]
+type = ChangeState
+value = ifelse(!numhelper(1051),1050,2040)
+triggerall = var(59) > 2
+triggerall = power >= 5000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = TeamMode = simul
+trigger1 = numpartner && partner,alive && partner,stateno = 1161
+
+[State 3,AI]
+type = ChangeState
+value = ifelse(random < 500,1003,1000)
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = power < 5000
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = TeamMode = simul && partner,time < 90
+trigger1 = numpartner && partner,alive && partner,stateno = 1161
+
+[State 3,AI]
+type = ChangeState
+value = 1020
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = power < 5000
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = TeamMode = simul && partner,time > 90
+trigger1 = numpartner && partner,alive && partner,stateno = 1161
+
+[State AI]
+type = ChangeState
+value = 2040
+triggerall = var(59) > 2
+triggerall = power >= 3000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl || stateno = 20 || stateno = 101 || (stateno = 300 && anim = 300 && animelem = 2,<= 0)
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = enemynear(fvar(36)),ctrl = 0
+triggerall = enemynear(fvar(36)),movetype = A
+triggerall = enemynear(fvar(36)),statetype != A
+triggerall = enemynear(fvar(36)),statetype != L
+trigger1 = enemynear(fvar(36)),animtime < -30
+
+[State AI]
+type = ChangeState
+value = 1090
+triggerall = var(59) > 2
+triggerall = power >= 2000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101
+trigger1 = enemynear(fvar(36)),animtime < -12
+trigger1 = enemynear(fvar(36)),movetype = A
+trigger1 = P2bodydist X > 100-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31)))
+trigger2 = numhelper(1051) = 0 && var(6) = 0 && var(12) = 2
+trigger2 = enemynear(fvar(36)),movetype = H
+trigger2 = enemynear(fvar(36)),statetype = A
+trigger2 = enemynear(fvar(36)),stateno != [1025,1028]
+trigger2 = P2bodydist y < -50-floor(12*(EnemyNear(floor(fvar(36))),vel Y)+(12*12/2)*fvar(30))
+
+[State AI]
+type = ChangeState
+value = 2040
+triggerall = var(59) > 2
+triggerall = power >= 3000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = enemynear(fvar(36)),statetype = A
+triggerall = enemynear(fvar(36)),movetype  = H
+trigger1 = P2bodydist y = [-200-floor(36*(EnemyNear(floor(fvar(36))),vel Y)+(36*36/2)*fvar(30)),0-floor(36*(EnemyNear(floor(fvar(36))),vel Y)+(36*36/2)*fvar(30))]
+
+[State AI]
+type = ChangeState
+value = 1090
+triggerall = var(59) > 2
+triggerall = power >= 2000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0 || var(7) > 555
+triggerall = enemynear(fvar(36)),movetype = H
+triggerall = enemynear(fvar(36)),statetype = A
+triggerall = P2bodydist y < -40-floor(12*(EnemyNear(floor(fvar(36))),vel Y)+(12*12/2)*fvar(30))
+trigger1 = stateno = 1010 && animelem = 7
+trigger2 = stateno = 1012 && animelem = 7
+trigger3 = stateno = 1031 && animelem = 24,> 0
+
+[State AI]
+type = ChangeState
+value = 1090
+triggerall = var(59) > 2
+triggerall = power >= 2000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = enemynear(fvar(36)),statetype = A
+triggerall = enemynear(fvar(36)),movetype != H
+triggerall = enemynear(fvar(36)),vel y < 0
+trigger1 = P2bodydist y < 0-floor(20*(EnemyNear(floor(fvar(36))),vel Y)+(20*20/2)*fvar(30))
+trigger1 = P2bodydist X > 100-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31)))
+
+[State AI]
+type = ChangeState
+value = 1060
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = ctrl || stateno = 20 || stateno = 101  || (stateno = 300 && anim = 300 && animelem = 2,<= 0)
+triggerall = p2bodydist X = [-50-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),180+floor(0*(fvar(31)))]
+triggerall = EnemyNear(floor(fvar(36))),Movetype = A
+triggerall = EnemyNear(floor(fvar(36))),ctrl = 0
+trigger1 = enemynear(fvar(36)),HitDefAttr = SCA,AT
+trigger1 = var(6) = 0
+trigger2 = enemynear(fvar(36)),facing != facing
+trigger2 = var(6) = 1
+
+[State AI]
+type = ChangeState
+value = 1085
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = InGuardDist
+triggerall = stateno = 300 && animelem = 2,> 0
+triggerall = p2bodydist X = [-50-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),50+floor(0*(fvar(31)))]
+triggerall = EnemyNear(floor(fvar(36))),Movetype != H
+trigger1 = !EnemyNear(floor(fvar(36))),HitDefAttr = SCA,AA,AP
+trigger1 = EnemyNear(floor(fvar(36))),NumProj
+
+[State AI]
+type = ChangeState
+value = 1030
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = InGuardDist
+triggerall = stateno = 300 && animelem = 2,> 0
+triggerall = p2bodydist X = [-40-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),40+floor(0*(fvar(31)))]
+triggerall = EnemyNear(floor(fvar(36))),Movetype != H
+trigger1 = EnemyNear(floor(fvar(36))),HitDefAttr = SCA,AA,AP
+trigger1 = EnemyNear(floor(fvar(36))),NumProj = 0
+
+[State AI]
+type = ChangeState
+value = 1060
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = InGuardDist
+triggerall = stateno = 300 && animelem = 2,> 0
+triggerall = p2bodydist X != [0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),70+floor(0*(fvar(31)))]
+triggerall = EnemyNear(floor(fvar(36))),Movetype != H
+trigger1 = !EnemyNear(floor(fvar(36))),NumProj
+trigger1 = !EnemyNear(floor(fvar(36))),HitDefAttr = SCA,AA,AP
+
+[State AI]
+type = ChangeState
+value = 1061
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = ctrl || stateno = 20 || stateno = 101  || (stateno = 300 && anim = 300 && animelem = 2,<= 0)
+triggerall = p2bodydist X > 180+floor(22*(fvar(31)))
+triggerall = EnemyNear(floor(fvar(36))),Movetype = A
+triggerall = EnemyNear(floor(fvar(36))),ctrl = 0
+trigger1 = enemynear(fvar(36)),HitDefAttr = SCA,AT
+trigger1 = var(6) = 0
+trigger2 = enemynear(fvar(36)),facing != facing
+trigger2 = var(6) = 1
+
+[State AI]
+type = ChangeState
+value = 1061
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = enemynear(fvar(36)),movetype = A
+triggerall = animelem = 2,<= 0
+triggerall = !enemynear(fvar(36)),HitDefAttr = SCA,AA,AP,AT
+triggerall = !enemynear(fvar(36)),NumProj
+triggerall = stateno = 300 && anim = 300
+trigger1 = statetype != A
+
+[State 3,AI]
+type = ChangeState
+value = 1006
+triggerall = var(59) > 2
+triggerall = p2bodydist X = [-10-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(22*(fvar(31))),100+floor(22*(fvar(31)))]
+triggerall = P2bodydist y = [-80-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(0*0/2)*fvar(30)),0-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(0*0/2)*fvar(30))]
+triggerall = power < 3000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = statetype != A
+trigger1 = numhelper(1051) && enemynear(fvar(36)),movetype = H
+trigger2 = var(6) = 1 && enemynear(fvar(36)),vel y < 0
+trigger2 = enemynear(fvar(36)),statetype = A
+
+[State 3,AI]
+type = ChangeState
+value = 1005
+triggerall = var(59) > 2
+triggerall = p2bodydist X = [100-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),180+floor(0*(fvar(31)))]
+triggerall = P2bodydist y = [-80-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(0*0/2)*fvar(30)),0-floor(0*(EnemyNear(floor(fvar(36))),vel Y)+(0*0/2)*fvar(30))]
+triggerall = power < 3000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = statetype != A
+trigger1 = numhelper(1051) && enemynear(fvar(36)),movetype = H
+trigger2 = var(6) = 1 && enemynear(fvar(36)),vel y < 0
+trigger2 = enemynear(fvar(36)),statetype = A
+
+[State AI]
+type = ChangeState
+value = ifelse(enemynear(fvar(36)),pos y < -50,1000,1003)
+triggerall = var(59) > 2
+triggerall = power < 3000
+triggerall = p2bodydist X != [-10-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),180+floor(0*(fvar(31)))]
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = statetype != A
+trigger1 = numhelper(1051) && enemynear(fvar(36)),movetype = H
+trigger2 = var(6) = 1 && enemynear(fvar(36)),vel y < 0
+trigger2 = enemynear(fvar(36)),statetype = A
+
+[State AI]
+type = ChangeState
+value = 1060
+triggerall = var(59) > 2
+triggerall = power < 3000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = statetype != A
+triggerall = FrontEdgeBodyDist > 100
+trigger1 = var(6) = 1 && enemynear(fvar(36)),vel y < 0
+trigger1 = enemynear(fvar(36)),statetype = A
+trigger2 = numtarget && enemynear(fvar(36)),stateno = 4556
+
+[State AI]
+type = ChangeState
+value = 1061
+triggerall = var(59) > 2
+triggerall = power >= 3000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = !numhelper(1071)
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = statetype != A
+triggerall = enemynear(fvar(36)),ctrl = 1
+triggerall = enemynear(fvar(36)),stateno != 0
+trigger1 = p2bodydist x <= 120
+
+[State AI]
+type = ChangeState
+value = 1070
+triggerall = var(59) > 2
+triggerall = power >= 3000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = !numhelper(1071)
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = enemynear(fvar(36)),ctrl = 0
+trigger1 = statetype != A
+
+[State AI]
+type = ChangeState
+value = 1050
+triggerall = var(59) > 2
+triggerall = power >= 1000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = !numhelper(1051)
+triggerall = statetype != A
+triggerall = var(6) = 0
+trigger1 = p2bodydist x > 100
+trigger1 = ctrl || stateno = 20 || stateno = 101
+trigger1 = enemynear(fvar(36)),vel x = 0
+trigger1 = enemynear(fvar(36)),stateno = 5120
+trigger1 = enemynear(fvar(36)),time <= 5
+trigger2 = stateno = 1031 && movehit && animelem = 22
+trigger2 = enemynear(fvar(36)),stateno = [2020,2030]
+trigger2 = enemynear(fvar(36)),life > fvar(34)
+
+[State AI]
+type = ChangeState
+value = 1040
+triggerall = var(59) > 2
+triggerall = power >= 1000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101 || (stateno = 300 && anim = 300 && animelem = 2,<= 0)
+triggerall = enemynear(fvar(36)),ctrl = 0
+triggerall = enemynear(fvar(36)),movetype = A
+triggerall = enemynear(fvar(36)),statetype != A
+triggerall = enemynear(fvar(36)),statetype != L
+triggerall = enemynear(fvar(36)),animtime < -10
+triggerall = enemynear(fvar(36)),facing != facing
+trigger1 = P2bodydist X = [0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(10*(fvar(31))),200+floor(10*(fvar(31)))]
+
+[State AI]
+type = ChangeState
+value = 1085
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101 || (stateno = 300 && anim = 300 && animelem = 2,<= 0)
+triggerall = enemynear(fvar(36)),ctrl = 0
+triggerall = enemynear(fvar(36)),statetype != L
+triggerall = enemynear(fvar(36)),movetype = A
+triggerall = P2bodydist X = [-10-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(10*(fvar(31))),60+floor(10*(fvar(31)))]
+triggerall = P2bodydist y = [-80-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(10*10/2)*fvar(30)),0-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(10*10/2)*fvar(30))]
+trigger1 = enemynear(fvar(36)),animtime < -10
+trigger2 = enemynear(fvar(36)),statetype = A
+
+[State AI]
+type = ChangeState
+value = ifelse(enemynear(fvar(36)),animtime < -14,1082,1020)
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101 || (stateno = 1085 && animelem = 6,>= 0 && helper(1086),stateno = 1087) || (stateno = 300 && anim = 300 && animelem = 2,<= 0)
+triggerall = !InGuardDist && !helper(35002),InGuardDist
+trigger1 = enemynear(fvar(36)),numproj
+trigger1 = enemynear(fvar(36)),movetype = A
+trigger1 = enemynear(fvar(36)),animtime < -12
+
+[State AI]
+type = ChangeState
+value = 1085
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101 || (stateno = 1085 && animelem = 6,>= 0 && helper(1086),stateno = 1087) || (stateno = 300 && anim = 300 && animelem = 2,<= 0)
+triggerall = InGuardDist
+trigger1 = helper(35002),var(9)
+trigger2 = !enemynear(fvar(36)),HitDefAttr = SCA,AA,AP,AT
+trigger3 = enemynear(fvar(36)),movetype != A
+
+[State AI]
+type = ChangeState
+value = 1080
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0 && animtime = 0
+triggerall = stateno = 300 && anim = 305
+triggerall = enemynear(fvar(36)),ctrl = 0
+triggerall = enemynear(fvar(36)),statetype != L
+triggerall = enemynear(fvar(36)),movetype = H
+triggerall = enemynear(fvar(36)),stateno != [120,159]
+triggerall = P2bodydist y = [-150-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(6*6/2)*fvar(30)),0-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(6*6/2)*fvar(30))]
+trigger1 = !numhelper(1051)
+
+[State AI]
+type = ChangeState
+value = 1082
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = enemynear(fvar(36)),ctrl = 0
+triggerall = enemynear(fvar(36)),statetype != L
+triggerall = enemynear(fvar(36)),movetype = H
+triggerall = enemynear(fvar(36)),stateno != [120,159]
+triggerall = enemynear(fvar(36)),stateno != [1025,1027]
+triggerall = P2bodydist y = [-150-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(6*6/2)*fvar(30)),0-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(6*6/2)*fvar(30))]
+trigger1 = var(12) < 2
+
+[State AI]
+type = ChangeState
+value = 1082
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = enemynear(fvar(36)),ctrl = 0
+triggerall = enemynear(fvar(36)),statetype != L
+triggerall = enemynear(fvar(36)),movetype = H
+triggerall = P2bodydist y = [-150-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(6*6/2)*fvar(30)),0-floor(10*(EnemyNear(floor(fvar(36))),vel Y)+(6*6/2)*fvar(30))]
+trigger1 = var(12) < 2
+trigger1 = stateno = 210 || stateno = 240
+trigger1 = animtime = 0
+trigger1 = projhittime(1000) = [8,13]
+
+[State 3,AI]
+type = ChangeState
+value = 1080
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = enemynear(fvar(36)),ctrl = 0
+trigger1 = p2bodydist X >= 150
+trigger1 = enemynear(fvar(36)),statetype = L
+
+[State 3,AI]
+type = ChangeState
+value = 1061
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = p2bodydist X < 100
+trigger1 = enemynear(fvar(36)),statetype = L
+
+[State 3,AI]
+type = ChangeState
+value = 1061
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = p2bodydist X = [200,250]
+triggerall = enemynear(fvar(36)),animtime < -25
+triggerall = enemynear(fvar(36)),movetype = A
+trigger1 = enemynear(fvar(36)),facing != facing
+trigger1 = enemynear(fvar(36)),ctrl = 0
+
+[State 3,AI]
+type = ChangeState
+value = 1061
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) > 2
+triggerall = var(6) = 0
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [80,180]
+trigger1 = enemynear(fvar(36)),movetype = A
+
+[State 3,AI]
+type = ChangeState
+value = 1061
+IgnoreHitPause = 1
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) > 2
+triggerall = FrontEdgeBodyDist > 100
+triggerall = enemynear(fvar(36)),statetype != A
+triggerall = enemynear(fvar(36)),stateno = [120,159]
+triggerall = ctrl && statetype != A
+trigger1 = p2bodydist x > 200
+
+[State 3,AI]
+type = ChangeState
+value = 1061
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) > 2
+triggerall = FrontEdgeBodyDist < 100
+triggerall = var(6) = 1 || enemynear(fvar(36)),statetype = A
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+trigger1 = p2bodydist x <= 100
+
+[State 3,AI]
+type = ChangeState
+value = 1060
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = p2bodydist X = [100,130]
+triggerall = enemynear(fvar(36)),animtime < -25
+trigger1 = enemynear(fvar(36)),facing != facing
+trigger1 = enemynear(fvar(36)),ctrl = 0
+
+[State a]
+type = Powerset
+triggerall = !IsHelper
+trigger1 = anim = 1060 && time = 1
+trigger2 = numhelper(1071) && helper(1071),stateno = 1074
+trigger2 = helper(1071),time = 1
+trigger3 = palno = 6
+value = Power + (ifelse(fvar(10) >= 0.5,fvar(10),0.5) * 1000)
+
+[State AI]
+type = ChangeState
+value = 1020
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = enemynear(fvar(36)),statetype = A
+triggerall = enemynear(fvar(36)),movetype != H
+triggerall = enemynear(fvar(36)),vel y < 0
+trigger1 = P2bodydist y < 0-floor(15*(EnemyNear(floor(fvar(36))),vel Y)+(15*15/2)*fvar(30))
+
+[State AI]
+type = ChangeState
+value = 1020
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0 && var(12)
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = enemynear(fvar(36)),statetype = A
+triggerall = enemynear(fvar(36)),movetype = H
+triggerall = enemynear(fvar(36)),vel y > 0
+triggerall = enemynear(fvar(36)),stateno != [1025,1028]
+trigger1 = P2bodydist y < 0-floor(15*(EnemyNear(floor(fvar(36))),vel Y)+(15*15/2)*fvar(30))
+
+[State 3,AI]
+type = ChangeState
+value = 1010
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 1 && numhelper(1051)
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = p2bodydist X = [0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),150+floor(0*(fvar(31)))]
+triggerall = enemynear(fvar(36)),movetype = H
+trigger1 = enemynear(fvar(36)),stateno = [2020,2030]
+
+[State 3,AI]
+type = ChangeState
+value = 1012
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 1 && numhelper(1051)
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = p2bodydist X = [150-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),300+floor(0*(fvar(31)))]
+triggerall = enemynear(fvar(36)),movetype = H
+trigger1 = enemynear(fvar(36)),stateno = [2020,2030]
+
+[State 3,AI]
+type = ChangeState
+value = 1010
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 1 && !numhelper(1051)
+trigger1 = p2bodydist X = [0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),150+floor(0*(fvar(31)))]
+trigger1 = ctrl || stateno = 20 || stateno = 101
+trigger2 = prevstateno = 1012 && animtime = 0
+
+[State 3,AI]
+type = ChangeState
+value = 1012
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 1 && !numhelper(1051)
+trigger1 = p2bodydist X = [150-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(0*(fvar(31))),300+floor(0*(fvar(31)))]
+trigger1 = ctrl || stateno = 20 || stateno = 101
+trigger2 = stateno = 1010 && animtime = 0
+
+[State 3,AI]
+type = ChangeState
+value = 1010
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = numhelper(1051)
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = p2bodydist X = [0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(4*(fvar(31))),150+floor(4*(fvar(31)))]
+trigger1 = enemynear(fvar(36)),stateno != [120,159]
+trigger1 = enemynear(fvar(36)),movetype = H
+
+[State 3,AI]
+type = ChangeState
+value = 1012
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = numhelper(1051)
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = p2bodydist X = [150-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(4*(fvar(31))),300+floor(4*(fvar(31)))]
+trigger1 = enemynear(fvar(36)),stateno != [120,159]
+trigger1 = enemynear(fvar(36)),movetype = H
+
+[State 3,AI]
+type = ChangeState
+value = 1006
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = numhelper(1051)
+triggerall = p2bodydist X = [-10-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(22*(fvar(31))),100+floor(22*(fvar(31)))]
+triggerall = P2bodydist y = [-80-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30)),0-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30))]
+triggerall = enemynear(fvar(36)),statetype != L
+trigger1 = enemynear(fvar(36)),stateno = [120,159]
+
+[State 3,AI]
+type = ChangeState
+value = 1005
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = numhelper(1051)
+triggerall = p2bodydist X = [100-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(22*(fvar(31))),180+floor(22*(fvar(31)))]
+triggerall = P2bodydist y = [-80-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30)),0-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30))]
+triggerall = enemynear(fvar(36)),statetype != L
+trigger1 = enemynear(fvar(36)),stateno = [120,159]
+
+[State 3,AI]
+type = ChangeState
+value = ifelse(random <= 333,1003,1060)
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = p2bodydist X > 100
+triggerall = p2bodydist X = [100-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(22*(fvar(31))),180+floor(22*(fvar(31)))]
+triggerall = P2bodydist y = [-80-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30)),0-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30))]
+triggerall = enemynear(fvar(36)),statetype != L
+trigger1 = enemynear(fvar(36)),stateno = [120,159]
+trigger2 = enemynear(fvar(36)),Movetype = I
+
+[State 3,AI]
+type = ChangeState
+value = 1003
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = numhelper(1051)
+triggerall = P2bodydist y = [-80-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30)),0-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30))]
+triggerall = enemynear(fvar(36)),statetype != A
+triggerall = enemynear(fvar(36)),statetype != L
+trigger1 = enemynear(fvar(36)),stateno = [120,159]
+
+[State 3,AI]
+type = StateTypeSet
+triggerall = var(59)
+trigger1 = stateno = 1000 || stateno = 1003
+statetype = A
+
+[State 3,AI]
+type = ChangeState
+value = 1000
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = numhelper(1051)
+triggerall = p2bodydist X != [120-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(4*(fvar(31))),200+floor(4*(fvar(31)))]
+triggerall = P2bodydist y = [-80-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30)),0-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30))]
+triggerall = enemynear(fvar(36)),statetype != S
+triggerall = enemynear(fvar(36)),statetype != L
+trigger1 = enemynear(fvar(36)),stateno = [120,159]
+
+[State 3,AI]
+type = ChangeState
+value = ifelse(random <= 333,1003,1061)
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A && random >= 666
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = p2bodydist x > 180 && !numhelper(1080) && !numhelper(1083)
+triggerall = P2bodydist y = [-80-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30)),0-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30))]
+triggerall = enemynear(fvar(36)),statetype  = C
+triggerall = enemynear(fvar(36)),statetype != L
+trigger1 = enemynear(fvar(36)),stateno = [120,159]
+trigger2 = enemynear(fvar(36)),Movetype = I
+
+[State 3,AI]
+type = ChangeState
+value = ifelse(random <= 333,1000,1061)
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = p2bodydist x > 180 && !numhelper(1080) && !numhelper(1083)
+triggerall = P2bodydist y = [-80-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30)),0-floor(22*(EnemyNear(floor(fvar(36))),vel Y)+(22*22/2)*fvar(30))]
+triggerall = enemynear(fvar(36)),statetype != C
+triggerall = enemynear(fvar(36)),statetype != L
+trigger1 = enemynear(fvar(36)),stateno = [120,159]
+trigger2 = enemynear(fvar(36)),Movetype = I
+
+[State 3,AI]
+type = ChangeState
+value = 215
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0 && !numhelper(1051)
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = p2bodydist X = [-5-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(4*(fvar(31))),40+floor(4*(fvar(31)))]
+triggerall = enemynear(fvar(36)),statetype != L
+triggerall = enemynear(fvar(36)),statetype != A
+triggerall = enemynear(fvar(36)),animtime = [-10,-4]
+trigger1 = enemynear(fvar(36)),ctrl = 0
+
+[State 3,AI]
+type = ChangeState
+value = 230
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0 && !numhelper(1051)
+triggerall = ctrl || stateno = 20 || stateno = 101
+triggerall = p2bodydist X = [10-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(4*(fvar(31))),90+floor(4*(fvar(31)))]
+triggerall = enemynear(fvar(36)),statetype != L
+triggerall = enemynear(fvar(36)),statetype != A
+triggerall = enemynear(fvar(36)),ctrl = 0
+triggerall = enemynear(fvar(36)),movetype = A
+trigger1 = enemynear(fvar(36)),facing = facing
+
+[State 3,AI]
+type = ChangeState
+value = 230
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 1
+triggerall = ctrl || stateno = 20 || stateno = 101 || (stateno = 230 && MoveContact)
+triggerall = p2bodydist X = [0-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(4*(fvar(31))),90+floor(4*(fvar(31)))]
+triggerall = enemynear(fvar(36)),statetype != L
+triggerall = enemynear(fvar(36)),statetype != A
+triggerall = enemynear(fvar(36)),ctrl = 0
+trigger1 = enemynear(fvar(36)),animtime = [-10,-4]
+trigger2 = enemynear(fvar(36)),facing = facing
+
+[State 3,AI]
+type = ChangeState
+value = 230
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = !numhelper(1051)
+triggerall = MoveContact
+triggerall = P2bodydist X = [10-EnemyNear(fvar(36)),const(size.air.front)-EnemyNear(fvar(36)),const(size.air.back)+floor(4*(fvar(31))),90+floor(4*(fvar(31)))]
+triggerall = enemynear(fvar(36)),statetype != A
+triggerall = enemynear(fvar(36)),statetype != L
+triggerall = enemynear(fvar(36)),movetype = H
+triggerall = enemynear(fvar(36)),ctrl = 0
+trigger1 = stateno = 215
+trigger2 = stateno = 230
+
+[State 3,AI]
+type = ChangeState
+value = 240
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = var(6) = 0
+triggerall = MoveContact
+triggerall = P2bodydist X >= 90+floor(4*(fvar(31)))
+triggerall = enemynear(fvar(36)),statetype != A
+triggerall = enemynear(fvar(36)),movetype = H
+triggerall = enemynear(fvar(36)),ctrl = 0
+trigger1 = stateno = 230
+
+[State 3,AI]
+type = ChangeState
+value = 105
+triggerall = var(59) > 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = var(6) = 1
+triggerall = statetype != A
+triggerall = P2bodydist X <= 100
+triggerall = FrontEdgeBodyDist <= 100
+trigger1 = ctrl || stateno = 20 || stateno = 101
+
+[State 3,AI]
+type = ChangeState
+value = 0
+ctrl = 1
+triggerall = !IsHelper
+triggerall = var(59) > 2
+trigger1 = stateno = 20
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------LV  2-------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+[State AI]
+type = ChangeState
+value = 2055
+triggerall = var(59) = 2
+triggerall = power >= 1000
+triggerall = ctrl && statetype != A
+triggerall = p2stateno = 1027
+triggerall = p2bodydist x = [0,300]
+triggerall = prevstateno = 810
+trigger1 = ctrl
+
+[State -3,AI]
+type = ChangeState
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = NumEnemy
+triggerall = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = ctrl && StateType != A
+triggerall = P2statetype != A && P2statetype != L
+triggerall = P2movetype != H
+triggerAll = EnemyNear(floor(fvar(36))),AnimTime <= -3
+triggerall = P2bodyDist X = [-5,14]
+triggerall = p2stateno != [5050,5122]
+Trigger1 = Random<= var(59)*30
+value = 800
+
+[State 3,end]
+type = ChangeState
+value = 1061
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = p2movetype = A
+triggerall = random <= 100*var(59)
+triggerall = statetype != A
+triggerAll = EnemyNear(floor(fvar(36))),AnimTime <= -25
+trigger1 = ctrl
+trigger1 = p2bodydist X > 220
+trigger1 = roundstate = 2 && !IsHelper
+
+[State 3,end]
+type = ChangeState
+value = 1060
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = random <= 100*var(59)
+triggerall = statetype != A
+triggerall = ctrl
+triggerall = p2movetype != H
+triggerall = p2movetype != A
+trigger1 = p2bodydist X > 150
+trigger1 = roundstate = 2 && !IsHelper
+
+[State -3,tiaoxing]
+type = ChangeState
+value = 1070
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = ctrl
+triggerall = random <= 100*var(59)
+triggerall = statetype != A
+trigger1 = power >= 3000
+trigger1 = Numhelper(1071) = 0
+
+[State 3,AI]
+type = ChangeState
+value = ifelse(power>=3000,2040,2050)
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = var(6) = 0
+triggerall = random <= var(59)*100
+triggerall = power >= 2000
+triggerall = statetype != A
+triggerall = p2movetype = H
+triggerall = (p2stateno = 2020 || p2stateno = 2030)
+trigger1 = ctrl
+
+[State 3,AI]
+type = ChangeState
+value = 2050
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = var(6)= 0
+triggerall = power >= 2000
+triggerall = random <= 50*var(59)
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+triggerall = p2movetype = H
+trigger1 = (p2stateno = 2020 || p2stateno = 2030)
+trigger2 = P2stateno = [1025,1028]
+
+[State 3,AI]
+type = ChangeState
+value = 230
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = var(6) = 1
+triggerall = random <= var(59)*100
+triggerall = p2bodydist x = [15,100]
+triggerall = ctrl && statetype != A
+triggerall = p2statetype != L
+triggerall = p2statetype != A
+trigger1 = p2movetype != A
+
+[State 3,AI]
+type = ChangeState
+value = 1010
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = var(6) = 1
+triggerall = random <= var(59)*100
+triggerall = p2statetype != L
+triggerall = ctrl && statetype != A
+trigger1 = p2movetype = H
+trigger1 = p2bodydist x = [5,150]
+
+[State 3,AI]
+type = ChangeState
+value = 1012
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = var(6) = 1
+triggerall = random <= var(59)*100
+triggerall = p2statetype != L
+triggerall = ctrl && statetype != A
+trigger1 = p2movetype = H
+trigger1 = p2bodydist x >= 151
+
+[State 3,AI]
+type = ChangeState
+value = 105
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = var(6) = 1
+triggerall = FrontEdgeBodyDist <= 50
+triggerall = p2movetype = H
+triggerall = random <= var(59)*70
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [0,150]
+trigger1 = ctrl
+
+[State 3,AI]
+type = ChangeState
+value = 1061
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = random <= var(59)*75
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x <= 45
+trigger1 = var(6) = 1
+trigger2 = (p2stateno = 2020 || p2stateno = 2030)
+
+[State 3,AI]
+type = ChangeState
+value = 1070
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+Triggerall = var(6) = 1
+triggerall = NumHelper(1071) = 0
+triggerall = random <= 100*var(59)
+triggerall = power >= 2000
+triggerall = ctrl && statetype != A
+trigger1 = p2statetype = A
+trigger2 = p2movetype = A
+
+[State 3,AI]
+type = ChangeState
+value = 1070
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = NumHelper(1071) = 0
+triggerall = random <= 100*var(59)
+triggerall = life <= 500
+triggerall = ctrl && statetype != A
+trigger1 = p2statetype = L
+trigger1 = P2BodyDist X >= 155
+
+[State 3,AI]
+type = ChangeState
+value = 2040
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = random <= var(59)*100
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2statetype != L
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [0,300]
+triggerall = power >= 3000
+Trigger1 = P2bodydist y = [-1350-floor(6*(EnemyNear(floor(fvar(36))),vel Y)+(6*(6+1)/2)*fvar(30)),-150-floor(6*(EnemyNear(floor(fvar(36))),vel Y)+(6*(6+1)/2)*fvar(30))]
+trigger1 = p2movetype = H && p2statetype = A
+
+[State 3,AI]
+type = ChangeState
+value = 2040
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = random <= var(59)*100
+triggerall = power >= 3000
+triggerall = statetype != A
+triggerall = p2movetype = H
+trigger1 = stateno = 1050
+trigger1 = time = [40,50]
+trigger2 = var(6) = 0
+trigger2 = (stateno = 1010 || stateno = 1012)
+trigger2 = animelem = 6 , = 20
+trigger2 = P2bodydist y = [-1350-floor(6*(EnemyNear(floor(fvar(36))),vel Y)+(6*(6+1)/2)*fvar(30)),-150-floor(6*(EnemyNear(floor(fvar(36))),vel Y)+(6*(6+1)/2)*fvar(30))]
+trigger3 = (stateno = 1010 || stateno = 1012)
+trigger3 = animelem = 6 , = 20
+trigger3 = var(7) >= 555
+trigger3 = p2statetype = A
+
+[State 3,AI]
+type = ChangeState
+value = 1090
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(6)= 0
+triggerall = var(59) = 2
+triggerall = NumHelper(1051) = 0
+triggerall = p2stateno != [120,159]
+triggerall = roundstate = 2 && !IsHelper && p2statetype != L
+triggerall = p2movetype = H
+triggerall = statetype != A
+triggerall = power >= 2000
+trigger1 = p2statetype = A
+trigger1 = stateno = 1010
+trigger1 = animelem = 6 , = 40
+trigger2 = p2statetype = A
+trigger2 = stateno = 1012
+trigger2 = animelem = 6 , = 40
+trigger3 = stateno = 1031
+trigger3 = movehit
+trigger3 = time = [122,130]
+trigger4 = p2stateno = 2020
+trigger4 = ctrl
+trigger5 = p2bodydist x > 180
+trigger5 = ctrl
+
+[State 3,AI]
+type = ChangeState
+value = 2040
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = power >= 3000
+triggerall = roundstate = 2 && !IsHelper
+trigger1 = stateno = 1031
+trigger1 = movehit
+trigger1 = time = [118,121]
+trigger2 = stateno = 1082
+trigger2 = P2movetype = H
+trigger2 = p2stateno != [120,159]
+trigger2 = time = 36
+
+[State 3,AI]
+type = SelfState
+value = 1010
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = P2bodydist X = [50+floor(6*(fvar(31))),300+floor(6*(fvar(31)))]
+triggerall = ctrl && statetype != A
+triggerall = p2movetype = H
+triggerall = prevstateno != [5000,5200]
+trigger1 = P2stateno = [1025,1028]
+trigger1 = FrontEdgeDist > 150
+
+[State 3,AI]
+type = ChangeState
+value = 1090
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(6)= 0
+triggerall = var(59) = 2
+triggerall = NumHelper(1051) = 0
+triggerall = p2stateno != [120,159]
+triggerall = power >= 2000 && power < 3000
+triggerall = random <= var(59)*100
+triggerall = roundstate = 2 && !IsHelper && p2statetype != L
+triggerall = p2movetype = H
+triggerall = statetype != A
+trigger1 = p2statetype = A
+trigger1 = stateno = 1010
+trigger1 = animelem = 6 , = 40
+trigger2 = p2statetype = A
+trigger2 = stateno = 1012
+trigger2 = animelem = 6 , = 40
+trigger3 = stateno = 1031
+trigger3 = movehit
+trigger3 = animelem = 24
+
+[State -3,vj]
+type = ChangeState
+value = 1030
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+Triggerall = alive
+TriggerAll = EnemyNear(floor(fvar(36))),NumProj <=0
+triggerall = var(59) = 2
+TriggerAll = roundstate = 2 && !IsHelper
+TriggerAll = StateType != A
+TriggerAll = P2StateType != L
+TriggerAll = P2bodydist X = [15+floor(6*(fvar(31))),60+floor(6*(fvar(31)))]
+TriggerAll = P2bodydist y = [-65-floor(6*(EnemyNear(floor(fvar(36))),vel Y)+(6*(6+1)/2)*fvar(30)),0-floor(6*(EnemyNear(floor(fvar(36))),vel Y)+(6*(6+1)/2)*fvar(30))]
+TriggerAll = inguarddist
+TriggerAll = Ctrl || stateno = 19 || stateno = 20 || stateno = 21 || (stateno = 52 && Time >= 3) || stateno = 100
+TriggerAll = EnemyNear(floor(fvar(36))),HitDefAttr = SAC,NA,SA,HA,NP,SP,HP
+Trigger1 = Var(59)
+Trigger1 = Random <= Var(59)*80
+Trigger2 = Var(59)
+Trigger2 = Random <= (10-Var(59))*80
+
+[State AI]
+Type = ChangeState
+Value = 120
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+TriggerAll = NumHelPer(35000) > 0
+TriggerAll = NumHelPer(35001) > 0
+triggerall = var(59) = -1234
+TriggerAll = Var(6) = 0
+TriggerAll = StateType = A
+TriggerAll = Ctrl
+TriggerAll = P2StateNo != HelPer(35000),Var(6)
+TriggerAll = P2StateNo != HelPer(35001),Var(6)
+TriggerAll = HelPer(35000),Var(2)=0
+TriggerAll = IfElse(Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0,(Abs(P2Dist X) <= 60),1)
+Trigger1 = InGuardDist || (Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0 && P2MoveType = A)
+Trigger1 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger2 = InGuardDist || Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0
+Trigger2 = Enemy,NumProj > 0
+Trigger3 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger3 = P2BodyDist X < 0
+Trigger4 = EnemyNear(floor(fvar(36))),Vel X > 0
+Trigger4 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger5 = InGuardDist
+Trigger5 = Helper(35000),Var(53)
+
+[State AI]
+Type = ChangeState
+Value = 120
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+TriggerAll = NumHelPer(35000) > 0
+TriggerAll = NumHelPer(35001) > 0
+triggerall = var(59)
+TriggerAll = Var(6) = 0
+TriggerAll = StateType != A
+TriggerAll = Ctrl || stateno = 19 || stateno = 20 || stateno = 21 || (stateno = 52 && Time >= 3) || stateno = 100
+TriggerAll = Helper(35000),Var(2)=0
+TriggerAll = IfElse(Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0,(Abs(P2Dist X) <= 60),1)
+Trigger1 = InGuardDist || (Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0 && P2MoveType = A)
+Trigger1 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger2 = InGuardDist || Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0
+Trigger2 = Enemy,NumProj > 3
+Trigger3 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger3 = P2BodyDist X < 0
+Trigger4 = EnemyNear(floor(fvar(36))),Vel X > 0
+Trigger4 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger5 = InGuardDist
+Trigger5 = Helper(35000),Var(53)
+
+[State -3,vj]
+type = ChangeState
+value = 1030
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+TriggerAll = EnemyNear(floor(fvar(36))),NumProj <=0
+triggerall = var(59) = 2
+TriggerAll = StateType != A
+TriggerAll = P2bodydist X = [15+floor(6*(fvar(31))),60+floor(6*(fvar(31)))]
+TriggerAll = stateno = 200 || stateno = 230 || (stateno = 210&&time > 15) || (stateno = 240 && time >15)
+TriggerAll = EnemyNear(floor(fvar(36))),HitDefAttr = SCA,AA ,AP ,AT
+TriggerAll = P2movetype = A
+Trigger1 = Random <= Var(59)*80
+
+[State -3,vj]
+type = ChangeState
+value = 1085
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+TriggerAll = Random <= Var(59)*80
+TriggerAll = StateType != A
+TriggerAll = P2bodydist X = [-15+floor(6*(fvar(31))),60+floor(6*(fvar(31)))]
+TriggerAll = stateno = 200 || stateno = 230 || (stateno = 210&&time > 15) || (stateno = 240 && time >15)
+TriggerAll = InGuardDist
+Trigger1 = EnemyNear(floor(fvar(36))),HitDefAttr = SCA,AP,ST,HT
+Trigger2 = EnemyNear(floor(fvar(36))),NumProj > 0
+
+[State 3,AI]
+type = ChangeState
+value = 1070
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = NumHelper(1071) = 0
+triggerall = power >= 3000
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x >= 150
+trigger1 = p2statetype = L
+
+[State 3,AI]
+type = ChangeState
+value = 1061
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = random <= 500
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [80,180]
+triggerall = p2stateno != [5050,5122]
+trigger1 = p2movetype = A
+trigger2 = p2statetype = A
+trigger2 = p2movetype = A
+
+[State 3,AI]
+type = ChangeState
+value = 1061
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = random <= 100*var(59)
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist X =[-20,20]
+trigger1 = p2statetype = L
+trigger2 = p2stateno = 5120
+
+[State 3,AI]
+type = ChangeState
+value = 1030
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = alive
+TriggerAll = EnemyNear(floor(fvar(36))),NumProj <=0
+triggerall = var(59) = 2
+triggerall = random <= 100*var(59)
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [20,55]
+triggerall = p2stateno != [5050,5122]
+trigger1 = EnemyNear(floor(fvar(36))),HitDefAttr = SCA,AA || EnemyNear(floor(fvar(36))),HitDefAttr = SAC,NA,SA,HA,NP,SP,HP
+
+[State 3,AI]
+type = ChangeState
+value = 2055
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = (p2stateno != 2020 && p2stateno != 2030)
+triggerall = p2statetype = A
+triggerall = p2movetype = H
+triggerall = statetype != A
+triggerall = power >= 1000
+triggerall = !inguarddist
+triggerall = p2stateno != 4556
+triggerall = frontedgebodydist > 100
+Trigger1 = ctrl && Random = [0,499]
+triggerall = P2BodyDist X = [0+floor(6*(fvar(31))),100+floor(6*(fvar(31)))]
+triggerall = P2BodyDist Y = [-200-floor(6*(EnemyNear(floor(fvar(36))),vel Y)+(6*(6+1)/2)*fvar(30)),-50-floor(6*(EnemyNear(floor(fvar(36))),vel Y)+(6*(6+1)/2)*fvar(30))]
+
+[State 3,AI]
+type = ChangeState
+value = 1085
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+Triggerall = statetype !=A
+triggerall = random <= 100*var(59)
+triggerall = p2bodydist x <= 115
+trigger1 = ctrl && EnemyNear(floor(fvar(36))),NumProj && statetype != A && random = [20,300]
+trigger2 = inguarddist = [0,120]
+trigger2 = ctrl && EnemyNear(floor(fvar(36))),NumProj && statetype != A
+
+[State -3, LW]
+type = ChangeState
+value = 1085
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+Triggerall = StateType != A
+Triggerall = roundstate = 2 && !IsHelper
+Triggerall = InGuardDist
+triggerall = P2StateType != L
+Triggerall = P2BodyDist X = [120,200]
+triggerall = ctrl || stateno = 20|| stateno = 21|| stateno = 22|| stateno = 100
+Triggerall = Random < var(59)*100
+Trigger1 = EnemyNear(floor(fvar(36))),NumProj >= 1
+Trigger2 = EnemyNear(floor(fvar(36))),HitDefAttr = ,AP
+
+[State 3,AI]
+type = ChangeState
+value = 1061
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = random <= 100*var(59)
+triggerall = p2bodydist x = [200,300]
+trigger1 = ctrl && EnemyNear(floor(fvar(36))),NumProj && statetype != A && random = [200,300]
+trigger2 = inguarddist = [200,300]
+trigger2 = ctrl && EnemyNear(floor(fvar(36))),NumProj && statetype != A
+
+[State 3,AI]
+type = ChangeState
+value = 1080
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = (p2stateno != 2020 && p2stateno != 2030)
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+Triggerall = ctrl
+triggerall = random <= 100*var(59)
+trigger1 = p2statetype = L
+trigger1 = p2bodydist X >=200
+
+[State 3,AI]
+type = ChangeState
+value = 1082
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = var(6) = 0
+triggerall = (p2stateno != 2020 && p2stateno != 2030)
+triggerall = roundstate = 2 && !IsHelper
+triggerall = statetype != A
+triggerall = ctrl
+triggerall = random <= 100*var(59)
+trigger1 = p2statetype != L
+trigger1 = p2movetype = H && p2statetype !=A
+trigger1 = p2stateno !=[120,159]
+trigger1 = p2bodydist X >=170
+trigger2 = p2movetype = H && p2statetype = A
+trigger2 = p2stateno !=[120,159]
+trigger2 = p2bodydist X >=120
+trigger2 = p2stateno !=[1025,1028]
+
+[State 3,AI]
+type = ChangeState
+value = 1090
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(6) = 0
+triggerall = var(59) = 2
+triggerall = random <= 999
+triggerall = power >= 2000
+triggerall = NumHelper(1051) = 0
+triggerall = NumProjID(1000) = 0
+triggerall = (p2stateno !=2020 && p2stateno !=2030)
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2statetype != L
+triggerall = prevstateno != 2040
+triggerall = ctrl && statetype != A
+triggerall = p2stateno != [120,159]
+triggerall = p2stateno != 4556
+trigger1 = P2BodyDist X = [150+floor(6*(fvar(31))),300+floor(6*(fvar(31)))]
+trigger1 = p2movetype = A
+trigger2 = p2movetype = H
+trigger2 = p2statetype = A
+trigger2 = P2BodyDist X = [0+floor(6*(fvar(31))),300+floor(6*(fvar(31)))]
+trigger2 = P2BodyDist Y = [-200-floor(6*(EnemyNear(floor(fvar(36))),vel Y)+(6*(6+1)/2)*fvar(30)),-50-floor(6*(EnemyNear(floor(fvar(36))),vel Y)+(6*(6+1)/2)*fvar(30))]
+
+[State 3,AI]
+type = ChangeState
+value = 1020
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(6)= 0
+triggerall = var(59) = 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2statetype != L
+triggerall = statetype != A
+triggerall = !inguarddist
+triggerall = (p2stateno != 2020 && p2stateno != 2030)
+triggerall = Random = [500,999]
+trigger1 = p2statetype = A && ctrl
+trigger1 = p2movetype != H
+trigger1 = p2bodydist X >=150
+trigger2 = stateno = 210 || stateno = 240
+trigger2 = projhittime(1000) >= 2 && projhittime(1000) <= 10
+trigger2 = p2statetype = A
+
+[State 3,AI]
+type = ChangeState
+value = 1020
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(6)= 0
+triggerall = var(59) = 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2statetype != L
+triggerall = statetype != A && ctrl
+triggerall = P2BodyDist X = [-20+floor(6*(fvar(31))),99+floor(6*(fvar(31)))]
+trigger1 = p2stateno = 1028
+trigger2 = p2movetype = H && p2statetype = A
+trigger2 = (p2stateno != 2020 && p2stateno != 2030)
+trigger2 = p2stateno != 4556
+
+[State 3,AI]
+type = ChangeState
+value = 210
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = random <= var(59)*100
+triggerall = (p2stateno = 2020 || p2stateno = 2030)
+triggerall = p2movetype = H
+triggerall = ctrl && statetype != A
+trigger1 = p2bodydist X = [30,55]
+
+[State 3,AI]
+type = ChangeState
+value = 1010
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = random <= var(59)*100
+triggerall = (p2stateno = 2020 || p2stateno = 2030)
+triggerall = ctrl && statetype != A
+trigger1 = p2bodydist X <=125
+
+[State 3,AI]
+type = ChangeState
+value = 1012
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = random <= var(59)*100
+triggerall = (p2stateno = 2020 || p2stateno = 2030)
+triggerall = ctrl && statetype != A
+trigger1 = p2bodydist X > 125
+
+[State 3,AI]
+type = ChangeState
+value = 300
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) > 1
+triggerall = (p2stateno != 2020 && p2stateno != 2030)
+triggerall = statetype != A
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2statetype !=A && p2movetype !=H
+triggerall = p2movetype !=A && p2statetype != L
+trigger1 = p2stateno = [120,159]
+trigger1 = Ctrl || stateno = 19 || stateno = 20 || stateno = 21 || (stateno = 52 && Time >= 3) || stateno = 100 || stateno = 101
+trigger2 = Ctrl || stateno = 19 || stateno = 20 || stateno = 21 || (stateno = 52 && Time >= 3) || stateno = 100 || stateno = 101
+trigger2 = TeamMode = simul
+trigger2 = numpartner
+trigger2 = partner,alive
+trigger3 = p2stateno = [120,159]
+trigger3 = stateno = 1085
+trigger3 = animelem = 5,[0,6]
+triggerall = p2bodydist X =[30,70]
+triggerall = random <= var(59)*100
+
+[State -3]
+Type = ChangeState
+Value = 1030
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = alive
+TriggerAll = EnemyNear(floor(fvar(36))),NumProj <=0
+TriggerAll = StateType != A
+triggerall = ctrl || stateno = 20|| stateno = 21|| stateno = 22|| stateno = 100|| stateno = 101
+TriggerAll = IfElse(Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0,(Abs(P2Dist X) <= 60),1)
+triggerall = Random<=var(59)*80
+triggerall = p2bodydist X =[-100,100]
+triggerall = p2movetype != H
+triggerall = p2statetype != L
+Trigger1 = InGuardDist || (Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0 && P2MoveType = A)
+Trigger1 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA || EnemyNear(floor(fvar(36))),HitDefAttr = SAC,NA,SA,HA,NP,SP,HP
+Trigger2 = InGuardDist || Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0
+Trigger3 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA || EnemyNear(floor(fvar(36))),HitDefAttr = SAC,NA,SA,HA,NP,SP,HP
+Trigger3 = P2BodyDist X < 0
+Trigger4 = EnemyNear(floor(fvar(36))),Vel X > 0
+Trigger4 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA || EnemyNear(floor(fvar(36))),HitDefAttr = SAC,NA,SA,HA,NP,SP,HP
+Trigger5 = Enemy,NumHelper
+Trigger5 = InGuardDist
+
+[State -3]
+Type = ChangeState
+Value = 1030
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = alive
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+TriggerAll = StateType != A
+TriggerAll = Ctrl
+TriggerAll = EnemyNear(floor(fvar(36))),NumProj <=0
+TriggerAll = IfElse(Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0,(Abs(P2Dist X) <= 60),1)
+triggerall = Random<=var(59)*80
+triggerall = p2bodydist X =[-100,100]
+triggerall = p2movetype != H
+triggerall = p2statetype != L
+Trigger1 = InGuardDist || (Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0 && P2MoveType = A)
+Trigger1 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA || EnemyNear(floor(fvar(36))),HitDefAttr = SAC,NA,SA,HA,NP,SP,HP
+Trigger2 = InGuardDist || Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0
+Trigger3 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA || EnemyNear(floor(fvar(36))),HitDefAttr = SAC,NA,SA,HA,NP,SP,HP
+Trigger3 = P2BodyDist X < 0
+Trigger4 = EnemyNear(floor(fvar(36))),Vel X > 0
+Trigger4 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA || EnemyNear(floor(fvar(36))),HitDefAttr = SAC,NA,SA,HA,NP,SP,HP
+Trigger5 = Enemy,NumHelper
+Trigger5 = InGuardDist
+
+[State -3]
+Type = ChangeState
+Value = 1085
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+TriggerAll = StateType != A
+triggerall = ctrl || stateno = 20|| stateno = 21|| stateno = 22|| stateno = 100
+TriggerAll = IfElse(Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0,(Abs(P2Dist X) <= 60),1)
+triggerall = Random<=var(59)*100
+Trigger1 = InGuardDist || (Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0 && P2MoveType = A)
+Trigger1 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger2 = InGuardDist || Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0
+Trigger2 = Enemy,NumProj > 0
+Trigger3 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger3 = P2BodyDist X < 0
+Trigger4 = EnemyNear(floor(fvar(36))),Vel X > 0
+Trigger4 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+
+[State -3]
+Type = ChangeState
+Value = 1085
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+TriggerAll = StateType != A
+TriggerAll = Ctrl
+TriggerAll = IfElse(Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0,(Abs(P2Dist X) <= 60),1)
+triggerall = Random<=var(59)*100
+Trigger1 = InGuardDist || (Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0 && P2MoveType = A)
+Trigger1 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger2 = InGuardDist || Facing*(EnemyNear(floor(fvar(36))),Facing)*P2Dist X >0
+Trigger2 = Enemy,NumProj > 0
+Trigger3 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+Trigger3 = P2BodyDist X < 0
+Trigger4 = EnemyNear(floor(fvar(36))),Vel X > 0
+Trigger4 = EnemyNear(floor(fvar(36))),HitDefAttr = SC,NA,SA,HA,NP,SP,HP || EnemyNear(floor(fvar(36))),HitDefAttr = A,NA,SA,HA,NP,SP,HP
+
+[State 3,AI]
+type = ChangeState
+value = 215
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall != var(6)= 0
+triggerall = random <= 150
+triggerall = ctrl && statetype != A
+triggerall = p2stateno != [5050,5122]
+triggerall = p2statetype != A
+triggerall = p2bodydist x = [0,32]
+trigger1 = ctrl
+
+[State 3,AI]
+type = ChangeState
+value = 230
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall != var(6)= 0
+triggerall = p2statetype != A
+triggerall = movecontact
+triggerall = p2bodydist x = [0,130]
+triggerall = random <= 999
+trigger1 = stateno = 215
+trigger1 = time = 6
+
+[State 3,AI]
+type = ChangeState
+value = 300
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = p2statetype != A
+triggerall = movecontact
+triggerall = p2bodydist x = [0,77]
+triggerall = random <= 999
+triggerall = p2stateno = [120,159]
+trigger1 = stateno = 230
+trigger1 = time = 6
+
+[State 3,AI]
+type = ChangeState
+value = 230
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = p2statetype != A
+triggerall = movehit
+triggerall = p2bodydist x = [0,80]
+triggerall = random <= 999
+trigger1 = stateno = 230
+trigger1 = time = 6
+
+[State -3, AI]
+type = ChangeState
+value = 230
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = P2BodyDist X > 50
+triggerall = statetype != A
+triggerall = ctrl || stateno = 20|| stateno = 21|| stateno = 22|| stateno = 101
+triggerall = P2BodyDist X = [50+floor(7*(fvar(31))),99+floor(7*(fvar(31)))]
+trigger1 = P2statetype != L
+trigger1 = P2movetype != H
+trigger1 = P2statetype != A
+trigger1 = !InGuardDist
+trigger1 = Random <= var(59)*100
+
+[State 3,AI]
+type = SelfState
+value = 240
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = p2statetype != A
+triggerall = movecontact
+triggerall = p2bodydist x = [70,140]
+trigger1 = stateno = 230
+trigger1 = time = 6
+
+[State 3,AI]
+type = ChangeState
+value = 240
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = roundstate = 2 && !IsHelper
+triggerall = var(59) = 2
+triggerall = p2stateno != [120,159]
+triggerall = p2bodydist x = [100,150]
+triggerall = random <= 500 && p2Movetype != H
+trigger1 = frontedgebodydist = [100,150]
+trigger1 = ctrl && statetype != A
+
+[State 3,AI]
+type = ChangeState
+value = 1040
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = var(6) = 0
+triggerall = p2statetype != A
+triggerall = statetype != A
+triggerall = power >= 1000 && power < 3000
+triggerall = p2movetype = A
+triggerall = p2bodydist x = [90,200]
+triggerall = random <= 999
+trigger1 = ctrl && EnemyNear(fvar(36)),animtime < -7
+
+[State 3,AI]
+type = ChangeState
+value = 1040
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = var(6) = 0
+triggerall = p2statetype != A
+triggerall = power >= 1000
+triggerall = movehit
+triggerall = p2bodydist x = [90,300]
+triggerall = random <= 999
+trigger1 = stateno = 230
+trigger1 = time = 6
+
+[State 3,AI]
+type = ChangeState
+value = 1040
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(6) = 0
+triggerall = var(59) = 2
+;triggerall = p2life > 50
+triggerall = power >= 1000 && power < 3000
+triggerall = (p2stateno = 2020 || p2stateno = 2030)
+triggerall = random <= 999
+trigger1 = ctrl && statetype !=A
+
+[State 3,AI]
+type = ChangeState
+value = 1030
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = alive
+TriggerAll = roundstate = 2 && !IsHelper
+triggerall = EnemyNear(floor(fvar(36))),NumProj <=0
+triggerall = var(59) = 2
+triggerall = random <= 390
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2statetype != L
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [0,100]
+triggerall = p2movetype = A
+trigger1 = ctrl
+trigger1 = !EnemyNear(floor(fvar(36))),HitDefAttr = SAC,NA,SA,HA,NP,SP,HP
+
+[State 3,AI]
+type = ChangeState
+value = 300
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2bodydist x = [0,60]
+trigger1 = (stateno = 150 || stateno = 151) && power >= 500
+
+[State 3,AI]
+type = ChangeState
+value = 101
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2movetype != A
+triggerall = p2bodydist x = [100,300]
+triggerall = random <= 10
+trigger1 = statetype != A
+trigger1 = ctrl
+
+[State 3,AI]
+type = ChangeState
+value = 240
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = p2stateno != [5050,5122]
+triggerall = random <= 240
+triggerall = ctrl && statetype != A
+triggerall = statetype != A
+triggerall = p2statetype != A
+triggerall = p2bodydist x = [155,170]
+trigger1 = ctrl
+
+[State 3,AI]
+type = ChangeState
+value = 105
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = BackEdgeBodyDist >= 10
+triggerall = FrontEdgeBodyDist >= 10
+triggerall = p2stateno = [5080,5121]
+triggerall = random <= 200
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [0,150]
+triggerall = p2statetype != A
+triggerall = statetype = S
+trigger1 = ctrl
+
+[State 3,AI]
+type = ChangeState
+value = 2055
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = roundstate = 2 && !IsHelper
+triggerall = random <= 900
+triggerall = power >= 1000
+triggerall = ctrl && statetype != A
+triggerall = p2stateno = 1028
+triggerall = p2bodydist x = [0,300]
+trigger1 = ctrl
+
+[State 3,AI]
+type = ChangeState
+value = 1050
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = NumHelper(1051) = 0
+triggerall = power >= 1000
+triggerall = enemynear(fvar(36)),life > fvar(34)
+triggerall = random <= 500
+triggerall = roundstate = 2 && !IsHelper
+triggerall = movehit
+trigger1 = stateno = 1031
+trigger1 = movehit
+trigger1 = animelem = 23
+
+[State 3,AI]
+type = ChangeState
+value = 1010
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = var(6) = 1
+triggerall = random <= var(59)*100
+triggerall = p2statetype != L
+triggerall = ctrl && statetype != A
+trigger1 = p2movetype = H
+trigger1 = p2bodydist x = [60,150]
+
+[State 3,AI]
+type = ChangeState
+value = 1012
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59) = 2
+triggerall = var(6) = 1
+triggerall = random <= var(59)*100
+triggerall = p2statetype != L
+triggerall = ctrl && statetype != A
+trigger1 = p2movetype = H
+trigger1 = p2bodydist x >= 151
+
+[State -3]
+type = ChangeState
+value = 52001
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59)
+triggerall = Vel Y > 0
+triggerall = Pos Y < -10
+triggerall = Pos Y = [-120,-99]
+triggerall = alive
+trigger1 = stateno = 5050
+
+[State -3, UKEMI]
+type = ChangeState
+value = 52000
+IgnoreHitPause = 1
+TriggerAll = HitPauseTime = 0
+triggerall = var(59)
+triggerall = alive
+triggerall = pos y > -30
+triggerall = vel y > 0 && vel y < 15
+trigger1 = stateno = 5050 || stateno = 5071
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------LV  1-------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+[State AI]
+type = ChangeState
+value = 1061
+triggerall = var(59) = 1
+triggerall = random <= 200
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2statetype = A
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [0,70]
+triggerall = p2stateno != [5050,5122]
+triggerall = statetype = S
+trigger1 = ctrl && statetype != A
+trigger1 = p2movetype != H
+trigger2 = movehit
+
+[State AI]
+type = ChangeState
+value = 215
+triggerall = var(59) = 1
+triggerall != var(6)= 0
+triggerall = random <= 150
+triggerall = ctrl && statetype != A
+triggerall = p2stateno != [5050,5122]
+triggerall = p2statetype != A
+triggerall = p2bodydist x = [0,32]
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 230
+triggerall = var(59) = 1
+triggerall != var(6)= 0
+triggerall = p2statetype != A
+triggerall = movecontact
+triggerall = p2bodydist x = [0,130]
+triggerall = random <= 999
+trigger1 = stateno = 215
+trigger1 = time = 6
+
+[State AI]
+type = ChangeState
+value = 230
+triggerall = var(59) = 1
+triggerall = p2statetype != A
+triggerall = movecontact
+triggerall = p2bodydist x = [0,89]
+triggerall = random <= 999
+trigger1 = stateno = 230
+trigger1 = time = 6
+
+[State AI]
+type = ChangeState
+value = 240
+triggerall = var(59) = 1
+triggerall = p2statetype != A
+triggerall = movecontact
+triggerall = p2bodydist x = [90,300]
+triggerall = random <= 500
+trigger1 = stateno = 230
+trigger1 = time = 6
+
+[State AI]
+type = ChangeState
+value = 1040
+triggerall = var(59) = 1
+triggerall = p2statetype != A
+triggerall = power >= 1000
+triggerall = movecontact
+triggerall = p2bodydist x = [90,300]
+triggerall = random <= 999
+trigger1 = stateno = 230
+trigger1 = time = 6
+
+[State AI]
+type = ChangeState
+value = 2040
+triggerall = var(59) = 1
+triggerall = random <= 999
+triggerall = power >= 3000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2statetype != A
+triggerall = p2statetype != L
+triggerall = p2stateno != [5050,5122]
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [0,300]
+triggerall = p2movetype = A
+triggerall = statetype = S
+trigger1 = ctrl && EnemyNear(fvar(36)),Numhelper && statetype != A && random = [10,300]
+trigger1 = p2movetype != H
+
+[State AI]
+type = ChangeState
+value = 1061
+triggerall = var(59) = 1
+triggerall = roundstate = 2 && !IsHelper
+triggerall = random <= 300
+triggerall = p2bodydist x = [100,300]
+trigger1 = ctrl && EnemyNear(fvar(36)),NumProj && statetype != A && random = [20,300]
+trigger2 = inguarddist = [0,120]
+trigger2 = ctrl && EnemyNear(fvar(36)),NumProj && statetype != A
+
+[State AI]
+type = ChangeState
+value = 1085
+triggerall = var(59) = 1
+triggerall = roundstate = 2 && !IsHelper
+triggerall = random <= 790
+triggerall = p2bodydist x = [70,300]
+trigger1 = ctrl && EnemyNear(fvar(36)),NumProj && statetype != A && random = [20,300]
+trigger2 = inguarddist = [0,120]
+trigger2 = ctrl && EnemyNear(fvar(36)),NumProj && statetype != A
+
+[State AI]
+type = ChangeState
+value = 1000
+triggerall = var(59) = 1
+triggerall = NumHelper(1071) = 0
+triggerall = random <= 230
+triggerall != var(6) = 0
+triggerall = p2stateno != [5050,5122]
+triggerall = ctrl && statetype != A
+triggerall = statetype != A
+triggerall = p2statetype != A
+triggerall = p2bodydist x = [200,300]
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1003
+triggerall = var(59) = 1
+triggerall = NumHelper(1071) = 0
+triggerall != var(6) = 0
+triggerall = random <= 200
+triggerall = p2stateno != [5050,5122]
+triggerall = ctrl && statetype != A
+triggerall = statetype != A
+triggerall = p2statetype != A
+triggerall = p2bodydist x = [200,300]
+trigger1 = ctrl
+
+[State -1]
+type = ChangeState
+value = 1061
+triggerall = var(59) = 1
+triggerall = var(6) = 1
+triggerall = roundstate = 2 && !IsHelper
+triggerall = random <= 300
+triggerall = p2bodydist x = [120,300]
+triggerall = statetype != A
+trigger1 = statetype != A
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1010
+triggerall = var(59) = 1
+triggerall = random <= 150
+triggerall = p2stateno != [5050,5122]
+triggerall = ctrl && statetype != A
+triggerall = statetype != A
+triggerall = p2statetype != A
+triggerall = p2bodydist x = [50,150]
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1012
+triggerall = var(59) = 1
+triggerall = p2stateno != [5050,5122]
+triggerall = random <= 150
+triggerall = ctrl && statetype != A
+triggerall = statetype != A
+triggerall = p2statetype != A
+triggerall = p2bodydist x = [150,300]
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1030
+triggerall = var(59) = 1
+triggerall = random <= 390
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2statetype != A
+triggerall = p2statetype != L
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [0,100]
+triggerall = p2movetype = A
+triggerall = statetype = S
+trigger1 = ctrl
+trigger1 = p2movetype != H
+
+[State AI]
+type = ChangeState
+value = 300
+triggerall = var(59) = 1
+triggerall = roundstate = 2 && !IsHelper
+trigger1 = (stateno = 150 || stateno = 151) && power >= 1000
+trigger1 = random <= 100
+
+[State AI]
+type = ChangeState
+value = 101
+triggerall = var(59) = 1
+triggerall = p2movetype != A
+triggerall = p2bodydist x = [100,300]
+triggerall = random <= 10
+trigger1 = statetype != A
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 210
+triggerall = var(59) = 1
+triggerall = p2stateno != [5050,5122]
+triggerall = random <= 240
+triggerall = ctrl && statetype != A
+triggerall = statetype != A
+triggerall = p2statetype != A
+triggerall = p2bodydist x = [100,130]
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 240
+triggerall = var(59) = 1
+triggerall = p2stateno != [5050,5122]
+triggerall = random <= 240
+triggerall = ctrl && statetype != A
+triggerall = statetype != A
+triggerall = p2statetype != A
+triggerall = p2bodydist x = [155,170]
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1090
+triggerall = var(59) = 1
+triggerall = random <= 999
+triggerall = power >= 2000
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2statetype != A
+triggerall = p2statetype != L
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [50,300]
+triggerall = p2movetype = A
+triggerall = statetype = S
+trigger1 = ctrl
+trigger1 = p2movetype != H
+
+[State AI]
+type = ChangeState
+value = 1090
+triggerall = var(59) = 1
+triggerall = power >= 2000
+triggerall = random <= 550
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2statetype != A
+triggerall = p2statetype != L
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [100,300]
+triggerall = p2movetype = A
+triggerall = statetype = S
+trigger1 = ctrl
+trigger1 = p2movetype != H
+
+[State AI]
+type = ChangeState
+value = 105
+triggerall = var(59) = 1
+triggerall = BackEdgeBodyDist >= 10
+triggerall = FrontEdgeBodyDist >= 10
+triggerall = p2stateno = [5080,5121]
+triggerall = random <= 200
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [0,150]
+triggerall = p2statetype != A
+triggerall = statetype = S
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1020
+triggerall = var(59) = 1
+triggerall = p2stateno != [5080,5121]
+triggerall = random <= 150
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [0,150]
+triggerall = p2statetype != A
+triggerall = statetype = S
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1020
+triggerall = var(59) = 1
+triggerall = random <= 350
+triggerall = roundstate = 2 && !IsHelper
+triggerall = p2statetype = A
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [180,300]
+triggerall = statetype = S
+trigger1 = ctrl && statetype != A
+trigger1 = p2movetype != H
+trigger2 = movehit
+
+[State AI]
+type = ChangeState
+value = 800
+triggerall = var(59) = 1
+triggerall = random <= 170
+triggerall = ctrl && statetype != A
+triggerall = p2stateno != [5050,5122]
+triggerall = p2statetype != A
+triggerall = p2bodydist x = [0,15]
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 2040
+triggerall = var(59) = 1
+triggerall = random <= 999
+triggerall = power >= 3000
+triggerall = p2stateno = 2020
+triggerall = ctrl && statetype != A
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1015
+triggerall = var(59) = 1
+triggerall = random <= 800
+triggerall = power <= 999
+triggerall = ctrl && statetype != A
+triggerall = p2stateno = 1028
+triggerall = p2bodydist x = [0,300]
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 2055
+triggerall = var(59) = 1
+triggerall = random <= 800
+triggerall = power >= 1000
+triggerall = ctrl && statetype != A
+triggerall = p2stateno = 1028
+triggerall = p2bodydist x = [0,300]
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1082
+triggerall = var(59) = 1
+triggerall = p2stateno != [5050,5122]
+triggerall = random <= 100
+triggerall = Numprojid(1000) = 0
+triggerall = p2stateno != 1028
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [100,300]
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1070
+triggerall = var(59) = 1
+triggerall = NumHelper(1071) = 0
+triggerall = random <= 50
+triggerall = power >= 3000
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [0,300]
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1050
+triggerall = var(59) = 1
+triggerall = random <= 30
+triggerall = NumHelper(1051) = 0
+triggerall = power >= 1000
+triggerall = p2stateno != [5080,5121]
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+triggerall = p2statetype != A
+triggerall = statetype = S
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 2050
+triggerall = var(59) = 1
+triggerall != var(6)= 0
+triggerall = power >= 2000
+triggerall = p2stateno != [5080,5121]
+triggerall = random <= 110
+triggerall = roundstate = 2 && !IsHelper
+triggerall = ctrl && statetype != A
+triggerall = p2bodydist x = [0,300]
+triggerall = p2statetype != A
+triggerall = statetype = S
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1015
+triggerall = var(59) = 1
+triggerall = random <= 320
+triggerall = power <= 3000
+triggerall = p2stateno = 2020
+triggerall = ctrl && statetype != A
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 2055
+triggerall = var(59) = 1
+triggerall = random <= 420
+triggerall = power >= 1000
+triggerall = p2stateno = 2020
+triggerall = ctrl && statetype != A
+trigger1 = ctrl
+
+[State AI]
+type = ChangeState
+value = 1061
+triggerall = var(59) = 1
+triggerall = random <= 100
+triggerall = ctrl && statetype != A
+triggerall = p2stateno = [5080,5121]
+trigger1 = frontedgedist < 101

@@ -1,0 +1,991 @@
+
+[Data]
+life = 3000		
+power = 5000		
+attack = 100		
+defence = 100		
+fall.defence_up = 50
+liedown.time = 60	
+airjuggle = 15		
+sparkno = 4000		
+guard.sparkno = 4005	
+KO.echo = 0		
+volume = 255		
+IntPersistIndex = 60	
+FloatPersistIndex = 40 
+  				
+;---------------------------------------------------------------------------
+
+[Size]
+xscale           = 1
+yscale           = 1
+ground.back      = 15
+ground.front     = 16
+air.back         = 12
+air.front        = 12
+height           = 60
+attack.dist      = 160
+proj.attack.dist = 90
+proj.doscale     = 0
+head.pos         = 0, -90
+mid.pos          = 0, -60
+shadowoffset     = 0
+draw.offset      = 0,0
+
+;---------------------------------------------------------------------------
+
+[Velocity]
+walk.fwd  = 2.4		
+walk.back = -2.2		
+run.fwd  = 5.3, 0		
+run.back = -4.5,-4.2	   
+jump.neu     = 0,-9         
+jump.back    = -3.6        
+jump.fwd     = 3.7         
+runjump.back = -2.55,-8.1  
+runjump.fwd  = 4.2,-8.7    
+airjump.neu  = 0,-8.1      
+airjump.back = -2.5        
+airjump.fwd  = 2.55     
+
+;---------------------------------------------------------------------------
+
+[Movement]
+airjump.num     = 0
+airjump.height  = 35
+yaccel          = .56
+stand.friction  = .85
+crouch.friction = .82
+
+;---------------------------------------------------------------------------
+; Format:
+; [Statedef STATENO]
+; type = ?      S/C/A/L  stand/crouch/air/liedown
+; movetype = ?  I/A/H    idle/attack/gethit
+; physics = ?   S/C/A/N  stand/crouch/air/none
+; juggle = ?             air juggle points move requires
+;
+; [State STATENO, ?]     ? - any number you choose
+; type = ?
+; ...
+
+;---------------------------------------------------------------------------
+; Lose by Time Over
+; CNS difficulty: basic
+[Statedef 170]
+type = S
+ctrl = 0
+anim = 170
+velset = 0,0
+
+[State 170, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+;---------------------------------------------------------------------------
+; Win state decider
+; CNS difficulty: basic
+[Statedef 180]
+type = S
+
+[State 180,VarRandom]
+type = VarRandom
+trigger1 = 1
+v = 21
+range = 0,5
+
+
+
+;-----------------------------------------| WIN DECIDER BUTTONS
+
+[State 180, 2]
+type = ChangeState
+trigger1 = Time = 0 && command = "hold_x"
+value = 181
+
+[State 180, 3]
+type = ChangeState
+trigger1 = Time = 0 && command = "hold_a"
+value = 182
+
+[State 180, 4]
+type = ChangeState
+trigger1 = Time = 0 && command = "hold_y"
+value = 183
+
+[State 180, 4]
+type = ChangeState
+trigger1 = Time = 0 && command = "hold_b"
+value = 184
+
+[State 180, 4]
+type = ChangeState
+trigger1 = Time = 0 && command = "hold_c"
+value = 185
+
+[State 180, 4]
+type = ChangeState
+trigger1 = Time = 0 && command = "hold_z"
+value = 186
+
+
+;-------------------------------------------
+
+[State 180,]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = var(21) = 0
+value = 181
+
+[State 180,]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = var(21) = 1
+value = 182
+
+[State 180,]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = var(21) = 2
+value = 183
+
+[State 180,]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = var(21) = 3
+value = 184
+
+[State 180,]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = var(21) = 4
+value = 185
+
+[State 180,]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = var(21) = 5
+value = 186
+
+;---------------------------------------------------------------------------
+; Win pose 1
+; CNS difficulty: basic
+[Statedef 181]
+type = S
+ctrl = 0
+anim = 180
+velset = 0,0
+
+[state 181,]
+type = Posadd
+trigger1 = animelem = 2 || animelem = 3 || animelem = 4 || animelem = 5 || animelem = 10 || animelem = 11 || animelem = 12 
+x = 5
+
+[State 2500,*KillDrift]
+type = VelSet
+trigger1 = FrontEdgeDist <= -14
+x = -6
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 2
+trigger1 = Alive
+value = 181,0
+channel = 1
+volume = 255
+
+[State 181, assert]
+type = AssertSpecial
+trigger1 = time = [0,300]
+flag = roundnotover
+
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+; Win pose 2
+; CNS difficulty: basic
+[Statedef 182]
+type = S
+ctrl = 0
+anim = 181
+velset = 0,0
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 8
+trigger1 = Alive
+value = 182,0
+channel = 1
+volume = 255
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 22
+trigger1 = Alive
+value = 182,1
+channel = 1
+volume = 255
+
+[State 181, assert]
+type = AssertSpecial
+trigger1 = time = [0,200]
+flag = roundnotover
+
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+; Win pose 2
+; CNS difficulty: basic
+[Statedef 183]
+type = S
+ctrl = 0
+anim = 182
+velset = 0,0
+
+[state 191,*butterfly]
+type = Explod
+trigger1 = animelem = 7
+anim = 172
+postype = p1
+pos = 2,-78
+removetime = -3
+bindtime = -1
+ID = 172
+sprpriority = 2
+persistent = 1
+ignorehitpause = 1
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 7
+trigger1 = Alive
+value = 183,0
+channel = 1
+volume = 255
+
+[State 181, assert]
+type = AssertSpecial
+trigger1 = time = [0,200]
+flag = roundnotover
+
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+; Win pose 3
+; CNS difficulty: basic
+[Statedef 184]
+type = S
+ctrl = 0
+anim = 183
+velset = 0,0
+
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 12
+trigger1 = Alive
+value = 183,0
+channel = 1
+volume = 255
+
+[State 181, assert]
+type = AssertSpecial
+trigger1 = time = [0,200]
+flag = roundnotover
+
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+; Win pose 4
+; CNS difficulty: basic
+[Statedef 185]
+type = S
+ctrl = 0
+anim = 184
+velset = 0,0
+
+[State 181, assert]
+type = AssertSpecial
+trigger1 = time = [0,200]
+flag = roundnotover
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+; Win pose 5
+; CNS difficulty: basic
+[Statedef 186]
+type = S
+ctrl = 0
+anim = 185
+velset = 0,0
+
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 7
+trigger1 = Alive
+value = 1200,0
+channel = 1
+volume = 255
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 21
+trigger1 = Alive
+value = 100,6
+channel = 1
+volume = 255
+
+[State 181, assert]
+type = AssertSpecial
+trigger1 = time = [0,250]
+flag = roundnotover
+
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+;-------------------------------------------------------------------------------------------------------------------------
+;
+;Intros
+;
+;-------------------------------------------------------------------------------------------------------------------------
+
+; Introduction
+; CNS difficulty: basic
+[Statedef 190]
+type = S
+ctrl = 0
+anim = 0
+velset = 0,0
+
+[State 190,]
+type = ChangeState
+trigger1 = p2name = "Athena"            | p4name = "Athena"
+trigger2 = p2name = "Athena Asamiya"    | p4name = "Athena Asamiya"
+trigger3 = p2name = "Bao"       	| p4name = "Bao"
+trigger4 = p2name = "Momoko" 		| p4name = "Momoko"
+value = 193
+
+[State 190,]
+type = ChangeState
+trigger1 = p2name = "Kensou" 		| p4name = "Kensou"
+trigger2 = p2name = "Sie Kensou"        | p4name = "Sie Kensou" 
+trigger3 = p2name = "Kensou Sie"        | p4name = "Kensou Sie" 
+value = 194
+
+[State 190,]
+type = ChangeState
+trigger1 = p2name = "Kula Diamond" 		 | p4name = "Kula Diamond"
+trigger2 = p2name = "Kula"			 | p4name = "Kula"
+trigger3 = p2name = "Chang"			 | p4name = "Chang"
+trigger4 = p2name = "Chang Koehan"		 | p4name = "Chang Koehan"
+trigger5 = p2name = "Choi"			 | p4name = "Choi"
+trigger6 = p2name = "CHOI BOUNGE" 		 | p4name = "CHOI BOUNGE"
+trigger7 = p2name = "haohmaru" 			 | p4name = "haohmaru"
+trigger8 = p2name = "Mr.Big"			 | p4name = "Mr.Big"
+trigger9 = p2name = "Elisabeth Branctorche" 	 | p4name = "Elisabeth Branctorche"
+trigger10 = p2name = "Akuma"			 | p4name = "Akuma"
+trigger11 = p2name = "Goro Daimon" 	 	 | p4name = "Goro Daimon" 
+trigger12 = p2name = "Daimon" 			 | p4name = "Daimon" 
+trigger13 = p2name = "Ash Crimson" 	 	 | p4name = "Ash Crimson"
+value = 197
+
+[State 190,*IntroVarRandom]
+type = VarRandom
+trigger1 = 1
+v = 22
+range = 0,2
+
+[State 190,*IntroVarRandom]
+type = ChangeState
+trigger1 = Time = 1 && var(22)=0
+value = 191
+
+[State 190,*IntroVarRandom]
+type = ChangeState
+trigger1 = Time = 1 && var(22)=1
+value = 192
+
+[State 190,*IntroVarRandom]
+type = ChangeState
+trigger1 = Time = 1 && var(22)=2
+value = 196
+
+;..........................................................................................................................
+; intro vars
+;..........................................................................................................................
+
+
+[State 190,]
+type = VarSet
+trigger1 = p2name = "Athena"            | p4name = "Athena"
+trigger2 = p2name = "Athena Asamiya"    | p4name = "Athena Asamiya"
+trigger3 = p2name = "Bao"       	| p4name = "Bao"
+trigger4 = p2name = "Momoko" 		| p4name = "Momoko"
+var(22) = 2
+
+;...............................................................................................
+
+[State 190,9]
+type = VarSet
+trigger1 = p2name = "Kensou" 		| p4name = "Kensou"
+trigger2 = p2name = "Sie Kensou"        | p4name = "Sie Kensou" 
+trigger3 = p2name = "Kensou Sie"        | p4name = "Kensou Sie" 
+var(22) = 3
+
+;...............................................................................................
+
+[State 190,9]
+type = VarSet
+trigger1 = p2name = "Kula Diamond" 		 | p4name = "Kula Diamond"
+trigger2 = p2name = "Kula"			 | p4name = "Kula"
+trigger3 = p2name = "Chang"			 | p4name = "Chang"
+trigger4 = p2name = "Chang Koehan"		 | p4name = "Chang Koehan"
+trigger5 = p2name = "Choi"			 | p4name = "Choi"
+trigger6 = p2name = "CHOI BOUNGE" 		 | p4name = "CHOI BOUNGE"
+trigger7 = p2name = "haohmaru" 			 | p4name = "haohmaru"
+trigger8 = p2name = "Mr.Big"			 | p4name = "Mr.Big"
+trigger9 = p2name = "Elisabeth Branctorche" 	 | p4name = "Elisabeth Branctorche"
+trigger10 = p2name = "Akuma"			 | p4name = "Akuma"
+trigger11 = p2name = "Goro Daimon" 	 	 | p4name = "Goro Daimon" 
+trigger12 = p2name = "Daimon" 			 | p4name = "Daimon" 
+trigger13 = p2name = "Ash Crimson" 	 	 | p4name = "Ash Crimson"
+var(22) = 4
+
+;---------------------------------------------------------------------------------------------------------------------------
+;---------------------------------------------------------------------------------------------------------------------------
+; Intro 01 
+[Statedef 191]
+type = S
+ctrl = 0
+anim = 190
+velset = 0,0
+
+;----------------------------------------------------------------------------------------------
+
+[state 191,*butterfly]
+type = Explod
+trigger1 = time = 0
+anim = 171
+postype = p1
+pos = 0,-100
+removetime = -3
+bindtime = 1
+ID = 171
+sprpriority = 2
+persistent = 0
+ignorehitpause = 1
+
+[State 191,*]
+type = PlaySnd
+trigger1 = AnimElem = 2
+trigger1 = Alive
+value = 182,0
+channel = 0
+volume = 255
+
+[State 191,*]
+type = PlaySnd
+trigger1 = AnimElem = 21
+trigger1 = Alive
+value = 191,0
+channel = 0
+volume = 255
+
+[State 191,*]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191,*]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;---------------------------------------------------------------------------
+
+; Intro 02 
+[Statedef 192]
+type = S
+ctrl = 0
+anim = 191
+velset = 0,0
+
+
+[State 3800]
+type = Explod
+trigger1 = time = 0
+anim = 1402
+ID = 192
+sprpriority = 12
+postype = p1
+pos =  0, 0
+vel = 0, 0
+removetime = 300
+ownpal = 1
+bindtime = -1
+removeongethit = 1
+
+[State 3800]
+type = RemoveExplod
+trigger1 = animelem = 19,= 30
+ID = 192
+
+[state 192,*]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[state 192,*]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+
+;---------------------------------------------------------------------------
+
+; Intro 03 - versus athena/bao/momoko
+[Statedef 193]
+type = S
+ctrl = 0
+anim = 193
+velset = 0,0
+
+[State 190, 2] 
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 190, 4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;---------------------------------------------------------------------------
+
+; Intro 04 - versus kensou
+[Statedef 194]
+type = S
+ctrl = 0
+anim = 194
+velset = 0,0
+
+[State 191,*]
+type = PlaySnd
+trigger1 = AnimElem = 7
+trigger1 = Alive
+value = 182,0
+channel = 0
+volume = 255
+
+[State 191,*]
+type = PlaySnd
+trigger1 = AnimElem = 15
+trigger1 = Alive
+value = 182,0
+channel = 0
+volume = 255
+
+[State 190, 2] 
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 190, 4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;---------------------------------------------------------------------------
+; Taunt
+; CNS difficulty: easy
+[Statedef 195]
+type = S
+ctrl = 0
+anim = 195
+velset = 0,0
+movetype = I
+physics = S
+sprpriority = 2
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 2
+trigger1 = Alive
+value = 195,0
+channel = 0
+volume = 255
+
+[State 190, 2]
+type = ctrlset
+trigger1 = animelem >=3
+value = 1
+
+[State 195, 2]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+
+;---------------------------------------------------------------------------
+; intro 1995
+; CNS difficulty: easy
+[Statedef 196]
+type = S
+ctrl = 0
+anim = 196
+velset = 0,0
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 5
+trigger2 = AnimElem = 7
+trigger3 = AnimElem = 11
+trigger4 = AnimElem = 13
+value = 100,1
+channel = 0
+volume = 255
+
+[State 191,*]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191,*]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;---------------------------------------------------------------------------
+; INTRO - MANY ENEMIES
+[Statedef 197]
+type = S
+ctrl = 0
+anim = 197
+velset = 0,0
+
+[State 191,*]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191,*]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;==========================================================================================================================
+;						BASICS MOVIMENTS
+;==========================================================================================================================
+;---------------------------------------------------------------------------
+; Jump Start
+;---------------------------------------------------------------------------
+[Statedef 40]
+type    = S
+physics = S
+anim = 40
+ctrl = 0
+sprpriority = 1
+
+[State 40, 1]
+type = VarSet
+trigger1 = time = 0
+var(4) = 0
+
+[State 40, 1]
+type = VarSet
+trigger1 = command != "holdup"
+var(4) = 1
+
+[State 40, 1]
+type = VarSet
+trigger1 = Time = 0
+sysvar(1) = 0
+
+[State 40, 2]
+type = VarSet
+trigger1 = command = "holdfwd"
+sysvar(1) = 1
+
+[State 40, 3]
+type = VarSet
+trigger1 = command = "holdback"
+sysvar(1) = -1
+
+[State 40, 4]
+type = VelSet
+trigger1 = AnimTime = 0
+trigger1 = Var(4) = 0
+x = ifelse(sysvar(1)=0, const(velocity.jump.neu.x), ifelse(sysvar(1)=1, const(velocity.jump.fwd.x), const(velocity.jump.back.x)))
+y = const(velocity.jump.y)
+
+[State 40, 4];¬ƒWƒƒƒ“ƒv
+type = VelSet
+trigger1 = AnimTime = 0
+trigger1 = Var(4) = 1
+x = ifelse(sysvar(1)=0, const(velocity.jump.neu.x), ifelse(sysvar(1)=1, const(velocity.jump.fwd.x), const(velocity.jump.back.x)))
+y = -6
+
+[State 40, 5]
+type = VelSet
+trigger1 = AnimTime = 0
+trigger1 = prevstateno = 100 ;RUN_FWD
+trigger1 = sysvar(1) = 1
+x = const(velocity.runjump.fwd.x)
+
+[State 40, AI]
+type = VarSet
+triggerall = var(59) = 1
+trigger1 = time = 0
+trigger1 = p2bodydist x > 0
+var(58) = 2
+
+[State 40, 6]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 50
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; Jump Up
+;---------------------------------------------------------------------------
+[Statedef 50]
+type    = A
+physics = A
+
+[State 50, 1]
+type = VarSet
+trigger1 = Time = 0
+sysvar(1) = 0
+
+[State 191,]
+type = PlaySnd
+triggerall = time = 0
+triggerall = Var(3) != 0
+trigger1 = Alive
+value = s100,16
+channel = 4
+
+[State 191,]
+type = PlaySnd
+triggerall = time = 0
+triggerall = Var(4) = 0
+triggerall = Var(3) = 0
+trigger1 = Alive
+value = s100,15
+channel = 4
+
+[State 191,]
+type = PlaySnd
+triggerall = time = 0
+triggerall = Var(4) = 1
+triggerall = Var(3) = 0
+trigger1 = Alive
+value = s100,14
+channel = 4
+
+[State 50, 2]
+type = ChangeAnim
+trigger1 = Time = 0
+value = ifelse((vel x)=0, 41, ifelse((vel x)>0, 42, 43))
+
+[State 50, 3]
+type = ChangeAnim
+trigger1 = Vel y > -2
+trigger1 = SelfAnimExist(anim + 3)
+persistent = 0
+value = Anim + 3
+
+;---------------------------------------------------------------------------
+; Jump Land
+;---------------------------------------------------------------------------
+[Statedef 52]
+type    = S
+physics = S
+ctrl = 0
+anim = 47
+veladd = 0,0
+
+[State 191,]
+type = PlaySnd
+trigger1 = Time = 0
+value = s100,13
+vloume = 255
+
+[State 52, 1]
+type = VelSet
+trigger1 = Time = 0
+x = 0
+y = 0
+
+[State 52, 2]
+type = PosSet
+trigger1 = Time = 0
+y = 0
+
+[State 52, 3]
+type = CtrlSet
+trigger1 = Time = 3
+value = 1
+
+[State 52, 4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+
+;---------------------------------------------------------------------------
+; RUN_FWD
+[Statedef 100]
+type    = S
+physics = S
+anim = 100
+sprpriority = 1
+ctrl = 0
+
+[State 100, 1]
+type = VelSet
+trigger1 = 1
+x = const(velocity.run.fwd.x)
+
+[State 100, 2]
+type = Playsnd
+trigger1 = time = 0
+value = s100,5
+channel = 5
+loop = 1
+
+[State 100, 3]
+Type = ChangeState
+Trigger1 = Command = "holdup"
+Value = 40
+
+[State 100, 4]
+type = ChangeState
+triggerall = Time > 9
+trigger1 = command != "holdfwd"
+value = 101
+ctrl = 0
+
+;---------------------------------------------------------------------------
+; RUN_FWD END
+[Statedef 101]
+type    = S
+physics = S
+anim = 101
+sprpriority = 1
+ctrl = 0
+velset = 0,0
+
+[State 101, 1]
+type = ChangeState
+trigger1 = animtime = 0
+value = 0
+ctrl = 1
+
+
+
+;---------------------------------------------------------------------------
+; RUN_BACK
+[Statedef 105]
+type    = A
+physics = A
+ctrl = 0
+anim = 105
+sprpriority = 1
+
+[State 191,]
+type = PlaySnd
+triggerall = AnimElem = 2
+trigger1 = Alive
+value = s100,14
+
+[State 105, 1]
+type = VelSet
+trigger1 = AnimElem = 2
+x = const(velocity.run.back.x)
+y = const(velocity.run.back.y)
+
+
+[State 105, 3]
+type = ChangeState
+trigger1 = AnimElemtime(2) >= 0
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 106
+
+;---------------------------------------------------------------------------
+; RUN_BACK2 (land)
+[Statedef 106]
+type    = S
+physics = S
+ctrl = 0
+anim = 106
+
+[State 191,]
+type = PlaySnd
+triggerall = AnimElem = 1
+trigger1 = Alive
+value = s100,13
+
+[State 106, 1]
+type = VelSet
+trigger1 = Time = 0
+x = 0
+y = 0
+
+[State 106, 2]
+type = PosSet
+trigger1 = Time = 0
+y = 0
+
+[State 106, 3]
+type = MakeDust
+trigger1 = Time = 0
+pos = -5,-2
+spacing = 1
+
+[State 106, 4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1

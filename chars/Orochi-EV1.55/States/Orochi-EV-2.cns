@@ -1,0 +1,3250 @@
+;===========================================================================================================================
+;Orochi Eagrose Version, original char by Orochi Herman, enhanced by Eagrose
+;CNS file part: States that are always executed (use statedef -2)
+;===========================================================================================================================
+[Statedef -2]
+
+;===========================================================================================================================
+;Player Option
+;===========================================================================================================================
+[State -2, poweradd adjustment multiplier]
+type = VarSet
+trigger1 = 1
+fvar(10) = 1.0
+;poweradd adjustment multiplier (positive float is acceptable)
+;suggestions:
+;set to 0.25 - 0.3 if you want Orochi to gain power like a common character.
+;set to 1.0 if you want Orochi to gain power as a mighty BOSS.
+
+[State -2, global damage adjustment multiplier & true damage setting]
+type = VarSet
+trigger1 = 1
+;fvar(3) = 1.0       ;this setting doesn't ignore emeny's defence
+fvar(3) = fvar(9)*1.0  ;this setting is used to ignore enemy's defence
+;global damage adjustment multiplier (positive float is acceptable)
+;suggestions:
+;set lower than 1.0 if you want Orochi to do damage like a common character.
+;set to 1.0 if you want Orochi to do damage as a mighty BOSS.
+;set higher than 1.0 if ... well, become a cheap char.
+;--------------
+;New function:
+;if u use the second line (etc. "fvar(3) = fvar(9)*1.0") instead of the first line, the damage will ignore emeny's defence.
+;if u use the first line (etc. "fvar(3) = 1.0") instead of the second line, the damage will NOT ignore emeny's defence.
+;Note: the setting here ONLY used to ingore defence under CNS data.
+;Does NOT influence defence caused by "DefenceMulSet"
+;(DefenceMulSet must be ignored by using lifeadd/lifeset, and they're already in use)
+
+[State -2, gethit damage to power, Passive PowerAdd Multiplier]
+type = PowerAdd
+triggerall = !ishelper
+trigger1 = alive
+trigger1 = life < floor(fvar(8))
+value = (floor(fvar(8))-life)*0  ;<----change the number after "*", it's a multiplier
+ignorehitpause = 1
+;Passive PowerAdd Multiplier:
+;this control automatic poweradd when self is hit by enemy.
+;the purpose of this setting is to show my disappointing for those high-damage but low-givepower cheap chars.
+;if you enable this, suggest value: 10 (when receive 1000 damage, get 10000 power)
+;you can set it higher. Or just set it to 0, thus disable it.
+;I do NOT suggest using this feature when playing with normal chars ! (so default is disabled, thus 0)
+
+[State -2, Stand Anim Select]
+type = VarSet
+trigger1 = 1
+var(18) = 0
+;Stand Anim Select :
+; 0 --- Catalyst Original Stand Anim
+; 1 --- KOFM Stand Anim with background anim from Mizuchi
+
+[State -2, palfx shining cycle control]
+type = VarSet
+trigger1 = 1
+var(28) = 16
+;palfx shining cycle control :
+;must be positive interger or -1 !!
+;must lower than 52 !!
+;suggestion range: 10 - 30
+;shine faster when var(28) is lower
+;set to -1 to disable shining
+
+[State -2, Inner Mode Striker "respective" cooldown (unit:tick, 60ticks=1second)]
+type = VarSet
+trigger1 = 1
+var(40) = 180   ;<----set to -1 will disable strikers in Nightmare Mode, but no influence on Inner Mode
+;Inner Mode Striker respective cooldown (positive integer is acceptable)
+;set to positive integer for Inner Mode Striker cooldown.(unit:tick, 60ticks=1second)
+;default value is 180 (=3 second). NOTE: in old version, default is 360.
+;In nightmare mode, respective cooldown is ALWAYS half of that in Inner Mode.
+;--------------
+;New function:
+;set to -1 to disable nightmare mode strikers
+;Note: does NOT influence inner mode (thus inner mode cooldown will be 180 by default)
+
+[State -2, Inner Mode Striker "global" cooldown (unit:tick, 60ticks=1second)]
+type = VarSet
+trigger1 = 1
+var(41) = 90
+;Inner Mode Striker global cooldown (positive integer or 0 is acceptable)
+;NOTE: diffrent from var(40) above, this var(41) is "global" cooldown.
+;NOTE: must be lower than var(40) above (otherwise may cause BUG).
+;set to positive integer for Inner Mode Striker cooldown.(unit:tick, 60ticks=1second)
+;set to 0, so there will be no global cooldown.
+;default value is 90 (=1.5 second). NOTE: in old version, default is 180.
+;In nightmare mode, global cooldown is ALWAYS 0.
+
+[State -2, Once-Lose Enhance switch]
+type = VarSet
+trigger1 = 1
+var(42) = 222
+;Once-Lose Mode Enhance switch(three bit interger is acceptable,every bit must be 1 or 2)
+;high bit:
+;set to 2 , Disable normal mode(palno = 1 to 6) "Once-Lose Enhance"
+;set to 1 , Enable normal mode "Once-Lose Enhance"
+;therefore, when lose a round, Orochi will enter Inner Mode
+;middle bit:
+;set to 2 , Disable inner mode(palno = 7 to 11) "Once-Lose Enhance"
+;set to 1 , Enable inner mode "Once-Lose Enhance"
+;therefore, when lose a round, Orochi will enter Nightmare Mode
+;low bit:
+;set to 2 , Disable nightmare mode(palno = 12) "Once-Lose Enhance"
+;set to 1 , Enable nightmare mode "Once-Lose Enhance"
+;therefore, when lose a round, Orochi will be almost undefeatable.
+;For example:
+;121 means: enable normal mode "Once-Lose Enhance", disable inner mode "Once-Lose Enhance", enable nightmare mode "Once-Lose Enhance"
+;default is 222, thus disable all.
+
+[State -2, BGM DIY switch]
+type = VarSet
+trigger1 = 1
+var(20) = 222
+;must be used with the  VERY BIG snd file "Orochi-EV-DIY-BGM"
+;BGM DIY switch(three bit interger is acceptable,every bit must be 1 or 2)
+;high bit:
+;set to 2 , Disable normal mode(palno = 1 to 6) DIY BGM, restore to BG bgm
+;set to 1 , Enable normal mode DIY BGM
+;middle bit:
+;set to 2 , Disable inner mode(palno = 7 to 11) DIY BGM, restore to BG bgm
+;set to 1 , Enable inner mode DIY BGM
+;low bit:
+;set to 2 , Disable nightmare mode(palno = 12) DIY BGM, restore to BG bgm
+;set to 1 , Enable nightmare mode DIY BGM
+;For example:
+;121 means: enable normal mode DIY BGM, disable inner mode DIY BGM, enable nightmare mode DIY BGM
+
+[State -2, TeamMode-Only Skill Enable switch]
+type = VarSet
+trigger1 = 1
+var(39) = 1
+;TeamMode-Only Skill Enable switch --- [Orochi's Unholy Life] made by Eagrose
+;must be 1 or 2
+;only functional when has partner (2vs1 or 2vs2)
+;set to 2 to Disable TeamMode-Only Skill
+;set to 1 to Enable TeamMode-Only Skill
+;-------------------------
+;[Orochi's Unholy Life]
+;In normal/inner mode:
+;Resurrect partner to half life, when partner is nearly dead, ONLY one chance
+;In nightmare mode:
+;Resurrect BOTH self and partner to half life, when self or partner is nearly dead, EACH one chance
+;Note: after successful resurrection, the one will enter an invincible recovery state until he retake control of himself.
+;The skill based on coding of "God chars", the resurrection might not always be successful, especially when enemy attacks very frequently.
+
+;===========================================================================================================================
+;Once-Lose Enhance System
+;===========================================================================================================================
+;=====================论外=====================
+[State -2, VarSet];本体遭到变数弄检测
+type = VarSet
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = !ishelper
+triggerall = var(58) != [0,1]
+triggerall = roundno > 1
+trigger1 = roundstate <= 2
+trigger2 = !lose
+var(58) = 1
+ignorehitpause = 1
+
+[State -2, VarSet];本体遭到变数弄检测
+type = VarSet
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = !ishelper
+triggerall = var(58) != [0,2]
+trigger1 = roundstate > 2
+trigger1 = lose
+var(58) = 2
+ignorehitpause = 1
+
+[State -2, VarSet];Helper开幕占有变数弄抵抗
+type = VarSet
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = !ishelper
+triggerall = roundno > 1
+trigger1 = !numhelper(701100)
+trigger2 = numhelper(701100)
+trigger2 = helper(701100),stateno!=701100
+trigger3 = numhelper(701100)
+trigger3 = helper(701100),stateno=701100
+trigger3 = helper(701100),var(58)=9999
+var(58) = 1
+ignorehitpause = 1
+;=====================论外END=====================
+
+[State -2, VarSet];Once-Lose Enhance
+type = VarSet
+triggerall = !ishelper
+triggerall = roundstate > 2
+triggerall = lose
+trigger1 = 1 ;var(58) = 0
+var(58) = 2
+ignorehitpause = 1
+
+[State -2, VarSet];Once-Lose Enhance
+type = VarSet
+triggerall = !ishelper
+triggerall = roundstate < 2
+trigger1 = var(58) = 2
+var(58) = 1
+ignorehitpause = 1
+
+;===========================================================================================================================
+;抵抗Palno弄
+;===========================================================================================================================
+;=====================论外=====================
+[State -2, VarSet];抵抗palno弄 本体遭到变数弄检测
+type = VarSet
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = !ishelper
+triggerall = roundstate > 0
+trigger1 = var(51) != 0
+trigger1 = var(51) != 6666
+var(51) = 6666
+ignorehitpause = 1
+
+[State -2, VarSet];抵抗palno弄 Helper开幕占有变数弄抵抗
+type = VarSet
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = !ishelper
+triggerall = roundstate > 0
+trigger1 = !numhelper(701100)
+trigger2 = numhelper(701100)
+trigger2 = helper(701100),stateno!=701100
+trigger3 = numhelper(701100)
+trigger3 = helper(701100),stateno=701100
+trigger3 = helper(701100),var(51)=6666
+var(51) = 6666
+ignorehitpause = 1
+;=====================论外END=====================
+
+;===========================================================================================================================
+;Orochi's Unholy Life System (Resurrection of Partner)
+;made by Eagrose
+;change these with RATHER MUCH CAUTION !!!
+;===========================================================================================================================
+[State -2, TargetDrop];组队技能与准论外化互相影响纠错
+type = TargetDrop
+triggerall = NumPartner
+triggerall = Numhelper(4211)
+triggerall = Helper(4211),stateno = 4215
+trigger1 = Helper(4211),time = 1
+excludeID = -1
+keepone = 0
+ignorehitpause = 1
+
+[State -2, VarSet];cannot enable two same TeamMode-Only skill at one time.
+type = VarSet
+triggerall = var(39) = 1
+Trigger1 = Partner,AuthorName = "Orochi Herman,Eagrose"
+Trigger1 = Partner,Name = "Orochi Eagrose Version"
+Trigger1 = Partner,var(39) = 1
+var(39) = 2
+
+;------------------------------
+;resurrection var transfer
+;------------------------------
+[State -2, VarSet];debug the var transfer to partner, if partner is Igniz-EV
+type = VarSet
+trigger1 = Numhelper(4211)
+trigger1 = Helper(4211),stateno != 4215
+v = 32
+value = -1
+ignorehitpause = 1
+
+;------------------------------
+;self resurrection
+;------------------------------
+[State -2, SelfState];Resurrection SelfState
+type = SelfState
+triggerall = var(30) = 1
+triggerall = Numhelper(4211)
+triggerall = Helper(4211),stateno = 4215
+triggerall = var(25) != (gametime+5)*(gametime%3)+97864   ;Is in enemy's p2state
+trigger1 = life = 0
+trigger2 = life = [0,1]
+trigger2 = Partner,AuthorName = "GONZO-,Eagrose"
+trigger2 = Partner,Name = "Igniz Eagrose Version"
+trigger2 = Partner,var(39) = 1
+trigger2 = partner,NumHelper(4211)
+value = 4231
+ignorehitpause =  1
+
+[State -2, ChangeState];Resurrection ChangeState
+type = ChangeState
+triggerall = var(30) = 1
+triggerall = Numhelper(4211)
+triggerall = Helper(4211),stateno = 4215
+triggerall = stateno != 4230    ;avoid infinit changestate
+trigger1 = life = 0
+trigger2 = life = [0,1]
+trigger2 = Partner,AuthorName = "GONZO-,Eagrose"
+trigger2 = Partner,Name = "Igniz Eagrose Version"
+trigger2 = Partner,var(39) = 1
+trigger2 = partner,NumHelper(4211)
+value = 4231
+ignorehitpause =  1
+
+;------------------------------
+;KO snd setting
+;------------------------------
+
+;[State -2, AssertSpecial]
+;type = AssertSpecial
+;trigger1 = NumPartner
+;trigger1 = Numhelper(4211)
+;trigger1 = Helper(4211),stateno = 4215
+;flag = nokosnd
+;ignorehitpause = 1
+
+;------------------------------
+;KO judge setting
+;------------------------------
+[State -2, VarSet];noko judge initiate var(29)
+type = VarSet
+trigger1 = 1
+var(29) = 0
+ignorehitpause = 1
+
+[State -2, VarSet];noko enable (when self can resurrect, partner can ~, self not complete ~, partner not complete ~)
+type = VarSet
+triggerall = var(29) = 0
+triggerall = NumPartner
+triggerall = Numhelper(4211)
+triggerall = Helper(4211),stateno = 4215
+trigger1 = Helper(4211),var(10) = [0,1]   ;partner can resurrected
+trigger2 = Helper(4211),var(10) = 2   ;partner already resurrected once
+trigger2 = partner,stateno = 4230
+trigger2 = partner,alive
+trigger2 = partner,life != floor(partner,lifemax/2)    ;partner haven't complete resurrect
+trigger3 = var(30) = 1   ;self resurrect allowed
+trigger4 = var(30) = 2   ;self already resurrected once
+trigger4 = stateno = 4231
+trigger4 = alive
+trigger4 = life != floor(lifemax/2)    ;self haven't complete resurrect
+;******************************************************
+;When both Igniz-EV & Orochi-EV have enable team-mode skill, DEBUG:
+;If Orochi has already resurrected once, and when Igniz is just resurrecting, orochi will not enable NOKO
+;Therefore just when Igniz is resurrecting, both oroci and igniz is nearly dead (life =1)
+;So Igniz's system will INCORRECTLY judge that orochi should die (In fact due to igniz's linking, orochi shouldn't)
+;So here must DEBUG.
+trigger5 = Partner,AuthorName = "GONZO-,Eagrose"
+trigger5 = Partner,Name = "Igniz Eagrose Version"
+Trigger5 = Partner,var(39) = 1
+trigger5 = !((life=[0,1]) && (Partner,life=[0,1])) ||  ((var(32)=[0,1]) && (partner,life!=[0,1])) || (var(32)=2 && partner,stateno=4230 && (partner,life=[0,1]))
+var(29) = 1
+ignorehitpause = 1
+
+[State -2, VarSet];noko disable when ensure emeny ko
+type = VarSet
+triggerall = var(29) = 1
+;triggerall =  (alive && life>0 && movetype != H) || (partner,alive && partner,life>0 && partner,movetype != H) ;self-team must not ko
+triggerall =  ifelse(alive,ifelse(life>0,1,0),1)    ;self must not ko incorrectly --- if alive, then must not life=0
+triggerall =  ifelse((partner,alive),ifelse((partner,life>0),1,0),1) ;partner must not ko incorrectly--- if alive, then must not life=0
+trigger1 = NumEnemy = 1
+trigger1 = EnemyNear(floor(fvar(36))),life=0 ;[0,1]
+;trigger1 = EnemyNear(floor(fvar(36))),alive
+trigger2 = NumEnemy = 2
+trigger2 = EnemyNear(floor(fvar(36))),life=0 ;[0,1]
+trigger2 = EnemyNear(floor(fvar(36))),alive
+trigger3 = NumEnemy = 2
+trigger3 = EnemyNear(floor(fvar(36))+1),life=0 ;[0,1]
+trigger3 = EnemyNear(floor(fvar(36))+1),alive
+var(29) = 2
+ignorehitpause = 1
+
+[State -2, VarSet];noko disable when ensure already-resurrected self or partner ko
+type = VarSet
+triggerall = var(29) = 1
+triggerall = !((Partner,AuthorName = "GONZO-,Eagrose") && (Partner,Name = "Igniz Eagrose Version") && (Partner,Numhelper(4211)) && (Partner,var(39) = 1))  ;not during partner Igniz-EV Bionic Link
+;*********partner ensure ko
+trigger1 = alive && life>0   ;self not ko
+trigger1 = Helper(4211),var(10) = 2  ;partner have already resurrected
+trigger1 = !(partner,stateno = 4230 && partner,alive && partner,life != floor(partner,lifemax/2)) ;partner complete resurrect
+trigger1 = partner,alive     ;partner not ko "actually"
+trigger1 = partner,life=0    ;but partner should ko
+;*********self ensure ko (not nightmare mode)
+trigger2 = partner,alive && partner,life>0   ;partner not ko
+trigger2 = var(30) = 0  ;self not allowed resurrect(not nightmare mode) or
+trigger2 = alive     ;self not ko "actually"
+trigger2 = life=0    ;but self should ko
+;*********self ensure ko (Is nightmare mode)
+trigger3 = partner,alive && partner,life>0   ;partner not ko
+trigger3 = var(30) = 2  ;self have already resurrected (nightmare mode)
+trigger3 = !(stateno = 4231 && alive && life != floor(lifemax/2)) ;self complete resurrect
+trigger3 = alive     ;self not ko "actually"
+trigger3 = life=0    ;but self should ko
+var(29) = 2
+ignorehitpause = 1
+
+[State -2, AssertSpecial]; ---- DO NOT CHANGE THIS!!!
+type = AssertSpecial
+triggerall = !((win || lose || drawgame) && roundstate = 2)
+trigger1 = var(29) = 1
+flag = noko
+ignorehitpause =  1
+
+;------------------------------
+;KO state setting
+;------------------------------
+[State -2, SelfState];self fake dead selfstate
+type = SelfState
+TRIGGERALL = !IsHelper
+triggerall = NumPartner
+triggerall = Numhelper(4211)
+triggerall = Helper(4211),stateno = 4215
+triggerall = var(25) != (gametime+5)*(gametime%3)+97864   ;Is in enemy's p2state
+trigger1 = !alive ;life = 0  ;different from Igniz-EV, here must be life=0, but not !alive, to ensure partner resurrect
+value = 3510
+ignorehitpause = 1
+
+[State -2, Changestate];self fake dead changestate
+type = ChangeState
+TRIGGERALL = !IsHelper
+triggerall = NumPartner
+triggerall = Numhelper(4211)
+triggerall = Helper(4211),stateno = 4215
+triggerall = (stateno != [3510,3511]) && stateno != 5150    ;avoid infinit changestate
+trigger1 = !alive ;life = 0  ;different from Igniz-EV, here must be life=0, but not !alive, to ensure partner resurrect
+value = 3510
+ignorehitpause = 1
+
+[State -2, LifeSet];self true dead lifeset
+type = null;LifeSet
+TRIGGERALL = !IsHelper
+triggerall = var(30) != 1
+triggerall = NumPartner
+triggerall = Numhelper(4211)
+triggerall = Helper(4211),stateno = 4215
+triggerall = stateno = 3511   ;self fake dead
+triggerall = NumHelper(3512)  ;fake dead helper is created
+triggerall = life > 0
+trigger1 = Helper(4211),var(10) = 2   ;partner have already resurrected once
+trigger1 = Partner,life = 0
+trigger2 = Lose || Win
+trigger2 = roundstate > 2
+value = 0
+ignorehitpause = 1
+
+[State -2, SelfState];self true dead selfstate
+type = null;Selfstate
+TRIGGERALL = !IsHelper
+triggerall = var(30) != 1
+triggerall = NumPartner
+triggerall = Numhelper(4211)
+triggerall = Helper(4211),stateno = 4215
+triggerall = var(25) != (gametime+5)*(gametime%3)+97864   ;Is in enemy's p2state
+triggerall = stateno = 3511   ;self fake dead
+triggerall = NumHelper(3512)  ;fake dead helper is created
+trigger1 = life = 0      ;self true dead
+trigger1 = Helper(4211),var(10) = 2   ;partner have already resurrected once
+trigger1 = Partner,life = 0 || (Partner,life = 1 && !Partner,alive && Partner,stateno = 5150)
+trigger2 = Lose || Win
+trigger2 = roundstate > 2
+value = 5150
+ignorehitpause = 1
+
+[State -2, Changestate];self true dead changestate
+type = null;Changestate
+TRIGGERALL = !IsHelper
+triggerall = var(30) != 1
+triggerall = NumPartner
+triggerall = Numhelper(4211)
+triggerall = Helper(4211),stateno = 4215
+triggerall = stateno != 5150   ;avoid infinit changestate
+triggerall = stateno = 3511   ;self fake dead
+triggerall = NumHelper(3512)  ;fake dead helper is created
+trigger1 = life = 0
+trigger1 = Helper(4211),var(10) = 2   ;partner have already resurrected once
+trigger1 = Partner,life = 0 || (Partner,life = 1 && !Partner,alive && Partner,stateno = 5150)
+trigger2 = Lose || Win
+trigger2 = roundstate > 2
+value = 5150
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+;System Bar --- Orochi's Unholy Life (Resurrection of Partner)
+;made by Eagrose
+;-------------------------------------------------------------------------------
+[State -2, 味方判別]
+Type = VarSet
+Triggerall = !NumPartner
+Trigger1 = var(52)
+var(52) = 0
+
+[State -2, 味方判別]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = NumPartner
+TriggerAll = Partner,AuthorName = "Orochi Herman,Eagrose"
+Trigger1 = Partner,Name = "Orochi Eagrose Version"
+var(52) = Partner,ID
+
+[State -2, 味方判別]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = NumPartner
+TriggerAll = Partner,AuthorName = "GONZO-,Eagrose"
+Trigger1 = Partner,Name = "Igniz Eagrose Version"
+var(52) = Partner,ID
+
+[State -2, 味方判別]
+Type = VarSet
+triggerall = !IsHelper
+Trigger1 = !var(52)
+var(52) = ID
+
+[State -2, RemoveExplod]
+type = RemoveExplod
+triggerall = !IsHelper
+trigger1 = NumExplod(4002)
+id = 4002
+ignorehitpause = 1
+
+[State -2, RemoveExplod]
+type = RemoveExplod
+triggerall = !IsHelper
+trigger1 = NumExplod(4003)
+id = 4003
+ignorehitpause = 1
+
+[State -2, RemoveExplod]
+type = RemoveExplod
+triggerall = !IsHelper
+trigger1 = NumExplod(4004)
+id = 4004
+ignorehitpause = 1
+
+[State -2, RemoveExplod]
+type = RemoveExplod
+triggerall = !IsHelper
+trigger1 = NumExplod(4005)
+id = 4005
+ignorehitpause = 1
+
+;**************************************************
+[State -2, Resurrection Bar]
+Type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(39) = 1
+triggerall = !IsHelper
+TriggerAll = !NumExplod(4002)
+TriggerAll = RoundState = [2,3]
+triggerall = Numpartner
+Trigger1 = 1
+Anim        = 4002
+ID          = 4002
+Pos         = IfElse(TeamSide=2,288,32),234-160+IfElse(NumPartner,(var(52)<ID)*17,0)
+PosType     = Left
+Facing      = IfElse(TeamSide=2,-1,1)
+BindTime    = -1
+RemoveTime  = -1
+Scale       = .5,.5
+SprPriority = 10
+OnTop       = 1
+Ownpal      = 1
+SuperMove   = 1
+PauseMoveTime  = -1
+IgnoreHitPause = 1
+
+[State -2, Resurrection Bar -- ALLY explod]
+Type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(39) = 1
+triggerall = !IsHelper
+TriggerAll = !NumExplod(4003)
+TriggerAll = RoundState = [2,3]
+triggerall = Numpartner
+Trigger1 = 1
+Anim        = 4006
+ID          = 4003
+Pos         = IfElse(TeamSide=2,237-12,62+12),234-165+IfElse(NumPartner,(var(52)<ID)*17,0)
+PosType     = Left
+Facing      = 1;IfElse(TeamSide=2,-1,1)
+BindTime    = -1
+RemoveTime  = -1
+Scale       = .5,.5
+SprPriority = 10
+OnTop       = 1
+Ownpal      = 1
+SuperMove   = 1
+PauseMoveTime  = -1
+IgnoreHitPause = 1
+
+[State -2, resurrection status --- self]
+Type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(39) = 1
+triggerall = !IsHelper
+TriggerAll = !NumExplod(4004)
+TriggerAll = RoundState = [2,3]
+triggerall = Numpartner
+Trigger1 = 1
+Anim        = ifelse(!((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),4005,ifelse(var(30)=1,4007,ifelse(var(30)=2,4004,4005)))
+ID          = 4004
+Pos         = IfElse(TeamSide=2,256,52),234-165+IfElse(NumPartner,(var(52)<ID)*17,0)
+PosType     = Left
+Facing      = 1;IfElse(TeamSide=2,-1,1)
+BindTime    = -1
+RemoveTime  = -1
+Scale       = .5,.5
+SprPriority = 10
+OnTop       = 1
+Ownpal      = 1
+SuperMove   = 1
+PauseMoveTime  = -1
+IgnoreHitPause = 1
+
+[State -2, resurrection status --- partner]
+Type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(39) = 1
+triggerall = !IsHelper
+TriggerAll = !NumExplod(4005)
+TriggerAll = RoundState = [2,3]
+triggerall = Numpartner
+Trigger1 = 1
+Anim        = ifelse((NumHelper(4211)&&(helper(4211),var(10)=0)&&(helper(4211),var(31)=888)),4007,ifelse((NumHelper(4211)&&(helper(4211),var(10)=[1,2])&&(helper(4211),var(31)=888)),4004,4005))
+ID          = 4005
+Pos         = IfElse(TeamSide=2,212,96),234-165+IfElse(NumPartner,(var(52)<ID)*17,0)
+PosType     = Left
+Facing      = 1;IfElse(TeamSide=2,-1,1)
+BindTime    = -1
+RemoveTime  = -1
+Scale       = .5,.5
+SprPriority = 10
+OnTop       = 1
+Ownpal      = 1
+SuperMove   = 1
+PauseMoveTime  = -1
+IgnoreHitPause = 1
+
+;===========================================================================================================================
+;BGM DIY 自定义背景音乐
+;===========================================================================================================================
+;===============================================================================
+;1V1 非双打BGM协商
+;===============================================================================
+[State -2, VarSet];非双打 对端非伊蛇
+type = VarSet
+triggerall = teammode = single || teammode = turns
+;****************色表识别
+;****************自定义BGM开关识别
+;****************队友识别
+trigger1 = !(EnemyNear(floor(fvar(36))),AuthorName = "GONZO-,Eagrose") && !(EnemyNear(floor(fvar(36))),AuthorName = "Orochi Herman,Eagrose")
+trigger1 = !(EnemyNear(floor(fvar(36))),Name = "Igniz Eagrose Version") && !(EnemyNear(floor(fvar(36))),Name = "Orochi Eagrose Version")
+v = 7
+value = 1
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+[State -2, VarSet];非双打 均表模式 开关均开 全响 蛇蛇
+type = VarSet
+triggerall = teammode = single || teammode = turns
+;****************色表识别
+triggerall = palno = [1,6]
+triggerall = EnemyNear(floor(fvar(36))),palno = [1,6]
+;****************自定义BGM开关识别
+triggerall = floor(var(20)/100)%10=1
+triggerall = floor(EnemyNear(floor(fvar(36))),var(20)/100)%10=1
+;****************队友识别
+trigger1 = 0;EnemyNear(floor(fvar(36))),AuthorName = "GONZO-,Eagrose"
+trigger1 = 0;EnemyNear(floor(fvar(36))),Name = "Igniz Eagrose Version"
+Trigger2 = EnemyNear(floor(fvar(36))),AuthorName = "Orochi Herman,Eagrose"
+Trigger2 = EnemyNear(floor(fvar(36))),Name = "Orochi Eagrose Version"
+v = 7
+value = 1
+ignorehitpause = 1
+
+[State -2, VarSet];非双打 均表模式 开关均开 全响 伊蛇统一BGM
+type = VarSet
+triggerall = teammode = single || teammode = turns
+;****************色表识别
+triggerall = palno = [1,6]
+triggerall = EnemyNear(floor(fvar(36))),palno = [1,6]
+;****************自定义BGM开关识别
+triggerall = floor(var(20)/100)%10=1
+triggerall = floor(EnemyNear(floor(fvar(36))),var(20)/100)%10=1
+;****************队友识别
+trigger1 = EnemyNear(floor(fvar(36))),AuthorName = "GONZO-,Eagrose"
+trigger1 = EnemyNear(floor(fvar(36))),Name = "Igniz Eagrose Version"
+Trigger2 = 0;EnemyNear(floor(fvar(36))),AuthorName = "Orochi Herman,Eagrose"
+Trigger2 = 0;EnemyNear(floor(fvar(36))),Name = "Orochi Eagrose Version"
+v = 7
+value = 2
+ignorehitpause = 1
+
+[State -2, VarSet];非双打 均表模式 开关仅开一个 本地开 本地响 (对端默认不响)
+type = VarSet
+triggerall = teammode = single || teammode = turns
+;****************色表识别
+triggerall = palno = [1,6]
+triggerall = EnemyNear(floor(fvar(36))),palno = [1,6]
+;****************自定义BGM开关识别
+triggerall = floor(var(20)/100)%10=1
+triggerall = floor(EnemyNear(floor(fvar(36))),var(20)/100)%10=2
+;****************队友识别
+trigger1 = EnemyNear(floor(fvar(36))),AuthorName = "GONZO-,Eagrose"
+trigger1 = EnemyNear(floor(fvar(36))),Name = "Igniz Eagrose Version"
+Trigger2 = EnemyNear(floor(fvar(36))),AuthorName = "Orochi Herman,Eagrose"
+Trigger2 = EnemyNear(floor(fvar(36))),Name = "Orochi Eagrose Version"
+v = 7
+value = 1
+ignorehitpause = 1
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+[State -2, VarSet];非双打 均里模式 开关均开 全响 蛇蛇
+type = VarSet
+triggerall = teammode = single || teammode = turns
+;****************色表识别
+triggerall = palno = [7,11]
+triggerall = EnemyNear(floor(fvar(36))),palno = [7,11]
+;****************自定义BGM开关识别
+triggerall = floor(var(20)/100)%10=1
+triggerall = floor(EnemyNear(floor(fvar(36))),var(20)/100)%10=1
+;****************队友识别
+trigger1 = 0;EnemyNear(floor(fvar(36))),AuthorName = "GONZO-,Eagrose"
+trigger1 = 0;EnemyNear(floor(fvar(36))),Name = "Igniz Eagrose Version"
+Trigger2 = EnemyNear(floor(fvar(36))),AuthorName = "Orochi Herman,Eagrose"
+Trigger2 = EnemyNear(floor(fvar(36))),Name = "Orochi Eagrose Version"
+v = 7
+value = 1
+ignorehitpause = 1
+
+[State -2, VarSet];非双打 均里模式 开关均开 全响 伊蛇统一BGM
+type = VarSet
+triggerall = teammode = single || teammode = turns
+;****************色表识别
+triggerall = palno = [7,11]
+triggerall = EnemyNear(floor(fvar(36))),palno = [7,11]
+;****************自定义BGM开关识别
+triggerall = floor(var(20)/100)%10=1
+triggerall = floor(EnemyNear(floor(fvar(36))),var(20)/100)%10=1
+;****************队友识别
+trigger1 = EnemyNear(floor(fvar(36))),AuthorName = "GONZO-,Eagrose"
+trigger1 = EnemyNear(floor(fvar(36))),Name = "Igniz Eagrose Version"
+Trigger2 = 0;EnemyNear(floor(fvar(36))),AuthorName = "Orochi Herman,Eagrose"
+Trigger2 = 0;EnemyNear(floor(fvar(36))),Name = "Orochi Eagrose Version"
+v = 7
+value = 2
+ignorehitpause = 1
+
+[State -2, VarSet];非双打 均里模式 开关仅开一个 本地开 本地响 (对端默认不响)
+type = VarSet
+triggerall = teammode = single || teammode = turns
+;****************色表识别
+triggerall = palno = [7,11]
+triggerall = EnemyNear(floor(fvar(36))),palno = [7,11]
+;****************自定义BGM开关识别
+triggerall = floor(var(20)/100)%10=1
+triggerall = floor(EnemyNear(floor(fvar(36))),var(20)/100)%10=2
+;****************队友识别
+trigger1 = EnemyNear(floor(fvar(36))),AuthorName = "GONZO-,Eagrose"
+trigger1 = EnemyNear(floor(fvar(36))),Name = "Igniz Eagrose Version"
+Trigger2 = EnemyNear(floor(fvar(36))),AuthorName = "Orochi Herman,Eagrose"
+Trigger2 = EnemyNear(floor(fvar(36))),Name = "Orochi Eagrose Version"
+v = 7
+value = 1
+ignorehitpause = 1
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+[State -2, VarSet];非双打 均梦魇模式 开关均开 全响 蛇蛇 【不可能】
+type = VarSet
+triggerall = teammode = single || teammode = turns
+;****************色表识别
+triggerall = palno = 12
+triggerall = EnemyNear(floor(fvar(36))),palno = 12
+;****************自定义BGM开关识别
+triggerall = floor(var(20)/100)%10=1
+triggerall = floor(EnemyNear(floor(fvar(36))),var(20)/100)%10=1
+;****************队友识别
+trigger1 = 0;EnemyNear(floor(fvar(36))),AuthorName = "GONZO-,Eagrose"
+trigger1 = 0;EnemyNear(floor(fvar(36))),Name = "Igniz Eagrose Version"
+Trigger2 = EnemyNear(floor(fvar(36))),AuthorName = "Orochi Herman,Eagrose"
+Trigger2 = EnemyNear(floor(fvar(36))),Name = "Orochi Eagrose Version"
+v = 7
+value = 1
+ignorehitpause = 1
+
+[State -2, VarSet];非双打 均梦魇模式 开关均开 全响 伊蛇统一BGM
+type = VarSet
+triggerall = teammode = single || teammode = turns
+;****************色表识别
+triggerall = palno = 12
+triggerall = EnemyNear(floor(fvar(36))),palno = 12
+;****************自定义BGM开关识别
+triggerall = floor(var(20)/100)%10=1
+triggerall = floor(EnemyNear(floor(fvar(36))),var(20)/100)%10=1
+;****************队友识别
+trigger1 = EnemyNear(floor(fvar(36))),AuthorName = "GONZO-,Eagrose"
+trigger1 = EnemyNear(floor(fvar(36))),Name = "Igniz Eagrose Version"
+Trigger2 = 0;EnemyNear(floor(fvar(36))),AuthorName = "Orochi Herman,Eagrose"
+Trigger2 = 0;EnemyNear(floor(fvar(36))),Name = "Orochi Eagrose Version"
+v = 7
+value = 2
+ignorehitpause = 1
+
+[State -2, VarSet];非双打 均梦魇模式 开关仅开一个 本地开 本地响 (对端默认不响)
+type = VarSet
+triggerall = teammode = single || teammode = turns
+;****************色表识别
+triggerall = palno = 12
+triggerall = EnemyNear(floor(fvar(36))),palno = 12
+;****************自定义BGM开关识别
+triggerall = floor(var(20)/100)%10=1
+triggerall = floor(EnemyNear(floor(fvar(36))),var(20)/100)%10=2
+;****************队友识别
+trigger1 = EnemyNear(floor(fvar(36))),AuthorName = "GONZO-,Eagrose"
+trigger1 = EnemyNear(floor(fvar(36))),Name = "Igniz Eagrose Version"
+Trigger2 = EnemyNear(floor(fvar(36))),AuthorName = "Orochi Herman,Eagrose"
+Trigger2 = EnemyNear(floor(fvar(36))),Name = "Orochi Eagrose Version"
+v = 7
+value = 1
+ignorehitpause = 1
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+[State -2, VarSet];非双打 本地高优先级 本地开关开 本地响 蛇蛇 (对端默认不响)
+type = VarSet
+triggerall = teammode = single || teammode = turns
+;****************自定义BGM开关识别
+;triggerall = floor(var(20)/100)%10=1
+;triggerall = floor(EnemyNear(floor(fvar(36))),var(20)/100)%10=1
+;****************队友识别
+Triggerall = EnemyNear(floor(fvar(36))),AuthorName = "Orochi Herman,Eagrose"
+Triggerall = EnemyNear(floor(fvar(36))),Name = "Orochi Eagrose Version"
+;****************色表识别
+trigger1 = floor(var(20)/10)%10=1
+trigger1 = palno = [7,11]
+trigger1 = EnemyNear(floor(fvar(36))),palno = [1,6]
+trigger2 = floor(var(20)/100)%10=1
+trigger2 = palno = 12
+trigger2 = EnemyNear(floor(fvar(36))),palno = [1,11]
+v = 7
+value = 1
+ignorehitpause = 1
+
+[State -2, VarSet];非双打 本地高优先级 本地开关开 本地响 伊蛇 (对端默认不响)
+type = VarSet
+triggerall = teammode = single || teammode = turns
+;****************自定义BGM开关识别
+;triggerall = floor(var(20)/100)%10=1
+;triggerall = floor(EnemyNear(floor(fvar(36))),var(20)/100)%10=1
+;****************队友识别
+triggerall = EnemyNear(floor(fvar(36))),AuthorName = "GONZO-,Eagrose"
+triggerall = EnemyNear(floor(fvar(36))),Name = "Igniz Eagrose Version"
+;****************色表识别
+trigger1 = floor(var(20)/10)%10=1
+trigger1 = palno = [7,11]
+trigger1 = EnemyNear(floor(fvar(36))),palno = [1,6]
+trigger2 = floor(var(20)/100)%10=1
+trigger2 = palno = 12
+trigger2 = EnemyNear(floor(fvar(36))),palno = [1,11]
+v = 7
+value = 1
+ignorehitpause = 1
+;===============================================================================
+;2V2 1V2 2V1 双打BGM协商 过于繁琐且妨碍其他角色BGM 停止自定义BGM
+;===============================================================================
+[State -2, VarSet]
+type = NULL;VarSet
+triggerall = teammode = single || teammode = turns
+;****************色表识别
+triggerall = palno = [1,6]
+triggerall = ifelse(NumPartner,(partner,palno = [1,6]),1)
+triggerall = ifelse(NumPartner,(Partner,AuthorName = "GONZO-,Eagrose"),1)
+triggerall = ifelse(NumPartner,(partner,Name = "Igniz Eagrose Version"),1)
+triggerall = EnemyNear(floor(fvar(36))),palno=[1,6]
+triggerall = EnemyNear(floor(fvar(36))),AuthorName = "GONZO-,Eagrose"
+triggerall = EnemyNear(floor(fvar(36))),Name = "Igniz Eagrose Version"
+triggerall = ifelse(Numenemy=2,(EnemyNear(floor(fvar(36))+1),palno = [1,6]),1)
+triggerall = ifelse(Numenemy=2,(EnemyNear(floor(fvar(36))+1),AuthorName = "GONZO-,Eagrose"),1)
+triggerall = ifelse(Numenemy=2,(EnemyNear(floor(fvar(36))+1),Name = "Igniz Eagrose Version"),1)
+;****************自定义BGM开关识别
+triggerall = floor(var(20)/100)%10=1
+;****************队友识别
+trigger1 = 1
+v = 7
+value = 1
+ignorehitpause = 1
+
+[State -2, VarSet]
+type = null;VarSet
+trigger1 = teammode = simul
+trigger2 = numpartner
+trigger3 = numenemy = 2
+v = 7
+value = 0
+ignorehitpause = 1
+
+;===============================================================================
+;抹去原BGM
+;===============================================================================
+[State -2, AssertSpecial]
+type = AssertSpecial
+triggerall = !(teammode = simul || numpartner || numenemy = 2)
+triggerall = palno = [1,6]
+triggerall = floor(var(20)/100)%10=1
+trigger1 = var(7) != 0
+flag = nomusic
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State -2, AssertSpecial]
+type = AssertSpecial
+triggerall = !(teammode = simul || numpartner || numenemy = 2)
+triggerall = palno = [7,11]
+triggerall = floor(var(20)/10)%10=1
+trigger1 = var(7) != 0
+flag = nomusic
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State -2, AssertSpecial]
+type = AssertSpecial
+triggerall = !(teammode = simul || numpartner || numenemy = 2)
+triggerall = palno = 12
+triggerall = var(20)%10=1
+trigger1 = var(7) != 0
+flag = nomusic
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+;===========================================================================================================================
+;System Option & projhit pause/envcolor
+;===========================================================================================================================
+[State -2, Trans when in catalyst mode]
+type = null;Trans
+trigger1 = palno = 12
+trans = add
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State -2, Stand Anim always KOFM mode when in Nightmare Shin mode]
+type = null;VarSet
+trigger1 = palno=12
+var(18) = 1
+
+[state -2, damage adjustment reset for Mu ni Kaerou lv3 (Extend)]
+type = varset
+triggerall = var(13) != 0
+trigger1 = movetype = H
+var(13) = 0
+
+[state -2, time stop var disable when not catalysm mod]
+type = varset
+trigger1 = (palno = [1,11]) && !((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+fvar(6) = -9999
+
+[state -2, additional poweradd for black surge when proj hits];disabled
+type = null;poweradd
+triggerall = NumprojID(1106) >= 1
+trigger1 = projhit(1106)=1
+value = floor(400*fvar(10))
+persistent = 0
+ignorehitpause = 1
+
+[State -2, projhit EnvColor]
+type = envcolor
+trigger1 = projhit1101 = 1
+value = 255,255,255
+time = 1
+;persistent = 0
+ignorehitpause = 1
+under = -1
+
+[State -2, projhit slowdown]
+type = null;Pause
+triggerall = (GameTime%4) =1
+trigger1 = ProjHit1101 = 1, <= 10
+time = 1
+movetime = 0
+
+[State -2, projhit slowdown]
+type = Pause
+triggerall = (GameTime%2) =1
+trigger1 = ProjHit1628 = 1, <= 30
+trigger2 = ProjHit1629 = 1, <= 30
+time = 1
+movetime = 0
+
+[State -2, projhit EnvColor]
+type = EnvColor
+trigger1 = projhit1643 = 1
+value = 255,255,255
+ignorehitpause = 1
+time = 1
+
+[State -2, projhit slowdown]
+type = NULL;Pause
+triggerall = (GameTime%2) =1
+trigger1 = projhit1643 = 1, <= 10
+time = 1
+movetime = 0
+
+[State -2, projhit EnvColor]
+type = EnvColor
+trigger1 = projhit1663 = 1
+value = 255,255,255
+ignorehitpause = 1
+time = 1
+
+[State -2, projhit slowdown]
+type = Pause
+triggerall = (GameTime%2) =1
+trigger1 = projhit1663 = 1, <= 35
+time = 1
+movetime = 0
+
+;===========================================================================================================================
+;System Bar Judge when has Partner (Striker Cooldown / Time Stop duration bar)  var(53)
+;===========================================================================================================================
+[State -2, VarSet];inner mode striker cannot be disabled by set -1
+type = VarSet
+triggerall = var(40) = -1
+trigger1 = (palno=[7,11]) && !(var(58)=1 && floor(var(42)/10)%10=1) ;里模式未一败或关闭一败加强，保持里模式，维持援护
+Trigger2 = (palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1 ;表模式一败加强，进入里模式，维持援护
+var(40) = 180
+ignorehitpause = 1
+
+[State -2, 味方判別]
+Type = VarSet
+Triggerall = !NumPartner
+Trigger1 = var(53)
+var(53) = 0
+
+[State -2, 味方判別]
+Type = VarSet
+TriggerAll = NumPartner
+TriggerAll = Partner,AuthorName = "Orochi Herman,Eagrose"
+Trigger1 = Partner,Name = "Orochi Eagrose Version"
+var(53) = Partner,ID
+
+[State -2, 味方判別]
+Type = VarSet
+triggerall = !IsHelper(97864)
+TriggerAll = NumPartner
+TriggerAll = Partner,AuthorName = "GONZO-,Eagrose"
+Trigger1 = Partner,Name = "Igniz Eagrose Version"
+var(53) = Partner,ID
+
+[State -2, 味方判別]
+Type = VarSet
+triggerall = !IsHelper(97864)
+Trigger1 = ID < var(53)
+var(53) = ID
+
+;===========================================================================================================================
+;Striker Time Cooldown
+;===========================================================================================================================
+[State -2, RemoveExplod]
+type = RemoveExplod
+trigger1 = NumExplod(9002)
+id = 9002
+ignorehitpause = 1
+
+[State -2, RemoveExplod]
+type = RemoveExplod
+trigger1 = NumExplod(9003)
+id = 9003
+ignorehitpause = 1
+
+[State -2, RemoveExplod]
+type = RemoveExplod
+trigger1 = NumExplod(9004)
+id = 9004
+ignorehitpause = 1
+
+[State -2, RemoveExplod]
+type = RemoveExplod
+trigger1 = NumExplod(9005)
+id = 9005
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+;Chris Time Cooldown fvar(20)
+;-------------------------------------------------------------------------------
+[State -2, Striker Time Cooldown start]
+type = VarSet
+trigger1 = stateno = 1600
+Trigger2 = (palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+Trigger2 = fvar(6) = 1
+trigger2 = stateno = 1601 || stateno = 1602 || stateno = 1603
+trigger2 = !fvar(20)
+fv = 20
+value = ifelse(((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),var(40)/2,var(40))
+ignorehitpause = 1
+persistent = 0
+
+[State -2, Striker Time Cooldown count down]
+type = VarAdd
+triggerall = !NumHelper(1610)
+triggerall = stateno != 1600
+triggerall = stateno != 1601
+triggerall = stateno != 1602
+triggerall = stateno != 1603
+trigger1 = fvar(20) > 0
+fv = 20
+value = -1.0
+ignorehitpause = 1
+
+[State -2, Striker Time Cooldown cover Explod]
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(40) != -1 ;总开关
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 1
+trigger1 = !NumExplod(9002)
+anim = 9002
+ID = 9002
+pos = 6,ifelse(!var(53),217,ifelse(var(53)=ID,203,217))
+postype = left  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+SuperMove   = 1
+PauseMoveTime  = -1
+scale = .5,(fvar(20)/ifelse(((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),var(40),var(40)*2))
+sprpriority = 11
+ontop = 0
+shadow = 0,0,0
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+[State -2, Striker Time Cooldown cover Explod]
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(40) != -1 ;总开关
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 2
+trigger1 = !NumExplod(9002)
+anim = 9003
+ID = 9002
+pos = -6,ifelse(!var(53),217,ifelse(var(53)=ID,203,217))
+postype = right  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+SuperMove   = 1
+PauseMoveTime  = -1
+scale = .5,(fvar(20)/ifelse(((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),var(40),var(40)*2))
+sprpriority = 11
+ontop = 0
+shadow = 0,0,0
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+;Yashiro Time Cooldown  fvar(21)
+;-------------------------------------------------------------------------------
+[State -2, Striker Time Cooldown start]
+type = VarSet
+trigger1 = stateno = 1602
+Trigger2 = (palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+Trigger2 = fvar(6) = 1
+trigger2 = stateno = 1600 || stateno = 1601 || stateno = 1603
+trigger2 = !fvar(21)
+fv = 21
+value = ifelse(((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),var(40)/2,var(40))
+ignorehitpause = 1
+persistent = 0
+
+[State -2, Striker Time Cooldown count down]
+type = VarAdd
+triggerall = !NumHelper(1650)
+triggerall = stateno != 1600
+triggerall = stateno != 1601
+triggerall = stateno != 1602
+triggerall = stateno != 1603
+trigger1 = fvar(21) > 0
+fv = 21
+value = -1.0
+ignorehitpause = 1
+
+[State -2, Striker Time Cooldown cover Explod]
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(40) != -1 ;总开关
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 1
+trigger1 = !NumExplod(9003)
+anim = 9002
+ID = 9003
+pos = 33,ifelse(!var(53),217,ifelse(var(53)=ID,203,217))
+postype = left  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+SuperMove   = 1
+PauseMoveTime  = -1
+scale = .5,(fvar(21)/ifelse(((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),var(40),var(40)*2))
+sprpriority = 11
+ontop = 0
+shadow = 0,0,0
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+[State -2, Striker Time Cooldown cover Explod]
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(40) != -1 ;总开关
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 2
+trigger1 = !NumExplod(9003)
+anim = 9003
+ID = 9003
+pos = -33,ifelse(!var(53),217,ifelse(var(53)=ID,203,217))
+postype = right  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+SuperMove   = 1
+PauseMoveTime  = -1
+scale = .5,(fvar(21)/ifelse(((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),var(40),var(40)*2))
+sprpriority = 11
+ontop = 0
+shadow = 0,0,0
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+;Shermie Time Cooldown   fvar(22)
+;-------------------------------------------------------------------------------
+[State -2, Striker Time Cooldown start]
+type = VarSet
+trigger1 = stateno = 1601
+Trigger2 = (palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+Trigger2 = fvar(6) = 1
+trigger2 = stateno = 1600 || stateno = 1602 || stateno = 1603
+trigger2 = !fvar(22)
+fv = 22
+value = ifelse(((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),var(40)/2,var(40))
+ignorehitpause = 1
+persistent = 0
+
+[State -2, Striker Time Cooldown count down]
+type = VarAdd
+triggerall = !NumHelper(1630)
+triggerall = stateno != 1600
+triggerall = stateno != 1601
+triggerall = stateno != 1602
+triggerall = stateno != 1603
+trigger1 = fvar(22) > 0
+fv = 22
+value = -1.0
+ignorehitpause = 1
+
+[State -2, Striker Time Cooldown cover Explod]
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(40) != -1 ;总开关
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 1
+trigger1 = !NumExplod(9004)
+anim = 9002
+ID = 9004
+pos = 19,ifelse(!var(53),217,ifelse(var(53)=ID,203,217))
+postype = left  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+SuperMove   = 1
+PauseMoveTime  = -1
+scale = .51,(fvar(22)/ifelse(((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),var(40),var(40)*2))
+sprpriority = 11
+ontop = 0
+shadow = 0,0,0
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+[State -2, Striker Time Cooldown cover Explod]
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(40) != -1 ;总开关
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 2
+trigger1 = !NumExplod(9004)
+anim = 9003
+ID = 9004
+pos = -19,ifelse(!var(53),217,ifelse(var(53)=ID,203,217))
+postype = right  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+SuperMove   = 1
+PauseMoveTime  = -1
+scale = .51,(fvar(22)/ifelse(((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),var(40),var(40)*2))
+sprpriority = 11
+ontop = 0
+shadow = 0,0,0
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+;Goenitz Time Cooldown  fvar(23)
+;-------------------------------------------------------------------------------
+[State -2, Striker Time Cooldown start]
+type = VarSet
+trigger1 = stateno = 1603
+Trigger2 = (palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+Trigger2 = fvar(6) = 1
+trigger2 = stateno = 1600 || stateno = 1601 || stateno = 1602
+trigger2 = !fvar(23)
+fv = 23
+value = ifelse(((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),var(40)/2,var(40))
+ignorehitpause = 1
+persistent = 0
+
+[State -2, Striker Time Cooldown count down]
+type = VarAdd
+triggerall = !NumHelper(1670)
+triggerall = stateno != 1600
+triggerall = stateno != 1601
+triggerall = stateno != 1602
+triggerall = stateno != 1603
+;triggerall = var(16) = 0
+trigger1 = fvar(23) > 0
+fv = 23
+value = -1.0
+ignorehitpause = 1
+
+[State -2, Striker Time Cooldown cover Explod]
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(40) != -1 ;总开关
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 1
+trigger1 = !NumExplod(9005)
+anim = 9002
+ID = 9005
+pos = 46,ifelse(!var(53),217,ifelse(var(53)=ID,203,217))
+postype = left  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+SuperMove   = 1
+PauseMoveTime  = -1
+scale = .51,(fvar(23)/ifelse(((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),var(40),var(40)*2))
+sprpriority = 11
+ontop = 0
+shadow = 0,0,0
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+[State -2, Striker Time Cooldown cover Explod]
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(40) != -1 ;总开关
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 2
+trigger1 = !NumExplod(9005)
+anim = 9003
+ID = 9005
+pos = -46,ifelse(!var(53),217,ifelse(var(53)=ID,203,217))
+postype = right  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = -1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -1
+SuperMove   = 1
+PauseMoveTime  = -1
+scale = .51,(fvar(23)/ifelse(((palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)),var(40),var(40)*2))
+sprpriority = 11
+ontop = 0
+shadow = 0,0,0
+ownpal = 1
+removeongethit = 0
+ignorehitpause = 1
+
+;===========================================================================================================================
+;Striker Portrait
+;Chris + Shermie + Yashiro + Goenitz
+;===========================================================================================================================
+[State -2, striker portrait]; ---- all striker portrait left
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(40) != -1 ;总开关
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 1
+trigger1 = !NumExplod(9000)
+anim = 9000
+ID = 9000
+scale = .5,.5
+pos = 5,ifelse(!var(53),218,ifelse(var(53)=ID,204,218))
+postype = left
+sprpriority = 10
+ontop = 0
+BindTime = -1
+ownpal = 1
+SuperMove   = 1
+PauseMoveTime  = -1
+
+[State -2, striker portrait]; ---- all striker portrait right
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+Triggerall = var(40) != -1 ;总开关
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 2
+trigger1 = !NumExplod(9001)
+anim = 9001
+ID = 9001
+scale = .5,.5
+pos = -5,ifelse(!var(53),218,ifelse(var(53)=ID,204,218))
+postype = right
+sprpriority = 10
+ontop = 0
+BindTime = -1
+ownpal = 1
+SuperMove   = 1
+PauseMoveTime  = -1
+
+;===========================================================================================================================
+;Hidden Hyper Available indicater
+;===========================================================================================================================
+[State -2, Remove Hidden Hyper Available indicater]
+type = RemoveExplod
+triggerall = !ishelper
+triggerall = life >= (lifemax/3)
+trigger1 = NumExplod(7600)
+id = 7600
+ignorehitpause = 1
+
+[State -2, Remove Hidden Hyper Available indicater]
+type = RemoveExplod
+triggerall = !ishelper
+triggerall = life >= (lifemax/3)
+trigger1 = NumExplod(7601)
+id = 7601
+ignorehitpause = 1
+
+[State -2, Hidden Hyper Available indicater]; ---- left
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+triggerall = !ishelper
+triggerall = life < (lifemax/3)
+triggerall = (palno = [1,6]) && !((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 1
+trigger1 = !NumExplod(7600)
+anim = 7600
+ID = 7600
+scale = .5,.5
+pos = 0,ifelse(!var(53),233,ifelse(var(53)=ID,219,233))
+postype = left
+sprpriority = 10
+ontop = 0
+BindTime = -1
+ownpal = 1
+
+[State -2, Hidden Hyper Available indicater]; ---- right
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+triggerall = !ishelper
+triggerall = life < (lifemax/3)
+triggerall = (palno = [1,6]) && !((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 2
+trigger1 = !NumExplod(7601)
+anim = 7601
+ID = 7601
+scale = .5,.5
+pos = -5,ifelse(!var(53),233,ifelse(var(53)=ID,219,233))
+postype = right
+sprpriority = 10
+ontop = 0
+BindTime = -1
+ownpal = 1
+
+[State -2, Hidden Hyper Available indicater]; ---- left inner mode
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+triggerall = !ishelper
+triggerall = life < (lifemax/3)
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 1
+trigger1 = !NumExplod(7600)
+anim = 7600
+ID = 7600
+scale = .5,.5
+pos = 55,ifelse(!var(53),233,ifelse(var(53)=ID,219,233))
+postype = left
+sprpriority = 10
+ontop = 0
+BindTime = -1
+ownpal = 1
+
+[State -2, Hidden Hyper Available indicater]; ---- right inner mode
+type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+triggerall = !ishelper
+triggerall = life < (lifemax/3)
+triggerall = (palno = [7,12]) || ((palno=[1,6]) && var(58)=1 && floor(var(42)/100)%10=1)
+triggerall = TeamSide = 2
+trigger1 = !NumExplod(7601)
+anim = 7601
+ID = 7601
+scale = .5,.5
+pos = -50,ifelse(!var(53),233,ifelse(var(53)=ID,219,233))
+postype = right
+sprpriority = 10
+ontop = 0
+BindTime = -1
+ownpal = 1
+
+;===============================================================================
+; Mu ni Kaerou Sounds stop when get hit
+;===============================================================================
+[State haha]
+type = VarAdd
+trigger1 = var(16) > 0
+var(16) = 1
+ignorehitpause = 1
+
+[State haha]
+type = StopSnd
+;trigger1 = (stateno != [2000,2001]) && var(16) > 0
+trigger1 = NumHelper(2002) = 0 && var(16) > 0
+trigger2 = RoundState > 2
+channel = 5
+ignorehitpause = 1
+
+[State haha]
+type = StopSnd
+;trigger1 = (stateno != [2000,2001]) && var(16) > 0
+trigger1 = NumHelper(2002) = 0 && var(16) > 0
+trigger2 = RoundState > 2
+channel = 6
+ignorehitpause = 1
+
+[State haha]
+type = VarSet
+;trigger1 = (stateno != [2000,2001])
+trigger1 = NumHelper(2002) = 0 ;&& var(16) > 0
+trigger2 = RoundState > 2
+var(16) = 0
+ignorehitpause = 1
+;===============================================================================
+;-------------------------------------------------------------------------------
+;"Time Stop" time counter Bar
+;original code from "Yukari_Yakumo" written by Kurogane
+;I owe my thanks to him
+;-------------------------------------------------------------------------------
+[State -2, 味方判別]
+Type = VarSet
+Triggerall = !NumPartner
+Trigger1 = var(52)
+var(52) = 0
+
+[State -2, 味方判別]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = NumPartner
+TriggerAll = Partner,AuthorName = "Orochi Herman,Eagrose"
+Trigger1 = Partner,Name = "Orochi Eagrose Version"
+var(52) = Partner,ID
+
+[State -2, 味方判別]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = NumPartner
+TriggerAll = Partner,AuthorName = "GONZO-,Eagrose"
+Trigger1 = Partner,Name = "Igniz Eagrose Version"
+var(52) = Partner,ID
+
+[State -2, 味方判別]
+Type = VarSet
+triggerall = !IsHelper
+Trigger1 = !var(52)
+var(52) = ID
+
+[State -2, "Time Stop" life regainning]
+type = NULL;lifeadd
+trigger1 = fvar(6) = 1
+trigger1 = fvar(5) > 0
+trigger1 = stateno != 3000
+trigger1 = time%4=0
+value = ceil(lifemax/1000)
+absolute = 1
+ignorehitpause = 1
+
+[State -2, "Time Stop" time counter Bar decreasing]
+type = Varadd
+triggerall = !IsHelper
+triggerall = fvar(6) = 1
+triggerall = fvar(5) > 0
+triggerall = stateno != 3000
+trigger1 = stateno != 2500
+trigger1 = stateno != 2000 && stateno != 2001 && stateno != 2002
+trigger1 = stateno != 2010 && stateno != 2011 && stateno != 2012
+trigger1 = stateno != 2200 && stateno != 2201 && stateno != 2202
+fv = 5
+value = -1000.0/540.0
+ignorehitpause = 1
+
+[State -2, "Time Stop" time counter Bar decreasing when doing supermoves]
+type = Varadd
+triggerall = !IsHelper
+triggerall = fvar(6) = 1
+triggerall = fvar(5) > 0
+triggerall = stateno != 3000
+trigger1 = stateno = 2000 || stateno || 2001 && stateno || 2002
+trigger2 = stateno = 2010 || stateno || 2011 && stateno || 2012
+trigger3 = stateno = 2200 || stateno || 2201 && stateno || 2202
+fv = 5
+value = -1000.0/540.0/2
+ignorehitpause = 1
+
+[State -2, SuperPause]
+type = SuperPause
+triggerall = !IsHelper
+trigger1 = fvar(6) = 1
+trigger1 = fvar(5) > 0
+trigger1 = stateno != 3000
+time = (540.0/1000.0)*fvar(5)
+anim = -1
+;sound =
+;pos =
+movetime = (540.0/1000.0)*fvar(5)
+darken = 0
+p2defmul = 1
+;poweradd = 0
+unhittable = 1
+;endcmdbuftime = (winmugen only)
+pausebg = 1; (winmugen only)
+ignorehitpause = 1
+;persistent =
+
+[State -2, SuperPause]
+type = SuperPause
+triggerall = !IsHelper
+trigger1 = fvar(6) = 1
+trigger1 = fvar(5) <= 0
+trigger1 = stateno != 3000
+time = 1
+anim = -1
+;sound =
+;pos =
+movetime = 1
+darken = 0
+p2defmul = 1
+;poweradd = 0
+unhittable = 1
+;endcmdbuftime = (winmugen only)
+pausebg = 1; (winmugen only)
+ignorehitpause = 1
+;persistent =
+
+[State 0, StopSnd]; ---- time stop end sound
+type = StopSnd
+triggerall = !IsHelper
+triggerall = fvar(6) = 1
+trigger1 = fvar(5) < 0
+;trigger1 = fvar(5) <= 1000.0/420.0
+channel = 24
+ignorehitpause = 1
+
+[State 0, StopSnd]; ---- time stop end sound
+type = StopSnd
+triggerall = !IsHelper
+triggerall = fvar(6) = 1
+trigger1 = fvar(5) < 0
+;trigger1 = fvar(5) <= 1000.0/420.0
+channel = 25
+ignorehitpause = 1
+
+[State 0, PlaySnd]; ---- time stop end sound
+type = PlaySnd
+triggerall = !IsHelper
+triggerall = fvar(6) = 1
+trigger1 = fvar(5) < 0
+;trigger1 = fvar(5) <= 1000.0/420.0
+value = S9,3
+volume = 255
+pan = 50
+
+[State 0, PlaySnd]; ---- time stop end sound
+type = PlaySnd
+triggerall = !IsHelper
+triggerall = fvar(6) = 1
+trigger1 = fvar(5) < 0
+;trigger1 = fvar(5) <= 1000.0/420.0
+value = S9,3
+volume = 255
+pan = -50
+
+[State -2, "Time Stop" time counter Bar enter regain mode]
+type = VarSet
+triggerall = !IsHelper
+trigger1 = fvar(6) = 1
+trigger1 = fvar(5) <= 0
+trigger1 = stateno != 3000
+fv = 6
+value = 0
+ignorehitpause = 1
+
+[State -2, "Time Stop" time counter Bar regaining normal]
+type = Varadd
+triggerall = !IsHelper
+triggerall = movetype != H || stateno = [120,159]
+trigger1 = fvar(6) = 0
+trigger1 = fvar(5) < 1000
+trigger1 = stateno != 3000
+fv = 5
+value = (1000.0/540.0)/19*12 ;10
+ignorehitpause = 1
+
+[State -2, "Time Stop" time counter Bar regaining gethit]
+type = Varadd
+triggerall = !IsHelper
+triggerall = movetype = H
+triggerall = stateno != [120,159]
+trigger1 = fvar(6) = 0
+trigger1 = fvar(5) < 1000
+trigger1 = stateno != 3000
+fv = 5
+value = (1000.0/540.0)/19*6 ;5
+ignorehitpause = 1
+
+[State 0, PlaySnd]
+type = PlaySnd
+triggerall = !IsHelper
+triggerall = fvar(6) = 0
+trigger1 = fvar(5) > 1000
+value = S9,4
+volume = 255
+
+[State -2, "Time Stop" time counter Bar full regain complete]
+type = Varset
+triggerall = !IsHelper
+trigger1 = fvar(6) = 0
+trigger1 = fvar(5) >= 1000
+trigger1 = stateno != 3000
+fv = 5
+value = 1000
+ignorehitpause = 1
+
+[State -2, BGPalFX]
+type = BGPalFX
+triggerall = !IsHelper
+trigger1 = fvar(6) = 1
+trigger1 = fvar(5) > 0
+trigger1 = stateno != 3000
+time = 1
+add = 0,0,0
+mul = 256,256,256
+sinadd = 0,0,0,10
+invertall = 1
+color = 256
+ignorehitpause = 1
+;persistent =
+
+[State 0, SelfState]; ---- Time Stop auto selfstate
+type = SelfState
+triggerall = !IsHelper
+triggerall = fvar(6) = 1
+triggerall = fvar(5) > 0
+trigger1 = movetype = H
+trigger1 = stateno != [120,159]
+;trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+value = ifelse(Pos Y < -20,5210,5201)
+ignorehitpause = 1
+
+[State -2, エフェクトを消す]
+Type = RemoveExplod
+triggerall = !IsHelper
+Trigger1 = NumExplod(4000)
+ID = 4000
+IgnoreHitPause = 1
+
+[State -2, エフェクトを消す]
+Type = RemoveExplod
+triggerall = !IsHelper
+Trigger1 = NumExplod(4010)
+ID = 4010
+IgnoreHitPause = 1
+
+[State -2, エフェクトを消す]
+Type = RemoveExplod
+triggerall = !IsHelper
+Trigger1 = NumExplod(4015)
+ID = 4015
+IgnoreHitPause = 1
+
+;**************************************************
+[State -2, 霊力ゲージ枠]
+Type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+triggerall = !IsHelper
+TriggerAll = RoundState = [2,3]
+triggerall = (palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+;Trigger1 = !NumPartner
+;Trigger2 = NumPartner
+;Trigger2 = ((var(52) = ID) || (var(52) > ID))
+Trigger1 = 1
+Anim        = ifelse(Partner,AuthorName = "GONZO-,Eagrose"&&Partner,Name = "Igniz Eagrose Version"&&((Partner,palno = 12) || ((Partner,palno=[7,11]) && Partner,var(58)=1 && floor(Partner,var(42)/10)%10=1)),4001,4000)
+ID          = 4000
+Pos         = IfElse(TeamSide=2,288,32),234-177
+PosType     = Left
+Facing      = IfElse(TeamSide=2,-1,1)
+BindTime    = -1
+RemoveTime  = -1
+Scale       = .5,.5
+SprPriority = 10
+OnTop       = IfElse(NumPartner,(var(52)=ID),1);何故かタッグで上に表示される事があるのでとりあえず対策
+Ownpal      = 1
+SuperMove   = 1
+PauseMoveTime  = -1
+IgnoreHitPause = 1
+
+[State -2, 霊力ゲージ-青緑黄点滅-1]
+Type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+triggerall = !IsHelper
+triggerall = (palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+Trigger1 = RoundState = [2,3]
+Trigger1 = !NumPartner
+Anim        = 4010+(fvar(5)=[501,750])+(fvar(5)=[251,500])*2+(fvar(5)=[0,250])*IfElse((Sin(GameTime*(Pi/10.))>=0),3,5)
+ID          = 4010
+Pos         = IfElse(TeamSide=2,288,32),234+IfElse(NumPartner,(var(52)<ID)*2,0)-177
+PosType     = Left
+Facing      = IfElse(TeamSide=2,-1,1)
+BindTime    = -1
+RemoveTime  = -1
+Scale       = fvar(5)/2000.,.5-((NumPartner)*.25*(var(52)!=ID))
+SprPriority = 11
+OnTop       = 1
+Ownpal      = 1
+SuperMove   = 1
+PauseMoveTime  = -1
+IgnoreHitPause = 1
+
+[State -2, 霊力ゲージ-青緑黄点滅-2]
+Type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+triggerall = !IsHelper
+triggerall = (palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+Trigger1 = RoundState = [2,3]
+Trigger1 = NumPartner
+Anim        = 4010+(fvar(5)=[501,750])+(fvar(5)=[251,500])*2+(fvar(5)=[0,250])*IfElse((Sin(GameTime*(Pi/10.))>=0),3,5)
+ID          = 4010
+Pos         = IfElse(TeamSide=2,288,32),234+((var(52)<ID)*2)-177
+PosType     = Left
+Facing      = IfElse(TeamSide=2,-1,1)
+BindTime    = -1
+RemoveTime  = -1
+Scale       = fvar(5)/2000.,.5-(.25*(var(52)!=ID))
+SprPriority = 11
+OnTop       = 1
+Ownpal      = 1
+SuperMove   = 1
+PauseMoveTime  = -1
+IgnoreHitPause = 1
+
+[State -2, 霊力ゲージ-赤-1]
+Type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+triggerall = !IsHelper
+triggerall = (palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+Trigger1 = RoundState = [2,3]
+Trigger1 = !NumPartner
+Trigger1 = fvar(5) = [0,250]
+Anim        = 4015
+ID          = 4015
+Pos         = IfElse(TeamSide=2,288,32),234+IfElse(NumPartner,(var(52)<ID)*2,0)-177
+PosType     = Left
+Facing      = IfElse(TeamSide=2,-1,1)
+BindTime    = -1
+RemoveTime  = -1
+Scale       = fvar(5)/2000.,.5
+SprPriority = 11
+OnTop       = 1
+Ownpal      = 1
+SuperMove   = 1
+PauseMoveTime  = -1
+IgnoreHitPause = 1
+
+[State -2, 霊力ゲージ-赤-2]
+Type = Explod
+Triggerall = !((var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900))
+triggerall = !IsHelper
+triggerall = (palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+Trigger1 = RoundState = [2,3]
+Trigger1 = NumPartner
+Trigger1 = fvar(5) = [0,250]
+Anim        = 4015
+ID          = 4015
+Pos         = IfElse(TeamSide=2,288,32),234+IfElse(NumPartner,(var(52)<ID)*2,0)-177
+PosType     = Left
+Facing      = IfElse(TeamSide=2,-1,1)
+BindTime    = -1
+RemoveTime  = -1
+Scale       = fvar(5)/2000.,.5-(.25*(var(52)!=ID))
+SprPriority = 11
+OnTop       = 1
+Ownpal      = 1
+SuperMove   = 1
+PauseMoveTime  = -1
+IgnoreHitPause = 1
+
+
+;===========================================================================================================================
+;WinKO Screen Special Effects
+;original from the char "Orochi_", written by OrochiHerman
+;I owe my thanks to him
+;===========================================================================================================================
+[State -2, KO Screen 1]
+type = null;Helper
+triggerall = !ishelper
+trigger1 = WinKO
+trigger1 = NumHelper(6005) = 0
+helpertype = normal
+name = "6005"
+id = (6005)
+pos = 0,0
+bindtime = -1
+postype = left
+stateno = 6005
+keyctrl = 0
+;persistent = 0
+ignorehitpause = 1
+ownpal = 1
+pausemovetime = 2147483648
+supermovetime = 2147483648
+
+;===========================================================================================================================
+;global afterimage
+;===========================================================================================================================
+[State -2, Afterimage]
+type = null;Afterimage
+triggerall = roundstate != 0
+trigger1 = time = 0
+trans = add
+PalContrast =  250, 250, 250
+PalBright = 0,0,0
+time    =  -1
+length  = 13
+TimeGap = 1
+FrameGap = 1
+
+[State -2, destroy Afterimage]; ---- reset afterimage
+type = AfterImageTime
+;triggerall = roundstate <= 2
+triggerall = time  = [1,3]
+;stateno = [190,193]
+trigger1 = stateno = 0
+;stateno = 20
+trigger2 = stateno = 270
+trigger3 = stateno = 271
+trigger4 = stateno = 275
+;trigger5 = stateno = 1000
+;trigger6 = stateno = 1001
+;trigger7 = stateno = 1002
+;trigger8 = stateno = 1003
+;trigger9 = stateno = 1004
+;trigger10 = stateno = 1005
+;trigger11 = stateno = 1006
+value = 0
+
+;===========================================================================================================================
+;Orochi power shinning Palfx
+;===========================================================================================================================
+[State -2]
+type = VarSet
+triggerall = stateno != [120,159]
+trigger1 = RoundNo = 1
+trigger1 = RoundState = 0 && stateno != 55087719
+trigger2 = !HitShakeOver
+;trigger3 = StateNo != 2101 && (stateno != 2000 && stateno != 2010 || ((stateno = 2000 || stateno = 2010) && (time != [0,28]))) && (stateno != 2100 && stateno != 2150 || ((stateno = 2100 || stateno = 2150) && (time != [1,29])))
+var(21) = 0
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+trigger1 = RoundNo = 1
+trigger1 = RoundState >= 2
+trigger1 = HitShakeOver
+trigger2 = RoundNo >= 2
+trigger2 = HitShakeOver
+trigger2 = RoundState >= 0
+trigger3 = roundno = 1
+trigger3 = RoundState = 0 && stateno = 55087719
+trigger4 = stateno = [120,159]
+var(21) = 1
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = StateNo != 2101 && stateno != 2000 && stateno != 2010 && stateno != 2100 && stateno != 2150
+trigger1 = RoundNo = 1
+trigger1 = RoundState >= 2
+trigger1 = HitShakeOver
+trigger2 = RoundNo >= 2
+trigger2 = HitShakeOver
+trigger2 = RoundState >= 0
+trigger3 = roundno = 1
+trigger3 = RoundState = 0 && stateno = 55087719
+trigger4 = stateno = [120,159]
+var(27) = 1
+ignorehitpause = 1
+
+[State -3, PalFX]
+type = PalFX
+triggerall = var(28) != -1
+triggerall = StateNo != 2101
+;triggerall = !(StateNo = 170 && time >= 0)
+trigger1 = var(21) = 1
+;triggerall = movetype != H && stateno != [120,159]
+;trigger1 = roundstate >= 2
+time = 1
+;color = IfElse((var(3) = [-1,0]), 75, 255)
+color = Ceil(IfElse((var(24) = [(var(28)*4-2)+1,((var(28)*4-2)*2)]), 75, 255))
+;color = Ceil(IfElse((var(24) = [63,124]), 75, 255))
+;color = Ceil(IfElse((var(24) = [31,60]), 75, 255))
+;color = Ceil(IfElse((var(24) = [31,60]), 0 * var(2), 255)) ;256 - (var(2) * (var(3) < 0))
+;color = Ceil(IfElse(var(3) > 0, -1 * var(2), 255)) ;256 - (var(2) * (var(3) < 0))
+;color = 256 + (var(2) * var(3) < 0)
+;invertall = IfElse((var(3) = [-1,0]), 1, 0)
+invertall = IfElse((var(24) = [(var(28)*4-2)+1,((var(28)*4-2)*2)]), 1, 0)
+;invertall = IfElse((var(24) = [63,124]), 1, 0)
+;invertall = IfElse((var(24) = [32,59]), 1, 0)
+;invertall = (var(24) = [31,60]) ;(var(23) = 1) ;*
+;invertall = ((var(3) = 1) || (var(3) = -2))
+add = Ceil(IfElse(var(3) < 0, var(2), -1 * var(2))), Ceil(IfElse(var(3) < 0, var(2), -1 * var(2))), Ceil(IfElse(var(3) < 0, var(2), -1 * var(2)))
+;sub = Ceil(IfElse(var(3) < 0, var(2), -1 * var(2))), Ceil(IfElse(var(3) < 0, var(2), -1 * var(2))), Ceil(IfElse(var(3) < 0, var(2), -1 * var(2)))
+;mul = 256,256,256
+;mul = Ceil(IfElse(var(3) < 0, var(2), -1 * var(2))), Ceil(IfElse(var(3) < 0, var(2), -1 * var(2))), Ceil(IfElse(var(3) < 0, var(2), -1 * var(2)))
+;contrast = Ceil(IfElse(var(3) < 0, var(2), -1 * var(2))), Ceil(IfElse(var(3) < 0, var(2), -1 * var(2))), Ceil(IfElse(var(3) < 0, var(2), -1 * var(2)))
+;sinadd = -208,-208,-208,16
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = var(21) = 1
+triggerall = var(27) = 1
+;triggerall = StateNo != 2101
+;trigger1 = var(2) <= 0 && var(23) = 0\
+trigger1 = RoundState = 0
+var(23) = 0
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = var(21) = 1
+triggerall = var(27) = 1
+;triggerall = StateNo != 2101
+;triggerall = movetype != H && stateno != [120,159]
+trigger1 = var(3) = 1
+;trigger1 = var(23) = 0
+var(23) = 1
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = var(21) = 1
+triggerall = var(27) = 1
+;triggerall = StateNo != 2101
+;triggerall = movetype != H && stateno != [120,159]
+trigger1 = var(24) >= (var(28)*4-2)*2       ;(208/13*4-2)*2
+;trigger1 = var(24) >= 60
+;trigger1 = var(23) = 0
+var(24) = 0
+ignorehitpause = 1
+
+[State -2]
+type = VarAdd
+triggerall = var(21) = 1
+triggerall = var(27) = 1
+trigger1 = var(23) = 1
+;trigger1 = StateNo != 2101 ;&& (stateno != 2000 && stateno != 2010 || ((stateno = 2000 || stateno = 2010) && (time != [0,28]))) && (stateno != 2100 && stateno != 2150 || ((stateno = 2100 || stateno = 2150) && (time != [1,29])))
+;trigger1 = var(23) = 0
+var(24) = 1
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = var(21) = 1
+triggerall = var(27) = 1
+;triggerall = StateNo != 2101
+;triggerall = movetype != H && stateno != [120,159]
+trigger1 = RoundState = 0
+var(2) = 0
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = var(27) = 1
+;triggerall = StateNo != 2101
+;triggerall = movetype != H && stateno != [120,159]
+trigger1 = RoundState = 0
+;trigger2 = roundstate >= 2
+;trigger2 = var(2) <= 0
+;trigger2 = roundstate >= 2
+trigger2 = var(21) = 1
+trigger2 = var(2) <= 0
+trigger2 = var(3) = -1
+var(3) = 0
+ignorehitpause = 1
+
+[State -2]
+type = VarAdd
+triggerall = var(27) = 1
+;triggerall = StateNo != 2101 ;&& (stateno != 2000 && stateno != 2010 || ((stateno = 2000 || stateno = 2010) && (time != [0,28]))) && (stateno != 2100 && stateno != 2150 || ((stateno = 2100 || stateno = 2150) && (time != [1,29])))
+;triggerall = movetype != H && stateno != [120,159]
+;triggerall = roundstate >= 2
+triggerall = var(21) = 1
+trigger1 = var(3) = 0
+trigger2 = var(3) = -2
+var(2) = floor(208/var(28))
+;var(2) = 26
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = var(27) = 1
+;triggerall = StateNo != 2101
+;triggerall = movetype != H && stateno != [120,159]
+triggerall = var(21) = 1
+;trigger1 = roundstate >= 2
+trigger1 = var(2) >= floor(208/var(28))*var(28)
+trigger1 = var(3) = 0
+var(3) = 1
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = var(27) = 1
+;triggerall = StateNo != 2101
+;triggerall = movetype != H && stateno != [120,159]
+triggerall = var(21) = 1
+;trigger1 = roundstate >= 2
+trigger1 = var(2) >= floor(208/var(28))*var(28)
+trigger1 = var(3) = -2
+var(3) = -1
+ignorehitpause = 1
+
+[State -2]
+type = VarAdd
+triggerall = var(27) = 1
+;triggerall = StateNo != 2101 && (stateno != 2000 && stateno != 2010 && (time != [0,28])) && (stateno != 2100 && stateno != 2150 && (time != [1,29]) )
+;triggerall = StateNo != 2101 ;&& (stateno != 2000 && stateno != 2010 || ((stateno = 2000 || stateno = 2010) && (time != [0,28]))) && (stateno != 2100 && stateno != 2150 || ((stateno = 2100 || stateno = 2150) && (time != [1,29])))
+;triggerall = movetype != H && stateno != [120,159]
+triggerall = var(21) = 1
+;triggerall = roundstate >= 2
+;triggerall = var(2) > 0
+trigger1 = var(3) = 1
+trigger2 = var(3) = -1
+var(2) = -1*floor(208/var(28))
+;var(2) = -26
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = var(27) = 1
+;triggerall = StateNo != 2101
+;triggerall = movetype != H && stateno != [120,159]
+triggerall = var(21) = 1
+;triggerall = roundstate >= 2
+trigger1 = var(2) <= 0
+trigger1 = var(3) = 1
+var(3) = -2
+ignorehitpause = 1
+
+
+;===========================================================================================================================
+;AI Helpers of statedef -2
+;===========================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+;===========================================================================================================================
+;Some Other Useful Special Global Settings
+;===========================================================================================================================
+[State 0, VarSet];defence ignore var
+type = VarSet
+trigger1 = EnemyNear(floor(fvar(36))),const(data.defence) >= 100
+fvar(9) = EnemyNear(floor(fvar(36))),const(data.defence)/100
+ignorehitpause = 1
+
+[State 0, VarSet];defence ignore var reset
+type = VarSet
+trigger1 = EnemyNear(floor(fvar(36))),const(data.defence) < 100
+fvar(9) = 1.0
+ignorehitpause = 1
+
+[State 0, SelfState]
+type = SelfState
+triggerall = !(NumPartner && Numhelper(4211) && Helper(4211),stateno = 4215) ;not team-mode OROCHI's UNHOLY LIFE
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = (palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+triggerall = !ishelper
+triggerall = !alive
+trigger1 = var(25) != (gametime+5)*(gametime%3)+97864    ;Is in enemy's P2state
+value = 3500
+ctrl = 0
+ignorehitpause = 1
+
+[State 0, SelfState]
+type = changeState
+triggerall = !(NumPartner && Numhelper(4211) && Helper(4211),stateno = 4215) ;not team-mode OROCHI's UNHOLY LIFE
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = (palno = 12) || ((palno=[7,11]) && var(58)=1 && floor(var(42)/10)%10=1)
+triggerall = !ishelper
+triggerall = !alive
+trigger1 = stateno != 3500    ;avoid infinite changestate
+trigger1 = stateno != 5150    ;avoid infinite changestate
+value = 3500
+ctrl = 0
+ignorehitpause = 1
+
+[State -2, Width*]
+type = Width
+trigger1 = frontedgedist < 8
+edge = 3,
+
+[State -2, cannot be throw during guard-shake, original game feature];防御僵直不可投，原作特性
+type = NotHitBy
+trigger1 = stateno = [150,159]
+value = ,AT
+ignorehitpause = 1
+
+[State -2, out of battle]
+type = NotHitBy
+trigger1 = roundstate < 2
+value = SCA
+ignorehitpause = 1
+
+[State -2, out of battle]
+type = PlayerPush
+trigger1 = roundstate = [0,1]
+value = 0
+ignorehitpause = 1
+
+[State -2, nobardisplay]
+type = NULL;AssertSpecial
+trigger1 = RoundState > 2
+trigger1 = Win
+flag = nobardisplay
+ignorehitpause = 1
+
+[State -2, VarSet]; ---- damage to power, life var reset at -2 end
+type = VarSet
+triggerall = !ishelper
+trigger1 = alive
+fvar(8) = life
+ignorehitpause = 1
+;===========================================================================================================================
+;Debug ClipBoard Parameter
+;===========================================================================================================================
+[State -2, DisplayToClipboard0]
+type = NULL;AppendToClipboard
+trigger1 = 1
+text = "var(13)=%d  var(59)=%d  fvar(37)=%d  fvar(39)=%d  P2bodydistX=%d "
+params = var(13),var(59),ceil(fvar(37)),ceil(fvar(39)), ceil(P2bodydist X)
+ignorehitpause = 1
+
+[State -2, DisplayToClipboard0]
+type = NULL;AppendToClipboard
+trigger1 = 1
+text = "\nvar(19)=%d  var(20)=%d  var(5)=%d  var(6)=%d  var(7)=%d "
+params = var(19),var(20),var(5),var(6),var(7)
+ignorehitpause = 1
+
+[State -2, DisplayToClipboard0]
+type = null;displayToClipboard
+trigger1 = 1
+text = "v59=%d,fv39=%d,fv37=%d,P2bodydistX=%d,inguard=%d,"
+params = var(59),floor(fvar(39)),floor(fvar(37)),ceil(P2bodydist X),inguarddist
+ignorehitpause = 1
+
+[State -2, DisplayToClipboard0]
+type = displayToClipboard
+trigger1 = 1
+text = "inguard=%d, NOKOvar(29)=%d, win=%d, lose=%d, var32=%d"
+params = inguarddist, var(29), win, lose, var(32)
+ignorehitpause = 1
+
+[State -2, DisplayToClipboard0]
+type = null;displayToClipboard
+trigger1 = 1
+text = "v59=%d,v21=%d,v24=%d,v3=%d,v2=%d"
+params = var(59),var(21),var(24),var(3),var(2)
+ignorehitpause = 1
+
+[State -2, DisplayToClipboard0]
+type = null;AppendToClipboard
+trigger1 = 1
+text = "\n fv6=%f,fv5=%f,P2bodydistY=%d"
+params = fvar(6),fvar(5),ceil(P2bodydist Y)
+ignorehitpause = 1
+
+[State -2, DisplayToClipboard0]
+type = null;AppendToClipboard
+trigger1 = 1
+text = "\n v21=%d,v27=%d,v1=%d"
+params = var(21),var(27),(helper(2501),var(1))
+ignorehitpause = 1
+
+[State -2, DisplayToClipboard0]
+type = null;AppendToClipboard
+trigger1 = 1
+text = "\n v58=%d,v25=%d,gametime=%d,v7=%d"
+params = var(58),var(25),gametime,var(7)
+ignorehitpause = 1
+
+[State -2, DisplayToClipboard0]
+type = null;AppendToClipboard
+trigger1 = 1
+text = "\n inguarddist=%d, movecontact=%d, P2 is A=%d"
+params = inguarddist,movecontact,(p2movetype = A)
+ignorehitpause = 1
+
+[State -2, DisplayToClipBoard];debug
+Type = null;AppendToClipboard
+Trigger1 = 1
+Text = "\n alive=%d, p_alive=%d, life=%d, partner_life=%d, helper.var(10)=%d"
+Params = alive,(partner,alive),life,(partner,life),(Helper(4211),var(10))
+IgnoreHitPause = 1
+
+[State -2, DisplayToClipBoard];debug
+Type = null;AppendToClipboard
+Trigger1 = 1
+Text = "\n enemy,alive=%d, enemy,hitpausetime=%d, enemy,stateno=%d, RS=%d, v58=%d"
+Params = (enemy,alive),(enemy,hitpausetime),(enemy,stateno),roundstate,var(58)
+IgnoreHitPause = 1
+
+[State -2, DisplayToClipBoard];debug
+Type = AppendToClipboard
+Trigger1 = 1
+Text = "\n enemy,alive=%d, RS=%d, v58=%d, v42=%d, palno=%d"
+Params = (enemy,alive),roundstate,var(58),var(42),palno
+IgnoreHitPause = 1
+
+[State -2, DisplayToClipBoard];debug
+Type = AppendToClipboard
+Trigger1 = 1
+Text = " v49=%d"
+Params = var(49)
+IgnoreHitPause = 1
+
+;-----------------------------------------------
+[State -2, DisplayToClipboard0]
+type = null;displayToClipboard
+trigger1 = 1
+text = "H0_v5=%d, H1_v5=%d, H0_v4=%d, H1_v4=%d, H0_v2=%d"
+params = (Helper(35000),Var(5)),(Helper(35001),Var(5)),(Helper(35000),Var(4)),(Helper(35001),Var(4)),(HelPer(35000),Var(2))
+ignorehitpause = 1
+
+[State -2, DisplayToClipboard0]
+type = null;AppendToClipboard
+trigger1 = 1
+text = "\n H0_v6=%d, H1_v6=%d, v57=%d, v56=%d"
+params =  (Helper(35000),Var(6)),(Helper(35001),Var(6)),var(57),var(56)
+ignorehitpause = 1
+
+
+;===========================================================================================================================
+;论外
+;===========================================================================================================================
+;=====================论外=====================
+[State 0, VarSet];生命操作重置
+type = VarSet
+TRIGGERALL = !ishelper
+Triggerall = var(49) <= 0 || var(49) > 2147483647
+Trigger1 = lifemax = [1,2147483647]
+var(49) = lifemax
+ignorehitpause = 1
+
+[State 0, VarSet];生命操作重置
+type = VarSet
+TRIGGERALL = !ishelper
+Triggerall = var(49) <= 0 || var(49) > 2147483647
+Trigger1 = lifemax != [1,2147483647]
+var(49) = 1000
+ignorehitpause = 1
+
+[state -2, SuperPause];SuperPause冻结解除
+type = SuperPause
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+Trigger1 = 1
+time = 2147483646
+movetime = 2147483646
+anim = -1
+unhittable = 0
+darken = 0
+ignorehitpause = 1
+
+[state -2, Pause];Pause冻结解除
+type = Pause
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+Trigger1 = 1
+time = 2147483646
+movetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];冻结解除Helper
+type = Helper
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+TriggerAll= !IsHelper ; ---- Not Shadow Clone Igniz
+triggerall = !numhelper(701130)
+trigger1 = 1
+helpertype = player
+name = "TimeFreeze Break"
+ID = 701130
+stateno = 701130
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[state -2, SuperPause];时停拖延KO
+type = SuperPause
+TRIGGERALL = !ishelper
+Triggerall = life = 0
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+time = 1;2147483647
+movetime = 2147483647
+unhittable = 0
+darken = 0
+anim = -1
+ignorehitpause = 1
+
+[state -2, Pause];时停拖延KO
+type = Pause
+TRIGGERALL = !ishelper
+Triggerall = life = 0
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+time = 1;2147483647
+movetime = 22147483647
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = VarSet
+TRIGGERALL = !ishelper
+Triggerall = var(49) >= floor(lifemax/3*2)
+Trigger1 = life = 0
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, LifeSet];抵抗大伤害 生命复位
+type = LifeSet
+TRIGGERALL = !ishelper
+TRIGGERALL = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+TRIGGERALL = lifemax = [1,2147483647]
+Trigger1 = roundstate != 2
+Trigger2 = var(49) != [1,Lifemax]
+value = lifemax
+ignorehitpause = 1
+
+[State 0, LifeSet];抵抗大伤害 生命操作
+type = LifeSet
+TRIGGERALL = !ishelper
+TRIGGERALL = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+TRIGGERALL = lifemax = [1,2147483647]
+Trigger1 = roundstate = 2
+Trigger1 = var(49) = [1,Lifemax]
+value = var(49)
+ignorehitpause = 1
+
+[State 0, LifeSet];抵抗大伤害 抵抗lifemax弄
+type = LifeSet
+TRIGGERALL = !ishelper
+TRIGGERALL = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+Trigger1 = lifemax != [1,2147483647]
+value = 1000
+ignorehitpause = 1
+
+[State 0, PowerAdd];能量无限（无实质意义）
+type = Poweradd
+TRIGGERALL = !ishelper
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900) ;Catalysm Mode
+value = PowerMax
+ignorehitpause = 1
+
+[State 0, AssertSpecial];TimeOver禁止
+type = null;AssertSpecial
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+flag = timerfreeze
+ignorehitpause = 1
+
+[State 0, ChangeState];帖图清屏美化
+type = removeexplod
+triggerall = roundstate < 4
+triggerall = roundstate > 1
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+trigger1 = stateno!=2300
+trigger1 = stateno!=2301
+trigger1 = stateno!=2302
+;trigger1 = stateno!=3000
+id = -1
+ignorehitpause = 1
+
+[State 0, ChangeState];无限死星技
+type = ChangeState
+TRIGGERALL = !ishelper
+triggerall = roundstate < 4
+triggerall = roundstate > 1
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+trigger1 = stateno!=2300
+trigger1 = stateno!=2301
+trigger1 = stateno!=2302
+;trigger1 = stateno!=3000
+value = 2300
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+TRIGGERALL = !ishelper
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, AssertSpecial];NOKO断言
+type = AssertSpecial
+TRIGGERALL = !ishelper
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+Trigger1 = life = 0
+Trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+flag = noko
+flag2 = nokosnd
+ignorehitpause = 1
+
+[State 0, AssertSpecial];helper禁止死亡音效
+type = AssertSpecial
+TRIGGERALL = ishelper
+Triggerall = life = 0
+Trigger1 = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+flag = nokosnd
+ignorehitpause = 1
+
+[State 0, HitAdd]
+type = HitAdd
+Trigger1 = !ishelper
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+value = -999
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+Trigger1 = !ishelper
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+y = 0
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = VarSet
+Triggerall = var(49) >= 2
+;------------------------
+triggerall = !ishelper
+triggerall = roundstate < 4
+triggerall = roundstate > 1
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+trigger1 = stateno!=2300
+trigger1 = stateno!=2301
+trigger1 = stateno!=2302
+trigger2 = time >= 600
+trigger3 = var(25) != (gametime+5)*(gametime%3)+97864
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, SelfState];全局selfstate
+type = SelfState
+triggerall = !ishelper
+triggerall = roundstate < 4
+triggerall = roundstate > 1
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+trigger1 = stateno!=2300
+trigger1 = stateno!=2301
+trigger1 = stateno!=2302
+trigger2 = time >= 600
+trigger3 = var(25) != (gametime+5)*(gametime%3)+97864
+value = 2300
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正
+type = selfstate
+triggerall = ishelper(2306)
+trigger1 = stateno != 2306
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+value = 2306
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 神模式核心
+type = selfstate
+triggerall = ishelper(701100)
+trigger1 = stateno != 701100
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state 701110
+value = 701100
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 OTHK受体
+type = selfstate
+triggerall = ishelper(701110)
+trigger1 = stateno != 701110
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+value = 701110
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3*2)
+;------------------------
+triggerall = ishelper(701120)
+trigger1 = stateno != 701120
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 超即死HITDEF
+type = selfstate
+triggerall = ishelper(701120)
+trigger1 = stateno != 701120
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+value = 701120
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 冻结解除
+type = selfstate
+triggerall = ishelper(701130)
+trigger1 = stateno != 701130
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+value = 701130
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3)
+;------------------------
+triggerall = ishelper(702210)
+trigger1 = stateno != 702210
+trigger1 = stateno != 702212
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 矛A
+type = selfstate
+triggerall = ishelper(702210)
+trigger1 = stateno != 702210
+trigger1 = stateno != 702212
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+value = 702210
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3)
+;------------------------
+triggerall = ishelper(702211)||ishelper(702212)||ishelper(702213)||ishelper(702214)||ishelper(702215)||ishelper(702216)||ishelper(702217)||ishelper(702218)
+trigger1 = stateno != 702211
+trigger1 = stateno != 702213
+trigger1 = stateno != 2147483645
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 盾A
+type = selfstate
+triggerall = ishelper(702211)||ishelper(702212)||ishelper(702213)||ishelper(702214)||ishelper(702215)||ishelper(702216)||ishelper(702217)||ishelper(702218)
+trigger1 = stateno != 702211
+trigger1 = stateno != 702213
+trigger1 = stateno != 2147483645
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+value = 702213
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3)
+;------------------------
+triggerall = ishelper(702220)
+trigger1 = stateno != 702220
+trigger1 = stateno != 702222
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 矛B
+type = selfstate
+triggerall = ishelper(702220)
+trigger1 = stateno != 702220
+trigger1 = stateno != 702222
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+value = 702220
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3)
+;------------------------
+triggerall = ishelper(702221)||ishelper(702222)||ishelper(702223)||ishelper(702224)||ishelper(702225)||ishelper(702226)||ishelper(702227)||ishelper(702228)
+trigger1 = stateno != 702221
+trigger1 = stateno != 702223
+trigger1 = stateno != 2147483645
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 盾B
+type = selfstate
+triggerall = ishelper(702221)||ishelper(702222)||ishelper(702223)||ishelper(702224)||ishelper(702225)||ishelper(702226)||ishelper(702227)||ishelper(702228)
+trigger1 = stateno != 702221
+trigger1 = stateno != 702223
+trigger1 = stateno != 2147483645
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+value = 702223
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3)
+;------------------------
+triggerall = ishelper(702230)
+trigger1 = stateno != 702230
+trigger1 = stateno != 702232
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 矛C
+type = selfstate
+triggerall = ishelper(702230)
+trigger1 = stateno != 702230
+trigger1 = stateno != 702232
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+value = 702230
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3)
+;------------------------
+triggerall = ishelper(702231)||ishelper(702232)||ishelper(702233)||ishelper(702234)||ishelper(702235)||ishelper(702236)||ishelper(702237)||ishelper(702238)
+trigger1 = stateno != 702231
+trigger1 = stateno != 702233
+trigger1 = stateno != 2147483645
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 盾C
+type = selfstate
+triggerall = ishelper(702231)||ishelper(702232)||ishelper(702233)||ishelper(702234)||ishelper(702235)||ishelper(702236)||ishelper(702237)||ishelper(702238)
+trigger1 = stateno != 702231
+trigger1 = stateno != 702233
+trigger1 = stateno != 2147483645
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+value = 702233
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3)
+;------------------------
+triggerall = ishelper(702240)
+trigger1 = stateno != 702240
+trigger1 = stateno != 702242
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 矛D
+type = selfstate
+triggerall = ishelper(702240)
+trigger1 = stateno != 702240
+trigger1 = stateno != 702242
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+value = 702240
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3)
+;------------------------
+triggerall = ishelper(702241)||ishelper(702242)||ishelper(702243)||ishelper(702244)||ishelper(702245)||ishelper(702246)||ishelper(702247)||ishelper(702248)
+trigger1 = stateno != 702241
+trigger1 = stateno != 702243
+trigger1 = stateno != 2147483645
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 盾D
+type = selfstate
+triggerall = ishelper(702241)||ishelper(702242)||ishelper(702243)||ishelper(702244)||ishelper(702245)||ishelper(702246)||ishelper(702247)||ishelper(702248)
+trigger1 = stateno != 702241
+trigger1 = stateno != 702243
+trigger1 = stateno != 2147483645
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+value = 702243
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3)
+;------------------------
+triggerall = ishelper(702250)
+trigger1 = stateno != 702250
+trigger1 = stateno != 702252
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 矛E
+type = selfstate
+triggerall = ishelper(702250)
+trigger1 = stateno != 702250
+trigger1 = stateno != 702252
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+value = 702250
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3)
+;------------------------
+triggerall = ishelper(702251)||ishelper(702252)||ishelper(702253)||ishelper(702254)||ishelper(702255)||ishelper(702256)||ishelper(702257)||ishelper(702258)
+trigger1 = stateno != 702251
+trigger1 = stateno != 702253
+trigger1 = stateno != 2147483645
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 盾E
+type = selfstate
+triggerall = ishelper(702251)||ishelper(702252)||ishelper(702253)||ishelper(702254)||ishelper(702255)||ishelper(702256)||ishelper(702257)||ishelper(702258)
+trigger1 = stateno != 702251
+trigger1 = stateno != 702253
+trigger1 = stateno != 2147483645
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+value = 702253
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3)
+;------------------------
+triggerall = ishelper(702260)
+trigger1 = stateno != 702260
+trigger1 = stateno != 702262
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 矛F
+type = selfstate
+triggerall = ishelper(702260)
+trigger1 = stateno != 702260
+trigger1 = stateno != 702262
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864      ;in the same p2state
+value = 702260
+ignorehitpause = 1
+
+[State 0, VarSet]; ---- 生命操作记录
+type = ParentVarSet
+Triggerall = Parent,var(49) >= floor(Parent,lifemax/3)
+;------------------------
+triggerall = ishelper(702261)||ishelper(702262)||ishelper(702263)||ishelper(702264)||ishelper(702265)||ishelper(702266)||ishelper(702267)||ishelper(702268)
+trigger1 = stateno != 702261
+trigger1 = stateno != 702263
+trigger1 = stateno != 2147483645
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+;------------------------
+var(49) = var(49)-1
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正 盾F
+type = selfstate
+triggerall = ishelper(702261)||ishelper(702262)||ishelper(702263)||ishelper(702264)||ishelper(702265)||ishelper(702266)||ishelper(702267)||ishelper(702268)
+trigger1 = stateno != 702261
+trigger1 = stateno != 702263
+trigger1 = stateno != 2147483645
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+value = 702263
+ignorehitpause = 1
+
+[State 0, destroyself];helper纠正
+type = destroyself
+triggerall = ishelper
+triggerall = !ishelper(2306)
+triggerall = !ishelper(701100)
+triggerall = !ishelper(701110)
+triggerall = !ishelper(701120)
+triggerall = !ishelper(702210);矛A
+triggerall = !ishelper(702211)&&!ishelper(702212)&&!ishelper(702213)&&!ishelper(702214)
+triggerall = !ishelper(702215)&&!ishelper(702216)&&!ishelper(702217)&&!ishelper(702218)
+triggerall = !ishelper(702220);矛B
+triggerall = !ishelper(702221)&&!ishelper(702222)&&!ishelper(702223)&&!ishelper(702224)
+triggerall = !ishelper(702225)&&!ishelper(702226)&&!ishelper(702227)&&!ishelper(702228)
+triggerall = !ishelper(702230);矛C
+triggerall = !ishelper(702231)&&!ishelper(702232)&&!ishelper(702233)&&!ishelper(702234)
+triggerall = !ishelper(702235)&&!ishelper(702236)&&!ishelper(702237)&&!ishelper(702238)
+triggerall = !ishelper(702240);矛D
+triggerall = !ishelper(702241)&&!ishelper(702242)&&!ishelper(702243)&&!ishelper(702244)
+triggerall = !ishelper(702245)&&!ishelper(702246)&&!ishelper(702247)&&!ishelper(702248)
+triggerall = !ishelper(702250);矛E
+triggerall = !ishelper(702251)&&!ishelper(702252)&&!ishelper(702253)&&!ishelper(702254)
+triggerall = !ishelper(702255)&&!ishelper(702256)&&!ishelper(702257)&&!ishelper(702258)
+triggerall = !ishelper(702260);矛F
+triggerall = !ishelper(702261)&&!ishelper(702262)&&!ishelper(702263)&&!ishelper(702264)
+triggerall = !ishelper(702265)&&!ishelper(702266)&&!ishelper(702267)&&!ishelper(702268)
+Trigger1 = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+ignorehitpause = 1
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+triggerall = !ishelper
+triggerall = roundstate < 4
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+Trigger1 = gametime%15=0
+value = 2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+[State 0, TargetLifeAdd];目标大伤害
+type = TargetLifeadd
+triggerall = !ishelper
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+value = -2147483648
+ID = -1
+kill = 1
+absolute = 1
+ignorehitpause = 1
+;persistent =
+
+[State 0, Targetpoweradd];目标能量清空
+type = Targetpoweradd
+triggerall = !ishelper
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+value = -2147483648
+ignorehitpause = 1
+;persistent =
+
+[State 0, PlaySnd];己方life=0时音效提醒
+type = PlaySnd
+triggerall = !ishelper
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+trigger1 = !life
+value = S8,10
+volume = 255
+channel = 0
+ignorehitpause = 1
+;persistent =
+
+[State 0, ChangeState];强制胜利动作
+type = SelfState
+triggerall = !ishelper
+triggerall = roundstate =4
+triggerall = win
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+trigger1 = stateno != 181
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+value = 181
+ignorehitpause = 1
+
+[State 0, ChangeState];强制失败动作
+type = SelfState
+triggerall = !ishelper
+triggerall = roundstate =4
+triggerall = !win
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+trigger1 = stateno != 170
+trigger2 = var(25) != (gametime+5)*(gametime%3)+97864
+value = 170
+ignorehitpause = 1
+
+[State 0, RemoveExplod];帖图清屏美化
+type = RemoveExplod
+triggerall = ishelper
+triggerall = roundstate =4
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+id = -1
+ignorehitpause = 1
+
+[State 0, RemoveExplod];帖图清屏美化
+type = RemoveExplod
+triggerall = !ishelper
+triggerall = roundstate =4
+Triggerall = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+Trigger1 = stateno = 181 && time = 1
+Trigger2 = stateno = 170 && time = 1
+id = -1
+ignorehitpause = 1
+
+[State 0, DestroySelf];helper纠正
+type = DestroySelf
+triggerall = roundstate =4
+Trigger1 = (var(51)=6666 && var(58)=1 && var(42)%10=1) || ( (!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && stateno != 5900)
+ignorehitpause = 1
+
+;=====================论外END=====================
+
+;===========================================================================================================================
+;P2STATENO -2 Check
+;written by Eagrose
+;change these with rather much CAUTION !!
+;===========================================================================================================================
+;[State 0, SelfState]
+;type = SelfState
+;Triggerall = !lose
+;triggerall = !ishelper
+;triggerall = var(58) = 999
+;trigger1 = var(25)=0
+;value = 2300
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = 1
+v = 25
+value = -97864
+ignorehitpause = 1
+
+;===============================================================================
+; VAR LIST  全局变量表
+;===============================================================================
+;-------------------------------------------------------------------------------
+; Integer Variable List
+;-------------------------------------------------------------------------------
+; Var(0) - StateDef 5120, 245, 281, 296, 1100, 2105, 2204, 2305, 35000
+; Var(1) - StateDef 5201, 245, 1201, 1300, 2005, 2015, 2105, 6005, 35000, -2, 180, 190
+; Var(2) - StateDef 35000, -3
+; Var(3) - StateDef 35000, -3
+; Var(4) - StateDef 35000, 35001, -2
+; Var(5) - StateDef 35000, 35001, -2
+; Var(6) - StateDef 35000, 35001
+; Var(7) - StateDef 35000, 35001, -2
+; Var(8) - StateDef 1200, 1201, 1210, 1220, 35000, 35001
+; Var(9) - StateDef 1200, 1201, 1210, 1220, 35000, 35001, -2
+; Var(10) - StateDef 35000, 35001, -2
+; Var(11) - StateDef 2501, 35000, 35001
+; Var(12) - StateDef 35000, 35001, -2
+; Var(13) - StateDef 2000, 2002, 2010, 2012, 2202, 35000, 35001, -2
+; Var(14) - StateDef 35000, 35001, -2
+; Var(15) - StateDef 35000, 35001
+; Var(16) - StateDef 2000, 35000, -2
+; Var(17) - StateDef 1101, 35000
+; Var(18) - StateDef 35000, -2
+; Var(19) - StateDef 35000
+; Var(20) - StateDef 35000
+; Var(21) - StateDef 35000, -3, 191, 192, 193
+; Var(22) - StateDef 35000
+; Var(23) - StateDef 35000, -3
+; Var(24) - StateDef 35000, -3
+; Var(25) - StateDef 35000
+; Var(26) - StateDef 1000, 1001, 1002, 1003, 1004, 1005, 2000, 35000
+; Var(27) - StateDef 2000, 2010, 2100, 2101, 2200, 2300, 2301, 2500, 35000, -3, 191, 192, 193
+; Var(28) - StateDef 35000
+; Var(29) - StateDef 35000
+; Var(30) - StateDef 35000
+; Var(31) - StateDef 35000, -3
+; Var(32) - StateDef 35000, -2
+; Var(33) - StateDef 35000, -3
+; Var(34) - StateDef 35000, -3
+; Var(35) - StateDef 35000, -2
+; Var(36) - StateDef 35000
+; Var(37) - StateDef 35000
+; Var(38) - StateDef 35000, -3
+; Var(39) - StateDef 35000, -3
+; Var(40) - StateDef 35000, -2
+; Var(41) - StateDef 35000
+; Var(42) - StateDef 35000
+; Var(43) - StateDef 35000
+; Var(44) - StateDef 35000
+; Var(45) - StateDef 35000, -3
+; Var(46) - StateDef 35000, -2
+; Var(47) - StateDef 35000, -3
+; Var(48) - StateDef 35000, -2
+; Var(49) - StateDef 35000, -3
+; Var(50) - StateDef -2
+; Var(51) - StateDef -3
+; Var(52) - StateDef -2
+; Var(54) - StateDef -2
+; Var(55) - StateDef -3
+; Var(56) - StateDef -2
+; Var(57) - StateDef -2
+; Var(59) - StateDef 96600, -3
+
+;-------------------------------------------------------------------------------
+;Float Variable List
+;-------------------------------------------------------------------------------
+; fVar(4) - StateDef -2
+; fVar(10) - StateDef -2
+; fVar(30) - StateDef -3
+; fVar(36) - StateDef 2106, -3
+; fVar(37) - StateDef -3
+; fVar(39) - StateDef -3
+
+;-------------------------------------------------------------------------------
+;===============================================================================
+
+
+
+
+
+
+
+
+;-------------- Generated by Fighter Factory -------------
+
+;--------------------- Variable List ----------------------
+
+; Var(0) - StateDef 5120, 245, 281, 296, 1100, 2105, 2204, 2305, 6300, 20003, 31030, 31031
+; Var(1) - StateDef 245, 1201, 2005, 2015, 2105, 3000, 6300, 8010, 8020, 8030, 8040, 31030, 180
+; Var(2) - StateDef 6300, 31030, -2
+; Var(3) - StateDef 31031, -2
+; Var(6) - StateDef 1400, 2005, 2015
+; Var(7) - StateDef -2
+; Var(8) - StateDef 1200, 1201, 1210, 1220, 1500
+; Var(9) - StateDef 1200, 1201, 1210, 1220, 1500
+; Var(10) - StateDef 4215, 93200
+; Var(11) - StateDef 2501, 93200
+; Var(12) - StateDef 93200
+; Var(13) - StateDef 2000, 2002, 2010, 2012, 2202, -2
+; Var(16) - StateDef 2000, -2
+; Var(17) - StateDef 1101
+; Var(18) - StateDef -2
+; Var(19) - StateDef 1103, 1653, 6007
+; Var(20) - StateDef -2
+; Var(21) - StateDef -2, 191, 192, 193
+; Var(23) - StateDef -2
+; Var(24) - StateDef -2
+; Var(25) - StateDef -2, -3
+; Var(26) - StateDef 1000, 1001, 1002, 1003, 1004, 1005, 2000
+; Var(27) - StateDef 2000, 2010, 2100, 2101, 2200, 2300, 2301, 2500, -2, 191, 192, 193
+; Var(28) - StateDef -2
+; Var(29) - StateDef -2
+; Var(30) - StateDef 4231
+; Var(31) - StateDef 4215
+; Var(32) - StateDef 4215, -2
+; Var(39) - StateDef 2501, -2
+; Var(40) - StateDef -2, -3
+; Var(41) - StateDef -2
+; Var(42) - StateDef -2
+; Var(50) - StateDef 101
+; Var(51) - StateDef 701100, -2, -3
+; Var(52) - StateDef -2
+; Var(53) - StateDef -2
+; Var(55) - StateDef -3
+; Var(57) - StateDef 701100
+; Var(58) - StateDef 701100, -2, -3
+; Var(59) - StateDef 96600, -3
+
+;--------------------- Float Variable List ----------------------
+
+; fVar(0) - StateDef 6300, 31030, 31031
+; fVar(1) - StateDef 2302, 2304, 31030, 31031
+; fVar(2) - StateDef 31030
+; fVar(3) - StateDef -2
+; fVar(5) - StateDef 3000, -2
+; fVar(6) - StateDef 5900, 3000, -2
+; fVar(7) - StateDef 3000, -3
+; fVar(8) - StateDef -2
+; fVar(9) - StateDef -2
+; fVar(10) - StateDef -2
+; fVar(11) - StateDef 1600, 1601, 1602, 1603, 2202, 2802
+; fVar(12) - StateDef 2801, 2802, 191, 192, 193
+; fVar(13) - StateDef 2800
+; fVar(20) - StateDef 1600, 1601, 1602, 1603, 3000, -2
+; fVar(21) - StateDef 1600, 1601, 1602, 1603, 3000, -2
+; fVar(22) - StateDef 1600, 1601, 1602, 1603, 3000, -2
+; fVar(23) - StateDef 1600, 1601, 1602, 1603, 3000, -2
+; fVar(28) - StateDef -3
+; fVar(29) - StateDef -3
+; fVar(30) - StateDef -3
+; fVar(31) - StateDef -3
+; fVar(32) - StateDef -3
+; fVar(36) - StateDef 2106, -3
+; fVar(37) - StateDef 3000, -3
+; fVar(39) - StateDef 3000, -3

@@ -1,0 +1,310 @@
+
+;###########################################################################
+; 超必殺技，MAX超必殺技，MAX2
+;###########################################################################
+
+;===============================================================
+; スーパーセスキック_弱
+;===============================================================
+;---------------------------------------------------------
+; 開始
+;---------------------------------------------------------
+
+[StateDef 3700]
+type = S
+movetype = A
+physics = S
+poweradd = -1000*!var(6)
+ctrl = 0
+anim = 3700
+velset = 0, 0
+
+[State 3000, VarSet]
+type = VarSet
+triggerall = Time = 0
+trigger1 = PrevStateNo = 440
+trigger2 = var(9) = 0 && (PrevStateNo = [200, 245])
+trigger3 = PrevStateNo = 300 || PrevStateNo = 340
+trigger4 = var(9) = 0 && ((PrevStateNo = [400, 440]) || PrevStateNo = 500)
+trigger5 = PrevStateNo = 930
+trigger6 = (PrevStateNo = [1000, 1999]) && PrevStateNo != 1422
+var(8) = 8
+
+; スーパーキャンセル時のゲージ消費
+[State 3000, PowerAdd]
+type = PowerAdd
+triggerall = Time = 0
+trigger1 = (PrevStateNo = [1000, 1999]) && PrevStateNo != 1422
+value = -1000*!var(6)
+persistent = 0
+
+; 先行入力発動時の振り向き
+[State 3000, Turn]
+type = Turn
+triggerall = Time = 0
+trigger1 = P2Dist X < 0
+
+; パワーMAXモードの解除
+[State 3000, VarSet]
+type = VarSet
+trigger1 = Time = 0
+fvar(0) = 0
+
+[State 3000, NotHitBy]
+type = NotHitBy
+trigger1 = AnimElemTime(4) < 0
+value = SCA
+time = 1
+IgnoreHitPause = 1
+
+[State 3000, Helper]
+type = Helper
+trigger1 = Time = 2
+id = 8500
+name = "super"
+pos = 12,-88	; 36
+postype = P1
+stateno = 8500
+helpertype = normal
+ownpal = 0
+persistent = 0
+pausemovetime = 99999999999999
+supermovetime = 99999999999999
+
+; スーパーポーズの判定
+[State 3000, VarSet]
+type = VarSet
+trigger1 = Time = 2
+var(13) = 28
+ignorehitpause = 1
+persistent = 0
+
+[State 3000, SuperPause]
+type = SuperPause
+trigger1 = Time = 2
+time = 28
+anim = -1
+sound = -1
+darken = 0
+p2defmul = 1
+movetime = 28
+
+;ハア！
+[State 3000, PlaySnd]
+type = PlaySnd
+trigger1 = AnimElem = 5
+value = s12, 6
+
+[State 1100, PlaySnd]
+type = PlaySnd
+trigger1 =  AnimElem = 4
+value = s5, 0
+
+;砂埃
+[State 1100, Explod]
+type = explod
+trigger1 = AnimElem = 4
+postype = p1
+pos = 60, 5
+sprpriority = 1
+anim = 7200
+persistent = 1
+ownpal = 1
+removeongethit = 1
+ignorehitpause = 0
+
+[State 3000, HitDef]
+type = HitDef
+trigger1 = AnimElem = 5
+attr = S, HA
+animtype = Hard
+damage = 83, 8
+getpower = 0, 0
+giverpower = 30, 30
+hitflag = MAF
+guardflag = M
+pausetime = 24, 36
+guard.pausetime = 44, 46 ;34, 36
+sparkno = s8030
+guard.sparkno = S8070
+sparkxy = -20,-70
+hitsound = s1, 4
+guardsound = s2,1
+ground.type = High
+ground.slidetime = 24
+ground.hittime  = 36
+ground.velocity = -1.5, -7.5	; -6
+guard.velocity = -8
+air.velocity = -1.5, -7
+fall = 1
+fall.recover = 0
+ground.cornerpush.veloff = 0
+air.cornerpush.veloff = 0
+guard.cornerpush.veloff = 0
+airguard.cornerpush.veloff = 0
+yaccel = .17
+id = 3700	; IfElse(var(1)=0,3700,1);1+(var(1)=0)
+nochainid = var(11)
+
+[State 3000, StateTypeSet]
+type = ChangeState
+trigger1 = AnimElemTime(6) = 0
+trigger1 = NumTarget(3700)
+trigger1 = Target,MoveType = H && !Target,ctrl
+trigger1 = Target(3700),GetHitVar(guarded) = 0
+value = 3701
+persistent = 0
+ignorehitpause = 1
+
+[State 3000, StateTypeSet]
+type = StateTypeSet
+trigger1 = AnimElemTime(6) = 0
+movetype = I
+
+[State 3000, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------
+; 追撃
+;---------------------------------------------------------
+
+[StateDef 3701]
+type =  S
+movetype = A
+physics = S
+poweradd = 0
+velset = 0, 0
+anim = 3701
+ctrl = 0
+
+[State 3701, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+ignorehitpause = 1
+
+[State 3701, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 3201, VelSet]
+type = VelSet
+trigger1 = AnimElemTime(5) = 0
+x = 1
+y = -5
+
+[State 3201, StateTypeSet]
+type = VelAdd
+trigger1 = AnimElemTime(5) > 0
+trigger1 = AnimElemTime(17) < 0
+x = 0
+y = 0.15
+
+[State 3201, StateTypeSet]
+type = StateTypeSet
+trigger1 = AnimElemTime(5) = 0
+statetype = A
+physics = N
+
+[State 3201, StateTypeSet]
+type = VelSet
+trigger1 = AnimElemTime(18) = 0
+x = 0.3
+y = 0
+
+[State 3201, StateTypeSet]
+type = VelSet
+trigger1 = AnimElemTime(21) = 0
+x = 14
+y = 8
+
+;貰った…！
+[State 1100, PlaySnd]
+type = PlaySnd
+trigger1 =  AnimElem = 5
+value = s11, 2
+
+[State 3000, HitDef]
+type = HitDef
+trigger1 = AnimElem = 21
+attr = S, HA
+animtype = Hard
+damage = 174, 8
+getpower = 0, 0
+giverpower = 30, 30
+hitflag = MAF
+guardflag = M
+pausetime = 24, 24
+sparkno = s8030
+guard.sparkno = S8070
+sparkxy = -20,-70
+hitsound = s1, 5
+guardsound = s2, 1
+ground.type = High
+ground.slidetime = 24
+ground.hittime  = 36
+ground.velocity = -1.0, -8	; -6
+guard.velocity = -8
+air.velocity = -1.0, -8
+fall = 1
+fall.recover = 0
+ground.cornerpush.veloff = 0
+air.cornerpush.veloff = 0
+guard.cornerpush.veloff = 0
+airguard.cornerpush.veloff = 0
+yaccel = .55
+id = IfElse(var(1)=0,3701,1);1+(var(1)=0)
+;nochainid = var(11)
+
+[State 3702, StateTypeSet]
+type = ChangeState
+trigger1 = AnimElemTime(5) > 0
+trigger1 = Vel Y > 0 && Pos Y >= 0
+value = 3702
+ctrl = 0
+
+;---------------------------------------------------------
+; 追撃
+;---------------------------------------------------------
+
+[StateDef 3702]
+type =  S
+movetype = I
+physics = S
+poweradd = 0
+velset = 14, 0
+anim = 3702
+ctrl = 0
+
+[State 3702, PlayerPush]
+type = PlayerPush
+trigger1 = AnimElemTime(2) < 0
+value = 0
+ignorehitpause = 1
+
+[State 3702, Explod]
+type = Explod
+triggerall = NumExplod(8320) = 0
+trigger1 = Time = 0
+anim = 8320
+id = 8320
+postype = P1
+pos = 0, 0
+sprpriority = 2
+facing = 1
+ownpal = 1
+bindtime = 1
+ignorehitpause = 0
+
+[State 3000, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+

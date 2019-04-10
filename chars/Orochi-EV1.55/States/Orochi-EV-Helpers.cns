@@ -1,0 +1,5866 @@
+;===========================================================================================================================
+;Orochi Eagrose Version, original char by Orochi Herman, enhanced by Eagrose
+;CNS file part: Functional Helpers
+;===========================================================================================================================
+;===========================================================================================================================
+;WinKO Screen Helper
+;written by OrochiHerman
+;===========================================================================================================================
+[Statedef 6005]
+type    = A
+movetype= I
+physics = N
+ctrl = 0
+anim = 9999 ; ---- blank
+sprpriority = -21
+
+[State 6005, EnvColor]; ---- red
+type = EnvColor
+Trigger1 = time = [0,1]
+Trigger2 = time = [4,5]
+Trigger3 = time = [8,9]
+Trigger4 = time = [12,13]
+Trigger5 = time = [16,17]
+Trigger6 = time = [20,21]
+Trigger7 = time = [24,25]
+Trigger8 = time = [28,29]
+Trigger9 = time = [32,33]
+Trigger10 = time = [36,37]
+Trigger11 = time = [40,41]
+Trigger12 = time = [44,45]
+value    = 255,0,0
+time     = 1
+under    = 1
+
+[State 6005, EnvColor]; ---- black
+type     = EnvColor
+Trigger1 = time = [2,3]
+value    = 0,0,0
+time     = 1
+under    = 1
+
+[State 6005, EnvColor]; ---- white
+type     = EnvColor
+Trigger1 = time = [6,7]
+Trigger2 = time = [10,11]
+Trigger3 = time = [14,15]
+Trigger4 = time = [18,19]
+Trigger5 = time = [22,23]
+Trigger6 = time = [26,27]
+Trigger7 = time = [30,31]
+Trigger8 = time = [34,35]
+Trigger9 = time = [38,39]
+Trigger10 = time = [42,43]
+value    = 255,255,255
+time     = 1
+under    = 1
+
+[state 6005, AssertSpecial]
+type = AssertSpecial
+trigger1 = time = [0,46]
+flag = nobg
+flag2 = nofg
+flag3 = nobardisplay
+
+[State 6005, PlaySnd]; ---- enables echo only in the final round
+type = PlaySnd
+trigger1 = Time = 0
+value = S0,28
+ignorehitpause = 1
+persistent = 0
+volume = 255
+;abspan = 255 * (root, facing)
+
+[State 6005, ChangeState]
+type = DestroySelf
+trigger1 = RoundState = 0
+
+;===========================================================================================================================
+;Slowdown Helper
+;===========================================================================================================================
+[Statedef 6006]
+type    = S
+movetype= I
+physics = N
+ctrl = 0
+anim = 6005
+sprpriority = -21
+
+[state 6006, displaytoclipboard]
+type = displaytoclipboard
+trigger1 = 1
+text = "Pausetime is %d"
+params = (root, var(26))
+ignorehitapuse = 1
+
+[State 6006, AssertSpecial]
+type = AssertSpecial
+triggerall = root, stateno = [2000,2002]
+trigger1 = RoundState = 2
+trigger1 = root, var(32) = [1,11]
+flag = nobg
+flag2 = nofg
+
+[State 6006, BGPalFX0]
+type = BGPalFX
+triggerall = root, stateno = [2000,2002]
+trigger1 = root, var(25) = 1
+trigger1 = root, var(32) = [8,9]
+time = 2
+invertall = 1
+ignorehitpause = 1
+
+[state 6006, pause]
+type = pause
+trigger1 = time = [(0 + (root, var(26))),(26 + (root, var(26)))]
+trigger1 = time % 2 = 0
+time = 1
+movetime = 1
+
+[State 6006, ChangeState]
+type = DestroySelf
+trigger1 = time >= (27 + (root, var(26)))
+trigger2 = roundstate > 2
+trigger3 = root, numtarget = 0
+
+;===========================================================================================================================
+;Force visual Helper
+;enhanced by Eagrose
+;===========================================================================================================================
+[Statedef 6007]
+type    = S
+movetype= A
+physics = S
+juggle  = 0
+velset = 0,0
+anim = 110004
+ctrl = 0
+sprpriority = 2
+poweradd = 0
+
+[State 6007, notHitby]
+type = notHitby
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 6007, VarSet]; ---- root,var(1) Trans changing
+type = VarSet
+trigger1 = 1
+var(19) = 256
+persistent = 0
+
+[State 6007, VarSet]; ---- root,var(1) Trans changing
+type = VarAdd
+triggerall = var(19) > 0
+trigger1 = 1
+var(19) = -10
+
+[State 6007, VarSet]; ---- root,var(1) Trans changing
+type = VarSet
+trigger1 = var(19) <= 0
+var(19) = 0
+
+[State 6007, Trans]
+type = Trans
+trigger1 = 1
+trans = addalpha
+alpha = var(19),256
+ignorehitpause =  1
+;persistent =
+
+[State 6007, AngleDraw]
+type = AngleDraw
+trigger1 = 1
+;value =  (winmugen only)
+scale = (0.25+(256-var(19))*0.00032),(0.8+(256-var(19))*0.001)
+ignorehitpause = 1
+;persistent =
+
+[State 6007, destroyself]
+type = destroyself
+trigger1 = time >= 25
+trigger2 = root,movetype = H
+;time >= 26
+
+;===========================================================================================================================
+;Ultimate Move Screen helper
+;original from the char "Iku_Nagae", written by Kurogane
+;I owe my thanks to him
+;===========================================================================================================================
+; Ultimate Move Screen!
+[Statedef 6300]
+Physics = N
+Anim = 9999
+
+;**************************************************
+[State 6300, カットイン]
+Type = Explod
+Trigger1 = IsHelper(6301)
+Trigger1 = Time > 0
+Anim = 3001
+ID = 6300
+Pos = IfElse(TeamSide=2,314-var(2),6+var(2)),115
+PosType = Left
+Scale = fvar(0),fvar(0)
+Facing = IfElse(TeamSide=2,-1,1)
+SprPriority = -9
+Trans = AddAlpha
+Alpha = 256-var(0),var(0)
+RemoveTime  = 1
+SuperMovetime = -1
+PauseMoveTime = -1
+
+;**************************************************
+[State 6300, 色]
+Type = PalFX
+Trigger1 = IsHelper(6300)
+Mul = 50+var(0),50+var(0),50+var(0)
+Time = 1
+
+[State 6300, 特殊効果]
+Type = AssertSpecial
+Trigger1 = IsHelper(6301)
+Flag = NoFG
+
+[State 6300, 変数増減]
+Type = VarAdd
+Trigger1 = IsHelper(6300)
+Trigger1 = Time > 0
+var(0) = IfElse(Time<50,4,-4)
+
+[State 6300, 変数増減]
+Type = VarAdd
+Trigger1 = IsHelper(6301)
+Trigger1 = Time > 39
+var(0) = 16
+
+[State 6300, 変数増減]
+Type = VarSet
+Trigger1 = IsHelper(6301)
+Trigger1 = Time = 0 || Time = 40
+var(1) = IfElse(Time=0,15,5)
+
+[State 6300, 変数増減]
+Type = VarAdd
+Trigger1 = IsHelper(6301)
+Trigger1 = Time = [1,15]
+var(1) = -1
+
+[State 6300, 変数増減]
+Type = VarAdd
+Trigger1 = IsHelper(6301)
+Trigger1 = Time > 0
+var(2) = var(1)
+
+[State 6300, 変数増減]
+Type = VarAdd
+Trigger1 = IsHelper(6301)
+Trigger1 = Time = 0 || Time > 39
+fvar(0) = IfElse(Time=0,.5,.03)
+
+[State 6300, エフェクトを消す]
+Type = RemoveExplod
+Trigger1 = IsHelper(6300)
+Trigger1 = Time > 1
+Trigger1 = var(0) < -44
+Trigger2 = IsHelper(6301)
+Trigger2 = var(0) > 249
+ID = 6300
+
+[State 6300, ヘルパーを消す]
+Type = DestroySelf
+Trigger1 = IsHelper(6300)
+Trigger1 = Time > 1
+Trigger1 = var(0) < -44
+Trigger2 = IsHelper(6301)
+Trigger2 = var(0) > 249
+
+;===========================================================================================================================
+;Intro Pose Helper
+;===========================================================================================================================
+;-------------------------------------------------------------------------------
+;intro pose 3 chris helper
+[Statedef 8010]
+Physics  = N
+Anim     = 8010
+SprPriority = 7
+ctrl = 0
+
+[State 1610, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA,NA,SA,HA,AA,NP,SP,HP,AP,NT,ST,HT,AT
+time = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+;persistent = 0
+
+[State 8020, VarSet]; ---- helper,var(1) palfx changing
+type = VarSet
+trigger1 = 1
+var(1) = 256
+persistent = 0
+
+[State 8020, VarAdd]; ---- helper,var(1) palfx changing
+type = VarAdd
+;triggerall = !parent,var(1)
+trigger1 = var(1) > 0
+var(1) = -5
+
+[State 8020, VarSet]; ---- helper,var(1) palfx changing
+type = VarSet
+;triggerall = !parent,var(1)
+trigger1 = var(1) <= 0
+var(1) = 0
+
+[State 8020, Trans]
+Type = Trans
+;triggerall = !parent,var(1)
+Trigger1 = var(1) > 0
+Trans = AddAlpha
+Alpha = 256-var(1) ,var(1)
+
+[State 8020, ChangeState]
+type = ChangeState
+;trigger1 = parent,var(1)
+trigger1 = parent,animelem = 59, =10
+value = 8011
+ctrl = 0
+
+;-------------------------------------------------------------------------------
+;intro pose 3 chris helper 2
+[Statedef 8011]
+Physics  = N
+Anim     = 8011
+SprPriority = 7
+ctrl = 0
+
+[State 1610, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA,NA,SA,HA,AA,NP,SP,HP,AP,NT,ST,HT,AT
+time = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+;persistent = 0
+
+[State 8021, Aura]
+type = NULL;Afterimage
+trigger1 = root,palno = 12
+trans = add
+PalContrast =  250, 250, 250
+PalBright = 0,0,0
+paladd = 0,25,25
+time    =  -1
+length  = 10
+TimeGap = 1
+FrameGap = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+persistent = 0
+
+[State 8021, PlaySnd]
+type = PlaySnd
+trigger1 = animelem = 1
+value = S3,7
+volume = 255
+
+[State 1213, posadd]
+type = posadd
+trigger1 = AnimElem = 5
+trigger2 = AnimElem = 6
+trigger3 = AnimElem = 7
+x = 25
+
+[State 1214, PlaySnd]
+type = PlaySnd
+trigger1 = AnimElem = 5
+value = S3,6
+
+[State 8021, ChangeState]
+type = DestroySelf
+trigger1 = animtime = 0
+
+;===============================================================================
+;-------------------------------------------------------------------------------
+;intro pose 3 shermie helper
+[Statedef 8020]
+Physics  = N
+Anim     = 8020
+SprPriority = 6
+ctrl = 0
+
+[State 1610, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA,NA,SA,HA,AA,NP,SP,HP,AP,NT,ST,HT,AT
+time = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+;persistent = 0
+
+[State 8020, VarSet]; ---- helper,var(1) palfx changing
+type = VarSet
+trigger1 = 1
+var(1) = 256
+persistent = 0
+
+[State 8020, VarAdd]; ---- helper,var(1) palfx changing
+type = VarAdd
+;triggerall = !parent,var(1)
+trigger1 = var(1) > 0
+var(1) = -5
+
+[State 8020, VarSet]; ---- helper,var(1) palfx changing
+type = VarSet
+;triggerall = !parent,var(1)
+trigger1 = var(1) <= 0
+var(1) = 0
+
+[State 8020, Trans]
+Type = Trans
+;triggerall = !parent,var(1)
+Trigger1 = var(1) > 0
+Trans = AddAlpha
+Alpha = 256-var(1) ,var(1)
+
+[State 8020, ChangeState]
+type = ChangeState
+;trigger1 = parent,var(1)
+trigger1 = parent,animelem = 59, =10
+value = 8021
+ctrl = 0
+
+;-------------------------------------------------------------------------------
+;intro pose 3 shermie helper 2
+[Statedef 8021]
+Physics  = N
+Anim     = 8021
+SprPriority = 6
+ctrl = 0
+
+[State 1610, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA,NA,SA,HA,AA,NP,SP,HP,AP,NT,ST,HT,AT
+time = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+;persistent = 0
+
+[State 8021, Aura]
+type = NULL;Afterimage
+trigger1 = root,palno = 12
+trans = add
+PalContrast =  250, 250, 250
+PalBright = 0,0,0
+paladd = 0,25,25
+time    =  -1
+length  = 10
+TimeGap = 1
+FrameGap = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+persistent = 0
+
+[State 8021, ChangeState]
+type = ChangeState
+trigger1 = animtime = 0
+value = 8022
+ctrl = 0
+
+;-------------------------------------------------------------------------------
+;shermie taunt
+[Statedef 8022]
+type    = S
+movetype= I
+physics = S
+ctrl = 0
+anim = 1633
+velset = 0,0,0
+sprpriority = 6
+
+[State 1610, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA,NA,SA,HA,AA,NP,SP,HP,AP,NT,ST,HT,AT
+time = -1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+;persistent = 0
+
+[State 3001, 5]
+type = EnvColor
+trigger1 = animelem = 7,=2
+value = 245,245,245
+time = 1
+
+[State 3001, 1]
+type = explod
+trigger1 = AnimElem = 7
+anim = 1641
+pos = 45,-100
+postype = p1
+sprpriority = 8
+supermove = 0
+bindtime = 1
+palfx.time = 3
+palfx.add = 220, 160,100
+
+[State 195, 2]
+type = PlaySnd
+trigger1 = animelem = 7
+value = s0,25
+
+[State 1610, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 195, 2]
+type = PlaySnd
+trigger1 = animelem = 3
+value = S3,16
+
+[State 195, 7]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 1634
+
+;===============================================================================
+;-------------------------------------------------------------------------------
+;intro pose 3 yashiro helper
+[Statedef 8030]
+Physics  = N
+Anim     = 8030
+SprPriority = 5
+ctrl = 0
+
+[State 1610, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA,NA,SA,HA,AA,NP,SP,HP,AP,NT,ST,HT,AT
+time = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+;persistent = 0
+
+[State 8020, VarSet]; ---- helper,var(1) palfx changing
+type = VarSet
+trigger1 = 1
+var(1) = 256
+persistent = 0
+
+[State 8020, VarAdd]; ---- helper,var(1) palfx changing
+type = VarAdd
+;triggerall = !parent,var(1)
+trigger1 = var(1) > 0
+var(1) = -5
+
+[State 8020, VarSet]; ---- helper,var(1) palfx changing
+type = VarSet
+;triggerall = !parent,var(1)
+trigger1 = var(1) <= 0
+var(1) = 0
+
+[State 8020, Trans]
+Type = Trans
+;triggerall = !parent,var(1)
+Trigger1 = var(1) > 0
+Trans = AddAlpha
+Alpha = 256-var(1) ,var(1)
+
+[State 8020, ChangeState]
+type = ChangeState
+;trigger1 = parent,var(1)
+trigger1 = parent,animelem = 59, =10
+value = 8031
+ctrl = 0
+
+;-------------------------------------------------------------------------------
+;intro pose 3 yashiro helper 2
+[Statedef 8031]
+Physics  = N
+Anim     = 8031
+SprPriority = 5
+ctrl = 0
+
+[State 1610, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA,NA,SA,HA,AA,NP,SP,HP,AP,NT,ST,HT,AT
+time = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+;persistent = 0
+
+[State 8021, Aura]
+type = NULL;Afterimage
+trigger1 = root,palno = 12
+trans = add
+PalContrast =  250, 250, 250
+PalBright = 0,0,0
+paladd = 0,25,25
+time    =  -1
+length  = 10
+TimeGap = 1
+FrameGap = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+persistent = 0
+
+[State 8021, ChangeState]
+type = ChangeState
+trigger1 = animtime = 0
+value = 8032
+ctrl = 0
+
+;-------------------------------------------------------------------------------
+;yashiro taunt
+[Statedef 8032]
+type = S
+anim = 8032
+ctrl = 0
+velset = 0,0,0
+physics = S
+SprPriority = 5
+
+[State 1610, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA,NA,SA,HA,AA,NP,SP,HP,AP,NT,ST,HT,AT
+time = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+;persistent = 0
+
+[State 1610, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 182,PlaySnd]
+type = PlaySnd
+trigger1 = AnimElem = 1
+value = 3,21
+
+[State 1000, 3.4]
+type = Explod
+trigger1 = AnimElem = 2
+anim = 1660
+ID = 1660
+pos = 0,0
+postype = p1
+sprpriority = 2
+supermove = 1
+bindtime = -1
+ownpal = 1
+removetime = 40
+
+[State 1000, 3.4]
+type = Explod
+trigger1 = AnimElem = 2
+anim = 1661
+ID = 1661
+pos = 0,0
+postype = p1
+sprpriority = -2
+supermove = 1
+bindtime = -1
+ownpal = 1
+removetime = 40
+
+[State 0, EnvShake]
+type = EnvShake
+trigger1 = AnimElem = 8
+time = 10
+freq = 60
+ampl = -10
+phase = 90
+;ignorehitpause =
+;persistent =
+
+[State 1000, 3.4] ;Ground wave (behind)
+type = Explod
+trigger1 = AnimElem = 8,=2
+anim = 1664
+pos = 0,0
+postype = p1
+sprpriority = -2
+supermove = 1
+bindtime = -1
+ownpal = 1
+
+[State 1000, 3.4] ;Ground wave (in front)
+type = Explod
+trigger1 = AnimElem = 8,=2
+anim = 1665
+pos = 0,0
+postype = p1
+sprpriority = 6
+supermove = 1
+bindtime = -1
+ownpal = 1
+
+[State 182,PlaySnd]
+type = PlaySnd
+trigger1 = AnimElem = 8
+value = 3,22
+
+[State 1000, 3.4]
+type = RemoveExplod
+trigger1 = AnimTime = 0
+ID = 1660
+
+[State 1000, 3.4]
+type = RemoveExplod
+trigger1 = AnimTime = 0
+ID = 1661
+
+[State 192,3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 8033
+
+;-------------------------------------------------------------------------------
+;yashiro turn
+[Statedef 8033]
+type = S
+anim = 8033
+ctrl = 0
+velset = 0,0,0
+physics = S
+SprPriority = 5
+
+[State 8033, Turn]
+type = Turn
+trigger1 = 1
+;ignorehitpause =
+persistent = 0
+
+[State 1610, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA,NA,SA,HA,AA,NP,SP,HP,AP,NT,ST,HT,AT
+time = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+;persistent = 0
+
+[State 1610, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 192,3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 1656
+
+;===============================================================================
+;-------------------------------------------------------------------------------
+;intro pose 3 goenitz helper
+[Statedef 8040]
+Physics  = N
+Anim     = 8040
+SprPriority = 7
+ctrl = 0
+
+[State 1610, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA,NA,SA,HA,AA,NP,SP,HP,AP,NT,ST,HT,AT
+time = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+;persistent = 0
+
+[State 8020, VarSet]; ---- helper,var(1) palfx changing
+type = VarSet
+trigger1 = 1
+var(1) = 256
+persistent = 0
+
+[State 8020, VarAdd]; ---- helper,var(1) palfx changing
+type = VarAdd
+;triggerall = !parent,var(1)
+trigger1 = var(1) > 0
+var(1) = -5
+
+[State 8020, VarSet]; ---- helper,var(1) palfx changing
+type = VarSet
+;triggerall = !parent,var(1)
+trigger1 = var(1) <= 0
+var(1) = 0
+
+[State 8020, Trans]
+Type = Trans
+;triggerall = !parent,var(1)
+Trigger1 = var(1) > 0
+Trans = AddAlpha
+Alpha = 256-var(1) ,var(1)
+
+[State 8020, ChangeState]
+type = ChangeState
+;trigger1 = parent,var(1)
+trigger1 = parent,animelem = 59, =10
+value = 8041
+ctrl = 0
+
+;-------------------------------------------------------------------------------
+;intro pose 3 goenitz helper 2
+[Statedef 8041]
+Physics  = N
+Anim     = 8041
+SprPriority = 7
+ctrl = 0
+
+[State 1610, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA,NA,SA,HA,AA,NP,SP,HP,AP,NT,ST,HT,AT
+time = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+;persistent = 0
+
+[State 8021, Aura]
+type = NULL;Afterimage
+trigger1 = root,palno = 12
+trans = add
+PalContrast =  250, 250, 250
+PalBright = 0,0,0
+paladd = 0,25,25
+time    =  -1
+length  = 10
+TimeGap = 1
+FrameGap = 1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+persistent = 0
+
+[State 0, PlaySnd]
+type = PlaySnd
+trigger1 = animtime = 0
+value = S3,33
+;ignorehitpause =
+;persistent =
+
+[State 8021, ChangeState]
+type = ChangeState
+trigger1 = animtime = 0
+value = 8042
+ctrl = 0
+
+; Geonitz taunt & leave --------------------------------------------------------
+[Statedef 8042]
+type    = S
+movetype= A
+physics = S
+poweradd = 0
+ctrl = 0
+velset = 0,0
+anim = 1677
+sprpriority = 7
+
+[State 1214, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+;persistent = 0
+
+[State 1610, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+y = 0
+;ignorehitpause =
+persistent = 0
+
+[State 0, Explod]
+type = Explod
+trigger1 = animelem = 7
+anim = 2630
+ID = 2630
+pos = 0,0
+postype = p1  ;p2,front,back,left,right
+facing = 1
+vfacing = 1
+bindtime = 1
+vel = 0,0
+accel = 0,0
+random = 0,0
+removetime = -2
+;supermove
+;pausemove
+scale = 1,1
+sprpriority = 8
+ontop = 0
+shadow = 0,0,0
+ownpal = 0
+removeongethit = 0
+;ignorehitpause =
+persistent = 0
+
+[State 0, PlaySnd]
+type = PlaySnd
+trigger1 = animelem = 7
+value = S0,40
+;ignorehitpause =
+;persistent =
+
+[State 2606, ChangeState]
+type = destroyself
+trigger1 = AnimTime = 0
+
+;===========================================================================================================================
+;Cancel Explod Helper
+;spr & cns from KOF Memorial Project, written by Zelgadis
+;I owe my thanks to him
+;===========================================================================================================================
+;-------------------------------------------------------------------------
+;Dream Cancel Helper
+[statedef 10000]
+type    = S
+movetype = I
+physics = N
+velset = 0,0
+sprpriority = 7
+anim = 9999
+facing = 1
+
+[State 10000, Explod]; ---- Dream Cartel (from KOF Memorial Project, written by Zelgadis)
+type = Explod
+trigger1 = time = 0
+ID = 10302
+anim = 10302
+pos = 0,75
+postype = left
+removetime = -2
+bindtime = -1
+pausemove = 1
+supermove = 1
+sprpriority = 9
+ownpal = 1
+persistent = 0
+
+[State 10000, Explod]; ----  Dream & Extintion Fondo Negro (from KOF Memorial Project, written by Zelgadis)
+type = Explod
+trigger1 = time = 0
+ID = 10303
+anim = 10303
+pos = 0,73
+postype = left
+removetime = -2
+bindtime = -1
+pausemove = 1
+supermove = 1
+sprpriority = 8
+trans = addalpha
+alpha = 256, 135
+ownpal = 1
+persistent = 0
+
+;--------------------------old XI dreamcancel Cartel
+;[State 10000, Explod]
+;type = Explod
+;trigger1 = time = 0
+;anim = 10209
+;postype = p1
+;facing = 1
+;pos = 0,0
+;scale = 3,1
+;removetime = -2
+;pausemovetime = 9999
+;supermovetime = 9999
+;ownpal = 1
+;ignorehitpause = 1
+;sprpriority = 7
+;bindtime = -1
+;trans = addalpha
+;alpha = 256, 135
+
+;[State 10000, Explod]
+;type = Explod
+;trigger1 = time = 0
+;anim = 10208
+;postype = p1
+;facing = 1
+;pos = 0,0
+;scale = 0.25,0.25
+;removetime = -2
+;pausemovetime = 9999
+;supermovetime = 9999
+;ownpal = 1
+;ignorehitpause = 1
+;sprpriority = 7
+;ontop = 1
+;bindtime = -1
+;--------------------------
+
+[state 10000, DestroySelf]
+type = DestroySelf
+trigger1 = Time = 2
+
+;-------------------------------------------------------------------------------
+;Super Cancel Helper
+[statedef 10001]
+type    = S
+movetype = I
+physics = N
+velset = 0,0
+sprpriority = 7
+anim = 9999
+facing = 1
+
+[State 10001, Explod]; ---- Super Cartel (from KOF Memorial Project, written by Zelgadis)
+type = Explod
+trigger1 = 1
+ID = 10300
+anim = 10300
+pos = 0,75
+postype = left
+removetime = -2
+bindtime = -1
+pausemove = 1
+supermove = 1
+sprpriority = 9
+ownpal = 1
+persistent = 0
+
+[State 10001, Explod]; ----  Super Fondo Negro (from KOF Memorial Project, written by Zelgadis)
+type = Explod
+trigger1 = 1
+anim = 10301
+ID = 10301
+pos = 0,73
+postype = left
+removetime = -2
+bindtime = -1
+pausemove = 1
+supermove = 1
+sprpriority = 8
+trans = addalpha
+alpha = 256, 135
+ownpal = 1
+persistent = 0
+
+;--------------------------old XI supercancel Cartel
+;[State 240, 4]
+;type = Explod
+;trigger1 = time = 0
+;anim = 10211
+;postype = p1
+;facing = 1
+;pos = 0,0
+;scale = 3,1
+;pausemovetime = 9999
+;supermovetime = 9999
+;ownpal = 1
+;ignorehitpause = 1
+;sprpriority = 7
+;bindtime = -1
+
+;[State 240, 4]
+;type = Explod
+;trigger1 = time = 0
+;anim = 10210
+;postype = p1
+;facing = 1
+;pos = 0,2
+;scale = 0.47,0.47
+;pausemovetime = 9999
+;supermovetime = 9999
+;ownpal = 1
+;ignorehitpause = 1
+;sprpriority = 7
+;ontop = 1
+;bindtime = -1
+;--------------------------
+
+[state 10001, RemoveExplod]
+type = RemoveExplod
+trigger1 = Time = 47
+
+[state 10001, destroyself]
+type = destroyself
+trigger1 = Time = 49
+
+;===========================================================================================================================
+;stand anim background from mizuchi helper
+;also nightmare shin mode background
+;===========================================================================================================================
+;--------------------------------------------------------------
+[statedef 10207]
+type    = S
+movetype= I
+physics = N
+ctrl = 0
+anim = 10207
+sprpriority = -3
+
+[state 10207, nothitby]
+type = nothitby
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+;[state 10207, 0]
+;type = trans
+;trigger1 = 1
+;trans = addalpha
+;alpha = 256,200
+;ignorehitpause = 1
+
+;[State 0, PalFXWiz]
+;type = PalFX
+;trigger1 = time = 0
+;time = -1
+;add = 25,25,25
+;mul = 256,256,256
+;sinadd = 50,50,50,28
+;invertall = 0
+;color = 256
+;ignorehitpause = 1
+
+[state 10207, bindtoroot]
+type = bindtoroot
+trigger1 = 1
+pos = 9,6
+facing = 1
+ignorehitpause = 1
+
+;[state 10207, 0]
+;type = Assertspecial
+;trigger1 = 1
+;flag = noautoturn
+
+;[state 10207, 0]
+;type = turn
+;trigger1 = root,facing != facing
+
+[state 10207, destroyself]
+type = destroyself
+triggerall = roundstate >= 2
+trigger1 = root,stateno = 102
+trigger2 = root,stateno = 105
+trigger3 = root,stateno = 270
+trigger4 = root,stateno = 271
+trigger5 = root,stateno = 275
+trigger6 = (root,movetype = H) && (root,stateno != [120,159]) && (root,stateno != 1102)
+trigger7 = root,stateno = [5000,5201]
+trigger8 = root,statetype = A
+trigger9 = root,var(18) = 0   ;Catalyst Stand Anim has no Background
+ignorehitpause = 1
+
+
+;===========================================================================================================================
+;02UM HSDM Effect Helper
+;===========================================================================================================================
+;-------------------------------------------------------------------------------
+[Statedef 20001]
+anim = 9999
+
+[State 20001, AssertSpecial]
+type = AssertSpecial
+trigger1 = 1
+flag = NoBG
+flag2 = NoFG
+ignorehitpause = 1
+
+;-------------------------
+[State 20001, Tile #0]
+type = Explod
+triggerall = !numexplod(20000)
+trigger1 = !time
+anim = 20000
+ID = 20000
+pos = 0,0
+postype = left
+removetime = 10
+pausemovetime = -1
+supermovetime = -1
+scale = 1,1
+sprpriority = -20
+ownpal = 1
+ignorehitpause = 1
+bindtime = -1
+persistent = 0
+
+[State 20001, Tile #1]
+type = Explod
+triggerall = !numexplod(20001) < 2
+trigger1 = !time
+trigger2 = (time%10) = 0
+anim = 20000
+ID = 20001
+pos = 320,0
+postype = left
+removetime = 20
+pausemovetime = -1
+supermovetime = -1
+scale = 1,1
+sprpriority = -20
+ownpal = 1
+ignorehitpause = 1
+bindtime = -1
+
+;-------------------------
+[State 20001, Tile #2]
+type = Explod
+triggerall = !numexplod(20010)
+trigger1 = !time
+anim = 20001
+ID = 20010
+pos = 0,0
+postype = left
+removetime = 20
+pausemovetime = -1
+supermovetime = -1
+scale = 1,1
+sprpriority = -20
+ownpal = 1
+ignorehitpause = 1
+persistent = 0
+bindtime = -1
+
+[State 20001, Tile #3]
+type = Explod
+triggerall = !numexplod(20011) < 2
+trigger1 = !time
+trigger2 = (time%20) = 0
+anim = 20001
+ID = 20011
+pos = 320,0
+postype = left
+removetime = 40
+pausemovetime = -1
+supermovetime = -1
+scale = 1,1
+sprpriority = -20
+ownpal = 1
+ignorehitpause = 1
+bindtime = -1
+
+;-------------------------
+[State 20001, Tile #4]
+type = Explod
+triggerall = !numexplod(20020)
+trigger1 = !time
+anim = 20002
+ID = 20020
+pos = 0,0
+postype = left
+removetime = 40
+pausemovetime = -1
+supermovetime = -1
+scale = 1,1
+sprpriority = -20
+ownpal = 1
+ignorehitpause = 1
+persistent = 0
+bindtime = -1
+
+[State 20001, Tile #5]
+type = Explod
+triggerall = !numexplod(20021) < 2
+trigger1 = !time
+trigger2 = (time%40) = 0
+anim = 20002
+ID = 20021
+pos = 320,0
+postype = left
+removetime = 80
+pausemovetime = -1
+supermovetime = -1
+scale = 1,1
+sprpriority = -20
+ownpal = 1
+ignorehitpause = 1
+bindtime = -1
+
+;-------------------------
+[State 20001, Tile #6]
+type = Explod
+triggerall = !numexplod(20030)
+trigger1 = !time
+anim = 20003
+ID = 20030
+pos = 0,0
+postype = left
+removetime = 80
+pausemovetime = -1
+supermovetime = -1
+scale = 1,1
+sprpriority = -20
+ownpal = 1
+ignorehitpause = 1
+persistent = 0
+bindtime = -1
+
+[State 20001, Tile #7]
+type = Explod
+triggerall = !numexplod(20031) < 2
+trigger1 = !time
+trigger2 = (time%80) = 0
+anim = 20003
+ID = 20031
+pos = 320,0
+postype = left
+removetime = 160
+pausemovetime = -1
+supermovetime = -1
+scale = 1,1
+sprpriority = -20
+ownpal = 1
+ignorehitpause = 1
+bindtime = -1
+;-------------------------
+
+[State 20001, Glass Break]
+type = ChangeState
+trigger1 = parent, stateno != [2800,2810]
+value = 20002
+
+[State 20001, Glass Break]
+type = ChangeState
+trigger1 = Time > 1000
+trigger2 = parent,stateno = 2801
+trigger2 = parent,time = 460
+value = 20002
+
+;-------------------------------------------------------------------------------
+[Statedef 20002]
+anim = 9999
+
+[State 40002, RemoveExplod]
+type = RemoveExplod
+trigger1 = !time
+trigger2 = Parent,StateNo != [2800,2810]
+id = 20000
+
+[State 20002, RemoveExplod]
+type = RemoveExplod
+trigger1 = !time
+trigger2 = Parent,StateNo != [2800,2810]
+id = 20001
+
+[State 20002, RemoveExplod]
+type = RemoveExplod
+trigger1 = !time
+trigger2 = Parent,StateNo != [2800,2810]
+id = 20010
+
+[State 20002, RemoveExplod]
+type = RemoveExplod
+trigger1 = !time
+trigger2 = Parent,StateNo != [2800,2810]
+id = 20011
+
+[State 20002, RemoveExplod]
+type = RemoveExplod
+trigger1 = !time
+trigger2 = Parent,StateNo != [2800,2810]
+id = 20020
+
+[State 20002, RemoveExplod]
+type = RemoveExplod
+trigger1 = !time
+trigger2 = Parent,StateNo != [2800,2810]
+id = 20021
+
+[State 20002, RemoveExplod]
+type = RemoveExplod
+trigger1 = !time
+trigger2 = Parent,StateNo != [2800,2810]
+id = 20030
+
+[State 20002, RemoveExplod]
+type = RemoveExplod
+trigger1 = !time
+trigger2 = Parent,StateNo != [2800,2810]
+id = 20031
+
+[State 20002, PlaySnd]
+type = PlaySnd
+trigger1 = !time
+value = S8,16
+volume = 200
+
+[State 20002, Explod]; ---- Glass Break
+type = Explod
+triggerall = !numexplod(20040)
+trigger1 = !time
+anim = 20004
+ID = 20040
+pos = 0,0
+postype = left
+pausemovetime = -1
+supermovetime = -1
+removetime = -2
+scale = 1,1
+sprpriority = -20
+ownpal = 1
+ignorehitpause = 1
+
+[State 20002, DestroySelf]
+type = DestroySelf
+trigger1 = time = 1
+trigger2 = Parent,StateNo != [2800,2810]
+
+;-------------------------------------------------------------------------------
+;2002 UM MAX2 PORTRAIT
+;-------------------------------------------------------------------------------
+[Statedef 20003]
+anim = 9999
+
+[State 20003, VarSet]
+type = null;VarSet
+trigger1 = enemy, numhelper(20003)
+trigger1 = !enemy, numhelper(20004)
+trigger2 = teamside = 2
+trigger2 = enemy, numhelper(20004)
+var(0) = 1
+
+[State 40001, P1 BG]
+type = Explod
+triggerall = !numexplod(20050)
+triggerall = teamside = 1
+trigger1 = !time
+anim = 20005
+ID = 20050
+pos = 0,abs((240*var(0))-81)
+postype = left
+pausemovetime = -1
+supermovetime = -1
+removetime = -2
+bindtime = -1
+scale = 1,1
+sprpriority = -5
+ownpal = 1
+ignorehitpause = 1
+
+[State 40001, P2 BG]
+type = Explod
+triggerall = !numexplod(20051)
+triggerall = teamside = 2
+trigger1 = !time
+anim = 20005
+ID = 20051
+pos = 0,abs((240*var(0))-81)
+postype = right
+pausemovetime = -1
+supermovetime = -1
+removetime = -2
+bindtime = -1
+scale = 1,1
+facing = -1
+sprpriority = -5
+ownpal = 1
+ignorehitpause = 1
+
+[State 40001, P1 PORTRAIT]
+type = Explod
+triggerall = !numexplod(20060)
+triggerall = teamside = 1
+trigger1 = !time
+anim = 20007
+ID = 20060
+pos = 0,abs((240*var(0))-81)
+postype = left
+pausemovetime = -1
+supermovetime = -1
+removetime = -2
+bindtime = -1
+scale = 1,1
+sprpriority = -4
+ownpal = 1
+ignorehitpause = 1
+
+[State 40001, P2 PORTRAIT]
+type = Explod
+triggerall = !numexplod(20061)
+triggerall = teamside = 2
+trigger1 = !time
+anim = 20007
+ID = 20061
+pos = 0,abs((240*var(0))-81)
+postype = right
+pausemovetime = -1
+supermovetime = -1
+removetime = -2
+bindtime = -1
+scale = 1,1
+facing = -1
+sprpriority = -4
+ownpal = 1
+ignorehitpause = 1
+
+;------------------------
+[State 40003, 0]
+type = ModifyExplod
+trigger1 = time = 2
+ID = 20050
+scale = 1,0.3
+
+[State 40003, 1]
+type = ModifyExplod
+trigger1 = time = 4
+ID = 20050
+scale = 1,0.54
+
+[State 40003, 2]
+type = ModifyExplod
+trigger1 = time = 6
+ID = 20050
+scale = 1,0.77
+
+[State 40003, 3]
+type = ModifyExplod
+trigger1 = time = 8
+ID = 20050
+scale = 1,1
+
+[State 40003, 4]
+type = ModifyExplod
+trigger1 = time = 56
+ID = 20050
+scale = 1,0.77
+
+[State 40003, 5]
+type = ModifyExplod
+trigger1 = time = 57
+ID = 20050
+scale = 1,0.54
+
+[State 40003, 6]
+type = ModifyExplod
+trigger1 = time = 58
+ID = 20050
+scale = 1,0.3
+
+[State 40003, 7]
+type = ModifyExplod
+trigger1 = time = 59
+ID = 20050
+scale = 1,1
+
+;------------------------
+[State 40003, 8]
+type = ModifyExplod
+trigger1 = time = 2
+ID = 20051
+scale = 1,0.3
+
+[State 40003, 9]
+type = ModifyExplod
+trigger1 = time = 4
+ID = 20051
+scale = 1,0.54
+
+[State 40003, 10]
+type = ModifyExplod
+trigger1 = time = 6
+ID = 20051
+scale = 1,0.77
+
+[State 40003, 11]
+type = ModifyExplod
+trigger1 = time = 8
+ID = 20051
+scale = 1,1
+
+[State 40003, 12]
+type = ModifyExplod
+trigger1 = time = 56
+ID = 20051
+scale = 1,0.77
+
+[State 40003, 13]
+type = ModifyExplod
+trigger1 = time = 57
+ID = 20051
+scale = 1,0.54
+
+[State 40003, 14]
+type = ModifyExplod
+trigger1 = time = 58
+ID = 20051
+scale = 1,0.3
+
+[State 40003, 15]
+type = ModifyExplod
+trigger1 = time = 59
+ID = 20051
+scale = 1,1
+
+;------------------------
+[State 40003, 16]
+type = ModifyExplod
+trigger1 = time = 2
+ID = 20060
+scale = 1,0.3
+
+[State 40003, 17]
+type = ModifyExplod
+trigger1 = time = 4
+ID = 20060
+scale = 1,0.54
+
+[State 40003, 18]
+type = ModifyExplod
+trigger1 = time = 6
+ID = 20060
+scale = 1,0.77
+
+[State 40003, 19]
+type = ModifyExplod
+trigger1 = time = 8
+ID = 20060
+scale = 1,1
+
+[State 40003, 20]
+type = ModifyExplod
+trigger1 = time = 56
+ID = 20060
+scale = 1,0.77
+
+[State 40003, 21]
+type = ModifyExplod
+trigger1 = time = 57
+ID = 20060
+scale = 1,0.54
+
+[State 40003, 22]
+type = ModifyExplod
+trigger1 = time = 58
+ID = 20060
+scale = 1,0.3
+
+[State 40003, 23]
+type = ModifyExplod
+trigger1 = time = 59
+ID = 20060
+scale = 1,1
+
+;------------------------
+[State 40003, 24]
+type = ModifyExplod
+trigger1 = time = 2
+ID = 20061
+scale = 1,0.3
+
+[State 40003, 25]
+type = ModifyExplod
+trigger1 = time = 4
+ID = 20061
+scale = 1,0.54
+
+[State 40003, 26]
+type = ModifyExplod
+trigger1 = time = 6
+ID = 20061
+scale = 1,0.77
+
+[State 40003, 27]
+type = ModifyExplod
+trigger1 = time = 8
+ID = 20061
+scale = 1,1
+
+[State 40003, 28]
+type = ModifyExplod
+trigger1 = time = 56
+ID = 20061
+scale = 1,0.77
+
+[State 40003, 29]
+type = ModifyExplod
+trigger1 = time = 57
+ID = 20061
+scale = 1,0.54
+
+[State 40003, 30]
+type = ModifyExplod
+trigger1 = time = 58
+ID = 20061
+scale = 1,0.3
+
+[State 40003, 31]
+type = ModifyExplod
+trigger1 = time = 59
+ID = 15661
+scale = 1,1
+;------------------------
+
+[State 40001, DestroySelf]
+type = DestroySelf
+trigger1 = time = 60
+
+
+;===========================================================================================================================
+;HyperCombo Effect Helper
+;code from "Mai_mvc2" written by 586
+;I owe my thanks to him
+;===========================================================================================================================
+;---------------------------------------------------------------------------
+; Hyper Combo Effect <Lv.3>
+[Statedef 31030]
+type = S
+movetype = I
+physics = N
+anim = 31030
+ctrl = 0
+sprpriority = 7
+
+[State 31030, AssertSpecial]
+type = AssertSpecial
+trigger1 = 1
+flag = NoShadow
+;flag2 = NoBG
+ignorehitpause = 1
+supermovetime = 9999
+pausemovetime = 9999
+
+[State 31030, AngleDraw]
+type = AngleDraw
+trigger1 = 1
+scale = 0.5,0.5
+
+[State 31030, Trans]
+type = Trans
+trigger1 = 1
+trans = sub;add
+
+[State 31030, AngleSet]
+type = Angledraw;AngleSet
+triggerall = 95-time > 0
+trigger1 = Time > 0
+value = var(1)
+scale = ifelse(time>=45,(95-time)*0.02,1),ifelse(time>=45,(95-time)*0.02,1)
+
+[State 31030, AngleSet]
+type = Angledraw;AngleSet
+trigger1 = 95-time <= 0
+value = var(1)
+scale = 0,0
+
+[State 31030, VarRandom]
+type = VarRandom
+trigger1 = Time = 0
+v = 0
+range = 0,360
+
+[State 31020, VarAdd]
+type = VarAdd
+trigger1 = 1
+var(1) = 7
+
+[State 31030, VarAdd]
+type = VarAdd
+trigger1 = Time = [1,16]
+var(2) = 10
+ignorehitpause = 1
+
+[State 31030, VarAdd]
+type = VarAdd
+trigger1 = Time >= 12
+fvar(0) = 0.04
+ignorehitpause = 1
+
+[State 31030, VarAdd]
+type = VarAdd
+trigger1 = Time >= 12
+fvar(1) = 0.25
+ignorehitpause = 1
+
+[State 31030, VarSet]
+type = VarSet
+trigger1 = Time = 0
+fvar(2) = 4
+ignorehitpause = 1
+
+[State 31030, VarSet]
+type = VarAdd
+trigger1 = Time > 0
+trigger1 = fvar(2) > 0
+fvar(2) = -0.4
+ignorehitpause = 1
+
+[State 31000, Helper];Spark
+type = Helper
+trigger1 = Time = 0
+helpertype = normal
+name = "Spark"
+pos = 0,0
+ownpal = 1
+pausemovetime = 9999
+supermovetime = 9999
+stateno = 31031
+ID = 0
+ignorehitpause = 1
+size.xscale = 1
+size.yscale = 1
+
+[State 31000, Helper];Spark
+type = Helper
+trigger1 = Time = 0
+helpertype = normal
+name = "Spark"
+pos = 0,0
+ownpal = 1
+pausemovetime = 9999
+supermovetime = 9999
+stateno = 31031
+ID = 1
+ignorehitpause = 1
+size.xscale = 1
+size.yscale = 1
+
+[State 31000, Helper];Spark
+type = Helper
+trigger1 = Time = 0
+helpertype = normal
+name = "Spark"
+pos = 0,0
+ownpal = 1
+pausemovetime = 9999
+supermovetime = 9999
+stateno = 31031
+ID = 2
+ignorehitpause = 1
+size.xscale = 1
+size.yscale = 1
+
+[State 31000, Helper];Spark
+type = Helper
+trigger1 = Time = 0
+helpertype = normal
+name = "Spark"
+pos = 0,0
+ownpal = 1
+pausemovetime = 9999
+supermovetime = 9999
+stateno = 31031
+ID = 3
+ignorehitpause = 1
+size.xscale = 1
+size.yscale = 1
+
+[State 31000, Helper];Spark
+type = Helper
+trigger1 = Time = 0
+helpertype = normal
+name = "Spark"
+pos = 0,0
+ownpal = 1
+pausemovetime = 9999
+supermovetime = 9999
+stateno = 31031
+ID = 4
+ignorehitpause = 1
+size.xscale = 1
+size.yscale = 1
+
+[State 31000, Helper];Spark
+type = Helper
+trigger1 = Time = 0
+helpertype = normal
+name = "Spark"
+pos = 0,0
+ownpal = 1
+pausemovetime = 9999
+supermovetime = 9999
+stateno = 31031
+ID = 5
+ignorehitpause = 1
+size.xscale = 1
+size.yscale = 1
+
+[State 31030, Explod]
+type = Explod
+trigger1 = Time = 12
+anim = 31012
+postype = p1
+ID = 31012
+pos = 0,0
+facing = 1
+bindtime = -1
+removetime = 35
+ownpal = 1
+supermovetime = 9999
+pausemovetime = 9999
+sprpriority = 3
+scale = fvar(0),fvar(0)
+
+[State 31030, ModifyExplod]
+type = ModifyExplod
+trigger1 = Time >= 12
+ID = 31012
+scale = fvar(0),fvar(0)
+supermovetime = 9999
+
+[State 31030, Explod]
+type = Explod
+trigger1 = Time = 12
+anim = 31010
+postype = p1
+ID = 31010
+pos = 0,0
+facing = 1
+bindtime = -1
+removetime = 35
+ownpal = 1
+supermovetime = 9999
+pausemovetime = 9999
+sprpriority = 3
+scale = fvar(1),fvar(1)
+
+[State 31030, ModifyExplod]
+type = ModifyExplod
+trigger1 = Time >= 12
+ID = 31010
+scale = fvar(1),fvar(1)
+supermovetime = 9999
+
+[State 31030, Explod]
+type = Explod
+trigger1 = Time = 0
+anim = 31010
+postype = p1
+ID = 31013
+pos = 0,0
+facing = 1
+bindtime = -1
+removetime = 35
+ownpal = 1
+supermovetime = 9999
+pausemovetime = 9999
+sprpriority = 3
+scale = fvar(2),fvar(2)
+
+[State 31030, ModifyExplod]
+type = ModifyExplod
+trigger1 = Time > 0
+ID = 31013
+scale = fvar(2),fvar(2)
+supermovetime = 9999
+
+[State 31030, DestroySelf]
+type = DestroySelf
+trigger1 = Time > 105;55
+
+;===========================================================================================================================
+;HyperCombo Beam Helper
+;code from "Mai_mvc2" written by 586
+;I owe my thanks to him
+;===========================================================================================================================
+;---------------------------------------------------------------------------
+; Hyper Combo Effect <Spark>
+[Statedef 31031]
+type = S
+movetype = I
+physics = N
+anim = 31031
+ctrl = 0
+sprpriority = 3
+
+[State 31031, AssertSpecial]
+type = AssertSpecial
+trigger1 = 1
+flag = noshadow
+ignorehitpause = 1
+supermovetime = 9999
+pausemovetime = 9999
+
+[State 31031, AngleDraw]
+type = AngleDraw
+trigger1 = 1
+scale = fvar(0),fvar(1)
+
+[State 31031, Trans]
+type = Trans
+trigger1 = 1
+trans = sub;add
+
+[State 31031, VarSet]
+type = VarSet
+trigger1 = Time = 0
+var(3) = Parent,var(0)
+persistent = 0
+
+[State 31031, VarSet]
+type = VarSet
+trigger1 = Time = 1
+trigger1 = isHelper(0)
+var(0) = 30+var(3)
+
+[State 31031, VarSet]
+type = VarSet
+trigger1 = Time = 1
+trigger1 = isHelper(1)
+var(0) = 60+var(3)
+
+[State 31031, VarSet]
+type = VarSet
+trigger1 = Time = 1
+trigger1 = isHelper(2)
+var(0) = 150+var(3)
+
+[State 31031, VarSet]
+type = VarSet
+trigger1 = Time = 1
+trigger1 = isHelper(3)
+var(0) = 180+var(3)
+
+[State 31031, VarSet]
+type = VarSet
+trigger1 = Time = 1
+trigger1 = isHelper(4)
+var(0) = 270+var(3)
+
+[State 31031, VarSet]
+type = VarSet
+trigger1 = Time = 1
+trigger1 = isHelper(5)
+var(0) = 300+var(3)
+
+[State 31031, AngleSet]
+type = AngleSet
+trigger1 = Time > 0
+value = var(0)
+
+[State 31031, VarSet]
+type = VarAdd
+trigger1 = Time % 2 = 0
+var(0) = 1
+
+[State 31031, VarSet]
+type = VarSet
+trigger1 = Time = 0
+fvar(0) = 1
+
+[State 31031, VarSet]
+type = VarSet
+trigger1 = Time = 0
+fvar(1) = 2
+
+[State 31031, VarAdd]
+type = VarAdd
+trigger1 = Time > 0
+trigger1 = fvar(1) > 0
+fvar(1) = -0.04
+
+[State 31031, DestroySelf]
+type = DestroySelf
+trigger1 = Time > 45
+
+;===========================================================================================================================
+;AI Functional Helper
+;written by Eagrose
+;===========================================================================================================================
+
+
+;===========================================================================================================================
+;AI起動ヘルパー (via AI Helper)
+;original written by マーダーライセンス若本
+;enhanced by Eagrose
+;===========================================================================================================================
+[StateDef 96600]
+anim=9999
+ctrl=0
+
+[State 96600, Turn]
+type=Turn
+trigger1=facing!=root,facing
+ignorehitpause=1
+
+[State 96600, AssertSpecial]
+type=AssertSpecial
+trigger1=1
+flag=invisible
+ignorehitpause=1
+
+[State 96600,間違いで本体が来たら立ちへ移行]
+type=selfstate
+trigger1=!ishelper
+value=0
+ctrl=1
+ignorehitpause=1
+
+[State 96600, VarSet]
+type = VarSet
+trigger1 = Command = "up" && Root,Command = "up"
+trigger2 = Command = "down" && Root,Command = "down"
+trigger3 = Command = "back" && Root,Command = "back"
+trigger4 = Command = "fwd" && Root,Command = "fwd"
+trigger5 = Command = "a" && Root,Command = "a"
+trigger6 = Command = "b" && Root,Command = "b"
+trigger7 = Command = "c" && Root,Command = "c"
+trigger8 = Command = "x" && Root,Command = "x"
+trigger9 = Command = "y" && Root,Command = "y"
+trigger10 = Command = "z" && Root,Command = "z"
+trigger11 = Command = "start" && Root,Command = "start"
+var(59) = -1
+
+[State 96600, DestroySelf]
+Type = DestroySelf
+triggerall = IsHelper
+trigger1 = Root,var(59) || var(59) = -1
+trigger2 = Command = "up" && Root,Command = "up"
+trigger3 = Command = "down" && Root,Command = "down"
+trigger4 = Command = "back" && Root,Command = "back"
+trigger5 = Command = "fwd" && Root,Command = "fwd"
+trigger6 = Command = "a" && Root,Command = "a"
+trigger7 = Command = "b" && Root,Command = "b"
+trigger8 = Command = "c" && Root,Command = "c"
+trigger9 = Command = "x" && Root,Command = "x"
+trigger10 = Command = "y" && Root,Command = "y"
+trigger11 = Command = "z" && Root,Command = "z"
+trigger12 = Command = "start" && Root,Command = "start"
+
+[State 96600, VarSet]
+type = VarSet
+triggerall = var(59) != -1
+trigger1 = Root,Command = "up"
+trigger2 = Root,Command = "down"
+trigger3 = Root,Command = "back"
+trigger4 = Root,Command = "fwd"
+trigger5 = Root,Command = "a"
+trigger6 = Root,Command = "b"
+trigger7 = Root,Command = "c"
+trigger8 = Root,Command = "x"
+trigger9 = Root,Command = "y"
+trigger10 = Root,Command = "z"
+trigger11 = Root,Command = "start"
+var(59) = 1
+
+;[State 96600,AI ON judge]; ---- AI ON judge
+;Type=varset
+;TriggerAll=isHelper
+;TriggerAll=var(59)=0
+;Trigger1=(command!="a")&&(parent,command="a")
+;Trigger2=(command!="b")&&(parent,command="b")
+;Trigger3=(command!="c")&&(parent,command="c")
+;Trigger4=(command!="x")&&(parent,command="x")
+;Trigger5=(command!="y")&&(parent,command="y")
+;Trigger6=(command!="z")&&(parent,command="z")
+;Trigger7=(command!="start")&&(parent,command="start")
+;;Trigger8=(command!="up")&&root,command="up"
+;;Trigger9=(command!="down")&&root,command="down"
+;;Trigger10=(command!="back")&&root,command="back"
+;;Trigger11=(command!="fwd")&&root,command="fwd"
+;var(59)=1
+;ignorehitpause=1
+
+;[State 96600,プレイヤー判定]; ---- AI OFF judge
+;type=varset
+;TriggerAll=isHelper
+;TriggerAll=var(59)=0
+;Trigger1=parent,command="a"
+;Trigger2=parent,command="b"
+;Trigger3=parent,command="c"
+;Trigger4=parent,command="x"
+;Trigger5=parent,command="y"
+;Trigger6=parent,command="z"
+;Trigger7=parent,command="start"
+;;Trigger8=command="up"&&root,command="up"
+;;Trigger9=command="down"&&root,command="down"
+;;Trigger10=command="back"&&root,command="back"
+;;Trigger11=command="fwd"&&root,command="fwd"
+;var(59)=-1
+;ignorehitpause=1
+
+;[State 96600, 立ったら消失]
+;Type=DestroySelf
+;TriggerAll=isHelper
+;Trigger1=root,var(59)
+;Trigger2=var(59)=-1
+;Trigger2=parent,stateno!=0
+;ignorehitpause=1
+
+
+;===========================================================================================================================
+;永续target 连击数修正helper
+;Infinite-target hitcount correcting helper
+;by Eagrose
+;not completed, unused
+;===========================================================================================================================
+[StateDef 93200]
+anim=9999
+ctrl=0
+
+[State 0, VarSet];初始化
+type = null;VarSet
+trigger1 = var(10) = 2000
+var(10) = 0
+ignorehitpause = 1
+
+[State 0, VarSet];敌方gethitvar(hitcount)，无法计入虚假hitcount
+type = null;VarSet
+triggerall = PlayerIDExist(var(10))
+trigger1 = !(PlayerID(var(10)),TeamSide = root,TeamSide)  ;enemy side
+trigger1 = PlayerID(var(10)),movetype = H    ;has gethitvar(hitcount)
+var(11) = var(11) + PlayerID(var(10)),gethitvar(hitcount)
+ignorehitpause = 1
+
+[State 0, VarSet];友方Uniqhitcount，一旦changestate则被重置
+type = null;VarSet
+triggerall = PlayerIDExist(var(10))
+trigger1 = PlayerID(var(10)),TeamSide = root,TeamSide  ;ally side
+trigger1 = PlayerID(var(10)),Uniqhitcount != 0    ;has uniqhitcount
+var(12) = var(12) + PlayerID(var(10)),Uniqhitcount
+ignorehitpause = 1
+
+[State 0, VarSet];处理结束，递归+1
+type = null;VarSet
+trigger1 = var(10) < 500
+var(10) = var(10) + 1
+ignorehitpause = 1
+
+[State 0, ChangeState];递归自身
+type = null;ChangeState
+trigger1 = var(10) < 500
+value = 93200
+ctrl = 0
+ignorehitpause = 1
+
+[State 0, ChangeState];递归下一轮500个
+type = null;ChangeState
+trigger1 = var(10) = 500
+value = 93201
+ctrl = 0
+ignorehitpause = 1
+
+
+;===========================================================================================================================
+;论外
+;===========================================================================================================================
+;混线检测、全局当身+永续target、NOKO保持、抵抗变数弄
+[Statedef 701100]
+type = S
+physics = N
+movetype = I
+ctrl = 0
+anim = 9997
+velset = 0,0
+
+;----------------------------------------------------------------------------
+;抵抗palno弄
+;--------------------------------------
+[State 0, VarSet];Helper受到变数弄检测
+type = VarSet
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = var(51) != 0
+var(51) = 6666
+ignorehitpause = 1
+
+[State 0, VarSet];本体色表检测
+type = VarSet
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+triggerall = roundstate = 0   ;初始化不受干扰
+trigger1 = roundno = 1        ;第一局
+trigger1 = root,palno = 12
+trigger2 = roundno > 1        ;非第一局
+trigger2 = root,var(51) = 6666
+var(51) = 6666
+ignorehitpause = 1
+
+[State 0, ParentVarSet];抵抗palno弄
+type = ParentVarSet
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = var(51) = 6666
+var(51) = 6666
+ignorehitpause = 1
+
+;----------------------------------------------------------------------------
+;梦魇一败加强开关检测
+;--------------------------------------
+[State 0, VarSet];Helper受到变数弄检测
+type = VarSet
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = var(57) != 0
+var(57) = 7777
+ignorehitpause = 1
+
+[State 0, VarSet];本体梦魇一败加强开关检测
+type = VarSet
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = var(42)%10=1
+var(57) = 7777
+ignorehitpause = 1
+
+;--------------------------------------
+;一败检测
+;--------------------------------------
+[State 0, VarSet];Helper受到变数弄检测
+type = VarSet
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = var(58) != 0
+var(58) = 9999
+ignorehitpause = 1
+
+[State 0, VarSet];本体受到变数弄检测
+type = VarSet
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = root,var(58) != [0,2]
+var(58) = 9999
+ignorehitpause = 1
+
+;--------------------------------------
+;抵抗变数弄 神模式
+;--------------------------------------
+[State 0, VarSet];抵抗变数弄 开局
+type = VarSet
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+triggerall = roundno > 1
+triggerall = roundstate <= 2
+trigger1 = var(51) = 6666    ;梦魇模式
+trigger1 = var(57) = 7777    ;一败加强开启
+trigger1 = root,var(58) = [1,2]  ;确实一败
+var(58) = 9999
+ignorehitpause = 1
+
+[State 0, ParentVarSet];抵抗变数弄 神模式
+type = ParentVarSet
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+triggerall = roundno > 1
+trigger1 = var(58) = 9999
+var(58) = 1
+ignorehitpause = 1
+
+;--------------------------------------
+;抵抗变数弄 神模式
+;--------------------------------------
+[State 0, ParentVarSet];抵抗变数弄 梦魇一败
+type = ParentVarSet
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = roundstate > 2
+trigger1 = root,lose
+var(58) = 2
+ignorehitpause = 1
+
+;----------------------------------------------------------------------------
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, HitOverride]
+type = HitOverride
+trigger1 = 1
+attr = SCA,NA,SA,HA,NP,SP,HP,NT,ST,HT
+slot = 0
+stateno = 701100
+time = -1
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+Trigger1 = roundstate <= 2
+Trigger1 = !((root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900))
+x = (enemynear(0),facing)*9999
+y = -9999
+ignorehitpause = 1
+
+[State 0, BindToRoot]
+type = BindToRoot
+Trigger1 = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+trigger1 = root,Name = "Orochi Eagrose Version"
+trigger1 = root,AuthorName = "Orochi Herman,Eagrose"
+time = 1
+facing = 1
+pos = 0,-150
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+Trigger1 = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+movetype = A
+ignorehitpause = 1
+
+[State 0, AssertSpecial]
+type = AssertSpecial
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+triggerall = root,life = 0
+Trigger1 = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+flag = noko
+ignorehitpause = 1
+
+[State 800, Repel] ;using reversaldef to reversal enemy's invincible attacks
+type = ReversalDef
+Trigger1 = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+reversal.attr = SCA, AA,AT,AP
+;hitflag = HLMAFD  ;----do not consume enemy's proj for OTHK
+pausetime = 0,0
+;animtype = DiagUp
+numhits = 0
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = S9,ifelse(gametime%20=0,2,-1)
+priority = 2147483647, hit
+;sparkxy = 0,0
+;p1stateno = 2305
+p2stateno = 2147483647
+damage = 2147483648
+fall.damage = 2147483648
+guard.dist = 0
+
+[State 0, TargetDrop]
+type = TargetDrop
+triggerall = Numtarget
+Trigger1 = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+trigger1 = target,Name = "Orochi Eagrose Version"
+trigger1 = target,AuthorName = "Orochi Herman,Eagrose"
+excludeID = -1
+keepone = 0
+ignorehitpause = 1
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+trigger1 = roundstate < 4
+Trigger1 = gametime%15=0
+value = 2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+triggerall = roundstate = 4
+trigger1 = target,stateno!=5150
+trigger1 = target,stateno!=2147483647
+trigger2 = !target,hitshakeover
+value = 2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+[State 0, TargetLifeAdd];目标大伤害
+type = TargetLifeAdd
+Trigger1 = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+value = -2147483648
+ID = -1
+kill = 1
+absolute = 1
+ignorehitpause = 1
+;persistent =
+
+[State 0, Targetpoweradd];目标能量清空
+type = Targetpoweradd
+Trigger1 = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+value = -2147483648
+ignorehitpause = 1
+;persistent =
+
+[State 0, Pause];冻结当身
+type = Pause
+triggerall = roundstate < 4
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+trigger1 = EnemyNear(floor(fvar(36))),alive
+trigger1 = EnemyNear(floor(fvar(36))),hitdefattr = SCA,AA,AT,AP
+trigger1 = time%2=0
+time = 1
+movetime = 1
+ignorehitpause = 1
+;persistent =
+;endcmdbuftime = (winmugen only)
+;pausebg =  (winmugen only)
+
+[State 0, SuperPause];冻结当身
+type = SuperPause
+triggerall = roundstate < 4
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+trigger1 = EnemyNear(floor(fvar(36))),alive
+trigger1 = EnemyNear(floor(fvar(36))),hitdefattr = SCA,AA,AT,AP
+trigger1 = time%2=0
+time = 1
+movetime = 1
+anim = -1
+sound = -1
+darken = 0
+p2defmul = 1
+ignorehitpause = 1
+
+;--------------------------------------------------------
+[State 0, VarSet]
+type = VarSet
+trigger1 = 1
+sysvar(0) = -1
+ignorehitpause = 1
+persistent = 0
+
+[State 0, VarSet]
+type = VarSet
+trigger1 = root,WinKO
+sysvar(0) = 0
+ignorehitpause = 1
+persistent = 0
+
+[State 6005, EnvColor]; ---- red
+type = EnvColor
+Trigger1 = sysvar(0) = [0,1]
+Trigger2 = sysvar(0) = [4,5]
+Trigger3 = sysvar(0) = [8,9]
+Trigger4 = sysvar(0) = [12,13]
+Trigger5 = sysvar(0) = [16,17]
+Trigger6 = sysvar(0) = [20,21]
+Trigger7 = sysvar(0) = [24,25]
+Trigger8 = sysvar(0) = [28,29]
+Trigger9 = sysvar(0) = [32,33]
+Trigger10 = sysvar(0) = [36,37]
+Trigger11 = sysvar(0) = [40,41]
+Trigger12 = sysvar(0) = [44,45]
+value    = 255,0,0
+time     = 1
+under    = 1
+
+[State 6005, EnvColor]; ---- black
+type     = EnvColor
+Trigger1 = sysvar(0) = [2,3]
+value    = 0,0,0
+time     = 1
+under    = 1
+
+[State 6005, EnvColor]; ---- white
+type     = EnvColor
+Trigger1 = sysvar(0) = [6,7]
+Trigger2 = sysvar(0) = [10,11]
+Trigger3 = sysvar(0) = [14,15]
+Trigger4 = sysvar(0) = [18,19]
+Trigger5 = sysvar(0) = [22,23]
+Trigger6 = sysvar(0) = [26,27]
+Trigger7 = sysvar(0) = [30,31]
+Trigger8 = sysvar(0) = [34,35]
+Trigger9 = sysvar(0) = [38,39]
+Trigger10 = sysvar(0) = [42,43]
+value    = 255,255,255
+time     = 1
+under    = 1
+
+[state 6005, AssertSpecial]
+type = AssertSpecial
+trigger1 = sysvar(0) = [0,46]
+flag = nobg
+flag2 = nofg
+flag3 = nobardisplay
+
+[State 6005, PlaySnd]; ---- enables echo only in the final round
+type = PlaySnd
+trigger1 = sysvar(0) = 0
+value = S11,0
+ignorehitpause = 1
+persistent = 0
+volume = 255
+;abspan = 255 * (root, facing)
+
+[State 0, VarSet]
+type = VarSet
+trigger1 = sysvar(0) >= 0
+sysvar(0) = sysvar(0)+1
+ignorehitpause = 1
+;--------------------------------------------------------
+
+;===============================================================================
+;伪站姿
+[Statedef 701101]
+type = S
+physics = S
+movetype = I
+ctrl = 0
+anim = 0
+velset = 0,0
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State 191, AssertSpecial]
+type = AssertSpecial
+triggerall = prevstateno = 191
+trigger1 = time <= 820-300
+flag = Intro
+flag2 = nomusic
+ignoreHitPause = 1
+
+;===============================================================================
+;OTHK受体
+[Statedef 701110]
+type = S
+physics = N
+movetype = I
+ctrl = 0
+anim = 9996
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(701110)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = HitBy
+trigger1 = 1
+value = SCA,NT
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X
+y = -2147480000
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, AssertSpecial]
+type = AssertSpecial
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+triggerall = root,life = 0
+Trigger1 = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+flag = noko
+ignorehitpause = 1
+
+[State 0, Helper];超即死hitdef
+type = Helper
+trigger1 = !numhelper(701120)
+helpertype = player
+name = "Super Instant Kill Hitdef"
+ID = 701120
+stateno = 701120
+pos = 0,0
+postype = left    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+persistent = 0
+
+;===============================================================================
+;超即死hitdef
+[Statedef 701120]
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9997
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(701120)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X
+y = 0
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, AssertSpecial]
+type = AssertSpecial
+triggerall = root,Name = "Orochi Eagrose Version"
+triggerall = root,AuthorName = "Orochi Herman,Eagrose"
+triggerall = root,life = 0
+Trigger1 = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+flag = noko
+ignorehitpause = 1
+
+[State 0, HitDef];超即死带入
+type = HitDef
+trigger1 = ishelper(701120)
+trigger1 = roundstate=2
+trigger1 = gametime%2=0
+attr = C,NT
+hitflag = HLMAFD
+pausetime = 0,0
+animtype = DiagUp
+numhits = 0
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+sparkxy = 0,0
+;p1stateno = 2305
+p2stateno = 2147483647
+damage = 0,0
+fall.damage = 1
+guard.dist = 0
+
+;===============================================================================
+;冻结解除
+[statedef 701130]
+type = A
+movetype = I
+physics = N
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(701130)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X
+y = 0
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, SuperPause];冻结解除
+type = SuperPause
+triggerall = IsHelper(701130)
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = !((root,win || root,lose || root,drawgame) && roundstate < 3)
+trigger1 = 1
+time = 0
+movetime = 0
+anim = -1
+sound = -1
+darken = 0
+ignorehitpause = 1
+
+[State 0, Pause];冻结解除
+type = Pause
+triggerall = IsHelper(701130)
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = !((root,win || root,lose || root,drawgame) && roundstate < 3)
+trigger1 = 1
+time = 0
+movetime = 0
+ignorehitpause = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+trigger1 = !((root,win || root,lose || root,drawgame) && roundstate < 3)
+trigger1 = GameTime
+ignorehitpause = 1
+
+;===========================================================================================================================
+;混线A
+;===========================================================================================================================
+[Statedef 702210];矛A
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9995
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702210)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X+100
+y = 2147480000
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, Helper];混线盾A1
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702210)
+triggerall = !numhelper(702211)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield A1"
+ID = 702211
+stateno = 702211
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾A2
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702210)
+triggerall = !numhelper(702212)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield A2"
+ID = 702212
+stateno = 702211
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾A3
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702210)
+triggerall = !numhelper(702213)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield A3"
+ID = 702213
+stateno = 702211
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾A4
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702210)
+triggerall = !numhelper(702214)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield A4"
+ID = 702214
+stateno = 702211
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾A5
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702210)
+triggerall = !numhelper(702215)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield A5"
+ID = 702215
+stateno = 702211
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾A6
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702210)
+triggerall = !numhelper(702216)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield A6"
+ID = 702216
+stateno = 702211
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾A7
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702210)
+triggerall = !numhelper(702217)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield A7"
+ID = 702217
+stateno = 702211
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾A8
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702210)
+triggerall = !numhelper(702218)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield A8"
+ID = 702218
+stateno = 702211
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+trigger1 = ishelper(702210)
+movetype = I
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+trigger1 = ishelper(702210)
+trigger1 = (numhelper(702211) && helper(702211),stateno=702211 && helper(702211),time>10) || (!numhelper(702211) && time > 20 && time%20=0)
+trigger1 = (numhelper(702212) && helper(702212),stateno=702211 && helper(702212),time>10) || (!numhelper(702212) && time > 20 && time%20=0)
+trigger1 = (numhelper(702213) && helper(702213),stateno=702211 && helper(702213),time>10) || (!numhelper(702213) && time > 20 && time%20=0)
+trigger1 = (numhelper(702214) && helper(702214),stateno=702211 && helper(702214),time>10) || (!numhelper(702214) && time > 20 && time%20=0)
+trigger1 = (numhelper(702215) && helper(702215),stateno=702211 && helper(702215),time>10) || (!numhelper(702215) && time > 20 && time%20=0)
+trigger1 = (numhelper(702216) && helper(702216),stateno=702211 && helper(702216),time>10) || (!numhelper(702216) && time > 20 && time%20=0)
+trigger1 = (numhelper(702217) && helper(702217),stateno=702211 && helper(702217),time>10) || (!numhelper(702217) && time > 20 && time%20=0)
+trigger1 = (numhelper(702218) && helper(702218),stateno=702211 && helper(702218),time>10) || (!numhelper(702218) && time > 20 && time%20=0)
+movetype = A
+ignorehitpause = 1
+
+[State 0, HitDef];抗当身hitdef
+type = HitDef
+trigger1 = ishelper(702210)
+attr = ,AT
+hitflag = HLMAFD
+guardflag = N
+affectteam = F    ;B,E,F
+pausetime = 0,0
+animtype = DiagUp
+numhits = 1
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+sparkxy = 0,0
+p1stateno = 702212
+p2stateno = 702213
+damage = 0,0
+fall.damage = 1
+guard.dist = 0
+hitonce = 0
+
+;===============================================================================
+[Statedef 702211];盾A
+type = S
+physics = N
+movetype = I
+ctrl = 0
+anim = 9994
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702211)
+trigger1 = !ishelper(702212)
+trigger1 = !ishelper(702213)
+trigger1 = !ishelper(702214)
+trigger1 = !ishelper(702215)
+trigger1 = !ishelper(702216)
+trigger1 = !ishelper(702217)
+trigger1 = !ishelper(702218)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = ishelper(702211)||ishelper(702212)||ishelper(702213)||ishelper(702214)||ishelper(702215)||ishelper(702216)||ishelper(702217)||ishelper(702218)
+trigger1 = helper(702210),stateno = 702212  ;矛 success
+value = 702213
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 =  time <= 9
+value = SCA
+time = 1
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = HitBy
+trigger1 = time >= 10
+value = SCA,AT
+time = -1
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, BindToParent]
+type = BindToParent
+trigger1 = parent,ishelper(702210)
+time = -1
+pos = 0,0
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+;===============================================================================
+[Statedef 702212];矛A success
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9999
+velset = 0,0
+hitcountpersist = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702210)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X-90+ifelse(gametime%180<90,gametime%90,90-gametime%90)
+y = -25
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, ChangeState];混线重建
+type = ChangeState
+triggerall = UniqHitcount != 8
+trigger1 = time >= 30
+value = 702210
+ctrl = 0
+ignorehitpause = 1
+
+[State 800, Repel] ;using reversaldef to reversal enemy's invincible attacks
+type = ReversalDef
+Trigger1 = 1
+reversal.attr = SCA
+hitflag = P
+pausetime = 0,0
+animtype = DiagUp
+numhits = 0
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+;sparkxy = 100, -100
+;p1stateno = 2305
+;p2stateno = 2147483647
+;damage = 2147483648,0
+;fall.damage = 2147483648
+guard.dist = 0
+
+[State 0, TargetDrop];丢弃自身本体DEBUG
+type = null;TargetDrop
+triggerall = Numtarget
+trigger1 = target,Name = "Orochi Eagrose Version"
+trigger1 = target,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !target,ishelper
+excludeID = -1
+keepone = 0
+ignorehitpause = 1
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+trigger1 = roundstate < 4
+Trigger1 = !(!EnemyNear(floor(root,fvar(36))),ishelper && EnemyNear(floor(root,fvar(36))),life=0 && EnemyNear(floor(root,fvar(36))),alive)
+Trigger1 = time%5=0
+value = 2147483645  ;2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+triggerall = roundstate = 4
+trigger1 = target,stateno!=5150
+trigger1 = target,stateno!=2147483647
+trigger2 = !target,hitshakeover
+value = 2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+
+;===============================================================================
+[Statedef 702213];盾A success
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9999
+velset = 0,0
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = ishelper
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+triggerall = !Name = "Orochi Eagrose Version"
+triggerall = !AuthorName = "Orochi Herman,Eagrose"
+trigger1 = 1
+;x = 0
+y = 0
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+triggerall = !Name = "Orochi Eagrose Version"
+triggerall = !AuthorName = "Orochi Herman,Eagrose"
+trigger1 = 1
+value = 2147483647
+ignorehitpause = 1
+
+;===========================================================================================================================
+;混线B
+;===========================================================================================================================
+[Statedef 702220];矛B
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9995
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702220)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X-100
+y = 2147480000
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, Helper];混线盾B1
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702220)
+triggerall = !numhelper(702221)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield B1"
+ID = 702221
+stateno = 702221
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾B2
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702220)
+triggerall = !numhelper(702222)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield B2"
+ID = 702222
+stateno = 702221
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾B3
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702220)
+triggerall = !numhelper(702223)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield B3"
+ID = 702223
+stateno = 702221
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾B4
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702220)
+triggerall = !numhelper(702224)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield B4"
+ID = 702224
+stateno = 702221
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾B5
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702220)
+triggerall = !numhelper(702225)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield B5"
+ID = 702225
+stateno = 702221
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾B6
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702220)
+triggerall = !numhelper(702226)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield B6"
+ID = 702226
+stateno = 702221
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾B7
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702220)
+triggerall = !numhelper(702227)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield B7"
+ID = 702227
+stateno = 702221
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾B8
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702220)
+triggerall = !numhelper(702228)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield B8"
+ID = 702228
+stateno = 702221
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+trigger1 = ishelper(702220)
+movetype = I
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+trigger1 = ishelper(702220)
+trigger1 = (numhelper(702221) && helper(702221),stateno=702221 && helper(702221),time>10) || (!numhelper(702221) && time > 20 && time%20=0)
+trigger1 = (numhelper(702222) && helper(702222),stateno=702221 && helper(702222),time>10) || (!numhelper(702222) && time > 20 && time%20=0)
+trigger1 = (numhelper(702223) && helper(702223),stateno=702221 && helper(702223),time>10) || (!numhelper(702223) && time > 20 && time%20=0)
+trigger1 = (numhelper(702224) && helper(702224),stateno=702221 && helper(702224),time>10) || (!numhelper(702224) && time > 20 && time%20=0)
+trigger1 = (numhelper(702225) && helper(702225),stateno=702221 && helper(702225),time>10) || (!numhelper(702225) && time > 20 && time%20=0)
+trigger1 = (numhelper(702226) && helper(702226),stateno=702221 && helper(702226),time>10) || (!numhelper(702226) && time > 20 && time%20=0)
+trigger1 = (numhelper(702227) && helper(702227),stateno=702221 && helper(702227),time>10) || (!numhelper(702227) && time > 20 && time%20=0)
+trigger1 = (numhelper(702228) && helper(702228),stateno=702221 && helper(702228),time>10) || (!numhelper(702228) && time > 20 && time%20=0)
+movetype = A
+ignorehitpause = 1
+
+[State 0, HitDef];抗当身hitdef
+type = HitDef
+trigger1 = ishelper(702220)
+attr = ,AT
+hitflag = HLMAFD
+guardflag = N
+affectteam = F    ;B,E,F
+pausetime = 0,0
+animtype = DiagUp
+numhits = 1
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+sparkxy = 0,0
+p1stateno = 702222
+p2stateno = 702223
+damage = 0,0
+fall.damage = 1
+guard.dist = 0
+hitonce = 0
+
+;===============================================================================
+[Statedef 702221];盾B
+type = S
+physics = N
+movetype = I
+ctrl = 0
+anim = 9994
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702221)
+trigger1 = !ishelper(702222)
+trigger1 = !ishelper(702223)
+trigger1 = !ishelper(702224)
+trigger1 = !ishelper(702225)
+trigger1 = !ishelper(702226)
+trigger1 = !ishelper(702227)
+trigger1 = !ishelper(702228)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = ishelper(702221)||ishelper(702222)||ishelper(702223)||ishelper(702224)||ishelper(702225)||ishelper(702226)||ishelper(702227)||ishelper(702228)
+trigger1 = helper(702220),stateno = 702222  ;矛 success
+value = 702223
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 =  time <= 9
+value = SCA
+time = 1
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = HitBy
+trigger1 = time >= 10
+value = SCA,AT
+time = -1
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, BindToParent]
+type = BindToParent
+trigger1 = parent,ishelper(702220)
+time = -1
+pos = 0,0
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+;===============================================================================
+[Statedef 702222];矛B success
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9999
+velset = 0,0
+hitcountpersist = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702220)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 =  1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X-90+ifelse((gametime-30)%180<90,(gametime-30)%90,90-(gametime-30)%90)
+y = -50
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, ChangeState];混线重建
+type = ChangeState
+triggerall = UniqHitcount != 8
+trigger1 = time >= 30
+value = 702220
+ctrl = 0
+ignorehitpause = 1
+
+[State 800, Repel] ;using reversaldef to reversal enemy's invincible attacks
+type = ReversalDef
+Trigger1 = 1
+reversal.attr = SCA
+hitflag = P
+pausetime = 0,0
+animtype = DiagUp
+numhits = 0
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+;sparkxy = 100, -100
+;p1stateno = 2305
+;p2stateno = 2147483647
+;damage = 2147483648,0
+;fall.damage = 2147483648
+guard.dist = 0
+
+[State 0, TargetDrop];丢弃自身本体DEBUG
+type = null;TargetDrop
+triggerall = Numtarget
+trigger1 = target,Name = "Orochi Eagrose Version"
+trigger1 = target,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !target,ishelper
+excludeID = -1
+keepone = 0
+ignorehitpause = 1
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+trigger1 = roundstate < 4
+Trigger1 = !(!EnemyNear(floor(root,fvar(36))),ishelper && EnemyNear(floor(root,fvar(36))),life=0 && EnemyNear(floor(root,fvar(36))),alive)
+Trigger1 = time%5=0
+value = 2147483645  ;2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+triggerall = roundstate = 4
+trigger1 = target,stateno!=5150
+trigger1 = target,stateno!=2147483647
+trigger2 = !target,hitshakeover
+value = 2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+
+;===============================================================================
+[Statedef 702223];盾B success
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9999
+velset = 0,0
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = ishelper
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+triggerall = !Name = "Orochi Eagrose Version"
+triggerall = !AuthorName = "Orochi Herman,Eagrose"
+trigger1 = 1
+;x = 0
+y = 0
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+triggerall = !Name = "Orochi Eagrose Version"
+triggerall = !AuthorName = "Orochi Herman,Eagrose"
+trigger1 = 1
+value = 2147483647
+ignorehitpause = 1
+
+
+;===========================================================================================================================
+;混线C
+;===========================================================================================================================
+[Statedef 702230];矛C
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9995
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702230)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X+2147480000
+y = 0
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, Helper];混线盾C1
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702230)
+triggerall = !numhelper(702231)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield C1"
+ID = 702231
+stateno = 702231
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾C2
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702230)
+triggerall = !numhelper(702232)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield C2"
+ID = 702232
+stateno = 702231
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾C3
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702230)
+triggerall = !numhelper(702233)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield C3"
+ID = 702233
+stateno = 702231
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾C4
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702230)
+triggerall = !numhelper(702234)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield C4"
+ID = 702234
+stateno = 702231
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾C5
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702230)
+triggerall = !numhelper(702235)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield C5"
+ID = 702235
+stateno = 702231
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾C6
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702230)
+triggerall = !numhelper(702236)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield C6"
+ID = 702236
+stateno = 702231
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾C7
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702230)
+triggerall = !numhelper(702237)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield C7"
+ID = 702237
+stateno = 702231
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾C8
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702230)
+triggerall = !numhelper(702238)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield C8"
+ID = 702238
+stateno = 702231
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+trigger1 = ishelper(702230)
+movetype = I
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+trigger1 = ishelper(702230)
+trigger1 = (numhelper(702231) && helper(702231),stateno=702231 && helper(702231),time>10) || (!numhelper(702231) && time > 20 && time%20=0)
+trigger1 = (numhelper(702232) && helper(702232),stateno=702231 && helper(702232),time>10) || (!numhelper(702232) && time > 20 && time%20=0)
+trigger1 = (numhelper(702233) && helper(702233),stateno=702231 && helper(702233),time>10) || (!numhelper(702233) && time > 20 && time%20=0)
+trigger1 = (numhelper(702234) && helper(702234),stateno=702231 && helper(702234),time>10) || (!numhelper(702234) && time > 20 && time%20=0)
+trigger1 = (numhelper(702235) && helper(702235),stateno=702231 && helper(702235),time>10) || (!numhelper(702235) && time > 20 && time%20=0)
+trigger1 = (numhelper(702236) && helper(702236),stateno=702231 && helper(702236),time>10) || (!numhelper(702236) && time > 20 && time%20=0)
+trigger1 = (numhelper(702237) && helper(702237),stateno=702231 && helper(702237),time>10) || (!numhelper(702237) && time > 20 && time%20=0)
+trigger1 = (numhelper(702238) && helper(702238),stateno=702231 && helper(702238),time>10) || (!numhelper(702238) && time > 20 && time%20=0)
+movetype = A
+ignorehitpause = 1
+
+[State 0, HitDef];抗当身hitdef
+type = HitDef
+trigger1 = ishelper(702230)
+attr = ,AT
+hitflag = HLMAFD
+guardflag = N
+affectteam = F    ;B,E,F
+pausetime = 0,0
+animtype = DiagUp
+numhits = 1
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+sparkxy = 0,0
+p1stateno = 702232
+p2stateno = 702233
+damage = 0,0
+fall.damage = 1
+guard.dist = 0
+hitonce = 0
+
+;===============================================================================
+[Statedef 702231];盾C
+type = S
+physics = N
+movetype = I
+ctrl = 0
+anim = 9994
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702231)
+trigger1 = !ishelper(702232)
+trigger1 = !ishelper(702233)
+trigger1 = !ishelper(702234)
+trigger1 = !ishelper(702235)
+trigger1 = !ishelper(702236)
+trigger1 = !ishelper(702237)
+trigger1 = !ishelper(702238)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = ishelper(702231)||ishelper(702232)||ishelper(702233)||ishelper(702234)||ishelper(702235)||ishelper(702236)||ishelper(702237)||ishelper(702238)
+trigger1 = helper(702230),stateno = 702232  ;矛 success
+value = 702233
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 =  time <= 9
+value = SCA
+time = 1
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = HitBy
+trigger1 = time >= 10
+value = SCA,AT
+time = -1
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, BindToParent]
+type = BindToParent
+trigger1 = parent,ishelper(702230)
+time = -1
+pos = 0,0
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+;===============================================================================
+[Statedef 702232];矛C success
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9999
+velset = 0,0
+hitcountpersist = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702230)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X-90+ifelse((gametime-60)%180<90,(gametime-60)%90,90-(gametime-60)%90)
+y = -75
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, ChangeState];混线重建
+type = ChangeState
+triggerall = UniqHitcount != 8
+trigger1 = time >= 30
+value = 702230
+ctrl = 0
+ignorehitpause = 1
+
+[State 800, Repel] ;using reversaldef to reversal enemy's invincible attacks
+type = ReversalDef
+Trigger1 = 1
+reversal.attr = SCA
+hitflag = P
+pausetime = 0,0
+animtype = DiagUp
+numhits = 0
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+;sparkxy = 100, -100
+;p1stateno = 2305
+;p2stateno = 2147483647
+;damage = 2147483648,0
+;fall.damage = 2147483648
+guard.dist = 0
+
+[State 0, TargetDrop];丢弃自身本体DEBUG
+type = null;TargetDrop
+triggerall = Numtarget
+trigger1 = target,Name = "Orochi Eagrose Version"
+trigger1 = target,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !target,ishelper
+excludeID = -1
+keepone = 0
+ignorehitpause = 1
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+trigger1 = roundstate < 4
+Trigger1 = !(!EnemyNear(floor(root,fvar(36))),ishelper && EnemyNear(floor(root,fvar(36))),life=0 && EnemyNear(floor(root,fvar(36))),alive)
+Trigger1 = time%5=0
+value = 2147483645  ;2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+triggerall = roundstate = 4
+trigger1 = target,stateno!=5150
+trigger1 = target,stateno!=2147483647
+trigger2 = !target,hitshakeover
+value = 2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+
+;===============================================================================
+[Statedef 702233];盾C success
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9999
+velset = 0,0
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = ishelper
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+triggerall = !Name = "Orochi Eagrose Version"
+triggerall = !AuthorName = "Orochi Herman,Eagrose"
+trigger1 = 1
+;x = 0
+y = 0
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+triggerall = !Name = "Orochi Eagrose Version"
+triggerall = !AuthorName = "Orochi Herman,Eagrose"
+trigger1 = 1
+value = 2147483647
+ignorehitpause = 1
+
+;===========================================================================================================================
+;混线D
+;===========================================================================================================================
+[Statedef 702240];矛D
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9995
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702240)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X-2147480000
+y = 0
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, Helper];混线盾D1
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702240)
+triggerall = !numhelper(702241)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield D1"
+ID = 702241
+stateno = 702241
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾D2
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702240)
+triggerall = !numhelper(702242)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield D2"
+ID = 702242
+stateno = 702241
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾D3
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702240)
+triggerall = !numhelper(702243)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield D3"
+ID = 702243
+stateno = 702241
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾D4
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702240)
+triggerall = !numhelper(702244)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield D4"
+ID = 702244
+stateno = 702241
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾D5
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702240)
+triggerall = !numhelper(702245)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield D5"
+ID = 702245
+stateno = 702241
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾D6
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702240)
+triggerall = !numhelper(702246)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield D6"
+ID = 702246
+stateno = 702241
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾D7
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702240)
+triggerall = !numhelper(702247)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield D7"
+ID = 702247
+stateno = 702241
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾D8
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702240)
+triggerall = !numhelper(702248)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield D8"
+ID = 702248
+stateno = 702241
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+trigger1 = ishelper(702240)
+movetype = I
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+trigger1 = ishelper(702240)
+trigger1 = (numhelper(702241) && helper(702241),stateno=702241 && helper(702241),time>10) || (!numhelper(702241) && time > 20 && time%20=0)
+trigger1 = (numhelper(702242) && helper(702242),stateno=702241 && helper(702242),time>10) || (!numhelper(702242) && time > 20 && time%20=0)
+trigger1 = (numhelper(702243) && helper(702243),stateno=702241 && helper(702243),time>10) || (!numhelper(702243) && time > 20 && time%20=0)
+trigger1 = (numhelper(702244) && helper(702244),stateno=702241 && helper(702244),time>10) || (!numhelper(702244) && time > 20 && time%20=0)
+trigger1 = (numhelper(702245) && helper(702245),stateno=702241 && helper(702245),time>10) || (!numhelper(702245) && time > 20 && time%20=0)
+trigger1 = (numhelper(702246) && helper(702246),stateno=702241 && helper(702246),time>10) || (!numhelper(702246) && time > 20 && time%20=0)
+trigger1 = (numhelper(702247) && helper(702247),stateno=702241 && helper(702247),time>10) || (!numhelper(702247) && time > 20 && time%20=0)
+trigger1 = (numhelper(702248) && helper(702248),stateno=702241 && helper(702248),time>10) || (!numhelper(702248) && time > 20 && time%20=0)
+movetype = A
+ignorehitpause = 1
+
+[State 0, HitDef];抗当身hitdef
+type = HitDef
+trigger1 = ishelper(702240)
+attr = ,AT
+hitflag = HLMAFD
+guardflag = N
+affectteam = F    ;B,E,F
+pausetime = 0,0
+animtype = DiagUp
+numhits = 1
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+sparkxy = 0,0
+p1stateno = 702242
+p2stateno = 702243
+damage = 0,0
+fall.damage = 1
+guard.dist = 0
+hitonce = 0
+
+;===============================================================================
+[Statedef 702241];盾D
+type = S
+physics = N
+movetype = I
+ctrl = 0
+anim = 9994
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702241)
+trigger1 = !ishelper(702242)
+trigger1 = !ishelper(702243)
+trigger1 = !ishelper(702244)
+trigger1 = !ishelper(702245)
+trigger1 = !ishelper(702246)
+trigger1 = !ishelper(702247)
+trigger1 = !ishelper(702248)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = ishelper(702241)||ishelper(702242)||ishelper(702243)||ishelper(702244)||ishelper(702245)||ishelper(702246)||ishelper(702247)||ishelper(702248)
+trigger1 = helper(702240),stateno = 702242  ;矛 success
+value = 702243
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 =  time <= 9
+value = SCA
+time = 1
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = HitBy
+trigger1 = time >= 10
+value = SCA,AT
+time = -1
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, BindToParent]
+type = BindToParent
+trigger1 = parent,ishelper(702240)
+time = -1
+pos = 0,0
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+;===============================================================================
+[Statedef 702242];矛D success
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9999
+velset = 0,0
+hitcountpersist = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702240)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X-90+ifelse((gametime-90)%180<90,(gametime-90)%90,90-(gametime-90)%90)
+y = -100
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, ChangeState];混线重建
+type = ChangeState
+triggerall = UniqHitcount != 8
+trigger1 = time >= 30
+value = 702240
+ctrl = 0
+ignorehitpause = 1
+
+[State 800, Repel] ;using reversaldef to reversal enemy's invincible attacks
+type = ReversalDef
+Trigger1 = 1
+reversal.attr = SCA
+hitflag = P
+pausetime = 0,0
+animtype = DiagUp
+numhits = 0
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+;sparkxy = 100, -100
+;p1stateno = 2305
+;p2stateno = 2147483647
+;damage = 2147483648,0
+;fall.damage = 2147483648
+guard.dist = 0
+
+[State 0, TargetDrop];丢弃自身本体DEBUG
+type = null;TargetDrop
+triggerall = Numtarget
+trigger1 = target,Name = "Orochi Eagrose Version"
+trigger1 = target,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !target,ishelper
+excludeID = -1
+keepone = 0
+ignorehitpause = 1
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+trigger1 = roundstate < 4
+Trigger1 = !(!EnemyNear(floor(root,fvar(36))),ishelper && EnemyNear(floor(root,fvar(36))),life=0 && EnemyNear(floor(root,fvar(36))),alive)
+Trigger1 = time%5=0
+value = 2147483645  ;2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+triggerall = roundstate = 4
+trigger1 = target,stateno!=5150
+trigger1 = target,stateno!=2147483647
+value = 2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+
+;===============================================================================
+[Statedef 702243];盾D success
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9999
+velset = 0,0
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = ishelper
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+triggerall = !Name = "Orochi Eagrose Version"
+triggerall = !AuthorName = "Orochi Herman,Eagrose"
+trigger1 = 1
+;x = 0
+y = 0
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+triggerall = !Name = "Orochi Eagrose Version"
+triggerall = !AuthorName = "Orochi Herman,Eagrose"
+trigger1 = 1
+value = 2147483647
+ignorehitpause = 1
+
+
+;===========================================================================================================================
+;混线E
+;===========================================================================================================================
+[Statedef 702250];矛E
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9995
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702250)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X
+y = -1147480000
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, Helper];混线盾E1
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702250)
+triggerall = !numhelper(702251)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield E1"
+ID = 702251
+stateno = 702251
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾E2
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702250)
+triggerall = !numhelper(702252)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield E2"
+ID = 702252
+stateno = 702251
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾E3
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702250)
+triggerall = !numhelper(702253)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield E3"
+ID = 702253
+stateno = 702251
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾E4
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702250)
+triggerall = !numhelper(702254)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield E4"
+ID = 702254
+stateno = 702251
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾E5
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702250)
+triggerall = !numhelper(702255)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield E5"
+ID = 702255
+stateno = 702251
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾E6
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702250)
+triggerall = !numhelper(702256)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield E6"
+ID = 702256
+stateno = 702251
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾E7
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702250)
+triggerall = !numhelper(702257)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield E7"
+ID = 702257
+stateno = 702251
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾E8
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702250)
+triggerall = !numhelper(702258)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield E8"
+ID = 702258
+stateno = 702251
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+trigger1 = ishelper(702250)
+movetype = I
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+trigger1 = ishelper(702250)
+trigger1 = (numhelper(702251) && helper(702251),stateno=702251 && helper(702251),time>10) || (!numhelper(702251) && time > 20 && time%20=0)
+trigger1 = (numhelper(702252) && helper(702252),stateno=702251 && helper(702252),time>10) || (!numhelper(702252) && time > 20 && time%20=0)
+trigger1 = (numhelper(702253) && helper(702253),stateno=702251 && helper(702253),time>10) || (!numhelper(702253) && time > 20 && time%20=0)
+trigger1 = (numhelper(702254) && helper(702254),stateno=702251 && helper(702254),time>10) || (!numhelper(702254) && time > 20 && time%20=0)
+trigger1 = (numhelper(702255) && helper(702255),stateno=702251 && helper(702255),time>10) || (!numhelper(702255) && time > 20 && time%20=0)
+trigger1 = (numhelper(702256) && helper(702256),stateno=702251 && helper(702256),time>10) || (!numhelper(702256) && time > 20 && time%20=0)
+trigger1 = (numhelper(702257) && helper(702257),stateno=702251 && helper(702257),time>10) || (!numhelper(702257) && time > 20 && time%20=0)
+trigger1 = (numhelper(702258) && helper(702258),stateno=702251 && helper(702258),time>10) || (!numhelper(702258) && time > 20 && time%20=0)
+movetype = A
+ignorehitpause = 1
+
+[State 0, HitDef];抗当身hitdef
+type = HitDef
+trigger1 = ishelper(702250)
+attr = ,AT
+hitflag = HLMAFD
+guardflag = N
+affectteam = F    ;B,E,F
+pausetime = 0,0
+animtype = DiagUp
+numhits = 1
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+sparkxy = 0,0
+p1stateno = 702252
+p2stateno = 702253
+damage = 0,0
+fall.damage = 1
+guard.dist = 0
+hitonce = 0
+
+;===============================================================================
+[Statedef 702251];盾E
+type = S
+physics = N
+movetype = I
+ctrl = 0
+anim = 9994
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702251)
+trigger1 = !ishelper(702252)
+trigger1 = !ishelper(702253)
+trigger1 = !ishelper(702254)
+trigger1 = !ishelper(702255)
+trigger1 = !ishelper(702256)
+trigger1 = !ishelper(702257)
+trigger1 = !ishelper(702258)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = ishelper(702251)||ishelper(702252)||ishelper(702253)||ishelper(702254)||ishelper(702255)||ishelper(702256)||ishelper(702257)||ishelper(702258)
+trigger1 = helper(702250),stateno = 702252  ;矛 success
+value = 702253
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 =  time <= 9
+value = SCA
+time = 1
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = HitBy
+trigger1 = time >= 10
+value = SCA,AT
+time = -1
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, BindToParent]
+type = BindToParent
+trigger1 = parent,ishelper(702250)
+time = -1
+pos = 0,0
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+;===============================================================================
+[Statedef 702252];矛E success
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9999
+velset = 0,0
+hitcountpersist = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702250)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X-90+ifelse((gametime-120)%180<90,(gametime-120)%90,90-(gametime-120)%90)
+y = -125
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, ChangeState];混线重建
+type = ChangeState
+triggerall = UniqHitcount != 8
+trigger1 = time >= 30
+value = 702250
+ctrl = 0
+ignorehitpause = 1
+
+[State 800, Repel] ;using reversaldef to reversal enemy's invincible attacks
+type = ReversalDef
+Trigger1 = 1
+reversal.attr = SCA
+hitflag = P
+pausetime = 0,0
+animtype = DiagUp
+numhits = 0
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+;sparkxy = 100, -100
+;p1stateno = 2305
+;p2stateno = 2147483647
+;damage = 2147483648,0
+;fall.damage = 2147483648
+guard.dist = 0
+
+[State 0, TargetDrop];丢弃自身本体DEBUG
+type = null;TargetDrop
+triggerall = Numtarget
+trigger1 = target,Name = "Orochi Eagrose Version"
+trigger1 = target,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !target,ishelper
+excludeID = -1
+keepone = 0
+ignorehitpause = 1
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+trigger1 = roundstate < 4
+Trigger1 = !(!EnemyNear(floor(root,fvar(36))),ishelper && EnemyNear(floor(root,fvar(36))),life=0 && EnemyNear(floor(root,fvar(36))),alive)
+Trigger1 = time%5=0
+value = 2147483645  ;2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+triggerall = roundstate = 4
+trigger1 = target,stateno!=5150
+trigger1 = target,stateno!=2147483647
+value = 2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+
+;===============================================================================
+[Statedef 702253];盾E success
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9999
+velset = 0,0
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = ishelper
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+triggerall = !Name = "Orochi Eagrose Version"
+triggerall = !AuthorName = "Orochi Herman,Eagrose"
+trigger1 = 1
+;x = 0
+y = 0
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+triggerall = !Name = "Orochi Eagrose Version"
+triggerall = !AuthorName = "Orochi Herman,Eagrose"
+trigger1 = 1
+value = 2147483647
+ignorehitpause = 1
+
+;===========================================================================================================================
+;混线F
+;===========================================================================================================================
+[Statedef 702260];矛F
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9995
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702260)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X
+y = 1147480000
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, Helper];混线盾F1
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702260)
+triggerall = !numhelper(702261)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield F1"
+ID = 702261
+stateno = 702261
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾F2
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702260)
+triggerall = !numhelper(702262)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield F2"
+ID = 702262
+stateno = 702261
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾F3
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702260)
+triggerall = !numhelper(702263)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield F3"
+ID = 702263
+stateno = 702261
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾F4
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702260)
+triggerall = !numhelper(702264)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield F4"
+ID = 702264
+stateno = 702261
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾F5
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702260)
+triggerall = !numhelper(702265)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield F5"
+ID = 702265
+stateno = 702261
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾F6
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702260)
+triggerall = !numhelper(702266)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield F6"
+ID = 702266
+stateno = 702261
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾F7
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702260)
+triggerall = !numhelper(702267)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield F7"
+ID = 702267
+stateno = 702261
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, Helper];混线盾F8
+type = Helper
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+triggerall = ishelper(702260)
+triggerall = !numhelper(702268)
+trigger1 = 1
+helpertype = player
+name = "Wild Pointer Shield F8"
+ID = 702268
+stateno = 702261
+pos = 0,0
+postype = p1    ;p2,front,back,left,right
+facing = 1
+keyctrl = 0
+ownpal = 0
+supermovetime = 2147483646
+pausemovetime = 2147483646
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+trigger1 = ishelper(702260)
+movetype = I
+ignorehitpause = 1
+
+[State 0, StateTypeSet]
+type = StateTypeSet
+trigger1 = ishelper(702260)
+trigger1 = (numhelper(702261) && helper(702261),stateno=702261 && helper(702261),time>10) || (!numhelper(702261) && time > 20 && time%20=0)
+trigger1 = (numhelper(702262) && helper(702262),stateno=702261 && helper(702262),time>10) || (!numhelper(702262) && time > 20 && time%20=0)
+trigger1 = (numhelper(702263) && helper(702263),stateno=702261 && helper(702263),time>10) || (!numhelper(702263) && time > 20 && time%20=0)
+trigger1 = (numhelper(702264) && helper(702264),stateno=702261 && helper(702264),time>10) || (!numhelper(702264) && time > 20 && time%20=0)
+trigger1 = (numhelper(702265) && helper(702265),stateno=702261 && helper(702265),time>10) || (!numhelper(702265) && time > 20 && time%20=0)
+trigger1 = (numhelper(702266) && helper(702266),stateno=702261 && helper(702266),time>10) || (!numhelper(702266) && time > 20 && time%20=0)
+trigger1 = (numhelper(702267) && helper(702267),stateno=702261 && helper(702267),time>10) || (!numhelper(702267) && time > 20 && time%20=0)
+trigger1 = (numhelper(702268) && helper(702268),stateno=702261 && helper(702268),time>10) || (!numhelper(702268) && time > 20 && time%20=0)
+movetype = A
+ignorehitpause = 1
+
+[State 0, HitDef];抗当身hitdef
+type = HitDef
+trigger1 = ishelper(702260)
+attr = ,AT
+hitflag = HLMAFD
+guardflag = N
+affectteam = F    ;B,E,F
+pausetime = 0,0
+animtype = DiagUp
+numhits = 1
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+sparkxy = 0,0
+p1stateno = 702262
+p2stateno = 702263
+damage = 0,0
+fall.damage = 1
+guard.dist = 0
+hitonce = 0
+
+;===============================================================================
+[Statedef 702261];盾F
+type = S
+physics = N
+movetype = I
+ctrl = 0
+anim = 9994
+velset = 0,0
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702261)
+trigger1 = !ishelper(702262)
+trigger1 = !ishelper(702263)
+trigger1 = !ishelper(702264)
+trigger1 = !ishelper(702265)
+trigger1 = !ishelper(702266)
+trigger1 = !ishelper(702267)
+trigger1 = !ishelper(702268)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = ishelper(702261)||ishelper(702262)||ishelper(702263)||ishelper(702264)||ishelper(702265)||ishelper(702266)||ishelper(702267)||ishelper(702268)
+trigger1 = helper(702260),stateno = 702262  ;矛 success
+value = 702263
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 =  time <= 9
+value = SCA
+time = 1
+ignorehitpause = 1
+
+[State 0, HitBy]
+type = HitBy
+trigger1 = time >= 10
+value = SCA,AT
+time = -1
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, BindToParent]
+type = BindToParent
+trigger1 = parent,ishelper(702260)
+time = -1
+pos = 0,0
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+;===============================================================================
+[Statedef 702262];矛F success
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9999
+velset = 0,0
+hitcountpersist = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper(702260)
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = -1
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+trigger1 = 1
+x = root,pos X-90+ifelse((gametime-150)%180<90,(gametime-150)%90,90-(gametime-150)%90)
+y = -150
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, PlayerPush]
+type = PlayerPush
+trigger1 = 1
+value = 0
+ignorehitpause = 1
+
+[State 0, ChangeState];混线重建
+type = ChangeState
+triggerall = UniqHitcount != 8
+trigger1 = time >= 30
+value = 702260
+ctrl = 0
+ignorehitpause = 1
+
+[State 800, Repel] ;using reversaldef to reversal enemy's invincible attacks
+type = ReversalDef
+Trigger1 = 1
+reversal.attr = SCA
+hitflag = P
+pausetime = 0,0
+animtype = DiagUp
+numhits = 0
+sparkno = -1
+getpower = 0,0
+givepower = 0,0
+hitsound = s-1
+priority = 2147483647, hit
+;sparkxy = 100, -100
+;p1stateno = 2305
+;p2stateno = 2147483647
+;damage = 2147483648,0
+;fall.damage = 2147483648
+guard.dist = 0
+
+[State 0, TargetDrop];丢弃自身本体DEBUG
+type = null;TargetDrop
+triggerall = Numtarget
+trigger1 = target,Name = "Orochi Eagrose Version"
+trigger1 = target,AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !target,ishelper
+excludeID = -1
+keepone = 0
+ignorehitpause = 1
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+trigger1 = roundstate < 4
+Trigger1 = !(!EnemyNear(floor(root,fvar(36))),ishelper && EnemyNear(floor(root,fvar(36))),life=0 && EnemyNear(floor(root,fvar(36))),alive)
+Trigger1 = time%5=0
+value = 2147483645  ;2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+[State 0, TargetState];目标即死状态
+type = TargetState
+Triggerall = (root,var(51)=6666 && root,var(58)=1 && root,var(42)%10=1) || ((!numhelper(701100) || (numhelper(701100) && helper(701100),stateno!=701100)) && root,stateno != 5900)
+triggerall = roundstate = 4
+trigger1 = target,stateno!=5150
+trigger1 = target,stateno!=2147483647
+value = 2147483647
+ID = -1
+ignorehitpause = 1
+;persistent =
+
+
+;===============================================================================
+[Statedef 702263];盾F success
+type = S
+physics = N
+movetype = A
+ctrl = 0
+anim = 9999
+velset = 0,0
+
+[State 0, NotHitBy]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+ignorehitpause = 1
+
+[State 0, ScreenBound]
+type = ScreenBound
+trigger1 = 1
+value = 0
+movecamera = 0,0
+ignorehitpause = 1
+
+[State 0, DestroySelf]
+type = DestroySelf
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = ishelper
+ignorehitpause = 1
+
+[State 0, changestate]
+type = selfstate
+triggerall = Name = "Orochi Eagrose Version"
+triggerall = AuthorName = "Orochi Herman,Eagrose"
+trigger1 = !ishelper
+Value = 2300
+ignorehitpause = 1
+
+[State 0, PosSet]
+type = PosSet
+triggerall = !Name = "Orochi Eagrose Version"
+triggerall = !AuthorName = "Orochi Herman,Eagrose"
+trigger1 = 1
+;x = 0
+y = 0
+ignorehitpause = 1
+
+[State 0, ChangeState]
+type = ChangeState
+triggerall = !Name = "Orochi Eagrose Version"
+triggerall = !AuthorName = "Orochi Herman,Eagrose"
+trigger1 = 1
+value = 2147483647
+ignorehitpause = 1
+

@@ -1,0 +1,1346 @@
+; CNSファイルはカンフーマンの定数（基本データ）と
+; 状態（各動作）を記述するものです。
+; キャラクターの心臓とも言える部分なのでとても重要です。
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;基本データ部分
+[Data]
+life              = 3000    ;体力ゲージの最大値を決めます
+power             = 5000    ;パワーゲージ最大値（デフォルトは 3000 = Lv.3 になります・オプション）
+attack            = 100     ;攻撃力パーセンテージ（デフォルトは 100% になります）
+defence           = 100     ;防御力パーセンテージ（デフォルトは 100% になります）
+fall.defence_up   = 50      ;一時的に上昇するダウン時の防御力パーセンテージ
+liedown.time      = 50      ;倒れてから起き上がるまでの時間
+airjuggle         = 15      ;ジャグルポイント限界値　★１
+sparkno           = 1       ;デフォルトのヒットスパーク番号（fightfx.airか、キャラのairから呼び出す）
+guard.sparkno     = 40      ;デフォルトのガードスパーク番号（fightfx.airか、キャラのairから呼び出す）
+KO.echo           = 0       ;ＫＯ時の声にエコーを掛けるかどうか（0=しない・1=する）
+volume            = 50      ;キャラの音量　255が最高
+intpersistindex   = 20      ;Varを次のラウンドへ持ち越しが可能 (最小=0, 最大=59)  ★２
+floatpersistindex = 40      ;FVarを次のラウンドへ持ち越しが可能 (最小=0, 最大=39) ★２
+
+;---------------------------------------------------------------------------
+;サイズ設定
+[Size]
+xscale           = 1        ;キャラ画像の横のスケール
+yscale           = 1        ;キャラ画像の縦のスケール
+ground.back      = 15       ;キャラの幅（地上後方）
+ground.front     = 16       ;キャラの幅（地上前方）
+air.back         = 12       ;キャラの幅（空中後方）
+air.front        = 12       ;キャラの幅（空中前方）
+height           = 60       ;跳び越す相手のためのキャラの高さ
+attack.dist      = 160      ;攻撃を出した時に相手がガード体勢に入る最低の距離
+proj.attack.dist = 90       ;相手がガード体勢に入る発射物との最低の距離
+proj.doscale     = 0        ;xscaleとyscaleが発射物のスケールにも影響するかどうか（0=しない・1=する）
+head.pos         = 0, -90   ;BindToTargetの時に必要な頭の座標
+mid.pos          = 0, -60   ;BindToTargetの時に必要な体中心の座標
+shadowoffset     = 0        ;影の垂直方向の位置
+draw.offset      = 0,0      ;キャラ描画表示位置（Ｘ軸,Ｙ軸）
+
+;---------------------------------------------------------------------------
+;移動速度設定
+[Velocity]
+walk.fwd     = 3.0          ;前進歩行速度
+walk.back    = -3.0        ;後退歩行速度
+run.fwd      = 6.8, 0       ;前に走る時の速度（Ｘ軸,Ｙ軸）
+run.back     = -10.0,-5.0   ;後ろに走る時の速度（Ｘ軸,Ｙ軸）
+jump.neu     = 0,-9         ;垂直ジャンプ速度（Ｘ軸,Ｙ軸）
+jump.back    = -3.6         ;後ジャンプ速度
+jump.fwd     = 3.7          ;前ジャンプ速度
+runjump.back = -2.55,-8.1   ;後ろに走りながらのジャンプ速度（オプション）
+runjump.fwd  = 4.2,-8.7    ;前に走りながらのジャンプ速度（オプション）
+airjump.neu  = 0,-8.1       ;空中垂直ジャンプ速度（オプション）
+airjump.back = -2.5         ;空中後ジャンプ速度（オプション）
+airjump.fwd  = 2.55         ;空中前ジャンプ速度（オプション）
+
+;---------------------------------------------------------------------------
+;動作設定
+[Movement]
+airjump.num     = 0      ;空中ジャンプが出来る回数（オプション）
+airjump.height  = 35     ;空中ジャンプするために必要な最低限の高さ（オプション）
+yaccel          = .56    ;重力（垂直下降加速度）
+stand.friction  = .85    ;立ち状態の摩擦係数
+crouch.friction = .82    ;しゃがみ状態の摩擦係数
+
+;---------------------------------------------------------------------------
+; Varの使用状況
+; ここに自分が使ったvarをメモしておくといろいろと好都合です。
+; var(1)  - コマンドファイルのコンボ用
+; var(3)  - ハイジャンプ
+; var(4)  - 小ジャンプ
+; var(6)  - 受身処理用
+; var(10) - 弱朧車ヒット確認用
+; var(15) - 百八拾弐式　強弱判別用
+; var(16) - コマンド入力用
+; var(20) - 行動制限用
+; var(21) - Random var用
+; var(22) - Lifeの初期値保存用
+; var(30) - スパキャン判定用
+; var(31) - MAX大蛇薙強弱判別用
+; var(32) - 零式・壱之段挑発用
+
+;---------------------------------------------------------------------------
+;「ステート」の説明と基本的な使い方
+;---------------------------------------------------------------------------
+;■ステートとは「状態」を意味しますが、
+;　ＭＵＧＥＮでは通常攻撃や必殺技などの枠にはまらない
+;「ゲーム中における全ての行動を決めるプログラム」の事を指します。
+;「ゲージ消費が必要無く、一撃で相手を倒せる攻撃」なども簡単に作成出来るので注意です。
+;　１ステート（一つの行動）ずつに対して必ず番号（アドレス）が割り当てられます。
+;　俗に「ステートナンバー」と呼ばれています。
+;
+;■基本的な設定の例
+; [Statedef STATENO]       一つの行動を定義する記述です。「STATENO」に必ず番号を設定してください
+; type = ?      S/C/A/L/U  キャラの状態を指定
+; S=立ち　C=しゃがみ　A=空中　L=倒れている　U=前のステートの状態を引き継ぐ
+;
+; movetype = ?  I/A/H      キャラの行動内容を指定
+; I=何もしない　A=攻撃している　H=攻撃を食らっている
+;
+; physics = ?   S/C/A/N/U  キャラの物理的な体勢
+; S=立ち　C=しゃがみ　A=空中　N=重力や摩擦の影響を受けない　U=前のステートの体勢を引き継ぐ
+;
+; juggle = ?               攻撃を当てた時に溜まるジャグルポイントの設定
+;
+; [State STATENO, ?]      「ステートコントローラ」と呼ばれるステートの色々な操作を定義し、設置や追加をします
+; type = ?                 ステートコントローラの種類をこの部分に状況に応じて入れます
+; 　                       トリガーで条件を指定し、様々な効果を適用させて行きます
+;
+;
+; ※１ステートには必ず一つはステートコントローラを設置する必要があります。
+;
+; 後は実際に使われているステートを参照してください。（[Statedef 200]に更に詳しい説明もあります）
+;
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+; 基本行動のステート
+;---------------------------------------------------------------------------
+; タイムオーバー時
+; CNS レベル: 基本
+
+[Statedef 170]
+type = S
+ctrl = 0     ;ここでCtrlSetを簡略化できます。　1=自由に動かせる
+anim = 170
+velset = 0,0 ;ここでVelSetを簡略化できます。　x方向,y方向 の順
+
+[State 170, 無敵]
+type = NotHitBy
+trigger1 = 1 ;1にするといかなる条件でも有効で、0にするといかなる条件でも無効
+value = SCA  ;※
+time = 1
+
+;---------------------------------------------------------------------------
+; 勝利ポーズ分岐
+; CNS レベル: 基本
+;
+;ここで勝利ポーズを選択する。　MatchOverは試合終了を判定するので、
+;一回目と二回目勝利を別のポーズにしたい時に便利。
+
+[Statedef 180]
+type = S
+
+[State 180,]
+type = VarRandom
+trigger1 = 1
+v = 21
+range = 0,2
+
+[State 180,]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = var(21) = 0
+value = 181
+
+[State 180,]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = var(21) = 1
+value = 182
+
+[State 180,]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = var(21) = 2
+value = 183
+
+;---------------------------------------------------------------------------
+
+; 勝利ポーズ1(燃えねえなあ)
+; CNS レベル: 基本
+
+[Statedef 181]
+type = S
+ctrl = 0
+anim = 181
+velset = 0,0
+
+[State 182, 音を鳴らす]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = s10,5
+
+[State 181, 勝利画面]
+type = Helper
+triggerall = Matchover
+triggerall = time = 180
+trigger1 = teammode = single || teammode = turns
+trigger2 = teammode = simul
+trigger2 = NumPartner
+trigger2 = ID < partner,ID || partner,alive = 0
+id = 10900
+name = "winner"
+sprpriority = 1
+pos = 0,0
+postype = p1
+stateno = 10900
+helpertype = normal
+pausemovetime = 999999
+keyctrl = 1 
+ownpal = 1
+
+[State 181, 特殊効果]
+type = AssertSpecial
+trigger1 = time = [0,220]
+flag = roundnotover
+
+[State 181, エフェクト表示]
+type = explod
+trigger1 =!Matchover
+trigger1 = teammode = single || teammode = turns
+trigger1 = time = 200
+anim = 9910
+id = 9910
+ontop = 1
+postype = left
+scale = 500.0,10.0
+ownpal = 1
+bindtime = -1
+ignorehitpause = 1
+
+[State 181, 特殊効果]
+type = AssertSpecial
+trigger1 = numexplod(9910) = 1
+flag = nobardisplay
+
+;---------------------------------------------------------------------------
+; 勝利ポーズ2(俺の･･･勝ちだ！)
+; CNS レベル: 基本
+
+[Statedef 182]
+type = S
+ctrl = 0
+anim = 182
+velset = 0,0
+
+[State 183, 音を鳴らす]
+type = PlaySnd
+trigger1 = AnimElem = 1
+value = s10,4
+
+[State 181, 勝利画面]
+type = Helper
+triggerall = Matchover
+triggerall = time = 180
+trigger1 = teammode = single || teammode = turns
+trigger2 = teammode = simul
+trigger2 = NumPartner
+trigger2 = ID < partner,ID || partner,alive = 0
+id = 10900
+name = "winner"
+sprpriority = 1
+pos = 0,0
+postype = p1
+stateno = 10900
+helpertype = normal
+pausemovetime = 999999
+keyctrl = 1 
+ownpal = 1
+
+[State 181, 特殊効果]
+type = AssertSpecial
+trigger1 = time = [0,220]
+flag = roundnotover
+
+[State 181, エフェクト表示]
+type = explod
+trigger1 =!Matchover
+trigger1 = teammode = single || teammode = turns
+trigger1 = time = 200
+anim = 9910
+id = 9910
+ontop = 1
+postype = left
+scale = 500.0,10.0
+ownpal = 1
+bindtime = -1
+ignorehitpause = 1
+
+[State 181, 特殊効果]
+type = AssertSpecial
+trigger1 = numexplod(9910) = 1
+flag = nobardisplay
+
+;---------------------------------------------------------------------------
+; 勝利ポーズ3
+; CNS レベル: 基本
+
+[Statedef 183]
+type = S
+ctrl = 0
+anim = 183
+velset = 0,0
+
+[State 184, 音を鳴らす]
+type = PlaySnd
+trigger1 = AnimElem = 7
+value = s12,0
+
+[State 184, ???????]
+type = Explod
+trigger1 = AnimElem = 3
+anim = 184
+postype = P1
+pos = 0, 0
+sprpriority = 5
+ownpal = 1
+
+[State 181, 勝利画面]
+type = Helper
+triggerall = Matchover
+triggerall = time = 220
+trigger1 = teammode = single || teammode = turns
+trigger2 = teammode = simul
+trigger2 = NumPartner
+trigger2 = ID < partner,ID || partner,alive = 0
+id = 10900
+name = "winner"
+sprpriority = 1
+pos = 0,0
+postype = p1
+stateno = 10900
+helpertype = normal
+pausemovetime = 999999
+keyctrl = 1 
+ownpal = 1
+
+[State 181, 特殊効果]
+type = AssertSpecial
+trigger1 = time = [0,260]
+flag = roundnotover
+
+[State 181, エフェクト表示]
+type = explod
+trigger1 =!Matchover
+trigger1 = teammode = single || teammode = turns
+trigger1 = time = 240
+anim = 9910
+id = 9910
+ontop = 1
+postype = left
+scale = 500.0,10.0
+ownpal = 1
+bindtime = -1
+ignorehitpause = 1
+
+[State 181, 特殊効果]
+type = AssertSpecial
+trigger1 = numexplod(9910) = 1
+flag = nobardisplay
+
+;---------------------------------------------------------------------------
+; イントロ分岐
+; CNS レベル: 基本
+;
+; ここでは変数(var)を使っていますが、詳しい説明は後ほど。
+; VarRandomはrangeで指定された範囲からひとつを選ぶので、
+; いろいろな分岐に便利です。
+
+;イントロ選択
+[Statedef 190]
+type = S
+ctrl = 0
+anim = 0
+velset = 0,0
+
+[State 190,灯蛾の如く燃え尽きて欲しい方々]
+type = ChangeState
+trigger1 = p2name = "Kyo" | p4name = "Kyo"
+trigger2 = p2name = "Kyo01" | p4name = "Kyo01"
+trigger3 = p2name = "Kyo03" | p4name = "Kyo03"
+trigger4 = p2name = "Kyo Kusanagi" | p4name = "Kyo Kusanagi"
+trigger5 = p2name = "Kusanagi Kyo" | p4name = "Kusanagi Kyo"
+trigger6 = p2name = "kyoAkof" | p4name = "kyoAkof"
+trigger7 = p2name = "Iori Yagami" | p4name = "Iori Yagami"
+trigger8 = p2name = "Iori" | p4name = "Iori"
+trigger9 = p2name = "Yagami" | p4name = "Yagami"
+trigger10 = p2name = "Yagami-AKOF" | p4name = "Yagami-AKOF"
+trigger11 = p2name = "AK'" | p4name = "AK'"
+trigger12 = p2name = "K'" | p4name = "K'"
+trigger13 = p2name = "K-BLOOD" | p4name = "K-BLOOD"
+trigger14 = p2name = "Nao" | p4name = "Nao"
+value = 192
+
+[State 190,対武器持ちの方々]
+type = ChangeState
+trigger1 = p2name = "Billy" | p4name = "Billy"
+trigger2 = p2name = "Shiki" | p4name = "Shiki"
+trigger3 = p2name = "Tin's Shiki" | p4name = "Tin's Shiki"
+trigger4 = p2name = "Asura" | p4name = "Asura"
+trigger5 = p2name = "Chang" | p4name = "Chang"
+trigger6 = p2name = "Chang Koehan" | p4name = "Chang Koehan"
+trigger7 = p2name = "Choi" | p4name = "Choi"
+trigger8 = p2name = "CHOI BOUNGE" | p4name = "CHOI BOUNGE"
+trigger9 = p2name = "Foxy" | p4name = "Foxy"
+trigger10 = p2name = "haohmaru" | p4name = "haohmaru"
+trigger11 = p2name = "Moriya" | p4name = "Moriya"
+trigger12 = p2name = "Mr.Big" | p4name = "Mr.Big"
+trigger13 = p2name = "EarthQuake" | p4name = "EarthQuake"
+trigger14 = p2name = "SvCEarthQuake" | p4name = "SvCEarthQuake"
+trigger15 = p2name = "GenJyuro" | p4name = "GenJyuro"
+trigger16 = p2name = "SvCGenJyuro" | p4name = "SvCGenJyuro"
+trigger17 = p2name = "Elisabeth Branctorche" | p4name = "Elisabeth Branctorche"
+trigger18 = p2name = "svcZero" | p4name = "svcZero"
+trigger19 = p2name = "whip" | p4name = "whip"
+trigger20 = p2name = "Balrog" | p4name = "Balrog"
+trigger21 = p2name = "Balrog_EX" | p4name = "Balrog_EX"
+trigger22 = p2name = "Kaede" | p4name = "Kaede"
+value = 193
+
+[State 190,対デコ助]
+type = ChangeState
+trigger1 = p2name = "K9999" | p4name = "K9999"
+value = 194
+
+[State 190,]
+type = ChangeState
+trigger1 = Time = 1
+value = ifelse(Random <= 500,191,198)
+
+;---------------------------------------------------------------------------
+; イントロ（試合開始直前のアクション）
+; CNS レベル: 基本
+
+[Statedef 191]
+type = S
+ctrl = 0
+anim = 190
+velset = 0,0
+
+[State 191, 特殊効果] ;「ROUND1, FIGHT!」のアナウンスが始まるまでは、このコントローラを使ってください
+type = AssertSpecial
+trigger1 = 1
+flag = Intro ;イントロの状態になります
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = s10,6
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 5
+value = s190,0
+
+[State 191, ステート変更]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;---------------------------------------------------------------------------
+; イントロ　ＶＳ灯蛾の如く(以下略
+; CNS レベル: 基本
+
+[Statedef 192]
+type = S
+ctrl = 0
+anim = 190
+velset = 0,0
+
+[State 191, 特殊効果] ;「ROUND1, FIGHT!」のアナウンスが始まるまでは、このコントローラを使ってください
+type = AssertSpecial
+trigger1 = 1
+flag = Intro ;イントロの状態になります
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = s10,7
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 5
+value = s190,0
+
+[State 191, ステート変更]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;---------------------------------------------------------------------------
+; イントロ　ＶＳ武器持ち
+; CNS レベル: 基本
+
+[Statedef 193]
+type = S
+ctrl = 0
+anim = 194
+velset = 0,0
+
+[State 191, 特殊効果] ;「ROUND1, FIGHT!」のアナウンスが始まるまでは、このコントローラを使ってください
+type = AssertSpecial
+trigger1 = 1
+flag = Intro ;イントロの状態になります
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 4
+value = s10,8
+
+[State 191, ステート変更]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;---------------------------------------------------------------------------
+; イントロ　ＶＳデコ助
+; CNS レベル: 基本
+
+[Statedef 194]
+type = S
+ctrl = 0
+anim = 191
+velset = 0,0
+
+[State 191, 特殊効果] ;「ROUND1, FIGHT!」のアナウンスが始まるまでは、このコントローラを使ってください
+type = AssertSpecial
+trigger1 = 1
+flag = Intro ;イントロの状態になります
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = s10,9
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 6
+value = s12,0
+
+[State 700, エフェクト表示]
+type = Explod
+trigger1 = AnimElem = 4
+anim = 192
+postype = P1
+pos = -20, -110
+bindtime = -1
+removetime = -1
+sprpriority = -5
+ownpal = 1
+ID = 194
+
+[State 1001,]
+type = RemoveExplod
+trigger1 = AnimElem = 5
+ID = 194
+
+[State 700, エフェクト表示]
+type = Explod
+trigger1 = AnimElem = 5
+anim = 193
+postype = P1
+pos = 10, 0
+sprpriority = 5
+ownpal = 1
+
+[State 191, ステート変更]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;---------------------------------------------------------------------------
+; 挑発
+; CNS レベル: 基本
+[Statedef 195]
+type     = S
+movetype = I
+physics  = S
+anim     = 195
+velset   = 0,0
+ctrl     = 0
+sprpriority = 2 ;ここで表示優先度を決定できます。　範囲は-5～5、大きいほど手前に表示される
+facep2 = 1      ;相手の方を向いてから挑発（結構重要）
+
+[State 195, コントロール可否]
+type = CtrlSet
+triggerall = Time >= 30
+triggerall = !winko
+trigger1 =!var(59)
+trigger2 = var(59)
+trigger2 =!(EnemyNear(var(58)),stateno = 5715 && EnemyNear(var(58)),anim = 5300 && EnemyNear(var(58)),movetype = I)
+trigger2 = InGuardDist || EnemyNear(var(58)),MoveType = A || EnemyNear(var(58)),Vel X > 0
+value = 1
+
+[State 195, 音を鳴らす]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = s10,3
+channel = 10
+
+[State 195, ステート変更]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+
+;---------------------------------------------------------------------------
+; 特殊挑発(KUSANAGI)
+[Statedef 196]
+type     = S
+movetype = I
+physics  = S
+anim     = 179
+velset   = 0,0
+ctrl     = 0
+sprpriority = 3
+
+[State 195, コントロール可否]
+type = CtrlSet
+triggerall = Time >= 30
+triggerall = !winko
+trigger1 =!var(59)
+trigger2 = var(59)
+trigger2 =!(EnemyNear(var(58)),stateno = 5715 && EnemyNear(var(58)),anim = 5300 && EnemyNear(var(58)),movetype = I)
+trigger2 = InGuardDist || EnemyNear(var(58)),MoveType = A || EnemyNear(var(58)),Vel X > 0
+value = 1
+
+[State 3000, 音を鳴らす]
+type = PlaySnd
+trigger1 = AnimElem = 2
+value = s10,26
+channel = 10
+
+[State 195, ステート変更]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+
+[Statedef 197]
+type = S
+ctrl = 0
+anim = 197
+velset = 0,0
+
+[State 191, 特殊効果] ;「ROUND1, FIGHT!」のアナウンスが始まるまでは、このコントローラを使ってください
+type = AssertSpecial
+trigger1 = 1
+flag = Intro ;イントロの状態になります
+
+[State 191, 特殊効果]
+type = AssertSpecial
+trigger1 = numexplod(9910) = 1
+flag = nobardisplay
+
+[State 191, ステート変更]
+type = ChangeAnim
+triggerall = RoundsExisted = 0
+triggerall = TeamMode = Turns
+triggerall = roundno > 1
+trigger1 = AnimElemTime(1) >= 0 && AnimElemTime(2) < 0
+trigger1 = Time = 30
+value = 197
+Elem = 2
+
+[State 191, ステート変更]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;---------------------------------------------------------------------------
+
+[Statedef 198]
+type = S
+ctrl = 0
+anim = 198
+velset = 0,0
+
+[State 191, 特殊効果] ;「ROUND1, FIGHT!」のアナウンスが始まるまでは、このコントローラを使ってください
+type = AssertSpecial
+trigger1 = 1
+flag = Intro ;イントロの状態になります
+
+[State 181,]
+type = PlaySnd
+trigger1 = AnimElem = 6
+value = s12,0
+
+[State 700, エフェクト表示]
+type = Explod
+trigger1 = !ishelper
+trigger1 = AnimElem = 2
+anim = 184
+postype = P1
+pos = -10, 0
+sprpriority = 5
+ownpal = 1
+
+[State 191, ステート変更]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;---------------------------------------------------------------------------
+;ふっとばし
+[Statedef 300]
+type     = S
+movetype = A
+physics  = S
+juggle   = ifelse(P2movetype=H,8,15)
+poweradd = 0
+ctrl     = 0
+velset   = 0,0
+anim     = 300
+sprpriority = 3
+
+[State 300,]
+type = PowerAdd
+trigger1 = prevstateno = [150,151]
+trigger1 = time = 0
+value = -1000
+
+[State 300,]
+type = NotHitBy
+trigger1 = prevstateno = [150,151]
+trigger1 = 1
+value = SCA
+
+[state 300,]
+type = Posset
+trigger1 = time = 0
+y = 0
+
+[State 2100, 移動終了]
+type = VelSet
+trigger1 = AnimElem = 5
+x = 4.5
+
+[State 2100, 移動終了]
+type = VelSet
+trigger1 = AnimElem = 6
+x = 0
+
+[State 300,]
+type = palfx
+trigger1 = prevstateno = [150,151]
+trigger1 = time = 0
+time = 5
+add = 230,230,230
+
+[State 300,]
+type = AfterImage
+trigger1 = prevstateno = [150,151]
+trigger1 = time = 0
+time = 38
+trans = add1
+timegap = 2
+framegap = 2
+length = 5
+palbright = 12,12,12
+palcontrast = 220,220,220
+palpostbright = 0,0,0
+paladd = 0,0,0
+palmul = 1,1,1
+
+[State 300, ステート変更]
+type = ChangeAnim
+trigger1 = prevstateno = [150,151]
+trigger1 = time = 0
+value = 305
+
+[State 300, ヒット定義]
+type = HitDef
+trigger1 = prevstateno = [150,151]
+trigger1 = Time = 0
+attr = S, NA
+animtype  = Diagup
+damage    = 10
+pausetime = 16,18
+sparkno = s4010
+sparkxy = -20,-75
+hitsound   = s1,4
+ground.type = High
+ground.slidetime = 16
+ground.hittime  = 18
+ground.velocity = -5,-5
+air.velocity = -5,-5
+fall = 1
+fall.recover = 0
+kill = 0
+ground.cornerpush.veloff = 0
+air.cornerpush.veloff = 0
+
+[State 300 , 1]
+type = HitDef
+trigger1 = prevstateno != [150,151]
+trigger1 = time = 0
+attr = S, NA
+animtype  = Hard
+damage    = 80
+priority = 5
+pausetime = 13,14
+sparkno = s4010
+guard.sparkno = s4110
+sparkxy = -20,-75
+hitsound = s1,4
+hitflag = MAF
+guardflag = MA
+guardsound = s2,0
+ground.type = High
+ground.slidetime = 14
+ground.hittime  = 14
+ground.velocity = -5,-5
+air.velocity = -5,-5
+air.animtype = Back
+fall = 1
+fall.recover = 0
+ground.cornerpush.veloff = 0
+air.cornerpush.veloff = 0
+
+[State 300, 音を鳴らす]
+type = PlaySnd
+trigger1 = AnimElem = 4
+value = s0,1
+
+[State 300, 音を鳴らす]
+type = PlaySnd
+trigger1 = AnimElem = 4
+value = s10,19
+
+[State 300, ステート変更]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+;空中ふっとばし
+[Statedef 650]
+type     = A
+movetype = A
+physics  = A
+juggle   = ifelse(P2movetype=H,8,15)
+poweradd = 0
+ctrl     = 0
+anim     = 650
+sprpriority = 3
+
+[State 240 , 1]
+type = HitDef
+trigger1 = time = 0
+attr = A, NA
+animtype  = Hard
+damage    = 80
+priority = 5
+pausetime = 11,12
+sparkno = s4010
+guard.sparkno = s4110
+sparkxy = -25,-60
+hitsound = s1,4
+hitflag = MAF
+guardflag = MA
+guardsound = s2,0
+ground.type = High
+ground.slidetime = 14
+ground.hittime  = 14
+ground.velocity = -5,-5
+air.velocity = -5,-5
+air.animtype = Back
+fall = 1
+fall.recover = 0
+ground.cornerpush.veloff = 0
+air.cornerpush.veloff = 0
+
+[State 200, 音を鳴らす]
+type = PlaySnd
+trigger1 = AnimElem = 3
+value = s0,1
+
+[State 300, 音を鳴らす]
+type = PlaySnd
+trigger1 = AnimElem = 3
+value = s10,19
+
+;---------------------------------------------------------------------------
+;緊?回避前
+
+[Statedef 700]
+type = S
+physics = S
+anim = 700
+sprpriority = -1
+poweradd = 0; 0
+velset = 0,0
+ctrl = 0
+
+[State 1000, PlaySnd]
+type = PlaySnd
+trigger1 = prevstateno = [150,151]
+trigger1 = time = 0
+value = S5200,1
+
+[State 700,]
+type = SuperPause
+trigger1 = prevstateno = [150,151]
+trigger1 = time = 0
+anim = -1
+movetime = 10
+time = 10
+darken = 0
+
+[State 1000, Explod]
+type = Explod
+trigger1 = prevstateno = [150,151]
+trigger1 = time = 0
+anim = 7010
+pos = 11,-43
+postype = p1
+bindtime = 1
+removetime = -2
+supermove = 1
+pausemove = 1
+ownpal = 1
+sprpriority = 999
+removeongethit = 1
+
+[State 1000, Dodge Explod1]
+type = Explod
+triggerall = numexplod(4150) <= 0
+trigger1 = prevstateno = [150,152]
+trigger1 = numexplod(4150) <= 0 && teamside = 2
+ignorehitpause = 1
+persistent = 0
+anim = f4160
+pos = -81,206
+id = 4150
+postype = right
+bindtime = -1
+ontop = 1
+ownpal = 1
+
+[State 1000, Dodge Explod2]
+type = Explod
+triggerall = numexplod(4150) <= 0
+trigger1 = prevstateno = [150,152]
+trigger1 = numexplod(4150) <= 0 && teamside = 1
+ignorehitpause = 1
+persistent = 0
+anim = f4160
+pos = 4,206
+id = 4150
+postype = left
+bindtime = -1
+ontop = 1
+ownpal = 1
+
+[State 360, push]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 350, snd]
+type = PlaySnd
+trigger1 = AnimElem = 3
+value = s10,0
+
+[State 1000, HitBy]
+type = HitBy
+trigger1 = prevstateno != [150,151]
+value = SC, NT, ST, HT
+
+[State 1000, NotHitBy]
+type = NotHitBy
+trigger1 = prevstateno = [150,151]
+value = SCA
+
+[State 350, snd]
+type = Poweradd
+trigger1 = prevstateno = [150,151]
+trigger1 = AnimElem = 1
+value = -1000
+
+[State 1000, AfterImage]
+type = AfterImage
+trigger1 = prevstateno = [150,152]
+trigger1 = time = 0
+time = 2
+length = 11
+timegap = 1
+paladd = 60,20,100
+PalContrast = 220,200,350
+palcolor = 0
+framegap = 3
+
+[State 1000, Afterimage]
+type = Afterimage
+trigger1 = prevstateno != [150,152]
+trigger1 = time = 0
+time = 2
+length = 7
+PalBright = 0,0,0
+PalContrast = 255,255,255
+PalAdd = 0,0,0
+PalMul = 1,1,1
+FrameGap = 3
+
+[State 3050, Super C]
+type = AfterImageTime
+trigger1 = AnimElemTime(2) >= 0
+trigger1 = animelem = 7, < 0
+time = 2
+
+[State 9520, 51]
+type = EnvColor
+trigger1 = animelem = 1
+trigger1 = prevstateno = [150,151]
+value = 255,255,255
+time = 3
+
+[State 705, 1]
+type = velset
+trigger1 = Time = [9,25]
+x = 5
+
+[State 220, 3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;---------------------------------------------------------------------------
+;緊?回避後
+
+[Statedef 710]
+type = S
+physics = S
+anim = 710
+poweradd = 0; 0
+sprpriority = -1
+velset = 0,0
+ctrl = 0
+
+[State 1000, PlaySnd]
+type = PlaySnd
+trigger1 = prevstateno = [150,151]
+trigger1 = time = 0
+value = S5200,1
+
+[State 700,]
+type = SuperPause
+trigger1 = prevstateno = [150,151]
+trigger1 = time = 0
+anim = -1
+movetime = 10
+time = 10
+darken = 0
+
+[State 1000, Explod]
+type = Explod
+trigger1 = prevstateno = [150,152]
+trigger1 = time = 0
+anim = 7010
+pos = 11,-43
+postype = p1
+bindtime = 1
+removetime = -2
+supermove = 1
+pausemove = 1
+ownpal = 1
+sprpriority = 5
+
+[State 1000, Dodge Explod1]
+type = Explod
+triggerall = numexplod(4150) <= 0
+trigger1 = prevstateno = [150,152]
+trigger1 = numexplod(4150) <= 0 && teamside = 2
+ignorehitpause = 1
+persistent = 0
+anim = f4160
+pos = -81,206
+id = 4150
+postype = right
+bindtime = -1
+ontop = 1
+ownpal = 1
+
+[State 1000, Dodge Explod2]
+type = Explod
+triggerall = numexplod(4150) <= 0
+trigger1 = prevstateno = [150,152]
+trigger1 = numexplod(4150) <= 0 && teamside = 1
+ignorehitpause = 1
+persistent = 0
+anim = f4160
+pos = 4,206
+id = 4150
+postype = left
+bindtime = -1
+ontop = 1
+ownpal = 1
+
+[State 360, push]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 1000, HitBy]
+type = HitBy
+trigger1 = prevstateno != [150,151]
+value = SC, NT, ST, HT
+
+[State 1000, NotHitBy]
+type = NotHitBy
+trigger1 = prevstateno = [150,151]
+value = SCA
+
+[State 350, snd]
+type = PlaySnd
+trigger1 = AnimElem = 3
+value = s10,0
+
+[State 350, snd]
+type = Poweradd
+trigger1 = prevstateno = [150,151]
+trigger1 = AnimElem = 1
+value = -1000
+
+[State 1000, AfterImage]
+type = AfterImage
+trigger1 = prevstateno = [150,152]
+trigger1 = time = 0
+time = 2
+length = 11
+timegap = 1
+paladd = 60,20,100
+PalContrast = 220,200,350
+palcolor = 0
+framegap = 3
+
+[State 1000, Afterimage]
+type = Afterimage
+trigger1 = prevstateno != [150,152]
+trigger1 = time = 0
+time = 2
+length = 7
+PalBright = 0,0,0
+PalContrast = 255,255,255
+PalAdd = 0,0,0
+PalMul = 1,1,1
+FrameGap = 3
+
+[State 3050, Super C]
+type = AfterImageTime
+trigger1 = AnimElemTime(2) >= 0
+trigger1 = animelem = 7, < 0
+time = 2
+
+[State 9520, 51]
+type = EnvColor
+trigger1 = animelem = 1
+trigger1 = prevstateno = [150,151]
+value = 255,255,255
+time = 3
+
+[State 705, 1]
+type = velset
+trigger1 = Time = [9,25]
+x = -5
+
+[State 220, 3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+;ｻ=================================================================
+; MAX発動
+[Statedef 751]
+type     = S
+movetype = I
+physics  = S
+anim     = 751
+ctrl     = 0
+velset   = 0,0
+sprpriority = 1
+
+[State 751, PowerAdd]
+type = PowerAdd
+trigger1 = time = 0
+value = -1000
+
+[State 751, VarSet]
+type = VarSet
+trigger1 = time = 0
+var(40) = 900
+
+[State 751, スキルゲージ消費]
+type = varadd
+triggerall = fvar(35) >= 100
+trigger1 = time = 0
+fvar(35) = -101
+
+[State 751, 音を鳴らす]
+type = PlaySnd
+trigger1 = AnimElem = 1
+value = s751,0
+
+[State 700, エフェクト表示]
+type = Explod
+trigger1 = time = 0
+anim = 188
+postype = P1
+pos = 0,0
+sprpriority = 5
+ownpal = 1
+
+[State 750, Explod]
+type = Explod
+trigger1 = time = 0
+trigger1 = life > 500
+anim = 10080
+pos = 0, 0
+postype = p1
+facing = 1
+bindtime = -1
+sprpriority = 0
+ownpal = 1
+pausemovetime = 99999
+
+[State 750, Explod]
+type = Explod
+trigger1 = time = 0
+trigger1 = life <= 500
+anim = 7110
+pos = 15, -70
+postype = p1
+facing = 1
+bindtime = -1
+sprpriority = 0
+ownpal = 1
+pausemovetime = 99999
+
+[State 750, EnvShake]
+type = EnvShake
+trigger1 = time = 0
+time = 10
+ampl = -5
+freq = 95
+phase = 95
+
+[State 750, ChangeState]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;-------------------------------------------------------------------------
+; クイックMAX
+[Statedef 752]
+type     = S
+movetype = I
+physics  = S
+anim     = 752
+ctrl     = 0
+velset   = 0,0
+sprpriority = 1
+
+[State 751, PowerAdd]
+type = PowerAdd
+trigger1 = time = 0
+value = -1000
+
+[State 751, VarSet]
+type = VarSet
+trigger1 = time = 0
+var(40) = 900
+
+[State 751, スキルゲージ消費]
+type = varadd
+triggerall = fvar(35) >= 100
+trigger1 = time = 0
+fvar(35) = -101
+
+[State 750, Explod]
+type = Explod
+trigger1 = time = 0
+trigger1 = life > 500
+anim = 10080
+pos = 0, 0
+postype = p1
+facing = 1
+bindtime = -1
+sprpriority = 0
+ownpal = 1
+pausemovetime = 99999
+
+[State 750, Explod]
+type = Explod
+trigger1 = time = 0
+trigger1 = life <= 500
+anim = 7110
+pos = 15, -70
+postype = p1
+facing = 1
+bindtime = -1
+sprpriority = 0
+ownpal = 1
+pausemovetime = 99999
+
+[State 751, PlaySnd]
+type = PlaySnd
+trigger1 = time = 0
+value = s751,0
+
+[State 751, ChangeState]
+type = ChangeState
+triggerall = AnimTime = 0
+TriggerAll = palno != 6
+TriggerAll = life >= 500
+trigger1 = var(59)
+value = 100
+
+[State 751, ChangeState]
+type = ChangeState
+triggerall = AnimTime = 0
+TriggerAll = palno != 6
+TriggerAll = life < 500
+trigger1 = var(59)
+value = 58
+
+[State 751, ChangeState]
+type = ChangeState
+triggerall = AnimTime = 0
+TriggerAll = palno = 6
+trigger1 = var(59)
+value = 58
+
+[State 751, ChangeState]
+type = ChangeState
+triggerall = AnimTime = 0
+trigger1 = !var(59)
+trigger1 = command = "holdfwd"
+value = 100
+
+[State 751, ChangeState]
+type = ChangeState
+trigger1 = !var(59)
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;この下、一行以上空ける事！
+
+;FV39

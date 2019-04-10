@@ -1,0 +1,2213 @@
+;ƒŒƒIƒiEƒnƒCƒfƒ‹ƒ“ 
+[Data]
+life =3000
+power = 5000
+attack = 100
+defence = 100
+fall.defence_up = 50
+liedown.time = 45;60
+airjuggle = 15
+sparkno = 2
+guard.sparkno = 40
+KO.echo = 0
+volumescale = 100
+IntPersistIndex = 10
+FloatPersistIndex = 40
+
+[Size]
+xscale = 1           ;Horizontal scaling factor.
+yscale = 1           ;Vertical scaling factor.
+ground.back = 17     ;Player width (back, ground)
+ground.front = 18    ;Player width (front, ground)
+air.back = 12        ;Player width (back, air)
+air.front = 12       ;Player width (front, air)
+height = 60      ;Height of player (for opponent to jump over)
+attack.dist = 160    ;Default attack distance
+proj.attack.dist = 90 ;Default attack distance for projectiles
+proj.doscale = 0     ;Set to 1 to scale projectiles too
+head.pos = -5, -90   ;Approximate position of head
+mid.pos = -5, -60    ;Approximate position of midsection
+shadowoffset = 0     ;Number of pixels to vertically offset the shadow
+draw.offset = 0,0    ;Player drawing offset in pixels (x, y)
+
+[Velocity]
+walk.fwd  = 2.6      ;Walk forward
+walk.back = -2.5     ;Walk backward
+run.fwd  = 5.8, 0    ;Run forward (x, y)
+run.back = -5.4,-2.8 ;Hop backward (x, y)
+jump.neu = 0,-8.5    ;Neutral jumping velocity (x, y)
+jump.back = -3.5    ;Jump back Speed (x, y)
+jump.fwd = 3.5       ;Jump forward Speed (x, y)
+runjump.back = -2.55,-8.5 ;Running jump speeds (opt)
+runjump.fwd = 4,-8.5      ;.
+airjump.neu = 0,-8.5      ;.
+airjump.back = -2.55      ;Air jump speeds (opt)
+airjump.fwd = 2.5         ;.
+
+[Movement]
+airjump.num = 0      ;Number of air jumps allowed (opt)
+airjump.height = 35  ;Minimum distance from ground before you can air jump (opt)
+yaccel = .44         ;Vertical acceleration
+stand.friction = .85  ;Friction coefficient when standing
+crouch.friction = .82 ;Friction coefficient when crouching
+;---------------------------------------------------------------------------
+; ƒm[ƒ}ƒ‹ƒWƒƒƒ“ƒvE‚’¼i‚`‚h—pj
+[Statedef 41]
+type    = S
+physics = S
+anim = IfElse((Var(13) > 0),50,40)
+ctrl = 0
+sprpriority = 1
+
+[State 170, 1]
+type = NotHitBy
+trigger1 = 1
+value = ,NT,ST,HT
+
+[State 40, 1];‘åƒWƒƒƒ“ƒv”»’è
+type = VarSet
+trigger1 = Time = 0
+var(15) = 0
+
+[State 40, 1];¬ƒWƒƒƒ“ƒv”»’è
+type = VarSet
+trigger1 = Time = 0
+var(16) = 0
+
+[State 41, 2]
+type = VelSet
+trigger1 = AnimTime = 0
+x = 0
+y = const(velocity.jump.y)
+
+[State 41, 3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 50
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; ƒm[ƒ}ƒ‹ƒWƒƒƒ“ƒv‘Oi‚`‚h—pj
+[Statedef 42]
+type    = S
+physics = S
+anim = IfElse((Var(13) > 0),50,40)
+ctrl = 0
+sprpriority = 1
+
+[State 170, 1]
+type = NotHitBy
+trigger1 = 1
+value = ,NT,ST,HT
+
+[State 40, 1];‘åƒWƒƒƒ“ƒv”»’è
+type = VarSet
+trigger1 = Time = 0
+var(15) = 0
+
+[State 40, 1];¬ƒWƒƒƒ“ƒv”»’è
+type = VarSet
+trigger1 = Time = 0
+var(16) = 0
+
+[State 42, 2]
+type = VelSet
+trigger1 = AnimTime = 0
+x = const(velocity.jump.fwd.x)
+y = const(velocity.jump.y)
+
+[State 42, 3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 50
+ctrl = 1
+
+;---------------------------------------------------------------------------
+; ƒm[ƒ}ƒ‹ƒWƒƒƒ“ƒvŒã‚ëi‚`‚h—pj
+[Statedef 43]
+type    = S
+physics = S
+anim = IfElse((Var(13) > 0),50,40)
+ctrl = 0
+sprpriority = 1
+
+[State 170, 1]
+type = NotHitBy
+trigger1 = 1
+value = ,NT,ST,HT
+
+[State 40, 1];‘åƒWƒƒƒ“ƒv”»’è
+type = VarSet
+trigger1 = Time = 0
+var(15) = 0
+
+[State 40, 1];¬ƒWƒƒƒ“ƒv”»’è
+type = VarSet
+trigger1 = Time = 0
+var(16) = 0
+
+[State 43, 2]
+type = VelSet
+trigger1 = AnimTime = 0
+x = const(velocity.jump.back.x)
+y = const(velocity.jump.y)
+
+[State 43, 3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 50
+ctrl = 1
+;---------------------------------------------------------------------------
+; Lose by Time Over
+[Statedef 170]
+type = S
+ctrl = 0
+anim = 170
+velset = 0,0
+
+[STate 170]
+type=ChangeAnim
+trigger1=Time=0
+trigger1=var(13) = 1
+value=171
+
+[State 170, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+;---------------------------------------------------------------------------
+; Win state decider
+[Statedef 180]
+type = S
+
+[State 190,]
+type = VarRandom
+trigger1 = 1
+v = 23
+range = 0,7
+
+[State 180, 1]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = Var(23) = 0
+value = 181
+
+[State 180, 2]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = Var(23) = 1
+value = 182
+
+[State 180, 3]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = Var(23) = 2
+value = 183
+
+[State 180, 4]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = Var(23) = 3
+value = 184
+
+[State 180, 1]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = Var(23) = 4
+value = 185
+
+[State 180, 2]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = Var(23) = 5
+value = 186
+
+[State 180, 3]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = Var(23) = 6
+value = 187
+
+[State 180, 3]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = Var(23) = 7
+value = 188
+;---------------------------------------------------------------------------
+; Win pose 1
+[Statedef 181]
+type = S
+ctrl = 0
+anim = 180
+velset = 0,0
+
+[State 180, 2]; Riot Mode
+type = ChangeState
+trigger1 = Time = 0
+trigger1 = var(13) = 1
+value = ifelse(random<=500,8182,8180)
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 181, “ÁêŒø‰Ê]; corto
+type = AssertSpecial
+trigger1 = time = [0,350]
+flag = roundnotover
+
+;---------------------------------------------------------------------------
+; Win pose 2
+[Statedef 182]
+type = S
+ctrl = 0
+anim = 182
+velset = 0,0
+
+[State 180, 2]; Riot Mode
+type = ChangeState
+trigger1 = Time = 0
+trigger1 = var(13) = 1
+value = ifelse(random<=500,8182,8180)
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 191, 2] ;Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = Animelem=16,<0
+flag=roundnotover
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=10
+value = 0,18
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=10
+value = 0,18
+
+[State 181, “ÁêŒø‰Ê]; corto
+type = AssertSpecial
+trigger1 = time = [0,350]
+flag = roundnotover
+
+;---------------------------------------------------------------------------
+; Win pose 3
+[Statedef 183]
+type = S
+ctrl = 0
+anim = 183
+velset = 0,0
+
+[State 180, 2]; Riot Mode
+type = ChangeState
+trigger1 = Time = 0
+trigger1 = var(13) = 1
+value = ifelse(random<=500,8182,8180)
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 191, 2] ;Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = time<=230
+flag=roundnotover
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=15
+value = 0,16
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=17
+value = 0,17
+
+
+[State 181, “ÁêŒø‰Ê]; corto
+type = AssertSpecial
+trigger1 = time = [0,350]
+flag = roundnotover
+
+;---------------------------------------------------------------------------
+; Win pose 4
+[Statedef 184]
+type = S
+ctrl = 0
+anim = 184
+velset = 0,0
+
+[State 180, 2]; Riot Mode
+type = ChangeState
+trigger1 = Time = 0
+trigger1 = var(13) = 1
+value = ifelse(random<=500,8182,8180)
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 191, 2] ;Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = time<=300
+flag=roundnotover
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=15
+value = 0,20
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=15
+value = 0,20
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=25
+value = 0,21
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=25
+value = 0,21
+
+[State 255]
+type=Explod
+trigger1=Animelem=17
+anim=95
+pos=0,0
+postype=p1
+ownpal=1
+sprpriority=3
+bindtime=-1
+
+
+
+[State 181, “ÁêŒø‰Ê]; corto
+type = AssertSpecial
+trigger1 = time = [0,350]
+flag = roundnotover
+
+;---------------------------------------------------------------------------
+; Win pose 5
+[Statedef 185]
+type = S
+ctrl = 0
+anim = 185
+velset = 0,0
+
+[State 180, 2]; Riot Mode
+type = ChangeState
+trigger1 = Time = 0
+trigger1 = var(13) = 1
+value = ifelse(random<=500,8182,8180)
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+
+[State 181, “ÁêŒø‰Ê]; corto
+type = AssertSpecial
+trigger1 = time = [0,350]
+flag = roundnotover
+;---------------------------------------------------------------------------
+; Win pose 6
+[Statedef 186]
+type = S
+ctrl = 0
+anim = 186
+velset = 0,0
+
+[State 180, 2]; Riot Mode
+type = ChangeState
+trigger1 = Time = 0
+trigger1 = var(13) = 1
+value = ifelse(random<=500,8182,8180)
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = Animelem=5
+value = 0,23
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = Animelem=5
+value = 0,23
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = Animelem=10
+value = 0,24
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = Animelem=10
+value = 0,24
+
+
+
+[State 181, “ÁêŒø‰Ê]; corto
+type = AssertSpecial
+trigger1 = time = [0,350]
+flag = roundnotover
+
+;---------------------------------------------------------------------------
+; Win pose 7
+[Statedef 187]
+type = S
+ctrl = 0
+anim = 187
+velset = 0,0
+
+[State 180, 2]; Riot Mode
+type = ChangeState
+trigger1 = Time = 0
+trigger1 = var(13) = 1
+value = ifelse(random<=500,8182,8180)
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = time= 136
+value = 0,16
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = time = 186
+value = 0,17
+
+[State 181, “ÁêŒø‰Ê]; corto
+type = AssertSpecial
+trigger1 = time = [0,350]
+flag = roundnotover
+
+;---------------------------------------------------------------------------
+; Win pose 8
+[Statedef 188]
+type = S
+ctrl = 0
+anim = 188
+velset = 0,0
+
+[State 180, 2]; Riot Mode
+type = ChangeState
+trigger1 = Time = 0
+trigger1 = var(13) = 1
+value = ifelse(random<=500,8182,8180)
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = Animelem=8
+value = 0,23
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = Animelem=8
+value = 0,23
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = Animelem=12
+value = 0,24
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = Animelem=12
+value = 0,24
+
+[State 181, “ÁêŒø‰Ê]; corto
+type = AssertSpecial
+trigger1 = time = [0,350]
+flag = roundnotover
+;---------------------------------------------------------------------------
+; Introduction
+[Statedef 190]
+type = S
+ctrl = 0
+;anim = 190
+velset = 0,0
+
+[State 190,]
+type = VarRandom
+trigger1 = 1
+v = 23
+range = 0,2
+
+[State 191, 1] ;Œh—ç
+type = Changestate
+triggerall= time=0
+trigger1=palno>=7
+value = 8190
+
+[State 191, 1] ;‚ ‚È‚½‚Å‚ÍŸ‚Ä‚È‚¢
+type = Changestate
+triggerall= time=0
+trigger1 = (p2name = "iori yagami") || (p4name = "iori yagami")
+trigger2 = (p2name = "iori") || (p4name = "iori")
+trigger3 = (p2name = "goenitz") || (p4name = "goenitz")
+trigger4 = (p2name = "orochi") || (p4name = "orochi")
+trigger5 = (p2name = "yashiro") || (p4name = "yashiro")
+trigger6 = (p2name = "yashiro nanakase") || (p4name = "yashiro nanakase")
+trigger7 = (p2name = "shermie") || (p4name = "shermie")
+trigger8 = (p2name = "chris") || (p4name = "chris")
+trigger9 = (p2name = "Athena Asamiya") || (p4name = "Athena Asamiya")
+trigger10 = (p2name = "Athena") || (p4name = "Athena")
+trigger11 = (p2name = "goeniko") || (p4name = "goeniko")
+trigger12 = (p2name = "chang") || (p4name = "chang")
+trigger13 = (p2name = "chang koehan") || (p4name = "chang koehan")
+trigger14 = (p2name = "mizuchi") || (p4name = "mizuchi")
+value = 194
+
+[State 191, 1] ;Œh—ç
+type = Changestate
+triggerall= time=0
+trigger1=P2name="Ralf"||P4name="Ralf"
+trigger2=P2name="Clark"||P4name="Clark"
+trigger3=P2name="Ralf Jones"||P4name="Ralf Jones"
+trigger4=P2name="Clark Still"||P4name="Clark Still"
+trigger5=P2name="Athena Heidern"||P4name="Athena Heidern"
+value = 193
+
+[State 191, 1] ;whip
+type = Changestate
+triggerall= time=0
+trigger1=P2name="Whip"||P4name="Whip"
+trigger2=P2name="Orochi Whip"||P4name="Orochi Whip"
+value = 196
+
+[State 191, 1] ;ƒnƒCƒfƒ‹ƒ“
+type = Changestate
+triggerall= time=0
+trigger1=P2name="Heidern"||P4name="Heidern"
+trigger2=P2name="Orochi Heidern"||P4name="Orochi Heidern"
+value = 192
+
+[State 190,]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = var(23) = 0
+value = 1930
+
+[State 190,]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = var(23) = 1
+value = 1940
+
+[State 190,]
+type = ChangeState
+trigger1 = Time = 1
+trigger1 = var(23) = 2
+value = 191
+;---------------------------------------------------------------------------
+; Intro Normal 1
+[Statedef 191]
+type = S
+ctrl = 0
+Anim = 192
+velset = 0,0
+
+[State 191, 2]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191, 4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+;---------------------------------------------------------------------------
+; Intro VS Heidern
+[Statedef 192]
+type = S
+ctrl = 0
+anim = 191
+velset = 0,0
+
+[State 191, 2] ;Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = animelem=33,<=0
+flag = Intro
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = time=170
+value = 0,13
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = time=230
+value = 0,14
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = time=270
+value = 0,15
+
+[State 191, 4] ;Change to stand state
+type = ChangeState
+trigger1 =animTime = 0
+value = 0
+;---------------------------------------------------------------------------
+; Intro VS Ikari Team
+[Statedef 193]
+type = S
+ctrl = 0
+anim = 181
+velset = 0,0
+
+[State 191, 2] ;Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=5
+value = 1,12
+
+[State 191, 4] ;Change to stand state
+type = ChangeState
+trigger1 =animTime = 0
+value = 0
+;---------------------------------------------------------------------------
+; Intro VS Iori Yagami
+[Statedef 194]
+type = S
+ctrl = 0
+anim = 190
+velset = 0,0
+
+[State 191, 2] ;Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=10
+value = 0,18
+
+[State 191, 4] ;Change to stand state
+type = ChangeState
+trigger1 =animTime = 0
+value = 0
+;---------------------------------------------------------------------------
+; Intro VS Whip
+[Statedef 196]
+type = S
+ctrl = 0
+anim = 194
+velset = 0,0
+
+[State 191, 1] ;Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[state 196,2]
+type = playsnd
+trigger1 = animelem = 17
+value = 0,23
+channel = 0
+volume = 1000
+
+[state 196,3]
+type = playsnd
+trigger1 = animelem = 27
+value = 1,0
+channel = 0
+
+[State 191, 4] ;Change to stand state
+type = ChangeState
+trigger1 =animTime = 0
+value = 0
+;---------------------------------------------------------------------------
+; Intro Normal 2
+[Statedef 1930]
+type = S
+ctrl = 0
+anim = 193
+velset = 0,0
+
+[State 191, 2] ;Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=3
+value = 0,23
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=3
+value = 0,23
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=11
+value = 0,19
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=11
+value = 0,19
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=16
+value = 1,39
+
+[State 191, 4] ;Change to stand state
+type = ChangeState
+trigger1 =pos Y>=0&&Vel Y>0
+value = 0
+
+[STate 1930]
+type=VelSet
+trigger1=Animelem=11
+y=-7
+
+[STate 1930]
+type=VelAdd
+trigger1=Animelem=11,>=0
+y=.4
+
+[State 1930]
+type=Explod
+trigger1=Animelem=16
+anim=1930
+pos=0,-10
+postype=p1
+ownpal=1
+sprpriority=3
+vel=2,-.3
+
+[State 1930]
+type=Explod
+trigger1=Animelem=16
+anim=1931
+pos=0,-10
+postype=p1
+ownpal=1
+sprpriority=3
+vel=-2.5,-.5
+;---------------------------------------------------------------------------
+; Intro Normal 3
+[Statedef 1940]
+type = S
+ctrl = 0
+anim = 1940
+velset = 0,0
+
+[State 191, 2] ;Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191, 3]
+type = PlaySnd
+trigger1=Animelem=2
+value = 1,39
+channel=1
+
+[State 1930]
+type=Explod
+trigger1=time=0
+anim=1945
+pos=0,0
+postype=p1
+ownpal=1
+sprpriority=3
+id=1941
+
+[State 1930]
+type=Explod
+trigger1=numexplod(1941)=0
+trigger1=Numexplod(1940)=0
+anim=1946
+pos=0,0
+postype=p1
+ownpal=1
+sprpriority=3
+vel=-3.5,-2
+id=1940
+
+[State 191, 4] ;Change to stand state
+type = ChangeState
+trigger1 =Animtime=0
+value = 0
+;---------------------------------------------------------------------------
+; Intro Riot Mode
+[Statedef 8190]
+type = S
+ctrl = 0
+anim = 8190
+velset = 0,0
+
+[State 191, 2] ;Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=8
+trigger2=Animelem=18
+value = 0,30
+channel=0
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=28
+value = 0,31
+channel=0
+
+[State 191, 4] ;Change to stand state
+type = ChangeState
+trigger1 =animTime = 0
+value = 0
+;---------------------------------------------------------------------------
+; Taunt
+[Statedef 195]
+type = S
+ctrl = 0
+anim = 195
+velset = 0,0
+movetype = I
+physics = S
+sprpriority = 2
+
+[STate 195]
+type=Changeanim
+trigger1=var(13)=1
+trigger1=Time=0
+value=8195
+
+[State 195];•t‚¯‚é‚à‚Ì‚©”÷–­¥¥¥¥
+type = Width
+trigger1=var(13)=0
+trigger1=animelem=2,>=0
+value=-20,0
+
+[State 0]
+type=PlaySnd
+trigger1=var(13)=0
+trigger1=Animelem=1
+value=0,22
+channel=0
+
+[State 0]
+type=PlaySnd
+trigger1=var(13)=1
+trigger1=Animelem=2
+value=0,35
+channel=0
+
+[STate 195]
+type=Varadd
+trigger1=var(13)=0
+trigger1=Time=0
+trigger1=Var(24)<5
+var(24)=1
+
+[State 195, 2]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+;---------------------------------------------------------------------------
+; Win Riot Mode 1
+[Statedef 8180]
+type = S
+ctrl = 0
+anim = 8180
+velset = 0,0
+
+[State 999];MAXƒ‚[ƒh‰ğœ
+type=VarSet
+trigger1=time=1
+var(32)=0
+[State 999];ƒNƒŠƒeƒBƒJƒ‹ƒJƒEƒ“ƒ^[‰ğœ
+type=VarSet
+trigger1=time=1
+var(33)=0
+[State 999];ŠoÁƒ‚[ƒh‰ğœ
+type=VarSet
+trigger1=time=1
+var(13)=0
+[State 999];ƒNƒƒbƒNƒAƒbƒvƒ‚[ƒh‰ğœ
+type=VarSet
+trigger1=time=1
+var(22)=0
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 191, 2] ;Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = time<=150
+flag=roundnotover
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=5
+value = 0,38
+
+[State 255]
+type=Explod
+trigger1=Animelem=5
+anim=8181
+pos=0,0
+postype=p1
+ownpal=1
+sprpriority=3
+;---------------------------------------------------------------------------
+; Win Riot Mode 2
+[Statedef 8182]
+type = S
+ctrl = 0
+anim = 8182
+velset = 0,0
+
+[State 999];MAXƒ‚[ƒh‰ğœ
+type=VarSet
+trigger1=time=1
+var(32)=0
+[State 999];ƒNƒŠƒeƒBƒJƒ‹ƒJƒEƒ“ƒ^[‰ğœ
+type=VarSet
+trigger1=time=1
+var(33)=0
+[State 999];ŠoÁƒ‚[ƒh‰ğœ
+type=VarSet
+trigger1=time=1
+var(13)=0
+[State 999];ƒNƒƒbƒNƒAƒbƒvƒ‚[ƒh‰ğœ
+type=VarSet
+trigger1=time=1
+var(22)=0
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 191, 2] ;Assert this until you want "round 1, fight" to begin
+type = AssertSpecial
+trigger1 = time<=220
+flag=roundnotover
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=4
+trigger2=Animelem=14
+value = 0,30
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem=28
+value = 0,37
+
+[STate 8182]
+type=EnvShake
+trigger1=Animelem=25,>=0
+trigger1=TimeMod=6,0
+ampl=8
+time=3
+
+[State 8182]
+type=BGpalFx
+trigger1=Animelem=25
+add=50,10,0
+sinadd=215,40,75,125
+time=250
+
+; Extra Mode (Zelgadis)
+[Statedef 310]
+type = S
+movetype = I
+physics = S
+anim = 910
+velset = 0
+ctrl = 0
+
+[State 301, snd];Leona
+type = PlaySnd
+triggerall = var(13)=0
+trigger1 = AnimElem = 1
+value = 0,9
+channel = 8
+
+[State 301, snd];Leona
+type = PlaySnd
+triggerall = var(13)=1
+trigger1 = AnimElem = 1
+value = 0,30
+channel = 8
+
+[State 301, snd]; FX
+type = PlaySnd
+trigger1 = AnimElem = 1
+value = 20,1
+channel = 9
+
+[State 910, ChangeState]
+type = ChangeState
+triggerall = var(55) = 1
+trigger1 = !time
+value = 1100
+
+[State 730, 1]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 311
+
+; Power up
+[Statedef 311]
+type = S
+movetype = I
+physics = S
+anim = 911
+
+[State 705, 2]
+type = Explod
+triggerall = numexplod(911)= 0
+trigger1 = time = 0
+anim = 915
+ID = 911
+sprpriority = 3
+postype = p1
+pos = -20,0
+bindtime = -1
+removetime = -1
+removeongethit = 1
+
+[State 735, 1]
+type = ChangeState
+trigger1 = command != "hold_a"
+trigger3 = command != "hold_y"
+value = 312
+
+[State 910, ChangeState]
+type = ChangeState
+triggerall = var(55) = 1
+trigger1 = p2movetype != H
+value = 312
+
+[State 735, 2]
+type = PowerAdd
+trigger1 = var(13)=1
+trigger1 = Time = [0,9]
+value = 10
+
+[State 735, 2]
+type = PowerAdd
+trigger1 = var(13)=0
+trigger1 = Time = [0,9]
+value = 9
+
+[State 735, 2]
+type = ChangeState
+trigger1 = Power >= 3000
+value = 313
+
+[State 735, 3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 311
+
+; Power up (end)
+[Statedef 312]
+type = S
+movetype = I
+physics = S
+anim = 912
+
+[State 912, StopSnd]
+type = StopSnd
+trigger1 = animtime = 0
+channel = 8
+
+[State 912, StopSnd]
+type = StopSnd
+trigger1 = animtime = 0
+channel = 9
+
+[State 1100, 1]
+type = RemoveExplod
+trigger1 = time = 0
+ID = 911
+
+[State 740, 1]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; Power up (maxed out)
+[Statedef 313]
+type = S
+movetype = I
+physics = S
+anim = 912
+
+[State 912, StopSnd]
+type = StopSnd
+trigger1 = animtime = 0
+channel = 9
+
+[State 313, Explod]
+type = Explod
+trigger1 = time = 0
+anim = 916
+pos = 0,0
+postype = p1
+facing = 1
+vfacing = 1
+bindtime = 1
+removetime = -2
+scale = 1,1
+sprpriority = 7
+
+[State 301, snd]
+type = PlaySnd
+trigger1 = AnimElem = 1
+value = 1,17
+
+[State 1000, EnvShake]
+type = EnvShake
+trigger1 = AnimElem = 1
+time = 15
+freq = 90
+ampl = -4
+phase = 90
+
+[State 1100, 1]
+type = RemoveExplod
+trigger1 = AnimElem = 1
+ID = 911
+
+[State 741, 2]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+;---------------Special KO detect
+[Statedef 169]
+type = S
+physics = S
+anim = 999
+poweradd = 0
+sprpriority = -1
+velset = 0,0
+ctrl = 0
+facep2 = 1
+
+[State 220, 3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 169
+;-------------------------------------------------------------------------------
+;KO Flash Effect
+[Statedef 9910]
+type = S
+ctrl = 0
+anim = 999
+
+[State 1000, Sp Finish]
+type = Explod
+trigger1 = time = 0
+anim = 9910
+removetime = -2
+id = 9910
+sprpriority = -9
+pos = 0,0
+postype = left
+bindtime = -1
+ignorehitpause = 1
+supermove = 1
+pausemove = 1
+pausemovetime = 99999
+supermovetime = 99999
+ownpal = 1
+
+[State 1000, DestroySelf]
+type = DestroySelf
+trigger1 = time = 9999
+ignorehitpause = 1
+persistent = 0
+;-------------------------------------------------------------------------------
+;KO Flash Effect
+[Statedef 9911]
+type = S
+ctrl = 0
+anim = 999
+
+[State 1000, PosSet]
+type = PosSet
+trigger1 = 1
+x = 0
+y = 0
+ignorehitpause = 1
+
+[State 1000, PlaySnd]
+type = PlaySnd
+trigger1 = time = 0
+value = 5200,0
+ignorehitpause = 1
+persistent = 9
+
+[State 1000, PlaySnd]
+type = PlaySnd
+trigger1 = time = 0
+value = 5200,1
+ignorehitpause = 1
+persistent = 9
+
+[State 1000, PlaySnd]
+type = playsnd
+trigger1 = WinKO
+trigger1 = RoundState = 3
+IgnoreHitPause = 1
+trigger1 = time = 34
+anim = 9900
+value = 9000,0
+
+[State 1000, DestroySelf]
+type = DestroySelf
+trigger1 = time = 999
+ignorehitpause = 1
+persistent = 0
+
+;--------------------------------------------------------------------------------
+;•Ç’[ŒŸoƒwƒ‹ƒp[1(—“üÒ®)
+[Statedef 8900]
+Type = A
+Ctrl = 0
+Anim = 0
+Velset = 0,0,-50
+Movetype = I
+Physics = N
+Sprpriority = 1
+
+[State -3, Right]
+Type = Helper
+Trigger1 = !NumHelper(8905+root,id)
+HelperType = Normal
+Name = "Right_Edge"
+ID = 8905+root,id
+pos= 160,524288
+PosType = left
+StateNo = 8905
+facing = -1
+KeyCtrl = 1
+Ownpal = 0
+supermovetime=0;524288
+pausemovetime=0;524288
+persistent = 0
+IgnoreHitPause = 1
+
+[State -3, Left]
+Type = Helper
+Trigger1 = !NumHelper(8906+root,id)
+HelperType = Normal
+Name = "Left_Edge"
+ID = 8906+root,id
+pos = 160,524288
+PosType = left
+facing = 1
+StateNo = 8905
+KeyCtrl = 1
+Ownpal = 0
+supermovetime=0;524288
+pausemovetime=0;524288
+persistent = 0
+IgnoreHitPause = 1
+
+[State 8905]
+type = assertspecial
+trigger1 = 1
+flag = invisible
+flag2 = noshadow
+ignorehitpause = 1
+
+[State 8900, PosSet]
+type = posset
+trigger1 = numHelper(8905+root,id) > 0 && numHelper(8906+root,id) > 0
+X = ((Helper(8905+root,ID),Pos X+Helper(8906+root,ID),Pos X)*.5)
+
+[State 8900, Side];’[‹——£Zo+•Û‘¶
+type = null;varset
+trigger1 = numHelper(8905+root,id) > 0 && numHelper(8906+root,id) > 0
+Trigger1 = fvar(4) := Helper(8905+root,ID),Pos X-Helper(8900+root,ID),Pos X || 1
+Trigger1 = fvar(5) := Helper(8906+root,ID),Pos X-Helper(8900+root,ID),Pos X || 1
+
+[State 8900, Side];’[‹——£Zo+•Û‘¶
+type = null;varset
+Trigger1 = fvar(0) := fvar(4)-Helper(8900+root,ID),RootDist X || 1;©•ª‰E
+Trigger1 = fvar(1) := Helper(8900+root,ID),RootDist X-fvar(5) || 1;©•ª¶
+Trigger1 = fvar(2) := fvar(4)-Helper(8900+root,ID),P2Dist X || 1;“G‰E
+Trigger1 = fvar(3) := Helper(8900+root,ID),P2Dist X-fvar(5) || 1;“G¶
+
+[State 8900, Test];test
+type = null;posset
+trigger1 = 1
+Y = 0
+
+[State 8900]
+type = ScreenBound
+Trigger1=1
+value=0
+movecamera=0,0
+
+[State 8900]
+type = NotHitBy
+value = SCA
+trigger1 = 1
+
+[State 8900]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 8900]
+type = SprPriority
+trigger1 = 1
+value = -5
+
+[State 8900]
+type=selfstate
+trigger1=!ishelper
+value=0
+
+[State 8900]
+type = null ;DisplayToClipboard
+Trigger1 = ishelper
+text = "                                    FV0=%d FV1=%d FV2=%d FV3=%d, RDX=%d"
+params = floor(fvar(0)),floor(fvar(1)),floor(fvar(2)),floor(fvar(3)),floor(RootDist X)
+ignorehitpause = 1
+
+;----------------------------------------
+;‚¹‚Á‚©‚­í‘¶İ‚·‚é‚Ì‚ÅAFXvar‚Å‹L‰¯‚µ‚Ä‚à‚ç‚¤B
+
+;‘Šè‚ÌÅ‘åƒŠ[ƒ`‹L‰¯
+[State 1]
+type = varset
+triggerall = var(0) < (ceil(root,Pos X - EnemyNear(root,Var(53)),Pos X)*facing*Enemynear(root,Var(53)),facing*ifelse(teamside = 1,1,-1))
+triggerall = (ceil(root,Pos X - EnemyNear(root,Var(53)),Pos X)*facing*Enemynear(root,Var(53)),facing*ifelse(teamside = 1,1,-1)) > 0
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+var(0) = ceil(root,Pos X - EnemyNear(root,Var(53)),Pos X)*facing*Enemynear(root,Var(53)),facing*ifelse(teamside = 1,1,-1)
+;‚±‚Ì”’l‚Í(¡‚Ü‚Å‹ò‚ç‚Á‚½‘ÅŒ‚UŒ‚‚Ì)Å‘åƒŠ[ƒ`(p2dist X)
+
+;----
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚P
+[State 1]
+type = varset
+triggerall = var(1) = 0
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(1) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚P
+[State 1]
+type = varset
+triggerall = var(2) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno = var(1)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(2) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚Q
+[State 1]
+type = varset
+triggerall = var(3) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(3) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚Q
+[State 1]
+type = varset
+triggerall = var(4) = 0
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno = var(3)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(4) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚R
+[State 1]
+type = varset
+triggerall = var(5) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(5) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚R
+[State 1]
+type = varset
+triggerall = var(6) = 0
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno = var(5)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(6) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚S
+[State 1]
+type = varset
+triggerall = var(7) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno != var(5)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(7) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚S
+[State 1]
+type = varset
+triggerall = var(8) = 0
+triggerall = var(7) > 0 && EnemyNear(root,Var(53)),stateno = var(7)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(8) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚T
+[State 1]
+type = varset
+triggerall = var(9) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno != var(5)
+triggerall = var(7) > 0 && EnemyNear(root,Var(53)),stateno != var(7)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(9) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚T
+[State 1]
+type = varset
+triggerall = var(10) = 0
+triggerall = var(9) > 0 && EnemyNear(root,Var(53)),stateno = var(9)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(10) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚U
+[State 1]
+type = varset
+triggerall = var(11) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno != var(5)
+triggerall = var(7) > 0 && EnemyNear(root,Var(53)),stateno != var(7)
+triggerall = var(9) > 0 && EnemyNear(root,Var(53)),stateno != var(9)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(11) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚U
+[State 1]
+type = varset
+triggerall = var(12) = 0
+triggerall = var(11) > 0 && EnemyNear(root,Var(53)),stateno = var(11)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(12) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚V
+[State 1]
+type = varset
+triggerall = var(13) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno != var(5)
+triggerall = var(7) > 0 && EnemyNear(root,Var(53)),stateno != var(7)
+triggerall = var(9) > 0 && EnemyNear(root,Var(53)),stateno != var(9)
+triggerall = var(11) > 0 && EnemyNear(root,Var(53)),stateno != var(11)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(13) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚V
+[State 1]
+type = varset
+triggerall = var(14) = 0
+triggerall = var(13) > 0 && EnemyNear(root,Var(53)),stateno = var(13)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(14) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚W
+[State 1]
+type = varset
+triggerall = var(15) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno != var(5)
+triggerall = var(7) > 0 && EnemyNear(root,Var(53)),stateno != var(7)
+triggerall = var(9) > 0 && EnemyNear(root,Var(53)),stateno != var(9)
+triggerall = var(11) > 0 && EnemyNear(root,Var(53)),stateno != var(11)
+triggerall = var(13) > 0 && EnemyNear(root,Var(53)),stateno != var(13)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(15) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚W
+[State 1]
+type = varset
+triggerall = var(16) = 0
+triggerall = var(15) > 0 && EnemyNear(root,Var(53)),stateno = var(15)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(16) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚X
+[State 1]
+type = varset
+triggerall = var(17) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno != var(5)
+triggerall = var(7) > 0 && EnemyNear(root,Var(53)),stateno != var(7)
+triggerall = var(9) > 0 && EnemyNear(root,Var(53)),stateno != var(9)
+triggerall = var(11) > 0 && EnemyNear(root,Var(53)),stateno != var(11)
+triggerall = var(13) > 0 && EnemyNear(root,Var(53)),stateno != var(13)
+triggerall = var(15) > 0 && EnemyNear(root,Var(53)),stateno != var(15)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(17) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚X
+[State 1]
+type = varset
+triggerall = var(18) = 0
+triggerall = var(17) > 0 && EnemyNear(root,Var(53)),stateno = var(17)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(18) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚P‚O
+[State 1]
+type = varset
+triggerall = var(19) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno != var(5)
+triggerall = var(7) > 0 && EnemyNear(root,Var(53)),stateno != var(7)
+triggerall = var(9) > 0 && EnemyNear(root,Var(53)),stateno != var(9)
+triggerall = var(11) > 0 && EnemyNear(root,Var(53)),stateno != var(11)
+triggerall = var(13) > 0 && EnemyNear(root,Var(53)),stateno != var(13)
+triggerall = var(15) > 0 && EnemyNear(root,Var(53)),stateno != var(15)
+triggerall = var(17) > 0 && EnemyNear(root,Var(53)),stateno != var(17)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(19) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚P‚O
+[State 1]
+type = varset
+triggerall = var(20) = 0
+triggerall = var(19) > 0 && EnemyNear(root,Var(53)),stateno = var(19)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(20) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚P‚P
+[State 1]
+type = varset
+triggerall = var(21) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno != var(5)
+triggerall = var(7) > 0 && EnemyNear(root,Var(53)),stateno != var(7)
+triggerall = var(9) > 0 && EnemyNear(root,Var(53)),stateno != var(9)
+triggerall = var(11) > 0 && EnemyNear(root,Var(53)),stateno != var(11)
+triggerall = var(13) > 0 && EnemyNear(root,Var(53)),stateno != var(13)
+triggerall = var(15) > 0 && EnemyNear(root,Var(53)),stateno != var(15)
+triggerall = var(17) > 0 && EnemyNear(root,Var(53)),stateno != var(17)
+triggerall = var(19) > 0 && EnemyNear(root,Var(53)),stateno != var(19)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(21) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚P‚P
+[State 1]
+type = varset
+triggerall = var(22) = 0
+triggerall = var(21) > 0 && EnemyNear(root,Var(53)),stateno = var(21)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(22) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚P‚Q
+[State 1]
+type = varset
+triggerall = var(23) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno != var(5)
+triggerall = var(7) > 0 && EnemyNear(root,Var(53)),stateno != var(7)
+triggerall = var(9) > 0 && EnemyNear(root,Var(53)),stateno != var(9)
+triggerall = var(11) > 0 && EnemyNear(root,Var(53)),stateno != var(11)
+triggerall = var(13) > 0 && EnemyNear(root,Var(53)),stateno != var(13)
+triggerall = var(15) > 0 && EnemyNear(root,Var(53)),stateno != var(15)
+triggerall = var(17) > 0 && EnemyNear(root,Var(53)),stateno != var(17)
+triggerall = var(19) > 0 && EnemyNear(root,Var(53)),stateno != var(19)
+triggerall = var(21) > 0 && EnemyNear(root,Var(53)),stateno != var(21)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(23) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚P‚Q
+[State 1]
+type = varset
+triggerall = var(24) = 0
+triggerall = var(23) > 0 && EnemyNear(root,Var(53)),stateno = var(23)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(24) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚P‚R
+[State 1]
+type = varset
+triggerall = var(25) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno != var(5)
+triggerall = var(7) > 0 && EnemyNear(root,Var(53)),stateno != var(7)
+triggerall = var(9) > 0 && EnemyNear(root,Var(53)),stateno != var(9)
+triggerall = var(11) > 0 && EnemyNear(root,Var(53)),stateno != var(11)
+triggerall = var(13) > 0 && EnemyNear(root,Var(53)),stateno != var(13)
+triggerall = var(15) > 0 && EnemyNear(root,Var(53)),stateno != var(15)
+triggerall = var(17) > 0 && EnemyNear(root,Var(53)),stateno != var(17)
+triggerall = var(19) > 0 && EnemyNear(root,Var(53)),stateno != var(19)
+triggerall = var(21) > 0 && EnemyNear(root,Var(53)),stateno != var(21)
+triggerall = var(23) > 0 && EnemyNear(root,Var(53)),stateno != var(23)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(25) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚P‚R
+[State 1]
+type = varset
+triggerall = var(26) = 0
+triggerall = var(25) > 0 && EnemyNear(root,Var(53)),stateno = var(25)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(26) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚P‚S
+[State 1]
+type = varset
+triggerall = var(27) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno != var(5)
+triggerall = var(7) > 0 && EnemyNear(root,Var(53)),stateno != var(7)
+triggerall = var(9) > 0 && EnemyNear(root,Var(53)),stateno != var(9)
+triggerall = var(11) > 0 && EnemyNear(root,Var(53)),stateno != var(11)
+triggerall = var(13) > 0 && EnemyNear(root,Var(53)),stateno != var(13)
+triggerall = var(15) > 0 && EnemyNear(root,Var(53)),stateno != var(15)
+triggerall = var(17) > 0 && EnemyNear(root,Var(53)),stateno != var(17)
+triggerall = var(19) > 0 && EnemyNear(root,Var(53)),stateno != var(19)
+triggerall = var(21) > 0 && EnemyNear(root,Var(53)),stateno != var(21)
+triggerall = var(23) > 0 && EnemyNear(root,Var(53)),stateno != var(23)
+triggerall = var(25) > 0 && EnemyNear(root,Var(53)),stateno != var(25)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(27) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚P‚S
+[State 1]
+type = varset
+triggerall = var(28) = 0
+triggerall = var(27) > 0 && EnemyNear(root,Var(53)),stateno = var(27)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(28) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚P‚T
+[State 1]
+type = varset
+triggerall = var(29) = 0
+triggerall = var(1) > 0 && EnemyNear(root,Var(53)),stateno != var(1)
+triggerall = var(3) > 0 && EnemyNear(root,Var(53)),stateno != var(3)
+triggerall = var(5) > 0 && EnemyNear(root,Var(53)),stateno != var(5)
+triggerall = var(7) > 0 && EnemyNear(root,Var(53)),stateno != var(7)
+triggerall = var(9) > 0 && EnemyNear(root,Var(53)),stateno != var(9)
+triggerall = var(11) > 0 && EnemyNear(root,Var(53)),stateno != var(11)
+triggerall = var(13) > 0 && EnemyNear(root,Var(53)),stateno != var(13)
+triggerall = var(15) > 0 && EnemyNear(root,Var(53)),stateno != var(15)
+triggerall = var(17) > 0 && EnemyNear(root,Var(53)),stateno != var(17)
+triggerall = var(19) > 0 && EnemyNear(root,Var(53)),stateno != var(19)
+triggerall = var(21) > 0 && EnemyNear(root,Var(53)),stateno != var(21)
+triggerall = var(23) > 0 && EnemyNear(root,Var(53)),stateno != var(23)
+triggerall = var(25) > 0 && EnemyNear(root,Var(53)),stateno != var(25)
+triggerall = var(27) > 0 && EnemyNear(root,Var(53)),stateno != var(27)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(29) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚P‚T
+[State 1]
+type = varset
+triggerall = var(30) = 0
+triggerall = var(29) > 0 && EnemyNear(root,Var(53)),stateno = var(29)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, NA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(30) = EnemyNear(root,Var(53)),time
+
+;ƒ`[ƒ€íEƒŠƒZƒbƒg
+[State 1]
+type = VarRangeSet
+trigger1 = EnemyNear(root,Var(53)),teammode = turns && roundstate != 2
+value = 0
+first =0
+last =30
+
+;=====================================================================
+;---------------------------------------------------------------------
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚P(•KE‹Z)
+[State 1]
+type = varset
+triggerall = var(41) = 0
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, SA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(41) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚P(•KE‹Z)
+[State 1]
+type = varset
+triggerall = var(42) = 0
+triggerall = var(41) > 0 && EnemyNear(root,Var(53)),stateno = var(41)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, SA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(42) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚Q(•KE‹Z)
+[State 1]
+type = varset
+triggerall = var(43) = 0
+triggerall = var(41) > 0 && EnemyNear(root,Var(53)),stateno != var(41)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, SA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(43) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚Q(•KE‹Z)
+[State 1]
+type = varset
+triggerall = var(44) = 0
+triggerall = var(43) > 0 && EnemyNear(root,Var(53)),stateno = var(43)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, SA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(44) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚R(•KE‹Z)
+[State 1]
+type = varset
+triggerall = var(45) = 0
+triggerall = var(41) > 0 && EnemyNear(root,Var(53)),stateno != var(41)
+triggerall = var(43) > 0 && EnemyNear(root,Var(53)),stateno != var(43)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, SA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(45) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚R(•KE‹Z)
+[State 1]
+type = varset
+triggerall = var(46) = 0
+triggerall = var(45) > 0 && EnemyNear(root,Var(53)),stateno = var(45)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, SA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(46) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚S(•KE‹Z)
+[State 1]
+type = varset
+triggerall = var(47) = 0
+triggerall = var(41) > 0 && EnemyNear(root,Var(53)),stateno != var(41)
+triggerall = var(43) > 0 && EnemyNear(root,Var(53)),stateno != var(43)
+triggerall = var(45) > 0 && EnemyNear(root,Var(53)),stateno != var(45)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, SA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(47) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚S(•KE‹Z)
+[State 1]
+type = varset
+triggerall = var(48) = 0
+triggerall = var(47) > 0 && EnemyNear(root,Var(53)),stateno = var(47)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, SA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(48) = EnemyNear(root,Var(53)),time
+
+;--
+
+;‘Šè‚Ì‘ÅŒ‚ƒXƒe[ƒgƒiƒ“ƒo[‹L‰¯E‚T(•KE‹Z)
+[State 1]
+type = varset
+triggerall = var(49) = 0
+triggerall = var(41) > 0 && EnemyNear(root,Var(53)),stateno != var(41)
+triggerall = var(43) > 0 && EnemyNear(root,Var(53)),stateno != var(43)
+triggerall = var(45) > 0 && EnemyNear(root,Var(53)),stateno != var(45)
+triggerall = var(47) > 0 && EnemyNear(root,Var(53)),stateno != var(47)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, SA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(49) = EnemyNear(root,Var(53)),stateno
+
+;‘Šè‚Ì‘ÅŒ‚ƒtƒŒ[ƒ€‹L‰¯E‚T(•KE‹Z)
+[State 1]
+type = varset
+triggerall = var(50) = 0
+triggerall = var(49) > 0 && EnemyNear(root,Var(53)),stateno = var(49)
+trigger1 = root,movetype = H
+trigger1 = EnemyNear(root,Var(53)),movecontact = 1
+trigger1 = EnemyNear(root,Var(53)),HitDefAttr = SC, SA
+trigger1 = EnemyNear(root,Var(53)),stateno > 0
+var(50) = EnemyNear(root,Var(53)),time
+
+;----
+
+;—¬Î‚É‚»‚ë‚»‚ë”½Œ‚‚µ‚Ä‚à‚¢[‚¾‚ë“I‚È“GƒtƒŒ[ƒ€
+[State 1]
+type = varset
+triggerall = var(31) = 0
+triggerall = EnemyNear(root,Var(53)),Vel X <= 0 ;ƒXƒ‰ƒCƒfƒBƒ“ƒOŒn‚ÌUŒ‚‚¾‚Æƒ}ƒYƒCˆ×
+trigger1 = EnemyNear(root,Var(53)),stateno = var(1) && var(1) > 0
+trigger1 = EnemyNear(root,Var(53)),time > var(2) + 5 && var(2) > 1
+trigger2 = EnemyNear(root,Var(53)),stateno = var(3) && var(3) > 0
+trigger2 = EnemyNear(root,Var(53)),time > var(4) + 5 && var(4) > 1
+trigger3 = EnemyNear(root,Var(53)),stateno = var(5) && var(5) > 0
+trigger3 = EnemyNear(root,Var(53)),time > var(6) + 5 && var(6) > 1
+trigger4 = EnemyNear(root,Var(53)),stateno = var(7) && var(7) > 0
+trigger4 = EnemyNear(root,Var(53)),time > var(8) + 5 && var(8) > 1
+trigger5 = EnemyNear(root,Var(53)),stateno = var(9) && var(9) > 0
+trigger5 = EnemyNear(root,Var(53)),time > var(10) + 5 && var(10) > 1
+trigger6 = EnemyNear(root,Var(53)),stateno = var(11) && var(11) > 0
+trigger6 = EnemyNear(root,Var(53)),time > var(12) + 5 && var(12) > 1
+trigger7 = EnemyNear(root,Var(53)),stateno = var(13) && var(13) > 0
+trigger7 = EnemyNear(root,Var(53)),time > var(14) + 5 && var(14) > 1
+trigger8 = EnemyNear(root,Var(53)),stateno = var(15) && var(15) > 0
+trigger8 = EnemyNear(root,Var(53)),time > var(16) + 5 && var(16) > 1
+trigger9 = EnemyNear(root,Var(53)),stateno = var(17) && var(17) > 0
+trigger9 = EnemyNear(root,Var(53)),time > var(18) + 5 && var(18) > 1
+trigger10 = EnemyNear(root,Var(53)),stateno = var(19) && var(19) > 0
+trigger10 = EnemyNear(root,Var(53)),time > var(20) + 5 && var(20) > 1
+trigger11 = EnemyNear(root,Var(53)),stateno = var(21) && var(21) > 0
+trigger11 = EnemyNear(root,Var(53)),time > var(22) + 5 && var(22) > 1
+trigger12 = EnemyNear(root,Var(53)),stateno = var(23) && var(23) > 0
+trigger12 = EnemyNear(root,Var(53)),time > var(24) + 5 && var(24) > 1
+trigger13 = EnemyNear(root,Var(53)),stateno = var(25) && var(25) > 0
+trigger13 = EnemyNear(root,Var(53)),time > var(26) + 5 && var(26) > 1
+trigger14 = EnemyNear(root,Var(53)),stateno = var(27) && var(27) > 0
+trigger14 = EnemyNear(root,Var(53)),time > var(28) + 5 && var(28) > 1
+trigger15 = EnemyNear(root,Var(53)),stateno = var(29) && var(29) > 0
+trigger15 = EnemyNear(root,Var(53)),time > var(30) + 5 && var(30) > 1
+;‚±‚Á‚©‚ç•KE‹Z
+trigger16 = EnemyNear(root,Var(53)),stateno = var(41) && var(41) > 0
+trigger16 = EnemyNear(root,Var(53)),time > var(42) + 10 && var(42) > 1
+trigger17 = EnemyNear(root,Var(53)),stateno = var(43) && var(43) > 0
+trigger17 = EnemyNear(root,Var(53)),time > var(44) + 10 && var(44) > 1
+trigger18 = EnemyNear(root,Var(53)),stateno = var(45) && var(45) > 0
+trigger18 = EnemyNear(root,Var(53)),time > var(46) + 10 && var(46) > 1
+trigger19 = EnemyNear(root,Var(53)),stateno = var(47) && var(47) > 0
+trigger19 = EnemyNear(root,Var(53)),time > var(48) + 10 && var(48) > 1
+trigger20 = EnemyNear(root,Var(53)),stateno = var(49) && var(49) > 0
+trigger20 = EnemyNear(root,Var(53)),time > var(50) + 10 && var(50) > 1
+var(31) = 1
+
+;ƒŠƒZƒbƒg
+[State 1]
+type = varset
+triggerall = var(31) != 0
+trigger1 = roundstate != 2 || statetype = L
+trigger2 = EnemyNear(root,Var(53)),Vel X > 0 || EnemyNear(root,Var(53)),ctrl
+trigger3 = EnemyNear(root,Var(53)),statetype = L || EnemyNear(root,Var(53)),statetype = A
+trigger4 = EnemyNear(root,Var(53)),time = 1 || EnemyNear(root,Var(53)),animtime = 0
+var(31) = 0
+
+;----
+
+;ƒŠƒZƒbƒg
+[State 1]
+type = varset
+triggerall = var(51) != 0
+trigger1 = 1
+var(51) = 0
+
+;h‚µ‚±‚İ‚µ‚Ä‚àŠÔ‚É‡‚¤‚¾‚ë[“I‚È“GƒtƒŒ[ƒ€
+[State 1]
+type = varset
+triggerall = var(51) = 0
+triggerall = EnemyNear(root,Var(53)),Vel X <= 0 ;ƒXƒ‰ƒCƒfƒBƒ“ƒOŒn‚ÌUŒ‚‚¾‚Æƒ}ƒYƒCˆ×
+trigger1 = EnemyNear(root,Var(53)),stateno = var(1) && var(1) > 0
+trigger1 = EnemyNear(root,Var(53)),time <= var(2) - 5 && var(2) > 5
+trigger2 = EnemyNear(root,Var(53)),stateno = var(3) && var(3) > 0
+trigger2 = EnemyNear(root,Var(53)),time <= var(4) - 5 && var(4) > 5
+trigger3 = EnemyNear(root,Var(53)),stateno = var(5) && var(5) > 0
+trigger3 = EnemyNear(root,Var(53)),time <= var(6) - 5 && var(6) > 5
+trigger4 = EnemyNear(root,Var(53)),stateno = var(7) && var(7) > 0
+trigger4 = EnemyNear(root,Var(53)),time <= var(8) - 5 && var(8) > 5
+trigger5 = EnemyNear(root,Var(53)),stateno = var(9) && var(9) > 0
+trigger5 = EnemyNear(root,Var(53)),time <= var(10) - 5 && var(10) > 5
+trigger6 = EnemyNear(root,Var(53)),stateno = var(11) && var(11) > 0
+trigger6 = EnemyNear(root,Var(53)),time <= var(12) - 5 && var(12) > 5
+trigger7 = EnemyNear(root,Var(53)),stateno = var(13) && var(13) > 0
+trigger7 = EnemyNear(root,Var(53)),time <= var(14) - 5 && var(14) > 5
+trigger8 = EnemyNear(root,Var(53)),stateno = var(15) && var(15) > 0
+trigger8 = EnemyNear(root,Var(53)),time <= var(16) - 5 && var(16) > 5
+trigger9 = EnemyNear(root,Var(53)),stateno = var(17) && var(17) > 0
+trigger9 = EnemyNear(root,Var(53)),time <= var(18) - 5 && var(18) > 5
+trigger10 = EnemyNear(root,Var(53)),stateno = var(19) && var(19) > 0
+trigger10 = EnemyNear(root,Var(53)),time <= var(20) - 5 && var(20) > 5
+trigger11 = EnemyNear(root,Var(53)),stateno = var(21) && var(21) > 0
+trigger11 = EnemyNear(root,Var(53)),time <= var(22) - 5 && var(22) > 5
+trigger12 = EnemyNear(root,Var(53)),stateno = var(23) && var(23) > 0
+trigger12 = EnemyNear(root,Var(53)),time <= var(24) - 5 && var(24) > 5
+trigger13 = EnemyNear(root,Var(53)),stateno = var(25) && var(25) > 0
+trigger13 = EnemyNear(root,Var(53)),time <= var(26) - 5 && var(26) > 5
+trigger14 = EnemyNear(root,Var(53)),stateno = var(27) && var(27) > 0
+trigger14 = EnemyNear(root,Var(53)),time <= var(28) - 5 && var(28) > 5
+trigger15 = EnemyNear(root,Var(53)),stateno = var(29) && var(29) > 0
+trigger15 = EnemyNear(root,Var(53)),time <= var(30) - 5 && var(30) > 5
+var(51) = 1
+
+;----
+
+[State -2 ƒfƒoƒbƒO—p]
+type=displayToClipboard
+trigger1=ishelper
+ignorehitpause=1
+text="                                    V0:%d V1:%d V2:%d V31:%d V51:%d"
+params=var(0),var(1),var(2),var(31),var(51)
+
+[State 8900]
+Type = DestroySelf
+Trigger1 = ishelper && (RoundState > 3 || root,life <= 0 || !root,Alive)
+
+;-------------------------------------------------------------------------------
+;•Ç’[ŒŸoƒwƒ‹ƒp[2
+[Statedef 8905]
+Type = A
+Ctrl = 0
+Anim = 0
+Velset = -5,0,-50
+Movetype = I
+Physics = N
+Sprpriority = 1
+
+[State 8905]
+type = assertspecial
+trigger1 = 1
+flag = invisible
+flag2 = noshadow
+ignorehitpause = 1
+
+[State 8905]
+type = ScreenBound
+Trigger1=1
+value=0
+movecamera=0,0
+
+[State 8905]
+type = NotHitBy
+value = SCA
+trigger1 = 1
+
+[State 8905]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 8905]
+type = SprPriority
+trigger1 = 1
+value = -5
+
+[State 8905]
+type=selfstate
+trigger1=!ishelper
+value=0
+
+[state 8905]
+Type = Projectile
+Trigger1 = Time = 0
+ProjID = ifelse(ishelper(8905+root,ID),8905,8906)
+Projanim = 0
+Projremovetime = -1
+Velocity = Floor(Vel X),0
+projhits = 524288
+projmisstime = 524288
+projpriority = 524288
+projsprpriority = -524288
+Projedgebound = 524288
+projstagebound = -const(size.ground.front)
+Offset = 0,524288-320*(root,ID-55)
+supermovetime = 524288
+pausemovetime = 524288
+ignorehitpause = 1
+
+[state 8905]
+type = velset
+Trigger1 = !Root,NumProjID(ifelse(ishelper(8905+root,ID),8905,8906)) && time
+x = 0
+y = 0
+ignorehitpause = 1
+
+[State 8905]
+type = DisplayToClipboard
+Trigger1 = ishelper
+text = "ROOT X=%f P2X=%f V0=%d, POS X=%f"
+params = rootdist X,p2dist X,var(0),Pos X
+ignorehitpause = 1
+
+[State 8905]
+Type = DestroySelf
+Trigger1 = ishelper && (RoundState > 3 || root,life <= 0 || !root,Alive)
+Trigger2 = Vel X = 0 && root,NumProjID(8905) = 0 && root,NumProjID(8906) = 0 && Time
+

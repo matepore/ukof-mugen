@@ -1,0 +1,688 @@
+
+;###########################################################################
+[Statedef -3]
+;###########################################################################
+
+;*********************************************************************
+; ヘルパーの暴走防止
+;*********************************************************************
+;===============================================================
+; コマンド認識用ヘルパーの暴走防止
+;===============================================================
+[State -3, ChangeState]
+type = ChangeState
+trigger1 = IsHelper(8990)
+value = 8990
+ignorehitpause = 1
+
+
+;*********************************************************************
+; ヘルパーの呼び出し
+;*********************************************************************
+;===============================================================
+; コマンド認識用ヘルパーの呼び出し
+;===============================================================
+[State -3, Helper]
+type = Helper
+trigger1 = NumHelper(8990) = 0
+trigger1 = Alive = 1
+trigger1 = !IsHelper
+helpertype = Normal
+name = "CommandHelper"
+stateno = 8990
+ID = 8990
+postype = p1
+pos = 0,9999
+keyctrl = 1
+pausemovetime = 99999999999999
+supermovetime = 99999999999999
+
+;===============================================================
+; エフェクト＆Var管理ヘルパーの呼び出し
+;===============================================================
+[State -2, Helper]
+type = Helper
+trigger1 = NumHelper(8000) = 0
+trigger1 = !IsHelper
+name = "Effects & Var"
+StateNo = 8000
+id = 8000
+pos = 0,9999
+postype = p1
+ownpal = 1
+keyctrl = 0
+ignorehitpause = 1
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+; ＡＩ用 StateDef -3
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+;----------------------------------------------------------[ＡＩ起動用ヘルパー生成]
+[State -3, ＡＩ起動用ヘルパー]
+type=helper
+trigger1 = !IsHelper
+trigger1 = Var(59) = 0
+trigger1 = !NumHelper(10000+id)
+trigger1 = RoundState <= 2
+trigger1 = PrevStateNo = 5900 || (PrevStateNo = [190, 194])
+trigger1 = RoundsExisted = 0
+trigger1 = alive
+helpertype = Normal
+name = "AI"
+StateNo = 100000
+ID = 10000+id
+pos = 9999, 9999
+keyctrl = 1
+IgnoreHitPause = 1
+pausemovetime = 9999
+supermovetime = 9999
+persistent = 0
+
+[State -3, ヘルパー暴走の保険]
+type = ChangeState
+trigger1 = IsHelper
+trigger1 = IsHelper(10000+Root,id)
+trigger1 = StateNo != 100000
+value = 100000
+IgnoreHitPause = 1
+SuperMoveTime = 9999
+PauseMoveTime = 9999
+
+;----------------------------------------------------------[ＡＩ起動セット]
+[State -3, AIFlagSet]
+type = VarSet
+triggerall = !IsHelper
+triggerall = Var(59) = 0
+triggerall = NumHelper(20000+id)
+triggerall = Helper(20000+id),Var(57) != -1
+trigger1 = Command="AI1"||Command="AI2"||Command="AI3"||Command="AI4"||Command="AI5"
+trigger2 = Command="AI6"||Command="AI7"||Command="AI8"||Command="AI9"||Command="AI10"
+trigger3 = Command="AI11"||Command="AI12"||Command="AI13"||Command="AI14"||Command="AI15"
+trigger4 = Command="AI16"||Command="AI17"||Command="AI18"||Command="AI19"||Command="AI20"
+trigger5 = Command="AI21"||Command="AI22"||Command="AI23"||Command="AI24"||Command="AI25"
+trigger6 = Command="AI26"||Command="AI27"||Command="AI28"||Command="AI29"||Command="AI30"
+trigger7 = Command="AI31"||Command="AI32"||Command="AI33"||Command="AI34"||Command="AI35"
+trigger8 = Command="AI36"||Command="AI37"||Command="AI38"||Command="AI39"||Command="AI40"
+trigger9 = NumHelper(10000+id)
+trigger9 = Helper(10000+id),Var(59)
+trigger10 = Helper(20000+id),Var(57) = 1 || (PalNo >= 7 && Helper(20000+id),Var(57) = 2)
+var(59) = Helper(20000+id),Var(59) * -1
+IgnoreHitPause = 1
+
+[State -3, AI反転]
+Type = VarSet
+triggerall = !IsHelper
+trigger1 = Var(59) > 0
+trigger1 = RoundState != 2
+trigger2 = Var(59) < 0
+trigger2 = ctrl
+trigger2 = RoundState = 2
+var(59) = -Var(59)
+
+[State -3, ctrlset]
+Type = CtrlSet
+triggerall = !IsHelper
+triggerall = !ctrl
+trigger1 = Var(59) < 0
+trigger1 = RoundState > 2
+trigger1 = StateNo = 13 || (StateNo = [18, 19]) || StateNo = 21
+trigger2 = Var(59) > 0
+trigger2 = RoundState = 2
+trigger2 = StateNo = 0
+value = 1
+
+[State -3, NotHitBy]
+type = NotHitBy
+triggerall = !IsHelper
+triggerall = RoundState < 3
+trigger1 = Var(59) < 0 || NumHelper(10000+id)
+trigger1 = !ctrl && StateNo = 0
+value = SCA
+time = 1
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[めくり＆補助ヘルパー生成]
+[State -3, めくり＆補助ヘルパー]
+type=helper
+triggerall = !IsHelper
+trigger1 = !NumHelper(20000+id)
+trigger1 = alive
+helpertype = Normal
+name = "Turn"
+StateNo = 200000
+ID = 20000+id
+pos = 0, 9999
+keyctrl = 0
+IgnoreHitPause = 1
+pausemovetime = 9999
+supermovetime = 9999
+persistent = 1
+
+[State -3, ヘルパー暴走の保険]
+type = ChangeState
+triggerall = IsHelper
+triggerall = IsHelper(20000+Root,id)
+trigger1 = StateNo != 200000
+value = 200000
+IgnoreHitPause = 1
+SuperMoveTime = 9999
+PauseMoveTime = 9999
+
+;----------------------------------------------------------[ステージ端＆飛び道具認識ヘルパー生成]
+[State -3, 端ﾁｪｯｸ・右]
+Type = Helper
+triggerall = !IsHelper
+trigger1 = RoundState <= 2
+trigger1 = !NumHelper(30000+id)
+HelperType = Normal
+Name = "RightEdge"
+PosType = left
+StateNo = 32000
+ID = 30000+id
+facing = -1
+pos = 320, 9999 ;160,9999
+pausemovetime = 9999
+supermovetime = 9999
+persistent = 0
+IgnoreHitPause = 1
+KeyCtrl = 0
+
+[State -3, 端ﾁｪｯｸ・左]
+Type = Helper
+triggerall = !IsHelper
+trigger1 = RoundState <= 2
+trigger1 = !NumHelper(31000+id)
+trigger1 = NumHelper(30000+id)
+trigger1 = Helper(30000+id),Var(1) = 0
+HelperType = Normal
+Name = "LeftEdge"
+PosType = left
+StateNo = 31000
+facing = 1
+ID = 31000+id
+pos = 0, 9999 ;160,9999
+pausemovetime = 9999
+supermovetime = 9999
+persistent = 0
+IgnoreHitPause = 1
+KeyCtrl = 0
+
+[State -3, ヘルパー暴走の保険]
+type = ChangeState
+triggerall = IsHelper
+triggerall = IsHelper(30000+Root,id)
+trigger1 = StateNo != 32000
+value = 320000
+IgnoreHitPause = 1
+SuperMoveTime = 9999
+PauseMoveTime = 9999
+
+[State -3, ヘルパー暴走の保険]
+type = ChangeState
+triggerall = IsHelper
+triggerall = IsHelper(31000+Root,id)
+trigger1 = StateNo != 31000 && StateNo != [30020, 30029]
+value = 310000
+IgnoreHitPause = 1
+SuperMoveTime = 9999
+PauseMoveTime = 9999
+
+;----------------------------------------------------------[敵生死判別]
+[State -3, VarSet]
+Type = varset
+triggerall = !IsHelper
+trigger1 = NumEnemy = 1
+var(46) = EnemyNear,ID
+
+[State -3, VarSet]
+Type = varset
+triggerall = !IsHelper
+trigger1 = NumEnemy > 1
+var(46) = ifelse(EnemyNear(0),alive&&EnemyNear(0),StateNo!=358002, EnemyNear(0),ID, EnemyNear(1),ID)
+
+;----------------------------------------------------------[暗転感知]
+[State -3, 暗転感知カウント]
+type = varadd
+triggerall = !IsHelper
+trigger1 = RoundState = 2
+var(52) = 1
+ignorehitpause = 1
+
+[State -3, 暗転感知暴発防止1]
+type = varset
+triggerall = !IsHelper
+trigger1 = var(53) >= 120
+trigger2 = MoveType != H
+trigger2 = StateNo = [3000, 3999]
+trigger3 = PlayerID(Var(46)),MoveType = H
+var(52) = Helper(20000+id),Var(53)
+ignorehitpause = 1
+
+[State -3, 暗転感知暴発防止2]
+type = varset
+triggerall = !IsHelper
+trigger1 = var(52) = [1, 9];超必らしくない暗転を感知したら0に
+trigger2 = var(53) >= 120
+var(53) = 0
+ignorehitpause = 1
+
+;----------------------------------------------------------[先行入力(AI)解除]
+[State -3, Precede Input Reset]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = ((Var(48))%10)
+triggerall = (StateNo != [39, 40]) && StateNo != 105
+trigger1 = StateType != A && StateNo != 105
+trigger2 = MoveType = H || (MoveType = A && StateNo >= 200)
+trigger3 = (PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateNo >= 200 && PlayerID(Var(46)),StateType != L)
+var(48) = -((Var(48))%10)	;0
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[ランダムナンバー]
+[State -3, VarRandom]
+type = VarRandom
+triggerall = !IsHelper
+triggerall = StateNo != [10, 12]
+trigger1 = StateNo >= 200 && !ctrl
+trigger1 = Time = 1
+trigger2 = Time % 5 = 1
+trigger2 = StateNo < 200
+trigger2 = (StateNo != [39, 40]) && StateNo != 50 && StateNo != 100 && StateNo != 101 && StateNo != 110 && StateNo != 115 && StateNo != 5210 && StateNo != [120, 159]
+trigger2 = StateNo != 0 || Random < 500 || Time > 10
+trigger3 = Time % 5 = 1
+trigger3 = Time > 10
+trigger3 = (StateNo = 13 && Time > 20) || StateNo = 18 || StateNo = 19
+trigger4 = floor(fVar(32)) % 10 = 1 && fVar(32) > 0
+trigger4 = fVar(32) > 10
+trigger5 = StateNo = 151 || StateNo = 153 || StateNo = 155 || StateNo = 5000 || StateNo = 5010 || StateNo = 5020 || StateNo = 5040 || StateNo = 5050
+trigger5 = Time = 1
+trigger5 = Random < 400
+trigger6 = StateNo = 100
+trigger6 = Time % 5 = 1
+trigger7 = StateNo = 358002
+trigger7 = Time % 30 = 0
+trigger8 = StateNo = 321 && MoveType = I
+trigger8 = Time % 20 = 0
+v = 56
+Range = 0, 99
+IgnoreHitPause = 0
+
+;----------------------------------------------------------[攻撃のリーチ計算]
+[State -3, VarSet]
+type = VarSet
+triggerall = !IsHelper
+triggerall = fVar(22)
+trigger1 = 1
+fvar(22) = 0
+IgnoreHitPause = 1
+
+[State -3, 5A]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = (floor(fVar(22)) % 10) = 0
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 6
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 58
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 6
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(6-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<58
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 6
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 58
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 6
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(6-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 58
+fvar(22) = 1
+IgnoreHitPause = 1
+
+[State -3, 2A]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = (floor(fVar(22) / 10) % 10) = 0
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 5
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 41+(FrontEdgeBodyDist<60)*5
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 5
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(5-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<41+(FrontEdgeBodyDist<60)*5
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 5
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 41+(FrontEdgeBodyDist<60)*5
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 5
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(5-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 41+(FrontEdgeBodyDist<60)*5
+fvar(22) = 10
+IgnoreHitPause = 1
+
+[State -3, 6A]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = (floor(fVar(22) / 100) % 10) = 0
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 7
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 50+(FrontEdgeBodyDist<80)*5
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0 || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 7
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(7-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<50+(FrontEdgeBodyDist<80)*5
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 7
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 50+(FrontEdgeBodyDist<80)*5
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 7
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(7-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 50+(FrontEdgeBodyDist<80)*5
+fvar(22) = 100
+IgnoreHitPause = 1
+
+[State -3, 6B]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = (floor(fVar(22) / 1000) % 10) = 0
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 11
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 52
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 11
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(11-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<52+(FrontEdgeBodyDist<80)*0
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 11
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 52
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 11
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(11-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 52
+fvar(22) = 1000
+IgnoreHitPause = 1
+
+[State -3, 双掌昇陽]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = (floor(fVar(22) / 10000) % 10) = 0
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 4
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 54+(FrontEdgeBodyDist<60)*8
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 4
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(4-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<54+(FrontEdgeBodyDist<60)*8
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 4
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 54+(FrontEdgeBodyDist<60)*8
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 4
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(4-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 54+(FrontEdgeBodyDist<60)*8
+fvar(22) = 10000
+IgnoreHitPause = 1
+
+[State -3, 三巴昇陽]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = (floor(fVar(22) / 100000) % 10) = 0
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 4
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 58+(FrontEdgeBodyDist<80)*8
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 4
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(4-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<58+(FrontEdgeBodyDist<80)*8
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 4
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 58+(FrontEdgeBodyDist<80)*8
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 4
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(4-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 58+(FrontEdgeBodyDist<80)*8
+fvar(22) = 100000
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[ステージ端までの距離計算]
+[State -3, 自分後ろステージ端]
+type = varset
+triggerall = !IsHelper
+trigger1 = NumHelper(30000+id)
+trigger1 = Helper(30000+id),Var(1) > 0
+fvar(30) = ifelse(((PlayerID(Var(46)),facing=-1&&facing=-1)||(PlayerID(Var(46)),facing=1&&facing=-1)),(Helper(30000+id),ParentDist X), (Helper(30000+id),Var(1) - Helper(30000+id),ParentDist X))
+IgnoreHitPause = 1
+
+[State -3, 相手後ろステージ端]
+type = varset
+triggerall = !IsHelper
+trigger1 = NumHelper(30000+id)
+trigger1 = Helper(30000+id),Var(1) > 0
+fvar(31) = ifelse(((PlayerID(Var(46)),facing=-1&&facing=1)||(PlayerID(Var(46)),facing=1&&facing=1)),(helper(30000+id),P2Dist X), (Helper(30000+id),Var(1) - Helper(30000+id),P2Dist X))
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[相手起き上がり時間カウント]
+;9911 > 20F, 9912 > 9F 1053 > 22F
+[State -3, WakeUpGame Reset]
+type = VarSet
+triggerall = !IsHelper
+triggerall = fVar(11)
+trigger1 = 1
+fvar(11) = 0
+
+[State -3, WakeUpGame Set]
+type = null
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+;triggerall = fVar(11) = 0
+triggerall = PlayerID(Var(46)),StateType = L && ((Helper(20000+id),Var(17) / 10000000) % 10)
+trigger1 = PlayerID(Var(46)),StateNo = 9911
+trigger1 = fVar(11) := (29 + ((Helper(20000+id),Var(17) / 100000) % 100) - PlayerID(Var(46)),Time) || 1
+trigger2 = PlayerID(Var(46)),StateNo = 9912
+trigger2 = fVar(11) := (9 + ((Helper(20000+id),Var(17) / 100000) % 100) - PlayerID(Var(46)),Time) || 1
+trigger3 = PlayerID(Var(46)),StateNo = 5120
+trigger3 = fVar(11) := (((Helper(20000+id),Var(17) / 100000) % 100) - PlayerID(Var(46)),Time) || 1
+
+[State -3, WakeUpGame Set]
+type = null
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+;triggerall = fVar(11) = 0
+triggerall = PlayerID(Var(46)),StateType = L
+trigger1 = ((Helper(20000+id),Var(17) / 10000000) % 10)
+trigger1 = PlayerID(Var(46)),StateNo = ((Helper(20000+id),Var(17)) % 100000)
+trigger1 = 0	; fVar(11) := (((Helper(20000+id),Var(17) / 100000) % 100) - PlayerID(Var(46)),Time) || 1
+trigger2 = ((Helper(20000+id),Var(18) / 10000000) % 10)
+trigger2 = PlayerID(Var(46)),Anim = ((Helper(20000+id),Var(18)) % 100000)
+trigger2 = fVar(11) := (((Helper(20000+id),Var(18) / 100000) % 100) - PlayerID(Var(46)),Time) || 1
+trigger3 = ((Helper(20000+id),Var(19) / 10000000) % 10)
+trigger3 = PlayerID(Var(46)),Anim = ((Helper(20000+id),Var(19)) % 100000)
+trigger3 = fVar(11) := (((Helper(20000+id),Var(19) / 100000) % 100) - PlayerID(Var(46)),Time) || 1
+trigger4 = ((Helper(20000+id),Var(12) / 10000000) % 10)
+trigger4 = PlayerID(Var(46)),Anim = ((Helper(20000+id),Var(12)) % 100000)
+trigger4 = fVar(11) := (((Helper(20000+id),Var(12) / 100000) % 100) - PlayerID(Var(46)),Time) || 1
+
+;----------------------------------------------------------[相手受け身不能時間カウント]
+[State -3, A defensive fall Reset]
+Type = VarSet
+triggerall = PlayerIDExist(Var(46))
+trigger1 = PlayerID(Var(46)),MoveType != H
+fvar(23) = 0
+IgnoreHitPause = 1
+
+[State -3, 胴崩し(強)のけぞり時間]
+type = null
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),Movetype = H
+trigger1 = PlayerID(Var(46)),StateType = S
+trigger1 = PlayerID(Var(46)),StateNo = 1213
+;trigger1 = fVar(23) := 30 || 1
+trigger1 = fvar(23) := 30 - PlayerID(Var(46)),Time || 1
+IgnoreHitPause = 1
+
+[State -3, 受身不能時間]
+type = VarSet
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),stateno >= 200
+triggerall = PlayerID(Var(46)),Movetype = H
+triggerall = PlayerID(Var(46)),statetype != L
+trigger1 = PlayerID(Var(46)),gethitvar(fall)
+trigger1 = !(PlayerID(Var(46)),hitshakeover)
+trigger1 = PlayerID(Var(46)),time = 1
+fvar(23) = PlayerID(Var(46)),gethitvar(fall.recovertime)-1
+IgnoreHitPause = 1
+
+[State -3, 受身不能時間]
+type = VarSet
+triggerall = PlayerIDExist(Var(46))
+triggerall = NumEnemy>=2
+triggerall = PlayerID(Var(46)),stateno >= 200
+triggerall = PlayerID(Var(46)),Movetype = H
+triggerall = PlayerID(Var(46)),statetype != L
+trigger1 = PlayerID(Var(46)),gethitvar(fall)
+trigger1 = fvar(23)<PlayerID(Var(46)),gethitvar(fall.recovertime)-100
+fvar(23) = PlayerID(Var(46)),gethitvar(fall.recovertime)-100
+IgnoreHitPause = 1
+
+[State -3, 受身不能時間]
+type = VarSet
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),stateno >= 200
+triggerall = PlayerID(Var(46)),Movetype = H
+triggerall = PlayerID(Var(46)),statetype != L
+trigger1 = !PlayerID(Var(46)),gethitvar(fall.recover)
+trigger1 = PlayerID(Var(46)),gethitvar(fall)
+trigger2 = PlayerID(Var(46)),stateno = 5070
+fvar(23) = 999
+IgnoreHitPause = 1
+
+[State -3, ガード硬直]
+type = VarSet
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),Movetype = H
+triggerall = PlayerID(Var(46)),stateno < 200
+triggerall = PlayerID(Var(46)),Statetype = A
+trigger1 = !PlayerID(Var(46)),gethitvar(fall)
+trigger1 = !(PlayerID(Var(46)),hitshakeover)
+trigger1 = PlayerID(Var(46)),time = 1 || fvar(23) = 0
+fvar(23) = PlayerID(Var(46)),gethitvar(ctrltime)+PlayerID(Var(46)),gethitvar(hitshaketime)+1
+IgnoreHitPause = 1
+
+[State -3, ガード硬直]
+type = VarSet
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),Movetype = H
+triggerall = PlayerID(Var(46)),stateno < 200
+triggerall = PlayerID(Var(46)),Statetype != A
+trigger1 = !PlayerID(Var(46)),gethitvar(fall)
+trigger1 = !(PlayerID(Var(46)),hitshakeover)
+trigger1 = PlayerID(Var(46)),time = 1 || fvar(23) = 0
+fvar(23) = ifelse(PlayerID(Var(46)),gethitvar(ctrltime)<PlayerID(Var(46)),gethitvar(hittime),PlayerID(Var(46)),gethitvar(ctrltime),PlayerID(Var(46)),gethitvar(hittime))+PlayerID(Var(46)),gethitvar(hitshaketime)+1
+IgnoreHitPause = 1
+
+[State -3, のけぞり時間]
+type = VarSet
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),Movetype = H
+triggerall = PlayerID(Var(46)),stateno >= 200
+trigger1 = !PlayerID(Var(46)),gethitvar(fall)
+trigger1 = !(PlayerID(Var(46)),hitshakeover)
+trigger1 = PlayerID(Var(46)),time = 1
+fvar(23) = PlayerID(Var(46)),gethitvar(hittime)+PlayerID(Var(46)),gethitvar(hitshaketime)+1
+IgnoreHitPause = 1
+
+[State -3, A defensive fall Add]
+type = varadd
+trigger1 = fvar(23) > 0
+fvar(23) = -1
+IgnoreHitPause = 1
+SuperMoveTime = 9999
+PauseMoveTime = 9999
+
+;----------------------------------------------------------[120~131番のカウント]
+[State -3, VarSet]
+type = VarSet
+trigger1 = fVar(32) > 0
+trigger1 = (StateNo != [120, 131]) && StateNo != 13
+trigger1 = Time
+trigger2 = fVar(32) < 0
+trigger2 = StateNo != 100 || P2BodyDist X < -10
+fvar(32) = 0
+
+[State -3, VarSet]
+type = VarAdd
+trigger1 = fVar(32) < 0
+trigger1 = StateNo = 100
+fvar(32) = -1
+
+;----------------------------------------------------------[重力加速度計算]
+[State -3, 重力加速度計算]
+type = VarSet
+triggerall = !IsHelper
+trigger1 = PlayerIDExist(Var(46))
+fVar(39) = ifelse(PlayerID(Var(46)),MoveType != H, PlayerID(Var(46)),Const(Movement.yaccel), PlayerID(Var(46)),GetHitVar(yaccel))
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[処理順補正の使用]
+[State -3, 処理順補正の下準備1]
+type = null	; VarSet
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+trigger1 = 1
+fvar(35) = (PlayerID(Var(46)),gethitvar(hitshaketime) + PlayerID(Var(46)),hitpausetime)
+
+[State -3, 処理順補正の下準備2]
+type = null	; VarSet
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+trigger1 = 1
+fvar(36) = (fVar(35) + (fVar(35) = 0) * Var(54))
+
+;----------------------------------------------------------[ctrl制御]
+[State -3, assertspecial]
+type = assertspecial
+trigger1 = var(59) > 0
+flag = nowalk
+
+[State -3, assertspecial]
+type = assertspecial
+trigger1 = var(59) > 0
+flag = nostandguard
+flag2 = noairguard
+flag3 = nocrouchguard
+
+;----------------------------------------------------------[ヒット数]
+[State -3, HitNumber Reset]
+type = VarSet
+trigger1 = PlayerID(Var(46)),MoveType != H
+trigger2 = PlayerID(Var(46)),ctrl
+fvar(37) = 0
+
+[State -3, HitNumber]
+type = VarAdd
+trigger1 = MoveContact = 1
+fvar(37) = 1
+
+;----------------------------------------------------------[根性値計算]
+[State -3, 相手の実際の防御力]
+type = null
+triggerall = fVar(37) > 0 || StateNo = 801
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),GetHitVar(damage)
+trigger1 = (StateNo = 215 && AnimElemTime(6)) || StateNo = 400 || (StateNo = 415 && AnimElemTime(4)) || StateNo = 430 || (StateNo = 801 && AnimElemTime(43))
+trigger1 = fVar(29) := (PlayerID(Var(46)),GetHitVar(damage)*1000000)/(33 * fvar(1) * Const(data.attack)) || 1
+trigger2 = StateNo = 200 || StateNo = 205 || StateNo = 230 || StateNo = 235 || (StateNo = 1100 && AnimElemTime(5))
+trigger2 = fVar(29) := (PlayerID(Var(46)),GetHitVar(damage)*1000000)/(41 * fVar(1) * Const(data.attack)) || 1
+trigger3 = StateNo = 600 || StateNo = 631 || StateNo = 632
+trigger3 = fVar(29) := (PlayerID(Var(46)),GetHitVar(damage)*1000000)/(50 * fVar(1) * Const(data.attack)) || 1
+trigger4 = StateNo = 600 || StateNo = 631 || StateNo = 632
+trigger4 = fVar(29) := (PlayerID(Var(46)),GetHitVar(damage)*1000000)/(50 * fVar(1) * Const(data.attack)) || 1
+trigger5 = StateNo = 1050 || StateNo = 1060 || StateNo = 1201
+trigger5 = fVar(29) := (PlayerID(Var(46)),GetHitVar(damage)*1000000)/(58 * fVar(1) * Const(data.attack)) || 1
+trigger6 = StateNo = 310
+trigger6 = fVar(29) := (PlayerID(Var(46)),GetHitVar(damage)*1000000)/(74 * fVar(1) * Const(data.attack)) || 1
+trigger7 = StateNo = 3201
+trigger7 = fVar(29) := (PlayerID(Var(46)),GetHitVar(damage)*1000000)/(25 * fVar(1) * Const(data.attack)) || 1
+IgnoreHitPause = 1
+
+[State -3, 相手の実際の防御力, 初期設定]
+type = VarSet
+triggerall = PlayerIDExist(Var(46))
+trigger1 = fVar(29) = 0
+fvar(29) = 1000000/PlayerID(Var(46)),Const(data.defence)
+IgnoreHitPause = 1
+
+

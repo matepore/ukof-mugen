@@ -1,0 +1,382 @@
+;===============================================================================
+[Statedef -2]
+;===============================================================================
+;設定項目
+;===============================================================================
+;ストライカー使用 ON/OFF設定
+[State -2, Striker ON/OFF]
+type = Varset
+trigger1 = 1
+v = 17
+value = 0         ;←0…ストライカー あり  
+;                    1…ストライカー なし  
+
+
+;ストライカー回数
+[State -2, Striker Number of Times]
+type = Varset
+trigger1 = var(17) = 0
+trigger1 = 1
+v = 18
+value = 3         ;←0～5回まで変更可能
+
+
+;ストライカーゲージ位置設定
+[State 5900, Striker Position Set]
+type = VarSet
+trigger1 = 1
+var(19) = -50      ;←マイナス値で上に移動
+;                   プラス値で下に移動
+
+
+;===============================================================================
+;設定項目終わり。これより下は触らないでください。
+;Set item end. Please do not touch the following from this. 
+;===============================================================================
+[State -3, デバック(変数確認)]
+Type = DisplayToClipBoard
+Trigger1 = 1
+Text = "AI=%d,var(47)=%d,var(46)=%d,var(56)=%d,var(37)=%d \n"
+Params = var(59),var(47),var(46),var(56),var(37)
+IgnoreHitPause = 1
+
+[State -3, 距離確認デバック]
+type = AppendToClipboard
+trigger1 = 1
+text = "P2X=%f, P2Y=%f, velX=%d, hel=%d, PosX=%f \n"
+params = p2bodydist X,p2bodydist Y,facing = 1,numhelper,Partner,Pos X - Pos X
+IgnoreHitPause = 1
+
+[State -3, 画面端確認デバッグ]
+type = null;DisplayToClipboard
+Trigger1 = (NumHelper(50000) && NumHelper(60000))
+trigger1 = 1
+text = "helper(50000),rootdist x = %f\nhelper(60000),rootdist x = %f"
+params = (helper(50000+id),RootDist X), (helper(60000+id),RootDist X)
+ignorehitpause = 1
+
+;===============================================================================
+;ジャグル関連 全体
+[State -2, Juggle]
+type = Varadd
+triggerall = var(7) = 0 || var(7) = 2
+triggerall = p2statetype = A
+;夜終
+trigger1 = (stateNo = [1200,1210]) && movecontact = 1
+;夜終・陰
+trigger2 = stateNo = 3100 && movecontact = 1
+var(6) = -7
+
+;ジャグル関連 全体 リセット
+[State -2, Juggle R]
+type = Varset
+trigger1 = (p2stateNo != [5000,5100]) && (p2stateNo != [150,159])
+trigger2 = Enemynear,ctrl
+trigger3 = p2statetype = L
+trigger4 = Roundstate != 2
+var(6) = 15
+
+;ジャグル関連 ヒット確認 1
+[State -2, Juggle Hit 1]
+type = Varset
+trigger1 = var(7) = 0
+trigger1 = var(6) = [8,14]
+trigger2 = var(7) = 2
+trigger2 = var(6) < 8
+trigger3 = var(7) = 0
+trigger3 = var(6) < 0
+var(7) = 1
+
+;ジャグル関連 ヒット確認 2
+[State -2, Juggle Hit 2]
+type = Varset
+triggerall = var(7) = 1 && var(6) = 8 
+trigger1 = p2stateNo = [5000,5100]
+trigger1 = stateNo = 3100 || (stateNo = [600,640]) || stateNo = 260
+trigger1 = p2statetype = A
+var(7) = 2
+
+;ジャグル関連 ヒット確認 リセット
+[State -2, Juggle Hit R]
+type = Varset
+trigger1 = var(6) = 15
+trigger2 = (p2stateNo != [5000,5100]) && (p2stateNo != [150,159])
+trigger3 = Enemynear,ctrl
+trigger4 = p2statetype = L
+trigger5 = Roundstate != 2
+var(7) = 0
+
+;ジャグル関連 コンボ確認 1
+[State -2, Juggle combo 1]
+type = Varset
+triggerall = (var(7) = [1,2]) && var(6) < 8
+triggerall = p2statetype = A
+;夜終
+trigger1 = (stateNo = [1200,1210]) && movecontact = 1
+;夜終・陰
+trigger2 = stateNo = 3100 && movecontact = 1
+var(8) = 1
+
+;ジャグル関連 コンボ確認 2
+[State -2, Juggle combo 2]
+type = Varset
+triggerall = (var(7) = [1,2]) && var(6) < 1
+triggerall = p2statetype = A
+;夜終
+trigger1 = (stateNo = [1200,1210]) && movecontact = 1
+;夜終・陰
+trigger2 = stateNo = 3100 && movecontact = 1
+var(8) = 1
+
+;ジャグル関連 コンボ確認 リセット
+[State -2, Juggle combo R]
+type = Varset
+trigger1 = ctrl
+trigger2 = (stateNo = 3100 && Animtime = 0) || ((stateNo = [1200,1210]) && Animtime = 0)
+trigger3 = (p2stateNo != [5000,5100]) && (p2stateNo != [150,159])
+trigger4 = Enemynear,ctrl
+trigger5 = Enemynear,statetype = L
+trigger6 = Roundstate != 2
+var(8) = 0
+
+;-------------------------------------------------------------------------------
+;キャンセルダメージ補正 1
+[State -2, Cancel Hit 1]
+type = Varset
+trigger1 = PrevStateNo = [1000,1210]
+trigger1 = stateNo = 3000 || stateNo = 3200
+trigger2 = PrevStateNo = 3000
+trigger2 = stateNo = 3200
+var(10) = 1
+
+;キャンセルダメージ補正 2
+[State -2, Cancel Hit 2]
+type = null;varset
+triggerall = stateNo = 3150
+trigger1 = numHelper(16900) >= 1
+trigger1 = Helper(16900),movehit
+trigger1 = Helper(16900),Time <= 36
+trigger1 = p2stateNo = [5000,5070]
+var(10) = 2
+
+;スーパー＆ドリームキャンセル確認 リセット
+[State -2, Cancel Hit R]
+type = Varset
+trigger1 = ctrl
+trigger2 = movetype = H
+trigger3 = Roundstate != 2
+var(10) = 0
+
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+
+
+
+;ストライカー壬羽 キャンセル
+[State -2, Miu]
+type = Varset
+trigger1 = ctrl
+v = 12
+value = 0
+
+;-------------------------------------------------------------------------------
+;スーパーキャンセル確認
+[State -2, Super Set]
+type = Varset
+triggerall = stateNo = [1000,1010]
+trigger1 = numHelper(11000)
+trigger1 = Helper(11000),movecontact
+var(14) = 1
+
+;ドリームキャンセル確認
+[State -2, Super Set]
+type = Varset
+triggerall = stateNo = 3000
+trigger1 = numHelper(30000)
+trigger1 = Helper(30000),movecontact
+var(14) = 2
+
+;スーパーキャンセル確認 リセット
+[State -2, Suoer Set R]
+type = Varset
+trigger1 = (stateNo != [1000,1010]) && stateNo != 3000
+var(14) = 0
+
+;===============================================================================
+;タッグ時の生死確認
+[State -3, Tag]
+Type = VarSet
+Trigger1 = NumEnemy = 1
+Trigger2 = NumEnemy = 2
+Trigger2 = EnemyNear,Life > 0
+V = 15
+Value = 0
+IgnoreHitPause = 1
+SuperMoveTime = 9999
+PauseMoveTime = 9999
+
+[State -3, Tag]
+Type = VarSet
+Trigger1 = NumEnemy > 1
+Trigger1 = EnemyNear,Life = 0
+V = 15
+Value = 1
+IgnoreHitPause = 1
+SuperMoveTime = 9999
+PauseMoveTime = 9999
+
+
+;-------------------------------------------------------------------------------
+;相手距離確認
+[State -2, Pos X]
+type = Varset
+trigger1 = 1
+fv = 1
+value = Floor(Enemynear(var(15)),Pos X)
+
+[State -2, Pos Y]
+type = Varset
+trigger1 = 1
+fv = 2
+value = Floor(Enemynear(var(15)),Pos Y)
+
+[State -2, p2bodydist X]
+type = Varset
+trigger1 = 1
+fv = 3
+value = Floor(p2bodydist X)
+
+[State -2, p2bodydist Y]
+type = Varset
+trigger1 = 1
+fv = 4
+value = Floor(p2bodydist Y)
+
+;===============================================================================
+;ストライカー関連
+[State -2, Helper]
+type = Helper
+triggerall = var(17) = 0
+triggerall = !NumHelper(16000)
+trigger1 = Roundstate >= 2
+id = 16000
+name = "Striker"
+pos = 0,300
+postype = P1
+stateno = 16000
+helpertype = normal
+keyctrl = 0
+ownpal = 1
+ignorehitpause = 1
+persistent = 0
+size.xscale = 1.3
+size.yscale = 1.3
+pausemovetime = 99999999999999
+facing = facing*ifelse(teamside=1,1,-1)
+
+;回数確認 1
+[State -2, varset]
+type = varset
+trigger1 = var(18) = [1,5]
+trigger1 = Roundstate = [0,1]
+trigger1 = RoundsExisted = 0
+v = 20
+value = var(18)
+
+;回数確認 2
+[State -2, varset]
+type = varset
+trigger1 = var(18) < 1
+trigger1 = Roundstate = [0,1]
+trigger1 = RoundsExisted = 0
+v = 20
+value = 0
+
+;回数確認 3
+[State -2, varset]
+type = varset
+trigger1 = var(18) > 5
+trigger1 = Roundstate = [0,1]
+trigger1 = RoundsExisted = 0
+v = 20
+value = 5
+
+;回数減少
+[State -2, varset]
+type = varadd
+trigger1 = numhelper(2000)
+trigger1 = Helper(2000),stateNo = 2005
+trigger1 = Helper(2000),time = 1
+v = 20
+value = -1
+
+;===============================================================================
+;サウンド関係
+[State -2, Stopsnd]
+type = Stopsnd
+trigger1 = stateno != 100
+channel = 1
+
+[State -3, VarRandom]
+type = VarRandom
+triggerall = Time = 1
+trigger1 = stateno = 5000
+trigger2 = stateno = 5010
+trigger3 = stateno = 5020
+v = 4
+range = 0,15
+
+[State -2, PlaySnd]
+type = PlaySnd
+triggerall = Time = 1
+triggerall = Var(4) = [0,3]
+triggerall = alive = 1
+trigger1 = stateno = 5000
+trigger2 = stateno = 5010
+trigger3 = stateno = 5020
+value = 5000,0
+volume = 300
+
+[State -2, PlaySnd]
+type = PlaySnd
+triggerall = Time = 1
+triggerall = Var(4) = [4,7]
+triggerall = alive = 1
+trigger1 = stateno = 5000
+trigger2 = stateno = 5010
+trigger3 = stateno = 5020
+value = 5000,1
+volume = 300
+
+[State -2, AfterImage]
+type = AfterImage
+trigger1 = stateNo != [3000,3200]
+trigger1 = stateNo != [41,52]
+trigger1 = stateNo != [600,650]
+trigger1 = stateNo != 260
+time = 1
+
+
+[State -2, Helper]
+type = Helper
+triggerall = numHelper(20000)
+trigger1 = time = 1
+trigger1 = PrevStateNo = [3500,3599]
+trigger1 = StateNo != [3500,3599]
+trigger1 = StateNo != 3503
+trigger2 = stateNo = 3503
+trigger2 = time = 8
+trigger3 = stateNo = 3507
+trigger3 = time = 65
+name = "MAXEND"
+stateno = 20001
+ID = 20001
+helpertype = normal
+pos = 0,0
+postype = p2
+keyctrl = 0
+ownpal = 1
+ignorehitpause = 1
+persistent = 0
+

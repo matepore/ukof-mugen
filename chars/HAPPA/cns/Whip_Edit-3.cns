@@ -1,0 +1,5287 @@
+;###########################################################################
+[Statedef -3]
+;###########################################################################
+
+;*********************************************************************
+; ヘルパーの暴走防止
+;*********************************************************************
+;===============================================================
+; コマンド認識用ヘルパーの暴走防止
+;===============================================================
+[State -3, ChangeState]
+type = ChangeState
+trigger1 = IsHelper(8990)
+value = 8990
+ignorehitpause = 1
+
+
+;*********************************************************************
+; ヘルパーの呼び出し
+;*********************************************************************
+;===============================================================
+; コマンド認識＆Var管理ヘルパーの呼び出し(Pause中も処理できる)
+;===============================================================
+[State -3, Helper]
+type = Helper
+trigger1 = NumHelper(8990) = 0
+trigger1 = Alive = 1
+trigger1 = !IsHelper
+helpertype = Normal
+name = "CommandHelper & Var"
+stateno = 8990
+ID = 8990
+postype = p1
+pos = 0,9999
+keyctrl = 1
+pausemovetime = 99999999999999
+supermovetime = 99999999999999
+
+;===============================================================
+; 汎用常駐ヘルパーの呼び出し(Pause中は処理できない)
+;===============================================================
+[State -2, Helper]
+type = Helper
+trigger1 = NumHelper(8000) = 0
+trigger1 = !IsHelper
+name = "ResidentHelper"
+StateNo = 8000
+id = 8000
+pos = 0,9999
+postype = p1
+keyctrl = 0
+ownpal = 1
+ignorehitpause = 1
+
+
+;*********************************************************************
+; イントロ音声消去
+;*********************************************************************
+[State -3, StopSnd]
+type = StopSnd
+trigger1 = RoundState = 2
+channel = 3
+
+[State -3, StopSnd]
+type = StopSnd
+trigger1 = RoundState = 2
+channel = 4
+
+
+;*********************************************************************
+; パートナー判別(各スプライト表示用)
+;*********************************************************************
+;===============================================================
+; 初期化
+;===============================================================
+[State -3, VarSet]
+type = VarSet
+trigger1 = 1
+var(0) = 9999
+
+;===============================================================
+; KOFシリーズの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; 41さんの94の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "41"
+trigger1 = Partner,Name = "Rugal B."
+var(0) = 0
+
+;---------------------------------------------------------
+; Duende Macabroさんの94の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Duende Macabro"
+trigger1 = Partner,Name = "Benimaru Nikaido"
+trigger2 = Partner,Name = "Terry Bogard"
+trigger3 = Partner,Name = "Andy Bogard"
+var(0) = 0
+
+;---------------------------------------------------------
+; アリさんの94の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ali"
+trigger1 = Partner,Name = "Rugal B."
+var(0) = 0
+
+;---------------------------------------------------------
+; 死門さんの94の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "shimon"
+trigger1 = Partner,Name = "Athena"
+var(0) = 0
+
+;---------------------------------------------------------
+; 悪咲3号さんの94,98の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Warusaki3"
+trigger1 = Partner,Name = "rugal94"
+trigger2 = Partner,Name = "Athena Asamiya"
+trigger3 = Partner,Name = "Saisyu Kusanagi"
+var(0) = 0
+
+;---------------------------------------------------------
+; Noise Lowさんの95の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+trigger1 = Partner,AuthorName = "Noise_Low"
+trigger1 = Partner,Name = "chang_koehan"
+trigger2 = Partner,AuthorName = "Noise Low"
+trigger2 = Partner,Name = "Omega_Rugal'95"
+var(0) = 0
+
+;---------------------------------------------------------
+; 鶺鴒さんの94,95の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "sekirei"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "athena945"
+trigger2 = Partner,Name = "benimaru945"
+trigger3 = Partner,Name = "robert945"
+trigger4 = Partner,Name = "ryo945"
+trigger5 = Partner,Name = "yuri945"
+trigger6 = Partner,Name = "takuma945"
+var(0) = 1
+
+;---------------------------------------------------------
+; fxm508さんの96の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = (ID < Partner,ID && TeamSide = 1) || (ID > Partner,ID && TeamSide = 2)
+triggerall = Partner,AuthorName = "fxm508"
+trigger1 = Partner,Name = "Goenitz96"
+var(0) = 2
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = (ID > Partner,ID && TeamSide = 1) || (ID < Partner,ID && TeamSide = 2)
+triggerall = Partner,AuthorName = "fxm508"
+trigger1 = Partner,Name = "Goenitz96"
+var(0) = 3
+
+;---------------------------------------------------------
+; TightRiamさんの97の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "TightRiam"
+trigger1 = Partner,Name = "Orochi"
+var(0) = 0
+
+;---------------------------------------------------------
+; Zmanさんの97(98)の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Z man"
+trigger1 = Partner,Name = "SVC_Ryu"
+var(0) = 4
+
+;---------------------------------------------------------
+; 大垣さんの97(98)の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ohgaki"
+trigger1 = Partner,Name = "Nayu"
+var(0) = 5
+
+;---------------------------------------------------------
+; 民名書房さんの98,02の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "minmeisyobou"
+trigger1 = Partner,Name = "franco"
+trigger2 = Partner,Name = "zangief"
+var(0) = 12
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "minmeisyobou"
+trigger1 = Partner,Name = "Geese Howard"
+var(0) = 13
+
+;---------------------------------------------------------
+; 斑鳩さんの98の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ikaruga"
+triggerall = Partner,var(9) = 0
+trigger1 = Partner,Name = "Benimaru Nikaido"
+trigger2 = Partner,Name = "Goro Daimon"
+trigger3 = Partner,Name = "Haohmaru"
+trigger4 = Partner,Name = "Ryo Sakazaki"
+trigger5 = Partner,Name = "Ryu"
+trigger6 = Partner,Name = "Shingo Yabuki"
+trigger7 = Partner,Name = "Geese Howard"
+var(0) = 14
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ikaruga"
+triggerall = Partner,var(9) = 1
+trigger1 = Partner,Name = "Benimaru Nikaido"
+trigger2 = Partner,Name = "Goro Daimon"
+trigger3 = Partner,Name = "Haohmaru"
+trigger4 = Partner,Name = "Ryo Sakazaki"
+trigger5 = Partner,Name = "Ryu"
+trigger6 = Partner,Name = "Shingo Yabuki"
+trigger7 = Partner,Name = "Geese Howard"
+var(0) = 32
+
+;---------------------------------------------------------
+; fxm508さんの98UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = (ID > Partner,ID && TeamSide = 1) || (ID < Partner,ID && TeamSide = 2)
+triggerall = Partner,AuthorName = "fxm508"
+trigger1 = Partner,Name = "Goenitz_UM"
+trigger2 = Partner,Name = "Orochi_Mature"
+var(0) = 15
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = (ID < Partner,ID && TeamSide = 1) || (ID > Partner,ID && TeamSide = 2)
+triggerall = Partner,AuthorName = "fxm508"
+trigger1 = Partner,Name = "Goenitz_UM"
+trigger2 = Partner,Name = "Orochi_Mature"
+var(0) = 16
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "fxm508"
+trigger1 = Partner,Name = "Rugal2nd" && Partner,fvar(29) = [4,6]
+var(0) = 17
+
+;---------------------------------------------------------
+; 別府さんの98UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "beppu"
+trigger1 = Partner,Name = "kyo98UM"
+var(0) = 0
+
+;---------------------------------------------------------
+; アフロンさんの99,00の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ahuron"
+trigger1 = Partner,Name = "Krizalid-0"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ahuron"
+trigger1 = Partner,Name = "GorimaruJr"
+var(0) = 20
+
+;---------------------------------------------------------
+; Sander71113さんの99,00の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Sander71113"
+trigger1 = Partner,Name = "Kyo Kusanagi"
+trigger2 = Partner,Name = "NeoKyo"
+trigger3 = Partner,Name = "Ramon"
+var(0) = 20
+
+;---------------------------------------------------------
+; Tinさんの00の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Tin"
+trigger1 = Partner,Name = "Tin's Leona"
+var(0) = 0
+
+;---------------------------------------------------------
+; GONZO-さんの01の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "GONZO-"
+trigger1 = Partner,Name = "ZERO"
+var(0) = 0
+
+;---------------------------------------------------------
+; Flowrαlliαさんの01＋その他の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "flowrallia"
+trigger1 = Partner,Name = "Clone Weiss"
+var(0) = 0
+
+;---------------------------------------------------------
+; 自分が公開している02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = ID < Partner,ID
+triggerall = Partner,AuthorName = "HaiJin"
+trigger1 = Partner,Name = "whip"
+trigger2 = Partner,Name = "Kasumi Todo"
+var(0) = 30
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = ID > Partner,ID
+triggerall = Partner,AuthorName = "HaiJin"
+trigger1 = Partner,Name = "whip"
+trigger2 = Partner,Name = "Kasumi Todo"
+var(0) = 31
+
+;---------------------------------------------------------
+; アフロンさんの02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ahuron"
+trigger1 = Partner,Name = "Chris"
+trigger2 = Partner,Name = "Goro Daimon"
+trigger3 = Partner,Name = "Hanzo"
+trigger4 = Partner,Name = "Heavy D!"
+trigger5 = Partner,Name = "Kim Kaphwan"
+trigger6 = Partner,Name = "Lin"
+trigger7 = Partner,Name = "Nameless"
+trigger8 = Partner,Name = "Orochi Iori"
+trigger9 = Partner,Name = "Orochi Leona"
+trigger10 = Partner,Name = "Shermie"
+trigger11 = Partner,Name = "Yashiro Nanakase"
+var(0) = 32
+
+;---------------------------------------------------------
+; アンバサさんの02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ambasa"
+trigger1 = Partner,Name = "King"
+trigger2 = Partner,Name = "kyoko_typeP"
+trigger3 = Partner,Name = "Geese"
+var(0) = 32
+
+;---------------------------------------------------------
+; ピータンさんの02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "P-tan"
+trigger1 = Partner,Name = "Jenet"
+trigger2 = Partner,Name = "Blue Mary"
+trigger3 = Partner,Name = "mina"
+var(0) = 32
+
+;---------------------------------------------------------
+; 斑鳩さんの02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ikaruga"
+trigger1 = Partner,Name = "Iori Yagami"
+trigger2 = Partner,Name = "K'"
+trigger3 = Partner,Name = "KUSANAGI"
+trigger4 = Partner,Name = "William Lewis"
+trigger5 = Partner,Name = "Lynn Baker"
+trigger6 = Partner,Name = "Shimo" && (Partner,LifeMax = 940 || Partner,LifeMax = 627)
+trigger7 = Partner,Name = "Rock Howard"
+var(0) = 32
+
+;---------------------------------------------------------
+; 森ノ中さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "morinonaka"
+trigger1 = Partner,Name = "Rain"
+var(0) = 32
+
+;---------------------------------------------------------
+; 矢印さん＆まやさんの02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,Name = "K9999"
+trigger1 = Partner,AuthorName = "yajirushi"
+trigger2 = Partner,AuthorName = "<=&maya"
+var(0) = 32
+
+;---------------------------------------------------------
+; DDさんの02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "DD"
+trigger1 = Partner,Name = "Rock"
+var(0) = 32
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Dino"
+trigger1 = Partner,Name = "Shiki_Tohno"
+var(0) = 32
+
+;---------------------------------------------------------
+; fxm508さんの02,02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "fxm508"
+trigger1 = Partner,Name = "Rugal2nd" && Partner,fvar(29) = 1
+var(0) = 33
+
+;---------------------------------------------------------
+; 青村さんの02の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Aomura"
+trigger1 = Partner,Name = "Athena"
+trigger2 = Partner,Name = "Chin"
+trigger3 = Partner,Name = "Jhun"
+trigger4 = Partner,Name = "Maxima"
+trigger5 = Partner,Name = "Shizuha"
+trigger6 = Partner,Name = "Vice"
+var(0) = 34
+
+;---------------------------------------------------------
+; KoopaKootさんの02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "KoopaKoot"
+trigger1 = Partner,Name = "Athena Asamiya 2002"
+trigger2 = Partner,Name = "Billy Kane"
+trigger3 = Partner,Name = "Kasumi Todoh"
+trigger4 = Partner,Name = "Kyo Kusanagi"
+trigger5 = Partner,Name = "Leona Heidern"
+trigger6 = Partner,Name = "Ryo Sakazaki"
+trigger7 = Partner,Name = "Yuri Sakazaki"
+var(0) = 35
+
+;---------------------------------------------------------
+; Vansさんの02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Vans"
+trigger1 = Partner,Name = "Alfred_WLS"
+trigger2 = Partner,Name = "Angel"
+trigger3 = Partner,Name = "geese_wls"
+trigger4 = Partner,Name = "Iori Yagami"
+trigger5 = Partner,Name = "F-Iori Yagami"
+trigger6 = Partner,Name = "Jhun Hoon"
+trigger7 = Partner,Name = "Kyo_WLS"
+trigger8 = Partner,Name = "Marco Rossi"
+trigger9 = Partner,Name = "robert_wls"
+trigger10 = Partner,Name = "saisyu_wls"
+var(0) = 35
+
+;---------------------------------------------------------
+; K.O.Dさん＆Vansさんの02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "K.O.D & Vans"
+trigger1 = Partner,Name = "Nameless"
+var(0) = 35
+
+;---------------------------------------------------------
+; 謎の男さんの02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "謎の男"
+trigger1 = Partner,Name = "Kim Kaphwan"
+var(0) = 35
+
+;---------------------------------------------------------
+; はっぱさんの02UMの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "HAPPA"
+trigger1 = Partner,Name = "Mars People"
+var(0) = 0
+
+;---------------------------------------------------------
+; TightRiamさんの03,その他の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "TightRiam"
+trigger1 = Partner,Name = "Adelheid"
+trigger2 = Partner,Name = "Billy Kane"
+trigger3 = Partner,Name = "Iori Yagami"
+trigger4 = Partner,Name = "K`"
+trigger5 = Partner,Name = "Ryuji Yamazaki"
+var(0) = 40
+
+;---------------------------------------------------------
+; VansさんのXIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Vans"
+trigger1 = Partner,Name = "Duck_WLS"
+trigger2 = Partner,Name = "Eiji_WLS"
+trigger3 = Partner,Name = "oswald_wls"
+trigger4 = Partner,Name = "Ralf_WLS"
+trigger5 = Partner,Name = "Sho_WLS"
+var(0) = 0
+
+;---------------------------------------------------------
+; JesuszillaさんのXIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Jesuszilla"
+trigger1 = Partner,Name = "Trouble Maker!"
+var(0) = 0
+
+;---------------------------------------------------------
+; 斑鳩さんのXIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ikaruga"
+trigger1 = Partner,Name = "Andy Bogard"
+trigger2 = Partner,Name = "CloneKyo"
+trigger3 = Partner,Name = "Kaede"
+trigger4 = Partner,Name = "Moriya Minakata"
+trigger5 = Partner,Name = "Oswald"
+trigger6 = Partner,Name = "Robert Garcia"
+trigger7 = Partner,Name = "Shen Woo"
+trigger8 = Partner,Name = "Syo Kirishima"
+trigger9 = Partner,Name = "Keiichiro Washizuka"
+trigger10 = Partner,Name = "Wild Wolf"
+var(0) = 0
+
+;---------------------------------------------------------
+; 別府さんのXIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "beppu"
+trigger1 = Partner,Name = "AdelheidXI"
+trigger2 = Partner,Name = "gatoXI"
+trigger3 = Partner,Name = "ioriXI"
+trigger4 = Partner,Name = "KulaXI"
+trigger5 = Partner,Name = "k'XI"
+trigger6 = Partner,Name = "kyoXI"
+trigger7 = Partner,Name = "MakiXI"
+trigger8 = Partner,Name = "MaximaXI"
+trigger9 = Partner,Name = "MizuchiXI"
+trigger10 = Partner,Name = "MizuchiXI-Normal"
+trigger11 = Partner,Name = "Mr.karate2XI"
+trigger12 = Partner,Name = "Omega-AdelheidXI"
+trigger13 = Partner,Name = "RockXI"
+trigger14 = Partner,Name = "singoXI"
+trigger15 = Partner,Name = "TerryXI"
+trigger16 = Partner,Name = "TerryXI_EX"
+var(0) = 41
+
+;---------------------------------------------------------
+; M3さんのXIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = ID < Partner,ID
+triggerall = Partner,AuthorName = "M3"
+trigger1 = Partner,Name = "Hotaru_Futaba"
+var(0) = 41
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = ID > Partner,ID
+triggerall = Partner,AuthorName = "M3"
+trigger1 = Partner,Name = "Hotaru_Futaba"
+var(0) = 42
+
+;---------------------------------------------------------
+; 鶺鴒さんのXIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "sekirei"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "KYOKO_typeA"
+trigger2 = Partner,Name = "KYOKO_typeC"
+trigger3 = Partner,Name = "KYOKO_typeK"
+trigger4 = Partner,Name = "Kyo-XI_mi"
+trigger5 = Partner,Name = "Yagami_if"
+var(0) = 0
+
+;---------------------------------------------------------
+; chikuchikugonzalezさんのXIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "chikuchikugonzalez"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Adelheid"
+trigger2 = Partner,Name = "Athena XI"
+trigger3 = Partner,Name = "Athena 2002"
+trigger4 = Partner,Name = "Athena 2003"
+trigger5 = Partner,Name = "God Rugal"
+trigger6 = Partner,Name = "Kula Diamond"
+trigger7 = Partner,Name = "Kyoudou Senna"
+var(0) = 43
+
+;---------------------------------------------------------
+; horkさんのXIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "hork"
+trigger1 = Partner,Name = "kyoAkof-NE"
+var(0) = 44
+
+;---------------------------------------------------------
+; or2=3さんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "or2=3"
+trigger1 = Partner,Name = "H-SaikiXIII"
+trigger2 = Partner,Name = "IoriXIII"
+trigger3 = Partner,Name = "ViceXIII"
+var(0) = 50
+
+;---------------------------------------------------------
+; アフロンさんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ahuron"
+trigger1 = Partner,Name = "HwaXIII"
+trigger2 = Partner,Name = "KyoXIII"
+trigger3 = Partner,Name = "MaximaXIII"
+trigger4 = Partner,Name = "Mr.KARATEIII"
+trigger5 = Partner,Name = "ShenXIII"
+var(0) = 50
+
+;---------------------------------------------------------
+; 鳶影さんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Tobikage"
+trigger1 = Partner,Name = "KUSANAGIXIII"
+var(0) = 50
+
+;---------------------------------------------------------
+; ピータンさんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "P-tan"
+trigger1 = Partner,Name = "Hattori Hanzo Uruka"
+trigger2 = Partner,Name = "Hotaru Futaba XIII"
+trigger3 = Partner,Name = "Izuko Chrysoberyl"
+trigger4 = Partner,Name = "Kisarah Westfield"
+trigger5 = Partner,Name = "Kula Diamond"
+trigger6 = Partner,Name = "Leona XIII"
+trigger7 = Partner,Name = "Shiranui Mai"
+trigger8 = Partner,Name = "Rock Howard"
+trigger9 = Partner,Name = "Ryunmei Ranka"
+trigger10 = Partner,Name = "Schlussel"
+trigger11 = Partner,Name = "Elisabeth Blanctorche XIII"
+var(0) = 51
+
+;---------------------------------------------------------
+; 41さんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "41"
+trigger1 = Partner,Name = "YAGAMI IORI"
+trigger2 = Partner,Name = "SAIKI"
+trigger3 = Partner,Name = "SHINJIN GOUKI"
+trigger4 = Partner,Name = "VICE"
+trigger5 = Partner,Name = "YAGAMI IORI"
+trigger6 = Partner,Name = "MATURE"
+var(0) = 52
+
+;---------------------------------------------------------
+; TightRiamさんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "TightRiam"
+trigger1 = Partner,Name = "Geese"
+trigger2 = Partner,Name = "Goenitz"
+trigger3 = Partner,Name = "Rugal"
+var(0) = 52
+
+;---------------------------------------------------------
+; FlowrαlliαさんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "flowrallia"
+trigger1 = Partner,Name = "Elisabeth Blanctorche XIII"
+trigger2 = Partner,Name = "Heart Aino XIII"
+trigger3 = Partner,Name = "Order Sol XIII"
+trigger4 = Partner,Name = "shishioh"
+trigger5 = Partner,Name = "Akatsuki_XIII"
+var(0) = 53
+
+;---------------------------------------------------------
+; beyさんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "bey"
+trigger1 = Partner,Name = "Ash_XIII"
+var(0) = 54
+
+;---------------------------------------------------------
+; NSさんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "NS"
+trigger1 = Partner,Name = "King"
+var(0) = 54
+
+;---------------------------------------------------------
+; DarklosさんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Darklos"
+trigger1 = Partner,Name = "EXIori_XIII"
+var(0) = 54
+
+;---------------------------------------------------------
+; りゅんさんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ryun"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "B_ZENIA"
+trigger2 = Partner,Name = "F_HEAT_2nd" 
+trigger3 = Partner,Name = "F_Weiss"
+trigger4 = Partner,Name = "I_LILICA"
+trigger5 = Partner,Name = "K_Lieselotte"
+trigger6 = Partner,Name = "KISHIMAX_R"
+trigger7 = Partner,Name = "S_KAMUI"
+trigger8 = Partner,Name = "T_MAORI"
+var(0) = 55
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ryun"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "PETRA_R" 
+var(0) = 56
+
+;---------------------------------------------------------
+; KamekazeさんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Kamekaze"
+trigger1 = Partner,Name = "Akuma"
+trigger2 = Partner,Name = "RugalXIII"
+trigger3 = Partner,Name = "RugalEXXIII"
+trigger4 = Partner,Name = "Ryu"
+var(0) = 57
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Kamekaze X Jin"
+trigger1 = Partner,Name = "Krauser XIII"
+var(0) = 57
+
+;---------------------------------------------------------
+; Zero-SenninさんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Zero-Sennin"
+trigger1 = Partner,Name = "ZeroChunXIII"
+trigger2 = Partner,Name = "ZeroGoenitzXIII"
+trigger3 = Partner,Name = "ZeroHotaruXIII"
+trigger4 = Partner,Name = "ZeroVanessaXIII"
+var(0) = 58
+
+;---------------------------------------------------------
+; AkiさんのXIIIの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "aki"
+trigger1 = Partner,Name = "Scharlachrot"
+var(0) = 58
+
+;---------------------------------------------------------
+; CaponeさんのXIIIの表示使用キャラを判定 ※
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Capone"
+trigger1 = Partner,Name = "AshXIII"
+trigger2 = Partner,Name = "Duo_lonXIII"
+trigger3 = Partner,Name = "Saiki_BossXIII"
+trigger4 = Partner,Name = "Saiki_HumanXIII"
+var(0) = 59
+
+;※Defで「localcoord  = 640,480」と設定した時に合わせてます。 
+
+;---------------------------------------------------------
+; 斑鳩さんのKOFの表示使用キャラを判定　※
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ikaruga"
+trigger1 = Partner,Name = "Kyo Kusanagi"
+trigger2 = Partner,Name = "Terry Bogard"
+var(0) = 9000
+
+;※京は98仕様、02UM仕様、XI仕様の3つのNameが、
+;　テリーは98仕様、02UM仕様の2つのNameが同じで、
+;　それらを個別に判定することが困難なため
+;　こういった処理で誤魔化してますｗ
+
+
+;===============================================================
+; 餓狼伝説の表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; 悪咲3号さんの餓狼の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Warusaki3"
+trigger1 = Partner,Name = "Jin Chonrei"
+trigger2 = Partner,Name = "Jin Chonshu"
+var(0) = 0
+
+;---------------------------------------------------------
+; gegeさんの餓狼の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "gege"
+trigger1 = Partner,Name = "Blue Mary"
+var(0) = 100
+
+;---------------------------------------------------------
+; トラさんの餓狼の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "tora"
+trigger1 = Partner,Name = "Alfred"
+trigger2 = Partner,Name = "Andy Bogard"
+trigger3 = Partner,Name = "Billy Kane"
+trigger4 = Partner,Name = "cheng Sinzan"
+trigger5 = Partner,Name = "Jin Chonrei"
+trigger6 = Partner,Name = "Jin Chonshu"
+trigger7 = Partner,Name = "Duck King"
+trigger8 = Partner,Name = "Hon-Fu"
+trigger9 = Partner,Name = "Joe Higashi"
+trigger10 = Partner,Name = "Mai Shiranui"
+trigger11 = Partner,Name = "Franco Bash"
+trigger12 = Partner,Name = "Bob Wilson"
+trigger13 = Partner,Name = "Kim Kaphwan"
+trigger14 = Partner,Name = "Laurence Blood"
+trigger15 = Partner,Name = "Terry Bogard"
+trigger16 = Partner,Name = "Sokaku Mochiduki"
+trigger17 = Partner,Name = "Tung Fu Rue"
+trigger18 = Partner,Name = "Li Xiangfei"
+trigger19 = Partner,Name = "Rick Strowd"
+trigger20 = Partner,Name = "Blue Mary"
+var(0) = 100
+
+;---------------------------------------------------------
+; 虻蜂さんの餓狼の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "abuhachi"
+trigger1 = Partner,Name = "Wolfgang Krauser"
+var(0) = 100
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "abuhachi"
+trigger1 = Partner,Name = "Ryuji Yamazaki"
+var(0) = 101
+
+;---------------------------------------------------------
+; 鶺鴒さんの餓狼の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "sekirei"
+triggerall = ID < Partner,ID
+triggerall = Partner,var(57) = 1
+trigger1 = Partner,Name = "andy_FF3RB"
+trigger2 = Partner,Name = "geese_FF3RB"
+trigger3 = Partner,Name = "terry_FF3RB"
+var(0) = 102
+
+;---------------------------------------------------------
+; 日本破壊結社ＮＨＫさんの餓狼の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "NHK"
+trigger1 = Partner,Name = "Rick Strowd"
+trigger2 = Partner,Name = "xiangfei"
+var(0) = 103
+
+
+;===============================================================
+; サムライスピリッツの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; ３?さんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "3ha"
+trigger1 = Partner,Name = "Lenja"
+var(0) = 0
+
+;---------------------------------------------------------
+; mugeniさんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "mugeni"
+trigger1 = Partner,Name = "galford"
+trigger2 = Partner,Name = "rimururu"
+var(0) = 0
+
+;---------------------------------------------------------
+; Noeさんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Noe"
+trigger1 = Partner,Name = "CharlotteSS4"
+var(0) = 0
+
+;---------------------------------------------------------
+; 伊吹川さんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "IBUKAH"
+trigger1 = Partner,Name = "Nakoruru"
+var(0) = 0
+
+;---------------------------------------------------------
+; 操さんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "misao"
+trigger1 = Partner,Name = "Enja"
+trigger2 = Partner,Name = "Rera"
+trigger3 = Partner,Name = "Suija"
+trigger4 = Partner,Name = "Yoshitora"
+var(0) = 0
+
+;---------------------------------------------------------
+; 悪咲3号さんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Warusaki3"
+trigger1 = Partner,Name = "nakoruruss0"
+var(0) = 0
+
+;---------------------------------------------------------
+; H"さんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "H”"
+trigger1 = Partner,Name = "kusaregedo"
+var(0) = 200
+
+;---------------------------------------------------------
+; たるせさんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "taruse"
+trigger1 = Partner,Name = "Poppy_ZERO"
+trigger2 = Partner,Name = "Sankuro Yorozu"
+trigger3 = Partner,Name = "Yumeji Kurokouchi"
+var(0) = 200
+
+;---------------------------------------------------------
+; アリさんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ali"
+trigger1 = Partner,Name = "gaira"
+trigger2 = Partner,Name = "ss3komachi"
+trigger3 = Partner,Name = "ss3youmu"
+var(0) = 200
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ali"
+trigger1 = Partner,Name = "gaoh"
+trigger2 = Partner,Name = "genjuro"
+trigger3 = Partner,Name = "haoumaru"
+trigger4 = Partner,Name = "mina"
+trigger5 = Partner,Name = "nakoruru"
+trigger6 = Partner,Name = "mizuki"
+trigger7 = Partner,Name = "rasetsumaru"
+trigger8 = Partner,Name = "tamtam"
+trigger9 = Partner,Name = "zankuro"
+var(0) = 201
+
+;---------------------------------------------------------
+; Pinkoさんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Pinko"
+trigger1 = Partner,Name = "Hanzo"
+trigger2 = Partner,Name = "Shizumaru"
+trigger3 = Partner,Name = "Yunfei"
+var(0) = 202
+
+;---------------------------------------------------------
+; TightRiamさんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "TightRiam"
+trigger1 = Partner,Name = "Kubikiri Basara"
+trigger2 = Partner,Name = "Genjuro Kibagami"
+trigger3 = Partner,Name = "Suija"
+var(0) = 203
+
+;---------------------------------------------------------
+; スディさんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "SDY"
+trigger1 = Partner,Name = "KUBIKIRI BASARA"
+var(0) = 204
+
+;---------------------------------------------------------
+; 松梅魂さんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ShouBuySpirit"
+trigger1 = Partner,Name = "Johnny"
+var(0) = 205
+
+;---------------------------------------------------------
+; 5667さんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "5667"
+trigger1 = Partner,Name = "iroha"
+var(0) = 206
+
+;---------------------------------------------------------
+; エルさんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "R-R"
+trigger1 = Partner,Name = "mina majikina"
+var(0) = 207
+
+;---------------------------------------------------------
+; tukemonさんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "tukemon"
+trigger1 = Partner,Name = "Rimururu"
+var(0) = 208
+
+;---------------------------------------------------------
+; suiginさんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "suigin"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "kanu"
+trigger2 = Partner,Name = "fiona"
+trigger3 = Partner,Name = "sousou"
+trigger4 = Partner,Name = "komachi"
+trigger5 = Partner,Name = "ryofu"
+trigger6 = Partner,Name = "sonken"
+trigger7 = Partner,Name = "tyouhi"
+trigger8 = Partner,Name = "tyouun"
+trigger9 = Partner,Name = "senna"
+trigger10 = Partner,Name = "kannei"
+trigger11 = Partner,Name = "sonsyoukou"
+trigger12 = Partner,Name = "kakouen"
+trigger13 = Partner,Name = "youmu"
+var(0) = 5
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "suigin"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "kanu"
+trigger2 = Partner,Name = "fiona"
+trigger3 = Partner,Name = "sousou"
+trigger4 = Partner,Name = "komachi"
+trigger5 = Partner,Name = "ryofu"
+trigger6 = Partner,Name = "sonken"
+trigger7 = Partner,Name = "tyouhi"
+trigger8 = Partner,Name = "tyouun"
+trigger9 = Partner,Name = "senna"
+trigger10 = Partner,Name = "kannei"
+trigger11 = Partner,Name = "sonsyoukou"
+trigger12 = Partner,Name = "kakouen"
+trigger13 = Partner,Name = "youmu"
+var(0) = 209
+
+;---------------------------------------------------------
+; 暗黒内藤さんのサムスピの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "AnkokuNaitou"
+trigger1 = Partner,Name = "Elfin Berkley"
+var(0) = 210
+
+
+;===============================================================
+; 月華の剣士の表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; アフロンさんの月華の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ahuron"
+trigger1 = Partner,Name = "Ponta"
+trigger2 = Partner,Name = "Shinnosuke Kagami"
+trigger3 = Partner,Name = "Mukuro" && Partner,var(1) = 0
+var(0) = 300
+
+;---------------------------------------------------------
+; HALさんの月華の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "HAL"
+trigger1 = Partner,Name = "Shinnosuke Kagami"
+trigger2 = Partner,Name = "Moriya Minakata"
+trigger3 = Partner,Name = "Mukuro"
+trigger4 = Partner,Name = "Genbu no Okina"
+trigger5 = Partner,Name = "Inaba Tewi"
+var(0) = 300
+
+;---------------------------------------------------------
+; 虻蜂さんの月華の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "abuhachi"
+trigger1 = Partner,Name = "Hyo Amano"
+trigger2 = Partner,Name = "Lee Rekka"
+trigger3 = Partner,Name = "Musashi Akatsuki"
+var(0) = 301
+
+;---------------------------------------------------------
+; 大垣さんの月華の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ohgaki"
+trigger1 = Partner,Name = "andrew"
+trigger2 = Partner,Name = "kaede"
+trigger3 = Partner,Name = "Kanna"
+trigger4 = Partner,Name = "Shinnosuke Kagami"
+trigger5 = Partner,Name = "Chibi Suika"
+trigger6 = Partner,Name = "rock"
+trigger7 = Partner,Name = "sanada_ani"
+trigger8 = Partner,Name = "Shigen_Naoe"
+trigger9 = Partner,Name = "Shiki"
+trigger10 = Partner,Name = "Shikyoh"
+trigger11 = Partner,Name = "Yashiro"
+trigger12 = Partner,Name = "Yoshitora"
+var(0) = 302
+
+;---------------------------------------------------------
+; 各製作者さんのを改変したIldanafさんの月華の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+trigger1 = Partner,AuthorName = "DALA arranged by Ildanaf"
+trigger1 = Partner,Name = "kaede"		;※
+trigger2 = Partner,AuthorName = "DALA arranged by Ildanaf"
+trigger2 = Partner,Name = "Moriya Minakata"
+trigger3 = Partner,AuthorName = "DALA arranged by Ildanaf"
+trigger3 = Partner,Name = "washizuka"
+trigger4 = Partner,AuthorName = "Nyankoro arranged by Ildanaf"
+trigger4 = Partner,Name = "Kanzaki Juzo"	;※
+trigger5 = Partner,AuthorName = "Hotaryuso(dairi) arranged by Ildanaf"
+trigger5 = Partner,Name = "Sanada Kojiroh"	;※
+var(0) = 302
+
+;※楓、十三、小次郎の3キャラは初期状態では適用されません。
+;　正直な話、適用されなくてもゲージ類が全く見えないってことはないですけどね^^;
+;　この設定を有効にしたい場合は上記のキャラのdefファイルに以下を行ってください。
+;　・楓はauthorが書かれていないので、
+;　　「author = "DALA arranged by Ildanaf"」
+;　　の記述を追加してください。
+;　・十三は「"Nyankoro" arranged by "Ildanaf"」と言う記述になっていますが、
+;　　triggerで「Partner,AuthorName = "Nyankoro" arranged by "Ildanaf"」
+;　　と記述するとエラーが起こるので、
+;　　「author = "Nyankoro arranged by Ildanaf"」と変更してください。
+;　・小次郎は「name = "真田 小次郎"」や
+;　　「author = "ホタリュソ(代理) arranged by Ildanaf"」
+;　　と言う記述になっていますが、その状態だと判定できないようなので
+;　　「name = "Sanada Kojiroh"」、
+;　　「author = "Hotaryuso(dairi) arranged by Ildanaf"」と変更してください。
+;　　日本語がダメなのかと思いましたが謎の男さんは判定できてますよね。何故だろう？
+
+
+;===============================================================
+; SNK VS. CAPCOM SVC CHAOSの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; あだむすきーさん＆TinさんのSVCの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "adamskie"
+trigger1 = Partner,Name = "Hugo"
+var(0) = 0
+
+;---------------------------------------------------------
+; 悪咲3号さんのSVCの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Warusaki3"
+trigger1 = Partner,Name = "svcathena"
+trigger2 = Partner,Name = "svckarate"
+trigger3 = Partner,Name = "svcryu"
+var(0) = 0
+
+;---------------------------------------------------------
+; TinさんのSVCの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Tin"
+trigger1 = Partner,Name = "Tin's Kibagami"
+trigger2 = Partner,Name = "nbc_S_shishioh"
+trigger3 = Partner,Name = "nbc_shishioh"
+trigger4 = Partner,Name = "Tin's Shiki"
+var(0) = 400
+
+;---------------------------------------------------------
+; 日本破壊結社ＮＨＫさんのSVCの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = ID > Partner,ID
+triggerall = Partner,AuthorName = "NHK"
+trigger1 = Partner,Name = "Tabasa"
+var(0) = 401
+
+
+;===============================================================
+; ワールドヒーローズパーフェクトの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; 自分が公開しているワーパーの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = ID > Partner,ID
+triggerall = Partner,AuthorName = "HaiJin"
+trigger1 = Partner,Name = "C.Kidd"
+var(0) = 0
+
+;---------------------------------------------------------
+; Mouserさんのワーパーの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Mouser"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Dragon"
+trigger2 = Partner,Name = "Fuuma"
+trigger3 = Partner,Name = "C.Kidd"
+trigger4 = Partner,Name = "Rasputin"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Mouser"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "Dragon"
+trigger2 = Partner,Name = "Fuuma"
+trigger3 = Partner,Name = "C.Kidd"
+trigger4 = Partner,Name = "Rasputin"
+var(0) = 13
+
+;---------------------------------------------------------
+; 死門さんのワーパーの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Shimon"
+trigger1 = Partner,Name = "Brocken"
+trigger2 = Partner,Name = "Erick"
+trigger3 = Partner,Name = "Johnny"
+trigger4 = Partner,Name = "Ryofu"
+trigger5 = Partner,Name = "Son Gokuu"
+var(0) = 0
+
+;---------------------------------------------------------
+; GMさんのワーパーの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "GM"
+trigger1 = Partner,Name = "Brocken"
+trigger2 = Partner,Name = "Muscle Power"
+trigger3 = Partner,Name = "Shura"
+var(0) = 0
+
+;---------------------------------------------------------
+; ですからーさんのワーパーの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "(^o^)"
+trigger1 = Partner,Name = "Hanzo"
+var(0) = 0
+
+;---------------------------------------------------------
+; GURIさんのワーパーの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Mouser, arranged by GURI"
+trigger1 = Partner,Name = "C.Kidd"
+var(0) = 0
+
+;---------------------------------------------------------
+; OMEGAPSYCHOさんのワーパーの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "OMEGAPSYCHO"
+trigger1 = Partner,Name = "MUDMAN"
+var(0) = 12
+
+;===============================================================
+; 痛快GANGAN行進曲の表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; GMさんのガンガンの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "GM"
+trigger1 = Partner,Name = "Sheen"
+var(0) = 0
+
+
+;===============================================================
+; NINJA MASTER'S ～覇王忍法帖～の表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; ですからーさんのニジマスの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "(^o^)"
+trigger1 = Partner,Name = "Kamui"
+trigger2 = Partner,Name = "Sasuke"
+var(0) = 0
+
+;---------------------------------------------------------
+; ブラウンさんのニジマスの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "brown"
+trigger1 = Partner,Name = "houoh"
+var(0) = 1
+
+
+;===============================================================
+; ストリートファイターシリーズの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; G.D.Tさんのスパ2Xの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "G.D.T"
+trigger1 = Partner,Name = "cammy"
+trigger2 = Partner,Name = "feilong"
+trigger3 = Partner,Name = "ken"
+trigger4 = Partner,Name = "ryu"
+var(0) = 0
+
+;---------------------------------------------------------
+; OMEGAPSYCHOさんのスパ2Xの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "OMEGAPSYCHO"
+trigger1 = Partner,Name = "BALROG"
+trigger2 = Partner,Name = "M.BISON"
+trigger3 = Partner,Name = "E.HONDA"
+trigger4 = Partner,Name = "TERRY"
+trigger5 = Partner,Name = "T.HAWK"
+var(0) = 1000
+
+;---------------------------------------------------------
+; N64MarioさんのストZEROの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = ID > Partner,ID
+triggerall = Partner,AuthorName = "N-Mario"
+trigger1 = Partner,Name = "M.Bison"
+trigger2 = Partner,Name = "Balrog"
+var(0) = 1010
+
+;---------------------------------------------------------
+; GMさんのスト3の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "GM"
+trigger1 = Partner,Name = "Alex"
+trigger2 = Partner,Name = "Gill"
+trigger3 = Partner,Name = "Gouki"
+trigger4 = Partner,Name = "Hugo"
+trigger5 = Partner,Name = "Ibuki"
+trigger6 = Partner,Name = "Ken"
+trigger7 = Partner,Name = "Ryu"
+var(0) = 1020
+
+;---------------------------------------------------------
+; 日本破壊結社ＮＨＫさんのスト3の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "NHK"
+trigger1 = Partner,Name = "Makoto"
+var(0) = 1020
+
+;---------------------------------------------------------
+; 無敵医師さんのスト3の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "muteki"
+trigger1 = Partner,Name = "chun-li"
+trigger2 = Partner,Name = "Sean"
+var(0) = 1021
+
+;---------------------------------------------------------
+; reiさんのスト3の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "rei"
+trigger1 = Partner,Name = "Ken" && Partner,var(58) = 0
+trigger2 = Partner,Name = "sean"
+trigger3 = Partner,Name = "twelve"
+trigger4 = Partner,Name = "Sakura"
+var(0) = 1022
+
+;---------------------------------------------------------
+; reiさんのスト4,スパ4の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "rei"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "Ken" && Partner,var(58) = [1,2]
+trigger2 = Partner,Name = "Ryu"
+var(0) = 1030
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "rei"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Ken" && Partner,var(58) = [1,2]
+trigger2 = Partner,Name = "Ryu"
+var(0) = 1031
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "rei"
+trigger1 = Partner,Name = "zangief" && Partner,var(58) = 0
+var(0) = IfElse(Partner,var(58)=0,1032,9999)
+
+;---------------------------------------------------------
+; Werewoodさんのスト4,スパ4の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Werewood"
+trigger1 = Partner,Name = "SF4 Omni"
+trigger2 = Partner,Name = "SF4 Seth"
+var(0) = 1031
+
+;---------------------------------------------------------
+; chuchoryuさんのスト4,スパ4の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "chuchoryu"
+trigger1 = Partner,Name = "Evil Ryu"
+trigger2 = Partner,Name = "Ken"
+trigger3 = Partner,Name = "Kung Fu Man"
+trigger4 = Partner,Name = "Ryu"
+trigger5 = Partner,Name = "Sagat"
+trigger6 = Partner,Name = "Seth"
+var(0) = 1032
+
+;---------------------------------------------------------
+; Mr. Iさんのスト4,スパ4の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Mr. I"
+trigger1 = Partner,Name = "Gouken SSF4"
+var(0) = 1033
+
+
+;===============================================================
+; ヴァンパイアシリーズの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; Gal129さんのヴァンパイアの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Gal129"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "demitri" && Partner,var(59) != 4
+trigger2 = Partner,Name = "pyron" && (Partner,var(59) != 2 || Partner,var(59) != 4)
+var(0) = 1100
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Gal129"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "demitri" && Partner,var(59) = 4
+trigger2 = Partner,Name = "pyron" && (Partner,var(59) = 2 || Partner,var(59) = 4)
+var(0) = 31
+
+;---------------------------------------------------------
+; reiさんのヴァンパイアの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "rei"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "jedah"
+trigger2 = Partner,Name = "sasquatch"
+var(0) = IfElse(Partner,var(59) = 2,31,1100)
+
+;---------------------------------------------------------
+; Jesuszillaさんのヴァンパイアの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Jesuszilla"
+trigger1 = Partner,Name = "Felicia_LG"
+var(0) = 1100
+
+;---------------------------------------------------------
+; 木。さんのヴァンパイアの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Moku"
+trigger1 = Partner,Name = "Felicia"
+trigger2 = Partner,Name = "Gallon"
+var(0) = 1100
+
+
+;===============================================================
+; CAPCOM VS. SNKの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; GONZO-さんのCVS2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "GONZO-"
+triggerall = Partner,palno = [9,10]
+trigger1 = Partner,Name = "gouki"
+var(0) = 0
+
+;---------------------------------------------------------
+; Gal129さんのCVS2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Gal129"
+trigger1 = Partner,Name = "cvsanakaris"
+trigger2 = Partner,Name = "cvsblanka"
+trigger3 = Partner,Name = "cvschang"
+trigger4 = Partner,Name = "cvsdhalsim"
+trigger5 = Partner,Name = "cvseagle"
+trigger6 = Partner,Name = "cvshonda"
+trigger7 = Partner,Name = "cvsjoe"
+trigger8 = Partner,Name = "cvskim"
+trigger9 = Partner,Name = "cvsleo"
+trigger10 = Partner,Name = "cvsnool"
+trigger11 = Partner,Name = "cvssagat"
+var(0) = 1200
+
+;---------------------------------------------------------
+; JesuszillaさんのCVS2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Jesuszilla"
+trigger1 = Partner,Name = "cvsandy"
+trigger2 = Partner,Name = "cvsbison"
+trigger3 = Partner,Name = "cvsbluestreak"
+trigger4 = Partner,Name = "cvseagle"
+trigger5 = Partner,Name = "cvsfelicia"
+var(0) = 1200
+
+;---------------------------------------------------------
+; H"さんのCVS2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "H”"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "cvsadon"
+trigger2 = Partner,Name = "cvscody"
+trigger3 = Partner,Name = "cvshonda"
+trigger4 = Partner,Name = "cvsiori"
+trigger5 = Partner,Name = "cvsiori_normal"
+trigger6 = Partner,Name = "iori_ex"
+trigger7 = Partner,Name = "cvskyosuke"
+trigger8 = Partner,Name = "cvsmai"
+trigger9 = Partner,Name = "Genryusai Maki"
+trigger10 = Partner,Name = "Raiden"
+trigger11 = Partner,Name = "cvssagat"
+var(0) = 1200
+
+;---------------------------------------------------------
+; reiさんのCVS2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "rei"
+trigger1 = Partner,Name = "cvsbalrog"
+trigger2 = Partner,Name = "cvsbison"
+trigger3 = Partner,Name = "cvsguile"
+trigger4 = Partner,Name = "cvsmukuro"
+trigger5 = Partner,Name = "cvsrolento"
+trigger6 = Partner,Name = "cvstodo"
+trigger7 = Partner,Name = "cvsurien"
+trigger8 = Partner,Name = "cvszangief"
+var(0) = 1200
+
+;---------------------------------------------------------
+; RolentoさんのCVS2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Rolento" ;※
+trigger1 = Partner,Name = "CvS2 Guy"
+var(0) = 1200
+
+;　※初期状態だとdefに「author =".\/."」と書かれていますが、
+;　　.\/.ではどうやら判定できないようです。
+;　　なのでこの設定を有効にしたい場合は
+;　　「author ="Rolento"」と書き換えてください。
+
+;---------------------------------------------------------
+; 悪咲3号さんのCVS2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Warusaki3"
+trigger1 = Partner,Name = "cvsathena"
+trigger2 = Partner,Name = "cvsbenimaru"
+trigger3 = Partner,Name = "cvscammy"
+trigger4 = Partner,Name = "cvschunli"
+trigger5 = Partner,Name = "cvscommando"
+trigger6 = Partner,Name = "cvsdan"
+trigger7 = Partner,Name = "cvsg_rugal"
+trigger8 = Partner,Name = "cvsgeese"
+trigger9 = Partner,Name = "cvsgeese_normal"
+trigger10 = Partner,Name = "cvsgeese_ex"
+trigger11 = Partner,Name = "cvsgouki"
+trigger12 = Partner,Name = "cvsgouki_normal"
+trigger13 = Partner,Name = "cvsgouki_ex"
+trigger14 = Partner,Name = "cvsguile"
+trigger15 = Partner,Name = "cvsguy"
+trigger16 = Partner,Name = "cvshaohmaru"
+trigger17 = Partner,Name = "cvshaohmaru_normal"
+trigger18 = Partner,Name = "cvshaohmaru_ex"
+trigger19 = Partner,Name = "cvshayato"
+trigger20 = Partner,Name = "Hibiki Takane"
+trigger21 = Partner,Name = "cvshotaru"
+trigger22 = Partner,Name = "cvsingrid"
+trigger23 = Partner,Name = "cvsjill"
+trigger24 = Partner,Name = "cvsjuni"
+trigger25 = Partner,Name = "cvskarin"
+trigger26 = Partner,Name = "cvsken"
+trigger27 = Partner,Name = "cvsken_normal"
+trigger28 = Partner,Name = "cvsken_ex"
+trigger29 = Partner,Name = "cvskim"
+trigger30 = Partner,Name = "cvsking"
+trigger31 = Partner,Name = "cvskuroko"
+trigger32 = Partner,Name = "cvskyo"
+trigger33 = Partner,Name = "cvskyo_normal"
+trigger34 = Partner,Name = "cvskyo_ex"
+trigger35 = Partner,Name = "cvslilith"
+trigger36 = Partner,Name = "cvsmika"
+trigger37 = Partner,Name = "cvsnakoruru"
+trigger38 = Partner,Name = "cvsrock"
+trigger39 = Partner,Name = "cvsrolento"
+trigger40 = Partner,Name = "cvsrugal"
+trigger41 = Partner,Name = "cvsryo"
+trigger42 = Partner,Name = "cvsryu"
+trigger43 = Partner,Name = "cvsryu_normal"
+trigger44 = Partner,Name = "cvsryu_ex"
+trigger45 = Partner,Name = "cvssakura"
+trigger46 = Partner,Name = "cvssakura_normal"
+trigger47 = Partner,Name = "cvssakura_ex"
+trigger48 = Partner,Name = "cvssieger"
+trigger49 = Partner,Name = "cvsterry"
+trigger50 = Partner,Name = "cvstodo"
+trigger51 = Partner,Name = "cvsvega"
+trigger52 = Partner,Name = "cvsvega_normal"
+trigger53 = Partner,Name = "cvsvega_ex"
+trigger54 = Partner,Name = "cvsvice"
+trigger55 = Partner,Name = "cvsyamazaki"
+trigger56 = Partner,Name = "cvsyoko"
+trigger57 = Partner,Name = "cvsyun"
+trigger58 = Partner,Name = "cvsyuri"
+trigger59 = Partner,Name = "cvszangief"
+trigger60 = Partner,Name = "cvszangief_normal"
+trigger61 = Partner,Name = "cvszangief_ex"
+var(0) = 1200
+
+;---------------------------------------------------------
+; 悪咲3号さんのを改変したGigaHertzさんのCVS2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Warusaki3"
+trigger1 = Partner,Name = "cvsrobert"
+var(0) = 1200
+
+;---------------------------------------------------------
+; 悪咲3号さんのを改変したThe BajanFlashさんのCVS2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "BajanFlash"
+trigger1 = Partner,Name = "cvsdeejay"
+trigger2 = Partner,Name = "cvsfeilong"
+var(0) = 1200
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "2"
+trigger1 = Partner,Name = "cvsnash"
+trigger2 = Partner,Name = "cvsthawk"
+var(0) = 1200
+
+;---------------------------------------------------------
+; 悪咲3号さんのを改変したtJさんのCVS2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Warusaki3"
+trigger1 = Partner,Name = "cvspsylocke"
+var(0) = 1200
+
+;---------------------------------------------------------
+; 悪咲3号さんのを改変したMr.PiffyさんのCVS2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Warusaki3"
+trigger1 = Partner,Name = "cvsnecro"
+trigger2 = Partner,Name = "cvsremy"
+trigger3 = Partner,Name = "cvssean"
+var(0) = 1200
+
+;---------------------------------------------------------
+; suiginさんのCVS2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "suigin"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Tenko"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "suigin"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "Tenko"
+var(0) = 1201
+
+
+;===============================================================
+; その他CAPCOMゲームの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; アリさんのファイナルファイトの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+trigger1 = Partner,AuthorName = "ali"
+trigger1 = Partner,Name = "Abigail"
+trigger2 = Partner,AuthorName = "Elecbyte"
+trigger2 = Partner,Name = "Edi.E"
+var(0) = 5
+
+;---------------------------------------------------------
+; ですからーさんのエイリアンVSプレデターの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "(^o^)"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Major Alan (Dutch) Schaefer" ;※
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "(^o^)"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "Major Alan (Dutch) Schaefer" ;※
+var(0) = 1300
+
+;　※初期状態だとdefに「name = "Major Alan "Dutch" Schaefer"」
+;　　と書かれていますが、トリガーで""内に""を入れ込むとエラーになるので、
+;　　この設定を有効にしたい場合は「name = "Major Alan (Dutch) Schaefer"」
+;　　と書き換えてください。
+
+;---------------------------------------------------------
+; Pinkoさんのポケットファイターの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Pinko"
+trigger1 = Partner,Name = "Felicia"
+trigger2 = Partner,Name = "Lei-Lei"
+var(0) = 1310
+
+
+;===============================================================
+; ギルティギアの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; 無敵医師さんのギルティの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "muteki"
+trigger1 = Partner,Name = "osol"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "muteki"
+trigger1 = Partner,Name = "anji"
+trigger2 = Partner,Name = "baiken"
+trigger3 = Partner,Name = "bridget"
+trigger4 = Partner,Name = "chipp"
+trigger5 = Partner,Name = "eddie"
+trigger6 = Partner,Name = "faust"
+trigger7 = Partner,Name = "I-NO"
+trigger8 = Partner,Name = "justice"
+trigger9 = Partner,Name = "kliff"
+trigger10 = Partner,Name = "ky"
+trigger11 = Partner,Name = "may"
+trigger12 = Partner,Name = "potemkin"
+trigger13 = Partner,Name = "robo-ky"
+trigger14 = Partner,Name = "SLAYER"
+trigger15 = Partner,Name = "sol"
+trigger16 = Partner,Name = "gg_venom"
+trigger17 = Partner,Name = "zappa"
+;trigger18 = Partner,Name = "AXL"	:※
+;trigger19 = Partner,Name = "millia"	:※
+var(0) = 2000
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "muteki"
+trigger1 = Partner,Name = "A.B.A"
+trigger2 = Partner,Name = "jam"
+trigger3 = Partner,Name = "johnny"
+trigger4 = Partner,Name = "testament"
+var(0) = 2001
+
+;　※初期状態でのアクセルとミリアはSimul時は
+;　　一撃必殺が出せないので無効にしてますが、
+;　　自身でSimulでも出せるように記述を変えたらこちらも有効にして下さい。
+
+;---------------------------------------------------------
+; ELさんのギルティの表示使用キャラを判定
+;---------------------------------------------------------
+;[State -3, VarSet];※
+;type = VarSet
+;triggerall = NumPartner
+;triggerall = Partner,AuthorName = "EL"
+;trigger1 = Partner,Name = "BRIDGET"
+;trigger2 = Partner,Name = "DIZZY"
+;trigger3 = Partner,Name = "MAY"
+;trigger4 = Partner,Name = "ZAPPA"
+;var(0) = 0
+
+;　※初期状態ではSimul時は一撃必殺が出せないので無効にしてますが、
+;　　自身でSimulでも出せるように記述を変えたらこちらも有効にして下さい。
+
+;---------------------------------------------------------
+; 蔦屋さんのギルティの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "tutaya"
+trigger1 = Partner,Name = "Stake_Crimson_Field"
+var(0) = 0
+
+;---------------------------------------------------------
+; ウケゲさんのギルティの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ukege"
+trigger1 = Partner,Name = "OLD_ROBO-KY" && Partner,var(43) = 1
+trigger2 = Partner,Name = "ROBO-JAM"
+trigger3 = Partner,Name = "ROBO-KY1"
+trigger4 = Partner,Name = "ROBO-KY3"
+trigger5 = Partner,Name = "ZAGI"
+var(0) = 209
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ukege"
+trigger1 = Partner,Name = "ROBO-KY2"
+var(0) = 2002
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ukege"
+trigger1 = Partner,Name = "ROBO-SOL"
+var(0) = 2003
+
+;---------------------------------------------------------
+; N.I.Jさんのギルティの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "N.I.J"
+trigger1 = Partner,Name = "Ky = kiske"
+var(0) = 2004
+
+;---------------------------------------------------------
+; レイさんのギルティの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Rei"
+trigger1 = Partner,Name = "ROBO-KY_Type-P"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Rei"
+trigger1 = Partner,Name = "EINS"
+trigger2 = Partner,Name = "GGKY"
+trigger3 = Partner,Name = "ZWEI"
+var(0) = 2004
+
+;---------------------------------------------------------
+; レイさん＆elmさんのギルティの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Rei＆elm"
+trigger1 = Partner,Name = "MANUTE"
+var(0) = 2004
+
+;---------------------------------------------------------
+; 芥川さんのギルティの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Akutagawa"
+trigger1 = Partner,Name = "order-Sol=Badguy" && Partner,var(59) = 0
+trigger2 = Partner,Name = "Ky=kiske"
+var(0) = 2004
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Akutagawa"
+trigger1 = Partner,Name = "order-Sol=Badguy" && Partner,var(59) = 1
+var(0) = 2005
+
+
+;===============================================================
+; 北斗の拳(～審判の双蒼星 拳豪列伝～)の表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; Fixxxerさんの北斗の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Fixxxer"
+trigger1 = Partner,Name = "SHYU"
+var(0) = 0
+
+;---------------------------------------------------------
+; SAIKEIさんの北斗の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "SAIKEI"
+trigger1 = Partner,Name = "KENSHIRO"
+trigger2 = Partner,Name = "JUDA"
+trigger3 = Partner,Name = "THOUTHER"
+var(0) = 0
+
+;---------------------------------------------------------
+; アフロンさんのを改変した??さんの北斗の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ahuron"
+trigger1 = Partner,Name = "SHIN"
+var(0) = 0
+
+;---------------------------------------------------------
+; こんぺいとうさんの北斗の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "konpeitou"
+trigger1 = Partner,Name = "shin"
+var(0) = 0
+
+;---------------------------------------------------------
+; ドロウィンさんの北斗の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Drowin hokuto"
+trigger1 = Partner,Name = "KENSHIRO"
+trigger2 = Partner,Name = "JAGI"
+trigger3 = Partner,Name = "TOKI"
+trigger4 = Partner,Name = "RAOH"
+var(0) = 0
+
+;---------------------------------------------------------
+; ゆ～とはるさんの北斗の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "YU-TOHARU"
+trigger1 = Partner,Name = "MAMIYA"
+var(0) = 0
+
+;---------------------------------------------------------
+; reiさん(アフロンさんのを改変した物も含む)の北斗の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ahuron"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "REI"
+var(0) = 5
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ahuron"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "REI"
+var(0) = 2100
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "rei"
+trigger1 = Partner,Name = "Mr.HEART"
+var(0) = 2101
+
+;---------------------------------------------------------
+; 青っぽい猫さんの北斗の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "BluishCat"
+trigger1 = Partner,Name = "KaLen"
+var(0) = 2100
+
+;---------------------------------------------------------
+; Tsさんの北斗の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ts"
+trigger1 = Partner,Name = "Jagi"
+trigger2 = Partner,Name = "Toki"
+var(0) = 2101
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Fixxxer+Ts"
+trigger1 = Partner,Name = "Shuh"
+var(0) = 2101
+
+;---------------------------------------------------------
+; Ataruさんの北斗の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ataru"
+trigger1 = Partner,Name = "RAOH ATL"
+var(0) = 2102
+
+;---------------------------------------------------------
+; シュウさんの北斗の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "shuu"
+trigger1 = Partner,Name = "Chiester410_S"
+var(0) = 2103
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "shuu"
+trigger1 = Partner,Name = "REIsen U Inaba"
+trigger2 = Partner,Name = "TEOC REISEN"
+trigger3 = Partner,Name = "Toki Hakurei"
+trigger4 = Partner,Name = "TOKI_S"
+var(0) = 2104
+
+
+;===============================================================
+; 戦国BASARA Xの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; ABABさんのBASARA Xの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ABAB"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Mouri Alice"
+var(0) = 0
+
+;---------------------------------------------------------
+; reiさん(アフロンさんのを改変した物も含む)のBASARA Xの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "rei"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "Honda Tadakatsu"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "rei"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Honda Tadakatsu"
+trigger2 = Partner,Name = "Oda Nobunaga"
+trigger3 = Partner,Name = "Toyotomi Hideyoshi"
+var(0) = 2200
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ahuron"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Keiji"
+var(0) = 2200
+
+;---------------------------------------------------------
+; Gal129さんのBASARA Xの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Gal129"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "Chousokabe Motochika"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Gal129"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Chousokabe Motochika"
+var(0) = 2200
+
+
+;===============================================================
+; ペルソナ4 ジ・アルティメット イン マヨナカアリーナの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; M3さんのP4Uの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "M3"
+trigger1 = Partner,Name = "Angelia_Avallone"
+var(0) = 2300
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "M3"
+trigger1 = Partner,Name = "Scharlachrot"
+var(0) = 2301
+
+;---------------------------------------------------------
+; InaさんのP4Uの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ina"
+trigger1 = Partner,Name = "P4U_mai"
+var(0) = 2302
+
+
+;===============================================================
+; ゴールデンアックス・ザ・デュエルの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; massさんの戦斧の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "mass"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Jamm"
+trigger2 = Partner,Name = "Milan"
+var(0) = 3000
+
+;---------------------------------------------------------
+; werewoodさんの戦斧の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = ID > Partner,ID
+triggerall = Partner,AuthorName = "werewood"
+trigger1 = Partner,Name = "Kain Blade"
+var(0) = 3000
+
+
+;===============================================================
+; BLEACH DS 蒼天に駆ける運命の表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; 斑鳩さんのBLEACHの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ikaruga"
+trigger1 = Partner,Name = "Byakuya Kuchiki"
+trigger2 = Partner,Name = "Ichigo_InnerHollow"
+trigger3 = Partner,Name = "Ichigo Kurosaki"
+trigger4 = Partner,Name = "Kenpachi Zaraki"
+trigger5 = Partner,Name = "Renji Abarai"
+trigger6 = Partner,Name = "Tatsuki Arisawa"
+trigger7 = Partner,Name = "Goblin"
+trigger8 = Partner,Name = "Han Samuel"
+trigger9 = Partner,Name = "Knight"
+trigger10 = Partner,Name = "Reinhart Valgar"
+trigger11 = Partner,Name = "Wolf"
+trigger12 = Partner,Name = "Resistance"
+trigger13 = Partner,Name = "Soldier"
+var(0) = 3010
+
+
+;===============================================================
+; 水滸演武の表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; massさんの水滸の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "mass"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Genshougo"
+trigger2 = Partner,Name = "Kosanjou"
+var(0) = 1310
+
+
+;===============================================================
+; 豪血寺一族の表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; massさんの豪血寺外伝 最強伝説の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "mass"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Oshima"
+trigger2 = Partner,Name = "Sahad"
+var(0) = 3200
+
+;---------------------------------------------------------
+; Teneさんの豪血寺一族 祭 先祖供養の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Tene"
+trigger1 = Partner,Name = "Shinjuro Gouketsuji"
+var(0) = 0
+
+
+;===============================================================
+; ブレイカーズ リベンジの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; ですからーさんのブレイカーズの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "(^o^)"
+trigger1 = Partner,Name = "Bai-Hu"
+trigger2 = Partner,Name = "Condor Heads"
+trigger3 = Partner,Name = "Lee Daolong"
+trigger4 = Partner,Name = "Pielle"
+trigger5 = Partner,Name = "Sho Kamui"
+var(0) = 3300
+
+
+;===============================================================
+; アルカナハートシリーズの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; 日本破壊結社ＮＨＫさんのアルカナ,アルカナFULLの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "NHK"
+trigger1 = Partner,Name = "Kira"
+var(0) = 0
+
+;---------------------------------------------------------
+; 日本破壊結社ＮＨＫさんのを改変したチョイヤーさんのアルカナ,アルカナFULLの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "choiyer"
+trigger1 = Partner,Name = "Kira"
+var(0) = 0
+
+;---------------------------------------------------------
+; アフロンさんのアルカナ,アルカナFULLの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ahuron"
+trigger1 = Partner,Name = "Heart&Heart"
+trigger2 = Partner,Name = "Konoha"
+trigger3 = Partner,Name = "Lieselotte"
+trigger4 = Partner,Name = "Maori"
+var(0) = 3400
+
+;---------------------------------------------------------
+; ドロウィンさんのアルカナ,アルカナFULLの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Drowin arcana"
+trigger1 = Partner,Name = "Fiona"
+trigger2 = Partner,Name = "Kamui"
+trigger3 = Partner,Name = "Saki"
+var(0) = 3401
+
+;---------------------------------------------------------
+; Inaさんのアルカナ,アルカナFULLの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ina"
+trigger1 = Partner,Name = "Clarice_Di_Lanza"
+trigger2 = Partner,Name = "Elsa_La_Conti"
+trigger3 = Partner,Name = "Heart_Aino"
+trigger4 = Partner,Name = "Kamui_Tokinomiya"
+trigger5 = Partner,Name = "Lilica_Felchenerow"
+trigger6 = Partner,Name = "Meifang"
+trigger7 = Partner,Name = "Mildred_Avallone"
+trigger8 = Partner,Name = "Petra_Johanna_Lagerkvist"
+trigger9 = Partner,Name = "Zenia_Valov"
+var(0) = 3402
+
+;---------------------------------------------------------
+; or2=3さんのアルカナ2,すっごいアルカナ2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "or2=3"
+trigger1 = Partner,Name = "Angelia Avallone"
+var(0) = 1
+
+;---------------------------------------------------------
+; ゆ～とはるさんのアルカナ2,すっごいアルカナ2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "YU-TOHARU"
+trigger1 = Partner,Name = "DOROTHY ALBRIGHT"
+var(0) = 1201
+
+;---------------------------------------------------------
+; アフロンさんのアルカナ2,すっごいアルカナ2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ahuron"
+trigger1 = Partner,Name = "Akane Inuwaka"
+var(0) = 3410
+
+;---------------------------------------------------------
+; 布団推進委員会さんのアルカナ2,すっごいアルカナ2の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "huton"
+trigger1 = Partner,Name = "Yoriko_Yasuzumi"
+var(0) = 1201
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "huton"
+trigger1 = Partner,Name = "Nazuna_Inuwaka"
+var(0) = 3411
+
+;---------------------------------------------------------
+; baraiさんのアルカナ3の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "barai"
+trigger1 = Partner,Name = "obachan"
+trigger2 = Partner,Name = "Elsa"
+var(0) = 12
+
+;---------------------------------------------------------
+; incurableさんのアルカナ3の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "incurable"
+trigger1 = Partner,Name = "まおりん"
+trigger2 = Partner,Name = "くりすたらー"
+var(0) = 12
+
+;---------------------------------------------------------
+; 匿名スマブラーさんのアルカナ3の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "匿名スマブラー"
+trigger1 = Partner,Name = "Fiona"
+trigger2 = Partner,Name = "Kamui"
+var(0) = 12
+
+;---------------------------------------------------------
+; ミマァさんのアルカナ3の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ミマァ"
+trigger1 = Partner,Name = "Weiss"
+trigger2 = Partner,Name = "Lieselotte_Achenbach" 
+var(0) = 3420
+
+;===============================================================
+; MELTY BLOODシリーズの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; Lycorisさんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Lycoris"
+trigger1 = Partner,Name = "Ren"
+var(0) = 0
+
+;---------------------------------------------------------
+; R-Rさん(ELさん？)のメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "R-R"
+trigger1 = Partner,Name = "Hisui&Kohaku"
+var(0) = 0
+
+;---------------------------------------------------------
+; ?さんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "?"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Aozaki_Aoko"
+trigger2 = Partner,Name = "Hisui"
+trigger3 = Partner,Name = "Kishima_kouma"
+trigger4 = Partner,Name = "Kohaku"
+trigger5 = Partner,Name = "Len"
+trigger6 = Partner,Name = "Arima_Miyako"
+trigger7 = Partner,Name = "Nanaya_Shiki"
+trigger8 = Partner,Name = "Nrvnqsr_Chaos"
+trigger9 = Partner,Name = "Seifuku_Akiha"
+trigger10 = Partner,Name = "Sion_TATARI"
+var(0) = 12
+
+;---------------------------------------------------------
+; kuroさん＆?さんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "kuro&?"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Arcueid_Brunestud"
+var(0) = 12
+
+;---------------------------------------------------------
+; tukemonさんのを改変したHALさんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "tukemon&HAL"
+trigger1 = Partner,Name = "Akiha"
+var(0) = 12
+
+;---------------------------------------------------------
+; YoungKireiさん＆Take.Kさんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "YoungKirei & Take.K"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Ryougi_Shiki"
+var(0) = 12
+
+;---------------------------------------------------------
+; 社長さんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "syacho-"
+trigger1 = Partner,Name = "seifuku_akiha"
+trigger2 = Partner,Name = "satsuki EX"
+var(0) = 12
+
+;---------------------------------------------------------
+; tukemonさんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "tukemon"
+trigger1 = Partner,Name = "Akiha"
+var(0) = 1
+
+;---------------------------------------------------------
+; シロトさんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Shiroto"
+trigger1 = Partner,Name = "Akaitsuki"
+trigger2 = Partner,Name = "Ciel"
+trigger3 = Partner,Name = "Chie_Rumiko"
+trigger4 = Partner,Name = "Ingrid_MB"
+trigger5 = Partner,Name = "Kenshin Uesugi"
+trigger6 = Partner,Name = "Sion Eltnam Atlasia"
+trigger7 = Partner,Name = "Sion TATARI"
+var(0) = 1200
+
+;---------------------------------------------------------
+; りゅんさんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ryun"
+trigger1 = Partner,Name = "Haku"
+var(0) = 1200
+
+;---------------------------------------------------------
+; 41さんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "41"
+trigger1 = Partner,Name = "ARCHETYPE:EARTH"
+trigger2 = Partner,Name = "Ryougi Shiki"
+var(0) = 3500
+
+;---------------------------------------------------------
+; BDさんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "BD"
+trigger1 = Partner,Name = "Aoko_Aozaki"
+trigger2 = Partner,Name = "Mech-Hisui"
+trigger3 = Partner,Name = "Nrvnqsr_Chaos"
+trigger4 = Partner,Name = "Shiki_Tohno"
+var(0) = 3500
+
+;---------------------------------------------------------
+; chikuchikugonzalezさんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "chikuchikugonzalez"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Tohno Akiha"
+var(0) = 3500
+
+;---------------------------------------------------------
+; Kohakuさんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Kohaku"
+trigger1 = Partner,Name = "Kohaku_K"
+trigger2 = Partner,Name = "Nanaya_K"
+trigger3 = Partner,Name = "Ryougi_K"
+trigger4 = Partner,Name = "VAkiha_K"
+trigger5 = Partner,Name = "WLen_K"
+var(0) = 3501
+
+;---------------------------------------------------------
+; 青っぽい猫さんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "BluishCat"
+trigger1 = Partner,Name = "FritzTypeW"
+var(0) = 12
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "BluishCat"
+trigger1 = Partner,Name = "Tohno_Akiha"
+var(0) = 3501
+
+;---------------------------------------------------------
+; 如月 銃駆さんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Juke Kisaragi"
+trigger1 = Partner,Name = "Miyako Arima"
+trigger2 = Partner,Name = "White_Len"
+var(0) = 3501
+
+;---------------------------------------------------------
+; Sennou-Roomさんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Sennou-Room"
+trigger1 = Partner,Name = "Shiki_Kuroya"
+trigger2 = Partner,Name = "Shiki_Nanaya"
+var(0) = 3502
+
+;---------------------------------------------------------
+; Teneさんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Tene"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Powerd Ciel"
+var(0) = 3502
+
+;---------------------------------------------------------
+; イプシロンさんのメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "bunshi&rouge noir&Slayer&ε"
+trigger1 = Partner,Name = "Shiki"
+var(0) = 3502
+
+;---------------------------------------------------------
+; 來さん(他製作者さんのを改変したものも含む)のメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "QWERTY"
+trigger1 = Partner,Name = "CHIEL"
+var(0) = 3502
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ouchi"
+trigger1 = Partner,Name = "ryougishiki"
+var(0) = 3502
+
+;---------------------------------------------------------
+; 如月竜人さん(他製作者さんのを改変したものも含む)のメルブラの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "kisaragiryuto"
+trigger1 = Partner,Name = "hukusyuki"
+trigger2 = Partner,Name = "SENNA" && ID > Partner,ID
+var(0) = 3502
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "kisaragiryuto"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Arima_Miyako"
+trigger2 = Partner,Name = "Sion_Eltnam_Atlasia"
+trigger3 = Partner,Name = "Rouga_Zanma" 
+trigger4 = Partner,Name = "Shigure_Sakuya"
+trigger5 = Partner,Name = "Akito_Yamazaki"
+var(0) = 3503
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "?&kisaragiryuto"
+trigger1 = Partner,Name = "Absolute_White_Len"
+trigger2 = Partner,Name = "Yumiduka_Satsuki" && ID > Partner,ID
+var(0) = 3503
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "kisaragiryuto"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "dc_lion"
+var(0) = 3503
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "kisaragiryuto"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "dc_lion"
+var(0) = 3504
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "kisaragiryuto"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "johnny"
+var(0) = 3505
+
+
+;===============================================================
+; 東方シリーズの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; 蒼月さんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Aotsuki"
+trigger1 = Partner,Name = "Aya_Syameimaru"
+trigger2 = Partner,Name = "Shanghai_Alice"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Aotsuki"
+trigger1 = Partner,Name = "Hong_Meirin"
+trigger2 = Partner,Name = "Sakuya_Izayoi"
+trigger3 = Partner,Name = "Suika_Ibuki"
+var(0) = 302
+
+;---------------------------------------------------------
+; 黒鉄さんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Kurogane"
+trigger1 = Partner,Name = "Flandre_Scarlet"
+trigger2 = Partner,Name = "Iku_Nagae"
+trigger3 = Partner,Name = "Shinki"
+var(0) = 204
+
+;---------------------------------------------------------
+; 蔦屋さんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "tutaya"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "Ishana_Syameimaru"
+var(0) = 302
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "tutaya"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Ishana_Syameimaru"
+var(0) = 1030
+
+;---------------------------------------------------------
+; BIYOさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Biyo"
+trigger1 = Partner,Name = "BIYO_Reiuzi_Utsuho"
+var(0) = 1
+
+;---------------------------------------------------------
+; シロトさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Shiroto"
+trigger1 = Partner,Name = "Eirin Yagokoro"
+trigger2 = Partner,Name = "Kanako Yasaka"
+trigger3 = Partner,Name = "Reisen Udongein Inaba"
+trigger4 = Partner,Name = "Yorihime Watatsuki"
+trigger5 = Partner,Name = "Yukari Yakumo"
+trigger6 = Partner,Name = "Yuyuko Saigyouji"
+var(0) = 1
+
+;---------------------------------------------------------
+; へちょさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "hetyo"
+trigger1 = Partner,Name = "Aiwhen"
+trigger2 = Partner,Name = "Duna"
+var(0) = 1
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "hetyo"
+trigger1 = Partner,Name = "kasen"
+trigger2 = Partner,Name = "lily_Black"
+trigger3 = Partner,Name = "lily_White"
+trigger4 = Partner,Name = "lin"
+trigger5 = Partner,Name = "Orin"
+trigger6 = Partner,Name = "parsee"
+trigger7 = Partner,Name = "satori"
+trigger8 = Partner,Name = "sunny"
+trigger9 = Partner,Name = "tokiko"
+trigger10 = Partner,Name = "Kokoro"
+var(0) = 3600
+
+;---------------------------------------------------------
+; 夏恵さんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Natsumegu"
+trigger1 = Partner,Name = "NM_Hayate"
+var(0) = 1030
+
+;---------------------------------------------------------
+; しーぽんさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "seapon"
+trigger1 = Partner,Name = "Suwako Moriya"
+var(0) = 3500
+
+;---------------------------------------------------------
+; .DATさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = ".DAT"
+trigger1 = Partner,Name = "Nazrin"
+var(0) = 3600
+
+;---------------------------------------------------------
+; chigumaさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "chiguma"
+trigger1 = Partner,Name = "Komeiji_Koishi"
+var(0) = 3600
+
+;---------------------------------------------------------
+; G-shoさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "G-sho"
+trigger1 = Partner,Name = "kaguya_houraisan"
+var(0) = 3600
+
+;---------------------------------------------------------
+; gomashioさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "gomashio"
+trigger1 = Partner,Name = "Hiziri_Byakuren"
+trigger2 = Partner,Name = "Chen"
+trigger3 = Partner,Name = "Kotiya_Sanae"
+var(0) = 3600
+
+;---------------------------------------------------------
+; おもちさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "omoti"
+triggerall = TeamSide = 1
+trigger1 = Partner,Name = "yakumo_ran"
+var(0) = 3600
+
+;---------------------------------------------------------
+; イスさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "isu"
+trigger1 = Partner,Name = "Fujiwara_no_Mokou"
+var(0) = 3600
+
+;---------------------------------------------------------
+; そむＥさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "som"
+trigger1 = Partner,Name = "koakuma"
+var(0) = 3600
+
+;---------------------------------------------------------
+; 水影さんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "mikage_th"
+trigger1 = Partner,Name = "Alice Margatroid"
+trigger2 = Partner,Name = "Aya Syameimaru"
+trigger3 = Partner,Name = "Komachi Onoduka"
+trigger4 = Partner,Name = "Marisa Kirisame"
+trigger5 = Partner,Name = "Remilia Scarlet"
+trigger6 = Partner,Name = "Suwako Moriya"
+trigger7 = Partner,Name = "Reisen Udongein Inaba"
+trigger8 = Partner,Name = "Youmu Konpaku"
+var(0) = 3600
+
+;---------------------------------------------------------
+; yasaiさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "yasai"
+trigger1 = Partner,Name = "kaguya_houraisan"
+var(0) = 3601
+
+;---------------------------------------------------------
+; Seravyさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Seravy"
+trigger1 = Partner,Name = "Hijiri Byakuren"
+trigger2 = Partner,Name = "Cirno"
+trigger3 = Partner,Name = "Flandre Scarlet"
+trigger4 = Partner,Name = "Kaguya Houraisan"
+trigger5 = Partner,Name = "Nitori Kawashiro"
+trigger6 = Partner,Name = "Patchouli Knowledge"
+trigger7 = Partner,Name = "Reimu Hakurei"
+trigger8 = Partner,Name = "Remilia Scarlet"
+trigger9 = Partner,Name = "Seravy"
+trigger10 = Partner,Name = "Suika Ibuki"
+trigger11 = Partner,Name = "Tenshi Hinanai"
+trigger12 = Partner,Name = "Youmu Konpaku"
+trigger13 = Partner,Name = "Yukari Yakumo"
+trigger14 = Partner,Name = "Yuyuko Saigyouji"
+var(0) = 3602
+
+;---------------------------------------------------------
+; so_さんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "so_"
+trigger1 = Partner,Name = "Youmu Double Blade"
+var(0) = 3603
+
+;---------------------------------------------------------
+; Nachelさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Nachel"
+trigger1 = Partner,Name = "Remilia_Scarlet"
+trigger2 = Partner,Name = "Reimu_Hakurei"
+var(0) = 3604
+
+;---------------------------------------------------------
+; baraiさん(harudiさんとの合作も含む)の東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "barai"
+trigger1 = Partner,Name = "Hong_Meirin"
+trigger2 = Partner,Name = "Sakuya_Izayoi"
+trigger3 = Partner,Name = "Yuyuko_Saigyouzi"
+var(0) = 3605
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "barai&harudi"
+trigger1 = Partner,Name = "Mima"
+var(0) = 3605
+
+;---------------------------------------------------------
+; guさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "gu"
+trigger1 = Partner,Name = "Patchouli Knowledge"
+trigger2 = Partner,Name = "Reisen Udongein Inaba"
+trigger3 = Partner,Name = "Sakuya Izayoi"
+trigger4 = Partner,Name = "Tenshi Hinanai"
+trigger5 = Partner,Name = "Yukari_Yakumo"
+var(0) = 3606
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "gu"
+trigger1 = Partner,Name = "Ayu Tukimiya"
+trigger2 = Partner,Name = "Kano Kirishima"
+trigger3 = Partner,Name = "Mishio Amano"
+trigger4 = Partner,Name = "Misuzu Kamio"
+trigger5 = Partner,Name = "Shiori Misaka"
+trigger6 = Partner,Name = "Unknown"
+var(0) = 3607
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "gu"
+trigger1 = Partner,Name = "Patchouli_Knowledge"
+var(0) = 3608
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "gu"
+trigger1 = Partner,Name = "Marisa_Kirisame"
+trigger2 = Partner,Name = "Remilia_Scarlet"
+var(0) = 3609
+
+;---------------------------------------------------------
+; Yoshimuneさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Yoshimune"
+trigger1 = Partner,Name = "Cirno"
+var(0) = 3607
+
+;---------------------------------------------------------
+; ふるれさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "frule"
+trigger1 = Partner,Name = "Chirno"
+trigger2 = Partner,Name = "Hong-Meirin"
+trigger3 = Partner,Name = "Kirisame-Marisa"
+trigger4 = Partner,Name = "Kochiya-Sanae"
+var(0) = 3607
+
+;---------------------------------------------------------
+; ravenさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "raven"
+trigger1 = Partner,Name = "Kotiya Sanae_AC"
+var(0) = 3610
+
+;---------------------------------------------------------
+; 紅毛玉さんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "akakedama"
+trigger1 = Partner,Name = "patchouli"
+trigger2 = Partner,Name = "Kotiya Sanae"
+trigger3 = Partner,Name = "Scarlet Devil"
+trigger4 = Partner,Name = "saigyouji yuyuko"
+var(0) = 3610
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "akakedama"
+trigger1 = Partner,Name = "Reisen udongein inaba"
+var(0) = 3611
+
+;---------------------------------------------------------
+; KONさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "KON"
+trigger1 = Partner,Name = "Eirin Yagokoro"
+trigger2 = Partner,Name = "Tewi_Inaba"
+var(0) = 3612
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "KON"
+trigger1 = Partner,Name = "Rinnosuke_Morichika"
+var(0) = 3613
+
+;---------------------------------------------------------
+; Inaさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ina"
+trigger1 = Partner,Name = "Ibuki_Suika"
+var(0) = 3614
+
+;---------------------------------------------------------
+; こおろぎ屋さんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Korogiya"
+trigger1 = Partner,Name = "Sikieiki_Yamaxanadu"
+var(0) = 3614
+
+;---------------------------------------------------------
+; ネンミンさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "nenmin"
+trigger1 = Partner,Name = "AliceDolls"
+trigger2 = Partner,Name = "lety"
+trigger3 = Partner,Name = "Sanae Kotiya"
+var(0) = IfElse(TeamSide = 1,3615,3616)
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "nenmin"
+trigger1 = Partner,Name = "eiki"
+var(0) = IfElse(TeamSide = 1,3617,3618)
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "nenmin"
+trigger1 = Partner,Name = "Hatate_Himekaidou"
+var(0) = 3619
+
+;---------------------------------------------------------
+; ピカポンさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "pikapon"
+trigger1 = Partner,Name = "Inaba Tei"
+var(0) = 3620
+
+;---------------------------------------------------------
+; suneoさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Suneo"
+trigger1 = Partner,Name = "nue"
+var(0) = 3621
+
+;---------------------------------------------------------
+; nnsさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "nns"
+trigger1 = Partner,Name = "Daiyousei_hsts"
+trigger2 = Partner,Name = "Iku_hsts"
+trigger3 = Partner,Name = "Suika_hsts"
+trigger4 = Partner,Name = "Tenko_hsts"
+trigger5 = Partner,Name = "Tewi_hsts"
+trigger6 = Partner,Name = "Yukari_hsts"
+var(0) = 3622
+
+;---------------------------------------------------------
+; Arimaさんの東方の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Arima"
+triggerall = ID < Partner,ID
+trigger1 = Partner,Name = "Daiyousei"
+var(0) = 3623
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Arima"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Daiyousei"
+var(0) = 3624
+
+;===============================================================
+; Eternal Fighter ZEROの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; ELさんのEternal Fighter ZEROの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "EL"
+trigger1 = Partner,Name = "Makoto Sawatari"
+trigger2 = Partner,Name = "Nayuki Minase"
+var(0) = 3623
+
+;---------------------------------------------------------
+; DABAさんのEternal Fighter ZEROの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "DABA"
+trigger1 = Partner,Name = "Mio"
+trigger2 = Partner,Name = "Shiori"
+var(0) = 3650
+
+;---------------------------------------------------------
+; InaさんのEternal Fighter ZEROの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ina"
+trigger1 = Partner,Name = "Mizuka_Nagamori"
+var(0) = 3650
+
+;---------------------------------------------------------
+; 漆黒さんのEternal Fighter ZEROの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "shikkoku"
+trigger1 = Partner,Name = "Ayu Tukimiya"
+var(0) = 3650
+
+;---------------------------------------------------------
+; 烈空さんのEternal Fighter ZEROの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Rekku"
+trigger1 = Partner,Name = "Kaori&Shiori"
+trigger2 = Partner,Name = "Mishio&Makoto"
+trigger3 = Partner,Name = "Nanase(+D)&Mayu"
+var(0) = 3651
+
+;===============================================================
+; BIGBANG BEATの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; SongfuさんのBIGBANG BEATの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Songfu"
+trigger1 = Partner,Name = "Miyazato Erika"
+trigger2 = Partner,Name = "Tenrou Kunagi"
+trigger3 = Partner,Name = "Tsukiyomi Kinako"
+var(0) = 1
+
+;---------------------------------------------------------
+; 月砂さんのBIGBANG BEATの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "tukisuna"
+trigger1 = Partner,Name = "Moriya"
+trigger2 = Partner,Name = "Setsuna"
+var(0) = 1
+
+;---------------------------------------------------------
+; ?さんのBIGBANG BEATの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "?"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Agito_Of_The_Dark" 
+trigger2 = Partner,Name = "Burai_Yamamoto"
+trigger3 = Partner,Name = "Devil_Daigo"
+trigger4 = Partner,Name = "Hanny"
+trigger5 = Partner,Name = "Kendo&Kyudo"
+trigger6 = Partner,Name = "Kunagi_Tenrou"
+trigger7 = Partner,Name = "Manbou"
+trigger8 = Partner,Name = "Ren_Idagawa"
+trigger9 = Partner,Name = "Rouga_Zanma"
+trigger10 = Partner,Name = "Sanzou_Kongoumaru"
+var(0) = 3700
+
+;---------------------------------------------------------
+; InaさんのBIGBANG BEATの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ina"
+trigger1 = Partner,Name = "Heita_Zinnai"
+trigger2 = Partner,Name = "Kendou_Nakanishi"
+trigger3 = Partner,Name = "Kunagi_Tenrou"
+var(0) = 3701
+
+
+;===============================================================
+; アカツキ電光戦記の表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; シュウさんのアカツキの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "shuu"
+trigger1 = Partner,Name = "Jessica Ushiromiya_S"
+var(0) = 3800
+
+
+;===============================================================
+; エヌアイン完全世界の表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; HMさんのエヌアインの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "HM"
+trigger1 = Partner,Name = "AKATSUKI"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "HM"
+trigger1 = Partner,Name = "MYCALE"
+trigger2 = Partner,Name = "Rock Howard"
+var(0) = 3300
+
+;---------------------------------------------------------
+; 森ノ中さんのエヌアインの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "morinonaka"
+trigger1 = Partner,Name = "EN-EINS"
+var(0) = 0
+
+;---------------------------------------------------------
+; ariさんのエヌアインの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ari"
+triggerall = TeamSide = 1
+trigger1 = Partner,Name = "PERFECTI"
+var(0) = 3300
+
+;---------------------------------------------------------
+; way-ohさんのエヌアインの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "way-oh"
+trigger1 = Partner,Name = "ADLER-PW"
+trigger2 = Partner,Name = "AKATSUKI-PW"
+trigger3 = Partner,Name = "Anonym-guard"
+trigger4 = Partner,Name = "ELEKTROSOLDAT-EN"
+trigger5 = Partner,Name = "Fritz-PW"
+trigger6 = Partner,Name = "Heart-PW"
+trigger7 = Partner,Name = "KENSHIRO-PW"
+trigger8 = Partner,Name = "Kyo-PW"
+trigger9 = Partner,Name = "KY-PW"
+trigger10 = Partner,Name = "RAOH-PW"
+trigger11 = Partner,Name = "sol-PW"
+trigger12 = Partner,Name = "S-SOLDAT"
+trigger13 = Partner,Name = "TOKI-PW"
+var(0) = 3500
+
+;---------------------------------------------------------
+; 松梅魂さんのエヌアインの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ShowBuySpirit"
+trigger1 = Partner,Name = "Weiss"
+var(0) = 3810
+
+;===============================================================
+; 黄金夢想曲†CROSSの表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; ゆ～とはるさんの黄金夢想曲の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "YU-TOHARU"
+trigger1 = Partner,Name = "USHIROMIYA ANGE"
+var(0) = 3900
+
+;---------------------------------------------------------
+; baggyさんの黄金夢想曲の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "baggy"
+trigger1 = Partner,Name = "Furudo_Erika"
+trigger2 = Partner,Name = "oyashirorika"
+trigger3 = Partner,Name = "TrapSatoko"
+var(0) = 3900
+
+
+;===============================================================
+; その他の表示を使用しているキャラを判定
+;===============================================================
+;---------------------------------------------------------
+; BANANACHIPsさん(flowrαlliαさんが改変した物も含む)の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "BANANACHIPs"
+trigger1 = Partner,Name = "Dan_Smith"
+var(0) = 0
+
+;---------------------------------------------------------
+; baraiさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "barai"
+trigger1 = Partner,Name = "Rosa_Ushiromiya"
+var(0) = 0
+
+;---------------------------------------------------------
+; BFの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "BF"
+trigger1 = Partner,Name = "Gudea-Suika"
+var(0) = 0
+
+;---------------------------------------------------------
+; Kohakuさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Kohaku"
+trigger1 = Partner,Name = "Mishio_K"
+var(0) = 0
+
+;---------------------------------------------------------
+; Noctisさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Noctis"
+trigger1 = Partner,Name = "Ren"
+trigger2 = Partner,Name = "Rouga"
+var(0) = 0
+
+;---------------------------------------------------------
+; Teafさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Teaf"
+trigger1 = Partner,Name = "Ferir"
+trigger2 = Partner,Name = "Grizela"
+trigger3 = Partner,Name = "Harmir"
+trigger4 = Partner,Name = "Rucheca"
+trigger5 = Partner,Name = "Shartel"
+var(0) = 0
+
+;---------------------------------------------------------
+; アリさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ali"
+trigger1 = Partner,Name = "ARASHI"
+var(0) = 0
+
+;---------------------------------------------------------
+; とまさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Toma & Raien Makoto &　kisaragiryuto"
+trigger1 = Partner,Name = "Shiki_Nanaya"
+var(0) = 0
+
+;---------------------------------------------------------
+; Hanayakuroさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Hanayakuro"
+trigger1 = Partner,Name = "Alt"
+trigger2 = Partner,Name = "mumei"
+var(0) = 12
+
+;---------------------------------------------------------
+; chikuchikugonzalezさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "chikuchikugonzalez"
+
+trigger1 = Partner,Name = "Yuki"
+var(0) = 13
+
+;---------------------------------------------------------
+; M3さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "M3"
+trigger1 = Partner,Name = "Shiki_Ryougi"
+var(0) = 13
+
+;---------------------------------------------------------
+; 最ジャックさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "sai_jack"
+trigger1 = Partner,Name = "Alice"
+var(0) = 13
+
+;---------------------------------------------------------
+; 黒鉄さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Kurogane"
+trigger1 = Partner,Name = "Barbatos_Goetia"
+var(0) = 57
+
+;---------------------------------------------------------
+; 鶺鴒さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "sekirei"
+trigger1 = Partner,Name = "s_cless-f"
+trigger2 = Partner,Name = "s_crea-f"
+trigger3 = Partner,Name = "s_sayia-f"
+var(0) = 100
+
+;---------------------------------------------------------
+; NSさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "NS"
+trigger1 = Partner,Name = "Kiyoko Mitarai"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "NS"
+trigger1 = Partner,Name = "Makoto Ando"
+var(0) = 301
+
+;---------------------------------------------------------
+; 寝猫さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "neneco"
+trigger1 = Partner,Name = "Hiedano Akyu"
+var(0) = 301
+
+;---------------------------------------------------------
+; 見越入道さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Mikoshi Nyuudou"
+trigger1 = Partner,Name = "hina-k"
+var(0) = 302
+
+;---------------------------------------------------------
+; 寅午さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "koma"
+trigger1 = Partner,Name = "Flandre_Scarlet"
+trigger2 = Partner,Name = "Original_Flandre"
+var(0) = 302
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "koma"
+trigger1 = Partner,Name = "94_Flandre"
+var(0) = 2302
+
+;---------------------------------------------------------
+; 暗黒内藤さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "AnkokuNaitou"
+trigger1 = Partner,Name = "Ark"
+var(0) = 207
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "AnkokuNaitou"
+trigger1 = Partner,Name = "sundown-kid"
+var(0) = 1010
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "AnkokuNaitou"
+trigger1 = Partner,Name = "Hayato_Gou"
+trigger2 = Partner,Name = "Minmin"
+trigger3 = Partner,Name = "Ryuhi_sd"
+trigger4 = Partner,Name = "Yuuka_Kurenai"
+trigger5 = Partner,Name = "Greg_Wiler"
+var(0) = 1030
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "AnkokuNaitou"
+trigger1 = Partner,Name = "Adol Christin"
+var(0) = 1310
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "AnkokuNaitou"
+trigger1 = Partner,Name = "Kamaitachi_NWA"
+trigger2 = Partner,Name = "Kunoichi_NWA"
+trigger3 = Partner,Name = "Ninja_NWA"
+var(0) = 2302
+
+;---------------------------------------------------------
+; KFC?さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "KFC?"
+trigger1 = Partner,Name = "D.Hibiki"
+trigger2 = Partner,Name = "F.O.E."
+trigger3 = Partner,Name = "shogun"
+trigger4 = Partner,Name = "sqIVswordman"
+trigger5 = Partner,Name = "swordman"
+var(0) = 1010
+
+;---------------------------------------------------------
+; OMEGAPSYCHOさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "OMEGAPSYCHO"
+trigger1 = Partner,Name = "VIGA"
+var(0) = 3010
+
+;---------------------------------------------------------
+; stel2さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "stel2"
+trigger1 = Partner,Name = "shizuha"
+var(0) = 3500
+
+;---------------------------------------------------------
+; 松梅魂さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ShowBuySpirit"
+trigger1 = Partner,Name = "HAKU=LEN"
+var(0) = 3500
+
+;---------------------------------------------------------
+; baggyさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "baggy"
+trigger1 = Partner,Name = "kuroko_s"
+var(0) = 3501
+
+;---------------------------------------------------------
+; cafeさんのヤタガラスの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "cafe"
+trigger1 = Partner,Name = "Chadha"
+trigger2 = Partner,Name = "Hattori Hanzo Uruka"
+trigger3 = Partner,Name = "Hina"
+trigger4 = Partner,Name = "Jet"
+var(0) = 3501
+
+;---------------------------------------------------------
+; Kohakuさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Kohaku"
+trigger1 = Partner,Name = "Aya_K"
+trigger2 = Partner,Name = "Marisa_K"
+trigger3 = Partner,Name = "Meiling_K"
+trigger4 = Partner,Name = "Mokou_K"
+trigger5 = Partner,Name = "Remilia_K"
+trigger6 = Partner,Name = "Sakuya_K"
+trigger7 = Partner,Name = "Sanae_K"
+trigger8 = Partner,Name = "Tenshi_K"
+trigger9 = Partner,Name = "Utsuho_K"
+trigger10 = Partner,Name = "Youmu_K"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Kohaku"
+trigger1 = Partner,Name = "MC_Youmu"
+var(0) = 3501
+
+;---------------------------------------------------------
+; 森ノ中さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "morinonaka"
+trigger1 = Partner,Name = "Zik"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "morinonaka"
+trigger1 = Partner,Name = "Cr-Noise"
+var(0) = 3612
+
+;---------------------------------------------------------
+; .DATさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = ".DAT"
+trigger1 = Partner,Name = "yumemi okazaki"
+var(0) = 3700
+
+;---------------------------------------------------------
+; りゅんさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ryun"
+trigger1 = Partner,Name = "LEICA"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ryun"
+trigger1 = Partner,Name = "APEFUCHI"
+var(0) = 3700
+
+;---------------------------------------------------------
+; ゆ～とはるさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "YU-TOHARU"
+trigger1 = Partner,Name = "GOSUNKUGI HIKARU"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "YU-TOHARU"
+trigger1 = Partner,Name = "CURE BLACK"
+var(0) = 5000
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "YU-TOHARU"
+trigger1 = Partner,Name = "HATSUNE MIKU"
+var(0) = 5001
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "YU-TOHARU"
+trigger1 = Partner,Name = "AL AZIF"
+trigger2 = Partner,Name = "AIHARA NATSUMI"
+var(0) = 5002
+
+;---------------------------------------------------------
+; ゴーシュさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "goshu"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "Mira"
+var(0) = 5010
+
+;---------------------------------------------------------
+; ありゃーさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Arya-"
+triggerall = ID > Partner,ID
+trigger1 = Partner,Name = "yu-ka"
+var(0) = 5020
+
+;---------------------------------------------------------
+; Kibokuraの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Kibokura"	;※
+trigger1 = Partner,Name = "Wriggle"
+var(0) = 5030
+
+;※authorが""っとなっているので、この設定を適応するには
+;　「author = "Kibokura"」と記述してください。
+
+;---------------------------------------------------------
+; お家さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ouchi"
+trigger1 = Partner,Name = "kirikou"
+var(0) = 301
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ouchi"
+trigger1 = Partner,Name = "Agrias_Oaks"
+var(0) = 5040
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ouchi"
+trigger1 = Partner,Name = "Ayatsuji_Tsukasa"
+var(0) = 5041
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ouchi"
+trigger1 = Partner,Name = "MetaKnight_O"
+var(0) = 5042
+
+;---------------------------------------------------------
+; じーしょさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "G-sho"
+trigger1 = Partner,Name = "Peace of Len"
+var(0) = 5050
+
+;---------------------------------------------------------
+; とけいさん(時間の国・けいさん)の表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Tokinokuni-Kei"
+trigger1 = Partner,Name = "Mizuki Takase"
+var(0) = 3700
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Tokei"
+trigger1 = Partner,Name = "Akari Kamigishi"
+trigger2 = Partner,Name = "Peach Mizuki"
+trigger3 = Partner,Name = "Wing Gundam"
+trigger4 = Partner,Name = "Wing Gundam0"
+var(0) = 3700
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Tokei"
+trigger1 = Partner,Name = "Master Gundam" 
+var(0) = 5060
+
+;---------------------------------------------------------
+; ダガーさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "dager"
+trigger1 = Partner,Name = "Jecht"
+var(0) = 5070
+
+;---------------------------------------------------------
+; ネンミンさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "nenmin"
+trigger1 = Partner,Name = "Tachibana Kanade"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "nenmin"
+trigger1 = Partner,Name = "Akaneko"
+trigger2 = Partner,Name = "Kazane Humuro"
+trigger3 = Partner,Name = "Yuki Kameoka"
+var(0) = 5080
+
+;---------------------------------------------------------
+; プレートさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Pre-to"
+trigger1 = Partner,Name = "gengetu"
+trigger2 = Partner,Name = "hiziri"
+trigger3 = Partner,Name = "sanae_X"
+trigger4 = Partner,Name = "satuzinki_S"
+var(0) = 5090
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Pre-to"
+trigger1 = Partner,Name = "Acirno"
+trigger2 = Partner,Name = "Aleti"
+var(0) = 5091
+
+;---------------------------------------------------------
+; アンバサさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ambasa"
+trigger1 = Partner,Name = "Lyndis"
+var(0) = 5100
+
+;---------------------------------------------------------
+; Inaの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Ina"
+trigger1 = Partner,Name = "Kohaku"
+var(0) = 9000
+
+;---------------------------------------------------------
+; Seravyの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Seravy"
+trigger1 = Partner,Name = "Onpu Segawa"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "Seravy"
+trigger1 = Partner,Name = "Vanilla H"
+var(0) = 9000
+
+;---------------------------------------------------------
+; way-ohさんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "way-oh"
+trigger1 = Partner,Name = "akuji"
+trigger2 = Partner,Name = "maho"
+trigger3 = Partner,Name = "Noel"
+trigger4 = Partner,Name = "pailwing"
+trigger5 = Partner,Name = "wanda"
+var(0) = 0
+
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "way-oh"
+trigger1 = Partner,Name = "Lightning-Alpha"
+var(0) = 9000
+
+;---------------------------------------------------------
+; 青っぽい猫さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "BluishCat"
+trigger1 = Partner,Name = "PsychoCiel"
+var(0) = 9000
+
+;---------------------------------------------------------
+; 大垣さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "ohgaki"
+trigger1 = Partner,Name = "Yagumo"
+var(0) = 9000
+
+;---------------------------------------------------------
+; 社咲さんの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "yasirozaki"
+trigger1 = Partner,Name = "Yagokoro eirin"
+var(0) = 9000
+
+;---------------------------------------------------------
+; 落花生さんのディシディアの表示使用キャラを判定
+;---------------------------------------------------------
+[State -3, VarSet]
+type = VarSet
+triggerall = NumPartner
+triggerall = Partner,AuthorName = "rakkasei"
+trigger1 = Partner,Name = "Rydia"
+var(0) = 9000
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+; ＡＩ用 StateDef -3
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+;----------------------------------------------------------[ＡＩ起動用ヘルパー生成]
+[State -3, ＡＩ起動用ヘルパー]
+type=helper
+trigger1 = !IsHelper
+trigger1 = Var(59) = 0
+trigger1 = !NumHelper(10000+id)
+trigger1 = RoundState <= 2
+trigger1 = PrevStateNo = 5900 || (PrevStateNo = [190, 194]) || PrevStateNo = 4000 || PrevStateNo = 6000 || PrevStateNo = 6010 || PrevStateNo = 6020
+trigger1 = RoundsExisted = 0
+trigger1 = alive
+helpertype = Normal
+name = "AI"
+StateNo = 100000
+ID = 10000+id
+pos = 9999, 9999
+keyctrl = 1
+IgnoreHitPause = 1
+pausemovetime = 9999
+supermovetime = 9999
+persistent = 0
+
+[State -3, ヘルパー暴走の保険]
+type = ChangeState
+trigger1 = IsHelper
+trigger1 = IsHelper(10000+Root,id)
+trigger1 = StateNo != 100000
+value = 100000
+IgnoreHitPause = 1
+SuperMoveTime = 9999
+PauseMoveTime = 9999
+
+;----------------------------------------------------------[ＡＩ起動セット]
+[State -3, AIFlagSet]
+type = VarSet
+triggerall = !IsHelper
+triggerall = Var(59) = 0
+triggerall = NumHelper(20000+id)
+triggerall = Helper(20000+id),Var(57) != -1
+trigger1 = Command="AI1"||Command="AI2"||Command="AI3"||Command="AI4"||Command="AI5"
+trigger2 = Command="AI6"||Command="AI7"||Command="AI8"||Command="AI9"||Command="AI10"
+trigger3 = Command="AI11"||Command="AI12"||Command="AI13"||Command="AI14"||Command="AI15"
+trigger4 = Command="AI16"||Command="AI17"||Command="AI18"||Command="AI19"||Command="AI20"
+trigger5 = Command="AI21"||Command="AI22"||Command="AI23"||Command="AI24"||Command="AI25"
+trigger6 = Command="AI26"||Command="AI27"||Command="AI28"||Command="AI29"||Command="AI30"
+trigger7 = Command="AI31"||Command="AI32"||Command="AI33"||Command="AI34"||Command="AI35"
+trigger8 = Command="AI36"||Command="AI37"||Command="AI38"||Command="AI39"||Command="AI40"
+trigger9 = Command="AI41"||Command="AI42"||Command="AI43"||Command="AI44"||Command="AI45"
+trigger10 = Command="AI46"||Command="AI47"||Command="AI48"||Command="AI49"||Command="AI50"
+trigger11 = NumHelper(10000+id)
+trigger11 = Helper(10000+id),Var(59)
+trigger12 = Helper(20000+id),Var(57) = 1 || (PalNo >= 7 && Helper(20000+id),Var(57) = 2)
+var(59) = Helper(20000+id),Var(59) * -1
+IgnoreHitPause = 1
+
+[State -3, AI反転]
+Type = VarSet
+triggerall = !IsHelper
+trigger1 = Var(59) > 0
+trigger1 = RoundState != 2
+trigger2 = Var(59) < 0
+trigger2 = ctrl
+trigger2 = RoundState = 2
+var(59) = -Var(59)
+
+[State -3, ctrlset]
+Type = CtrlSet
+triggerall = !IsHelper
+triggerall = !ctrl
+trigger1 = Var(59) < 0
+trigger1 = RoundState > 2
+trigger1 = StateNo = 13 || (StateNo = [18, 19]) || StateNo = 21
+trigger2 = Var(59) > 0
+trigger2 = RoundState = 2
+trigger2 = StateNo = 0
+value = 1
+
+[State -3, NotHitBy]
+type = NotHitBy
+triggerall = !IsHelper
+triggerall = RoundState < 3
+trigger1 = Var(59) < 0 || NumHelper(10000+id)
+trigger1 = !ctrl && StateNo = 0
+value = SCA
+time = 1
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[めくり＆補助ヘルパー生成]
+[State -3, めくり&AI補助ヘルパー]
+type=helper
+triggerall = !IsHelper
+trigger1 = !NumHelper(20000+id)
+trigger1 = alive
+helpertype = Normal
+name = "Turn"
+StateNo = 200000
+ID = 20000+id
+pos = 0, 9999
+keyctrl = 0
+IgnoreHitPause = 1
+pausemovetime = 9999
+supermovetime = 9999
+persistent = 1
+
+[State -3, ヘルパー暴走の保険]
+type = ChangeState
+triggerall = IsHelper
+triggerall = IsHelper(20000+Root,id)
+trigger1 = StateNo != 200000
+value = 200000
+IgnoreHitPause = 1
+SuperMoveTime = 9999
+PauseMoveTime = 9999
+
+;----------------------------------------------------------[ステージ端＆飛び道具認識ヘルパー生成]
+[State -3, 端ﾁｪｯｸ・右]
+Type = Helper
+triggerall = !IsHelper
+trigger1 = RoundState <= 2
+trigger1 = !NumHelper(30000+id)
+HelperType = Normal
+Name = "RightEdge"
+PosType = left
+StateNo = 32000
+ID = 30000+id
+facing = -1
+pos = 320, 9999 ;160,9999
+pausemovetime = 9999
+supermovetime = 9999
+persistent = 0
+IgnoreHitPause = 1
+KeyCtrl = 0
+
+[State -3, 端ﾁｪｯｸ・左]
+Type = Helper
+triggerall = !IsHelper
+trigger1 = RoundState <= 2
+trigger1 = !NumHelper(31000+id)
+trigger1 = NumHelper(30000+id)
+trigger1 = Helper(30000+id),Var(1) = 0
+HelperType = Normal
+Name = "LeftEdge"
+PosType = left
+StateNo = 31000
+facing = 1
+ID = 31000+id
+pos = 0, 9999 ;160,9999
+pausemovetime = 9999
+supermovetime = 9999
+persistent = 0
+IgnoreHitPause = 1
+KeyCtrl = 0
+
+[State -3, ヘルパー暴走の保険]
+type = ChangeState
+triggerall = IsHelper
+triggerall = IsHelper(30000+Root,id)
+trigger1 = StateNo != 32000
+value = 320000
+IgnoreHitPause = 1
+SuperMoveTime = 9999
+PauseMoveTime = 9999
+
+[State -3, ヘルパー暴走の保険]
+type = ChangeState
+triggerall = IsHelper
+triggerall = IsHelper(31000+Root,id)
+trigger1 = StateNo != 31000 && StateNo != [30020, 30029]
+value = 310000
+IgnoreHitPause = 1
+SuperMoveTime = 9999
+PauseMoveTime = 9999
+
+;----------------------------------------------------------[敵攻撃状態判別]
+[State -3, VarSet]
+Type = varset
+triggerall = !IsHelper
+trigger1 = NumEnemy = 1
+var(45) = EnemyNear,ID
+
+[State -3, VarSet]
+Type = varset
+triggerall = !IsHelper
+trigger1 = NumEnemy > 1
+var(45)=ifelse(EnemyNear(0),alive&&EnemyNear(0),MoveType=A&&EnemyNear(0),StateNo>=200, EnemyNear(0),ID, EnemyNear(1),ID)
+
+;----------------------------------------------------------[敵生死判別]
+[State -3, VarSet]
+Type = varset
+triggerall = !IsHelper
+trigger1 = NumEnemy = 1
+var(46) = EnemyNear,ID
+
+[State -3, VarSet]
+Type = varset
+triggerall = !IsHelper
+trigger1 = NumEnemy > 1
+var(46) = ifelse(EnemyNear(0),alive&&EnemyNear(0),StateNo!=358002, EnemyNear(0),ID, EnemyNear(1),ID)
+
+;----------------------------------------------------------[ランダムナンバー]
+[State -3, VarRandom]
+type = VarRandom
+triggerall = !IsHelper
+triggerall = NumHelper(20000+id)
+triggerall = StateNo != [10, 12]
+trigger1 = StateNo >= 200 && !ctrl
+trigger1 = Time = 1
+trigger2 = Time % 10 = 1
+trigger2 = StateNo < 200
+trigger2 = (StateNo != [39, 40]) && StateNo != 50 && StateNo != 100 && StateNo != 101 && StateNo != 110 && StateNo != 115 && StateNo != 5210 && StateNo != [120, 159]
+trigger2 = StateNo != 0 || Random < 500 || Time > 10
+trigger3 = StateNo = 13 || StateNo = 18 || StateNo = 19
+trigger3 = Time % 5 = 1
+trigger3 = Time > 5
+trigger3 = Random < 200
+trigger4 = floor(fVar(33)) % 10 = 1
+trigger4 = fVar(33) > 10
+trigger5 = StateNo = 151 || StateNo = 153 || StateNo = 155 || StateNo = 5000 || StateNo = 5010 || StateNo = 5020 || StateNo = 5040 || StateNo = 5050
+trigger5 = Time = 1
+trigger5 = Random < 300
+trigger5 = StateNo = 100
+trigger5 = Time % 5 = 1
+trigger6 = StateNo = 358002
+trigger6 = Time % 30 = 0
+v = 47
+Range = 0, 99
+IgnoreHitPause = 0
+
+;----------------------------------------------------------[先行入力(AI)解除]
+[State -3, Precede Input Reset]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = ((Var(48))%10)
+triggerall = StateNo != [39, 40]
+trigger1 = StateType != A
+trigger2 = MoveType = H || (MoveType = A && StateNo >= 200)
+trigger3 = (PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateNo >= 200 && PlayerID(Var(46)),StateType != L)
+var(48) = -((Var(48))%10)	;0
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[確反フラグ解除]
+[State -3, CounterAttackFlag Reset]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = ((Var(48) / 10) % 10)
+trigger1 = MoveType = H
+trigger2 = PlayerID(Var(46)),StateNo < 200
+trigger3 = PlayerID(Var(46)),ctrl
+var(48) = -10
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[グレイズ解除]
+[State -3, GrazeFlag Reset]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = ((Var(48) / 100) % 10)
+trigger1 = MoveType = H
+trigger2 = PlayerID(Var(46)),StateNo >= 200 && (PlayerID(Var(46)),HitDefAttr = SCA, AA, AT)
+trigger3 = ((Helper(20000+id),Var(13)) % 10) || ((Helper(20000+id),Var(13) / 10) % 10)
+trigger4 = StateNo != 100
+var(48) = -100
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[攻撃のリーチ計算]
+[State -3, VarSet]
+type = VarSet
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+triggerall = Var(50)
+trigger1 = 1
+var(50) = 0
+IgnoreHitPause = 1
+
+[State -3, N5B]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = !((Var(50)) % 10)
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 4
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 15
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 4
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(4-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<15
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 4
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 15
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 4
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(4-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 15
+var(50) = 1
+IgnoreHitPause = 1
+
+[State -3, N5C]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = !((Var(50) / 10) % 10)
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 8
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 60-(FrontEdgeBodyDist<70)*5
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 8
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(8-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<60-(FrontEdgeBodyDist<70)*5
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 8
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 60-(FrontEdgeBodyDist<70)*5
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 8
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(8-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 60-(FrontEdgeBodyDist<70)*5
+var(50) = 10
+IgnoreHitPause = 1
+
+[State -3, N5D]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = !((Var(50) / 100) % 10)
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 10
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 32-(FrontEdgeBodyDist<70)*5
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 10
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(10-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1))*Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<32-(FrontEdgeBodyDist<70)*5
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 10
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 32-(FrontEdgeBodyDist<70)*5
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 10
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(10-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 32-(FrontEdgeBodyDist<70)*5
+var(50) = 100
+IgnoreHitPause = 1
+
+[State -3, 2B]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = !((Var(50) / 1000) % 10)
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 7
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 95-(FrontEdgeBodyDist<70)*10
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 7
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(7-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<95-(FrontEdgeBodyDist<70)*10
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 7
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 95-(FrontEdgeBodyDist<70)*10
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 7
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(7-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 95-(FrontEdgeBodyDist<70)*10
+var(50) = 1000
+IgnoreHitPause = 1
+
+[State -3, ブーメラン･ショット“CODE：SC(弱)]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = !((Var(50) / 10000) % 10)
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 8
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 70-(FrontEdgeBodyDist<70)*10
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0 || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 8
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(8-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<70-(FrontEdgeBodyDist<70)*10
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 8
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 70-(FrontEdgeBodyDist<70)*10
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 8
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(8-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 70-(FrontEdgeBodyDist<70)*10
+var(50) = 10000
+IgnoreHitPause = 1
+
+[State -3, ソニック・スローター“CODE：KW”（ノーマル版_弱）]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = !((Var(50) / 100000) % 10)
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 6
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 52-(FrontEdgeBodyDist<70)*10
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 6
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(6-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<52-(FrontEdgeBodyDist<70)*10
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 6
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 52-(FrontEdgeBodyDist<70)*10
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 6
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(6-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 52-(FrontEdgeBodyDist<70)*10
+var(50) = 100000
+IgnoreHitPause = 1
+
+[State -3, ソニック・スローター“CODE：DP”]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = !((Var(50) / 1000000) % 10)
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 5
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 20-(FrontEdgeBodyDist<70)*10
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 5
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(5-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<20-(FrontEdgeBodyDist<70)*10
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 5
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 20-(FrontEdgeBodyDist<70)*10
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 5
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(5-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 20-(FrontEdgeBodyDist<70)*10
+var(50) = 1000000
+IgnoreHitPause = 1
+
+[State -3, ソニック・スローター“CODE：KW”（MAX版）]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = !((Var(50) / 10000000) % 10)
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 9
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 60-(FrontEdgeBodyDist<70)*10
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 9
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(9-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<60-(FrontEdgeBodyDist<70)*10
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 9
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 60-(FrontEdgeBodyDist<70)*10
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 9
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(9-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 60-(FrontEdgeBodyDist<70)*10
+var(50) = 10000000
+IgnoreHitPause = 1
+
+[State -3, 吹っ飛ばし攻撃(00～XIver)）]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+triggerall = PlayerID(Var(46)),MoveType = H && PlayerID(Var(46)),StateType != A && PlayerID(Var(46)),StateNo >= 200
+triggerall = !((Var(50) / 100000000) % 10)
+trigger1 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger1 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 16
+trigger1 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 65-(FrontEdgeBodyDist<70)*10
+trigger2 = (abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0
+trigger2 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 16
+trigger2 = abs(P2BodyDist X+(abs(PlayerID(Var(46)),GetHitVar(xvel))*(1-Helper(20000+id),fVar(1)**(16-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2))<65-(FrontEdgeBodyDist<70)*10
+trigger3 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger3 = PlayerID(Var(46)),GetHitVar(HitShakeTime) > 16
+trigger3 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(0))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 65-(FrontEdgeBodyDist<70)*10
+trigger4 = !((abs(PlayerID(Var(46)),Vel X) = abs(PlayerID(Var(46)),GetHitVar(xvel))) || PlayerID(Var(46)),Vel X = 0)
+trigger4 = PlayerID(Var(46)),GetHitVar(HitShakeTime) <= 16
+trigger4 = abs(P2BodyDist X-((PlayerID(Var(46)),Vel X)*(1-Helper(20000+id),fVar(1)**(16-PlayerID(Var(46)),GetHitVar(HitShakeTime)))/(1-Helper(20000+id),fVar(1)) * Helper(20000+id),fVar(0))*Helper(20000+id),fVar(2)) < 65-(FrontEdgeBodyDist<70)*10
+var(50) = 100000000
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[暗転感知]
+[State -3, 暗転感知カウント]
+type = varadd
+triggerall = !IsHelper
+trigger1 = RoundState = 2
+var(52) = 1
+ignorehitpause = 1
+
+[State -3, 暗転感知暴発防止1]
+type = varset
+triggerall = !IsHelper
+trigger1 = var(53) >= 120
+trigger2 = MoveType != H
+trigger2 = StateNo = [3000, 3999]
+trigger3 = PlayerID(Var(46)),MoveType = H
+var(52) = Helper(20000+id),Var(53)
+ignorehitpause = 1
+
+[State -3, 暗転感知暴発防止2]
+type = varset
+triggerall = !IsHelper
+trigger1 = var(52) = [1, 9];超必らしくない暗転を感知したら0に
+trigger2 = var(53) >= 120
+var(53) = 0
+ignorehitpause = 1
+
+;----------------------------------------------------------[EFB氏謹製, 処理順補正]
+[State -3, 処理順補正Reset]
+type = VarSet
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+trigger1 = Var(54)
+var(54) = 0
+ignorehitpause = 1
+
+[State -3, 処理順補正Set]
+type = VarSet
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+; 自分非攻撃、相手攻撃
+trigger1 = movetype!=A
+trigger1 = PlayerID(Var(46)),movetype=A
+; 自分も相手も攻撃中、または自分も相手も非攻撃中で、相手の方が処理順が先の場合は以下の通り
+;  自分teamside=1の時、自分が3Pかつ相手が2Pの場合
+trigger2 = teamside=1
+trigger2 =!((movetype=A)^^(PlayerID(Var(46)),movetype=A))
+trigger2 =numpartner>0
+trigger2 =partner,id<id
+trigger2 = var(36)-id<=1
+; 自分teamside=2の時、自分が2Pかつ相手が1Pの場合
+trigger3 = teamside=2
+trigger3 = !((movetype=A)^^(PlayerID(Var(46)),movetype=A))
+trigger3 = id-var(50)>=1+(PlayerID(Var(46)),numpartner)
+; 自分teamside=2の時、自分が4Pの場合
+trigger4 = teamside=2
+trigger4 = !((movetype=A)^^(PlayerID(Var(46)),movetype=A))
+trigger4 = numpartner>0
+trigger4 = partner,id<id
+var(54) = 1
+ignorehitpause = 1
+
+;----------------------------------------------------------[ヒット数]
+[State -3, HitNumber Reset]
+type = VarSet
+trigger1 = PlayerID(Var(46)),MoveType != H
+trigger2 = PlayeriD(Var(46)),StateNo < 200
+var(56) = 0
+
+[State -3, HitNumber]
+type = VarAdd
+trigger1 = MoveHit = 1
+var(56) = 1
+
+;----------------------------------------------------------[ステージ端までの距離計算]
+[State -3, 自分ステージ端(後)]
+type = varset
+triggerall = !IsHelper
+trigger1 = NumHelper(30000+id)
+trigger1 = Helper(30000+id),Var(1) > 0
+fvar(30) = ifelse(((PlayerID(Var(46)),facing=-1&&facing=-1)||(PlayerID(Var(46)),facing=1&&facing=-1)),(Helper(30000+id),ParentDist X), (Helper(30000+id),Var(1) - Helper(30000+id),ParentDist X))
+IgnoreHitPause = 1
+
+[State -3, 相手ステージ端(後)]
+type = varset
+triggerall = !IsHelper
+trigger1 = NumHelper(30000+id)
+trigger1 = Helper(30000+id),Var(1) > 0
+fvar(31) = ifelse(((PlayerID(Var(46)),facing=-1&&facing=1)||(PlayerID(Var(46)),facing=1&&facing=1)),(helper(30000+id),P2Dist X), (Helper(30000+id),Var(1) - Helper(30000+id),P2Dist X))
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[起き攻め用距離/起き上がり時間計算]
+;9911 > 20F, 9912 > 9F 1053 > 22F
+[State -3, WakeUpGame Reset]
+type = VarSet
+triggerall = !IsHelper
+triggerall = fVar(32)
+trigger1 = 1
+fvar(32) = 0
+
+[State -3, WakeUpGame Set]
+type = null
+triggerall = !IsHelper
+triggerall = fVar(32) = 0
+triggerall = PlayerID(Var(46)),StateType = L && ((Helper(20000+id),Var(18)) % 100000) && !(Helper(20000+id),Var(18) / 100000)
+trigger1 = PlayerID(Var(46)),StateNo = 9911
+trigger1 = fVar(32) := (29 + (Helper(20000+id),Var(18) % 100000) - PlayerID(Var(46)),Time) || 1
+trigger2 = PlayerID(Var(46)),StateNo = 9912
+trigger2 = fVar(32) := (9 + (Helper(20000+id),Var(18) % 100000) - PlayerID(Var(46)),Time) || 1
+trigger3 = PlayerID(Var(46)),StateNo = 1053
+trigger3 = fVar(32) := (22 + (Helper(20000+id),Var(18) % 100000) - PlayerID(Var(46)),Time) || 1
+trigger4 = PlayerID(Var(46)),StateNo = 5120
+trigger4 = fVar(32) := ((Helper(20000+id),Var(18) % 100000) - PlayerID(Var(46)),Time) || 1
+trigger5 = PlayerID(Var(46)),StateNo = 1556
+trigger5 = fVar(32) := (54 + (Helper(20000+id),Var(18) % 100000) - PlayerID(Var(46)),Time) || 1
+trigger6 = PlayerID(Var(46)),StateNo = 3457
+trigger6 = fVar(32) := (21 + (Helper(20000+id),Var(18) % 100000) - PlayerID(Var(46)),Time) || 1
+trigger7 = PlayerID(Var(46)),StateNo = 5120
+trigger7 = fVar(32) := ((Helper(20000+id),Var(18) % 100000) - PlayerID(Var(46)),Time) || 1
+
+;----------------------------------------------------------[120~131番のカウント]
+[State -3, VarSet]
+type = VarSet
+trigger1 = (StateNo != [120, 131]) && StateNo != 13
+trigger1 = Time
+fvar(33) = 0
+
+;----------------------------------------------------------[相手受け身不能時間カウント]
+[State -3, A defensive fall Reset]
+Type = VarSet
+trigger1 = PlayerID(Var(46)),MoveType != H
+fvar(34) = 0
+IgnoreHitPause = 1
+
+[State -3, ウェブボール受身不能時間]
+type = null
+triggerall = PlayerID(Var(46)),MoveType = H
+triggerall = NumPartner
+triggerall = Partner,Name = "Spiderman"
+triggerall = Partner,authorname = "unkoman"
+;25+6
+trigger1 = PlayerID(Var(46)),StateNo = 1001
+;trigger1 = PlayerID(Var(46)),Time = 1
+trigger1 = fvar(34) := 32 - PlayerID(Var(46)),Time || 1
+;30+6
+trigger2 = PlayerID(Var(46)),StateNo = 1011
+;trigger2 = PlayerID(Var(46)),Time = 1
+trigger2 = fvar(34) := 37 - PlayerID(Var(46)),Time || 1
+;35+6
+trigger3 = PlayerID(Var(46)),StateNo = 1021
+;trigger3 = PlayerID(Var(46)),Time = 1
+trigger3 = fvar(34) := 42 - PlayerID(Var(46)),Time || 1
+;6
+trigger4 = PlayerID(Var(46)),StateNo = 1004
+trigger4 = fvar(34) := 7 - PlayerID(Var(46)),Time || 1
+IgnoreHitPause = 1
+
+[State -3, ウェブスロー受身不能時間]
+type = varset
+triggerall = PlayerID(Var(46)),Movetype = H
+triggerall = NumPartner
+triggerall = Partner,Name = "Spiderman"
+triggerall = Partner,authorname = "unkoman"
+triggerall=PlayerID(Var(46)),stateno = 1508
+triggerall=PlayerID(Var(46)),statetype != L
+trigger1 = StateNo = 1505
+fvar(34)=999
+IgnoreHitPause = 1
+
+[State -3, 特殊ダウン受身不能時間]
+type = null
+triggerall = PlayerID(Var(46)),Movetype = H
+trigger1 = PlayerID(Var(46)),StateType = A
+trigger1 = PlayerID(Var(46)),StateNo = 40274
+trigger1 = fvar(34) := 20 - PlayerID(Var(46)),Time || 1
+trigger2 = PlayerID(Var(46)),StateType = A
+trigger2 = PlayerID(Var(46)),StateNo = 40275
+trigger2 = fVar(34) := 10 - PlayerID(Var(46)),Time || 1
+trigger3 = PlayerID(Var(46)),StateType = A
+trigger3 = PlayerID(Var(46)),StateNo = 45003
+trigger3 = 0 ;fVar(34) := 999 || 1
+IgnoreHitPause = 1
+
+[State -3, 受身不能時間]
+type = VarSet
+triggerall=PlayerID(Var(46)),stateno >= 200
+triggerall=PlayerID(Var(46)),Movetype=H
+triggerall=PlayerID(Var(46)),statetype!=L
+trigger1=PlayerID(Var(46)),gethitvar(fall)
+trigger1=!(PlayerID(Var(46)),hitshakeover)
+trigger1=PlayerID(Var(46)),time=1
+fvar(34)=PlayerID(Var(46)),gethitvar(fall.recovertime)-1
+IgnoreHitPause = 1
+
+[State -3, 受身不能時間]
+type = VarSet
+triggerall=NumEnemy>=2
+triggerall=PlayerID(Var(46)),stateno >= 200
+triggerall=PlayerID(Var(46)),Movetype=H
+triggerall=PlayerID(Var(46)),statetype!=L
+trigger1=PlayerID(Var(46)),gethitvar(fall)
+trigger1=fvar(34)<PlayerID(Var(46)),gethitvar(fall.recovertime)-100
+fvar(34)=PlayerID(Var(46)),gethitvar(fall.recovertime)-100
+IgnoreHitPause = 1
+
+[State -3, 受身不能時間]
+type = VarSet
+triggerall=PlayerID(Var(46)),stateno >= 200
+triggerall=PlayerID(Var(46)),Movetype=H
+triggerall=PlayerID(Var(46)),statetype!=L
+trigger1=!PlayerID(Var(46)),gethitvar(fall.recover)
+trigger1=PlayerID(Var(46)),gethitvar(fall)
+trigger2=PlayerID(Var(46)),stateno=5070
+fvar(34)=999
+IgnoreHitPause = 1
+
+[State -3, ガード硬直]
+type = VarSet
+triggerall=PlayerID(Var(46)),Movetype=H
+triggerall=PlayerID(Var(46)),stateno < 200
+triggerall=PlayerID(Var(46)),Statetype=A
+trigger1=!PlayerID(Var(46)),gethitvar(fall)
+trigger1=!(PlayerID(Var(46)),hitshakeover)
+trigger1=PlayerID(Var(46)),time=1 || fvar(34)=0
+fvar(34)=PlayerID(Var(46)),gethitvar(ctrltime)+PlayerID(Var(46)),gethitvar(hitshaketime)+1
+IgnoreHitPause = 1
+
+[State -3, ガード硬直]
+type = VarSet
+triggerall=PlayerID(Var(46)),Movetype=H
+triggerall=PlayerID(Var(46)),stateno < 200
+triggerall=PlayerID(Var(46)),Statetype!=A
+trigger1=!PlayerID(Var(46)),gethitvar(fall)
+trigger1=!(PlayerID(Var(46)),hitshakeover)
+trigger1=PlayerID(Var(46)),time=1 || fvar(34)=0
+fvar(34)=ifelse(PlayerID(Var(46)),gethitvar(ctrltime)<PlayerID(Var(46)),gethitvar(hittime),PlayerID(Var(46)),gethitvar(ctrltime),PlayerID(Var(46)),gethitvar(hittime))+PlayerID(Var(46)),gethitvar(hitshaketime)+1
+IgnoreHitPause = 1
+
+[State -3, のけぞり時間]
+type = VarSet
+triggerall=PlayerID(Var(46)),Movetype=H
+triggerall=PlayerID(Var(46)),stateno >= 200
+trigger1=!PlayerID(Var(46)),gethitvar(fall)
+trigger1=!(PlayerID(Var(46)),hitshakeover)
+trigger1=PlayerID(Var(46)),time=1
+fvar(34)=PlayerID(Var(46)),gethitvar(hittime)+PlayerID(Var(46)),gethitvar(hitshaketime)+1
+IgnoreHitPause = 1
+
+[State -3, A defensive fall Add]
+type = varadd
+trigger1 = StateNo != [600, 610]
+trigger1 = fvar(34) > 0
+fvar(34) = -1
+IgnoreHitPause = 1
+SuperMoveTime = 9999
+PauseMoveTime = 9999
+
+;----------------------------------------------------------[重力加速度計算]
+[State -3, 重力加速度計算]
+type = VarSet
+triggerall = !IsHelper
+trigger1 = PlayerIDExist(Var(46))
+fVar(39) = ifelse(PlayerID(Var(46)),MoveType != H, PlayerID(Var(46)),Const(Movement.yaccel), PlayerID(Var(46)),GetHitVar(yaccel))
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[相手Vel取得]
+[State -3, VarSet]
+type = VarSet
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+trigger1 = NumEnemy
+fvar(29) = PlayerID(Var(46)),Vel Y
+ignorehitpause = 1
+
+;----------------------------------------------------------[処理順補正の使用]
+[State -3, 処理順補正の下準備1]
+type = VarSet
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+trigger1 = 1
+fvar(35) = (PlayerID(Var(46)),gethitvar(hitshaketime) + PlayerID(Var(46)),hitpausetime)
+
+[State -3, 処理順補正の下準備2]
+type = VarSet
+triggerall = !IsHelper
+triggerall = PlayerIDExist(Var(46))
+trigger1 = 1
+fvar(36) = (fVar(35) + (fVar(35) = 0) * Var(54))
+
+;----------------------------------------------------------[ctrl制御]
+[State -3, assertspecial]
+type = assertspecial
+trigger1 = var(59) > 0
+flag = nowalk
+
+[State -3, assertspecial]
+type = assertspecial
+trigger1 = var(59) > 0
+flag = nostandguard
+flag2 = noairguard
+flag3 = nocrouchguard
+
+;----------------------------------------------------------[根性値計算]
+[State -3, 相手の実際の防御力]
+type = null
+triggerall = Var(56) > 0
+triggerall = PlayerID(Var(46)),GetHitVar(damage)
+trigger1 = StateNo = 200 || StateNo = 205 || StateNo = 230 || StateNo = 235 || StateNo = 310 || StateNo = 311 || StateNo = 312 || StateNo = 313 || StateNo = 314
+trigger1 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(33 * fvar(1) * Const(data.attack)) || 1
+trigger2 = 0	; StateNo = 210	; 何故かバグるので封印(使うことも少ないだろうし)
+trigger2 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(80 / (2 ** HitCount)* fvar(1) * Const(data.attack)) || 1
+trigger3 = StateNo = 215 || StateNo = 245
+trigger3 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(100 * fvar(1) * Const(data.attack)) || 1
+trigger4 = StateNo = 240
+trigger4 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(125* fvar(1) * Const(data.attack)) || 1
+trigger5 = StateNo = 300
+trigger5 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(56 * fvar(1) * Const(data.attack)) || 1
+trigger6 = StateNo = 400
+trigger6 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(41 * fvar(1) * Const(data.attack)) || 1
+trigger7 = 0	; StateNo = 410
+trigger7 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(88 / (2 ** HitCount)* fvar(1) * Const(data.attack)) || 1
+trigger8 = StateNo = 430
+trigger8 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(25 * fvar(1) * Const(data.attack)) || 1
+trigger9 = StateNo = 440
+trigger9 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(116 * fvar(1) * Const(data.attack)) || 1
+trigger10 = StateNo = 500
+trigger10 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(68 * fvar(1) * Const(data.attack)) || 1
+trigger11 = StateNo = 610 || StateNo = 615	; || (StateNo = 645 && Vel X <= 0)
+trigger11 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(91 * fvar(1) * Const(data.attack)) || 1
+trigger12 = 0	; StateNo = 640
+trigger12 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(128 / (2 ** HitCount) * fvar(1) * Const(data.attack)) || 1
+trigger13 = (StateNo = 645 && (Var(5) != 1 && Var(5) != 4))
+trigger13 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(91 * fvar(1) * Const(data.attack)) || 1
+trigger14 = StateNo = 700
+trigger14 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(IfElse(var(5) = 1 || var(5) = 4,108,91)* fvar(1) * Const(data.attack)) || 1
+trigger15 = (StateNo = 1000 && AnimElemTime(7) < 0)
+trigger15 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(58 * fvar(1) * Const(data.attack)) || 1
+trigger16 = (StateNo = 1001 && AnimElemTime(7) < 0)
+trigger16 = fvar(28) := PlayerID(Var(46)),GetHitVar(damage)*1000000/(83 * fvar(1) * Const(data.attack)) || 1
+
+ ;|| (StateNo = 600 && Vel X <= 0)
+ ;42*
+IgnoreHitPause = 1
+
+[State -3, 相手の実際の防御力, 初期設定]
+type = VarSet
+trigger1 = fVar(28) = 0
+fvar(28) = 1000000/PlayerID(Var(46)),Const(data.defence)
+IgnoreHitPause = 1
+
+;----------------------------------------------------------[加速度計算]
+[State -3, Accelaration Calculate]
+type = Null
+triggerall = PlayerID(Var(46)),StateType = A
+trigger1 = fVar(25) := ceil((PlayerID(Var(46)),Pos Y-fVar(26)-fVar(27))*1000.0)/1000.0 || 1;少数四桁切り上げ
+trigger1 = fVar(26) := PlayerID(Var(46)),Pos Y - fVar(27) || 1
+trigger1 = fVar(27) := PlayerID(Var(46)),Pos Y || 1
+
+[State -3, Accelaration Substitution]
+type = VarSet
+trigger1 = PlayerID(Var(46)),StateType = A
+trigger1 = fVar(25) >= 0 && fVar(25) < 1
+fVar(24) = fVar(25)
+IgnoreHitPause = 1
+

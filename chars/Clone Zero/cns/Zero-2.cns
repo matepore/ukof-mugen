@@ -1,0 +1,86 @@
+;============================================================================
+; States that are always executed (use statedef -2)
+;============================================================================
+[Statedef -2]
+
+[State -2, poweradd adjustment multiplier]
+type = VarSet
+trigger1 = 1
+fvar(10) = 0.75
+;poweradd adjustment multiplier (positive float is acceptable)
+;suggestions:
+;set to 0.25 - 0.3 if you want Clone Zero to gain power like a common character.
+;set to 1.0 if you want Clone Zero to gain power as a mighty BOSS.
+
+[State -2, 1]
+type = assertspecial
+trigger1 = 1
+flag = nojugglecheck
+
+;----------------------
+; ストライカーの顔位置決定
+;----------------------
+[State -2, 1]
+type = VarSet
+triggerall = Var(8) != 1
+triggerall = Var(8) != 2
+trigger1 = Facing = 1
+var(8) = 1
+
+[State -2, 2]
+type = VarSet
+triggerall = Var(8) != 1
+triggerall = Var(8) != 2
+trigger1 = Facing = -1
+var(8) = 2
+
+;--------------------
+; ストライカーの顔
+;--------------------
+[State -2, 4]
+type = Explod
+trigger1 = var(8) = 1
+trigger1 = NumExplod(2400) = 0
+anim = 2400
+ID = 2400
+scale = 0.75,0.75
+pos = 10,208
+postype = left
+ontop = 1
+BindTime = -1
+ownpal = 1
+
+;--------------------
+; ストライカーの顔（逆）
+;--------------------
+[State -2, 5]
+type = Explod
+trigger1 = var(8) = 2
+trigger1 = NumExplod(2401) = 0
+anim = 2401
+ID = 2401
+scale = 0.75,0.75
+pos = -10,208
+postype = right
+ontop = 1
+BindTime = -1
+ownpal = 1
+
+
+
+[State -2, デバック(変数確認)]
+Type = DisplayToClipBoard
+Trigger1 = 1
+Text = "p2stateno=%d, FrontEBDist=%d, BackEBDist=%d"
+Params = p2stateno,floor(FrontEdgeBodyDist),floor(backEdgeBodyDist)
+IgnoreHitPause = 1
+
+;表示を下に加える
+[State -2, デバッグ表示その3]
+type = AppendToClipboard
+trigger1 = 1
+text = "\nP2BodyDist X=%d,Y=%d, Vel X=%d/10,Y=%d/10,"
+params = floor(P2BodyDist X),ceil(P2BodyDist Y),ceil(Vel X*10),floor(Vel Y*10),
+ignorehitpause = 1
+
+

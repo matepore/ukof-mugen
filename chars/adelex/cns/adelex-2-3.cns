@@ -1,0 +1,463 @@
+;-----------------------------------------------------------------------------
+[Statedef -2];常時監視ステート(相手に行動を制御されても関係無く常に実行される)
+;-----------------------------------------------------------------------------
+;-----------------------------------------------------------------------------
+
+[State -2, 二人目のイントロ]
+type = ChangeState             ;二人目でもイントロを作る
+value = 190                    ;イントロへ
+triggerall = RoundsExisted = 0 ;自分が初参戦時
+triggerall = TeamMode = Turns  ;ターンモード
+trigger1 = stateno = 5900      ;5900番
+
+
+;ここでtrigger用に自分の初期ライフを確認します
+[State -2, ライフ確認]
+type = VarSet
+triggerall = RoundState = [0,1] ;開始前の間
+trigger1 = RoundNo = 1          ;一試合目
+trigger2 = TeamMode = Turns     ;5900でイントロを作らないと ↓
+trigger2 = RoundsExisted = 0    ;これは使えません
+v = 22
+value = Life   ;Var(22)に自分のライフを保存
+
+[State -2, ライフ取得ミス対策]
+type = VarSet
+triggerall = Var(22) = [0,100] ;ライフが100以下と認識されたら
+triggerall = Time = 1
+trigger1 = RoundNo = 1
+trigger2 = RoundsExisted = 0
+v = 22
+value = const(data.life) ;自分のデータに書かれたLifeにする
+
+;────────────────────────────────────────
+;画面端めくり防止
+[State -2]
+Type = Width
+Trigger1 = P2Dist X >= 0
+edge = 3,-3
+
+[State -2]
+Type = Width
+Trigger1 = P2Dist X < 0
+edge = -3,3
+
+;--------------------------------------------------------------------
+[State -2, モード判定]
+Type = VarSet
+trigger1 = palno = [1,6]
+v = 30
+value = 0
+
+[State -2, モード判定]
+Type = VarSet
+trigger1 = palno >= 7
+v = 30
+value = 1
+
+;ボスモード攻撃力
+[State -2, 攻撃力]
+type = AttackMulSet
+TriggerAll = RoundState > 1
+trigger1 = var(30) = 1
+value = 1.2
+
+;ボスモード防御力
+[State -2, 防御力]
+type = DefenceMulSet
+TriggerAll = RoundState > 1
+trigger1 = var(30) = 1
+value = 0.7
+
+[State -2, MAX2]
+Type = Varset
+TriggerAll =!var(12)
+TriggerAll = Alive
+TriggerAll = RoundState = 2
+Trigger1 = (1000*Life/LifeMax) <= 800
+v = 12
+value = 1
+ignorehitpause = 1
+persistent = 0
+
+[State -2, MAX3]
+Type = Varset
+TriggerAll = var(12) < 2
+TriggerAll = Alive
+TriggerAll = RoundState = 2
+Trigger1 = (1000*Life/LifeMax) <= 300
+v = 12
+value = 2
+ignorehitpause = 1
+persistent = 0
+
+;----------------------------------------------------------------------------
+;未完成な相手キャラによって、不具合が起きても自己解決するシステム(仮)
+[State -2, Y座標自己修復]
+type = PosSet
+triggerall = RoundState = 2
+trigger1 = stateno = [0,12]      ;立ち＆屈み時
+trigger1 = floor(Pos Y) = [-2,3] ;立ち位置が僅かにずれていたらすぐ修正
+y = 0
+[State -2, Y座標自動修正]
+type = PosAdd
+triggerall = RoundState = 2
+triggerall = Life < Var(22)  ;トレーニングでCtrl+Iを使うときに配慮
+trigger1 = stateno = [0,30]  ;歩きも含める
+trigger1 = floor(Pos Y) < -2 ;立ち位置が大きくずれていたら移動する
+y = 2
+[State -2, Y座標自動修正]
+type = PosAdd
+triggerall = RoundState = 2
+triggerall = Life < Var(22)
+trigger1 = stateno = [0,30]
+trigger1 = floor(Pos Y) > 2 ;同じく
+y = -2
+[State -2, Y座標強制修復]               ;GATTより一言…
+type = ChangeState                      ;この辺のシステムは
+triggerall = RoundState = 2             ;うちの咲夜に搭載しているもので
+triggerall = ctrl = 0                   ;かなりオリジナルな設定です。
+triggerall = alive = 1                  ;いらない、または重い処理を使う際は削除してください
+triggerall = !Lose
+trigger1 = Pos Y < -1800 ;空高く飛ばされてしまっても体勢を立て直して落下する
+trigger1 = GameTime % 10 = 0
+trigger2 = Pos Y > 480   ;地中深くに埋められてしまっても這い上がってくる
+trigger2 = GameTime % 10 = 0
+value = 40
+;----------------------------------------------------------------------------
+
+;♪
+
+;----------------------------------------------------------------------------
+;デバッグ支援記述集
+
+; ※ この一連の記述は、キャラが完成したら消すか";"を付けて無効化しましょう。
+;　　僅かにでも処理が重くなることが理由です。（ちなみにNullではダメです）
+
+
+;デバッグモードに白い文字の表示を加える
+[State -2, デバッグ表示]
+type = DisplayToClipboard
+trigger1 = 1
+text = "V1-C=%d,V3-J=%d,V4-D=%d,V5-B=%d,V20-A=%d"
+params = var(1),var(3),var(4),var(5),var(20)
+ignorehitpause = 1
+
+;表示を横に加える
+[State -2, デバッグ表示その2]
+type = AppendToClipboard
+trigger1 = 1
+text = " p2stateno=%d,V3-R=%d,Pos X=%d,Y=%d"
+params = p2stateno,var(3),ceil(Pos X),floor(Pos Y)
+ignorehitpause = 1
+
+;表示を下に加える
+[State -2, デバッグ表示その3]
+type = AppendToClipboard
+trigger1 = 1
+text = "\nDist X=%d,Y=%d, Vel X=%d/10,Y=%d/10 : Power=%d"
+params = floor(P2BodyDist X),ceil(P2BodyDist Y),ceil(Vel X*10),floor(Vel Y*10),Power
+ignorehitpause = 1
+
+
+; ※ 関数説明：floor(1.5) = 1、ceil(1.5) = 2になります。 小数を含む場合によく使います。
+;　　小数を詳しく見たい場合は%dの代わりに%fを使います。 MUGENに限らず結構常識です。
+;　　Vel X*10に対し、表記はVel X=%d/10になっています。 10で割った数値が目安のVel Xです。
+;　　PosとDistはfloorとceilが逆になっています。
+
+
+
+
+;無人デバッグ用（かなり長時間CPUに任せるデバッグ法）
+;ウォッチ、サバイバル(ctrl+2使用)のチーム戦が良いと思う
+;[State -2, バグ発生警報]
+;type = VarSet
+;triggerall = RoundState = 2
+;triggerall = Var(20) >= 0
+;trigger1 = floor(Pos Y) < -5 ;よくあるバグとして、宙に浮かぶことが挙げられる
+;trigger1 = stateno = [0,22]  ;宙で立つ、しゃがむ、歩く
+;trigger1 = Time = 1
+;trigger2 = Anim != [5110,5120]
+;trigger2 = Ctrl = 0     ;行動不能のまま
+;trigger2 = Life > 0     ;まだ息があり
+;trigger2 = !Lose        ;負けていないのに
+;trigger2 = Time = 2047  ;長時間固まる
+;var(20)  = -4           ;上記バグが出るとセットされます。
+
+;[State -2, 永久戦闘デバッグ]
+;type = LifeAdd
+;trigger1 = TeamMode = Simul ;必要に応じて条件を変える
+;value = 20  ;HPが減らない
+;ignorehitpause = 1
+
+
+[State -3, 成功したときの残像]
+type = AfterImage
+trigger1 = Movetype = H
+time = 1
+
+[State 1001,]
+type = RemoveExplod
+trigger1 = Anim != 1500
+trigger2 = Movetype != A
+ID = 1500
+
+[State 1001,]
+type = RemoveExplod
+trigger1 = Anim != 1550
+trigger2 = Movetype != A
+ID = 1550
+
+[State 1001,]
+type = RemoveExplod
+trigger1 = Anim != 1215
+trigger2 = Movetype != A
+ID = 2000
+
+[State 1001,]
+type = RemoveExplod
+trigger1 = Anim != 2505
+trigger2 = Movetype != A
+ID = 2500
+
+[State 1000, 音を鳴らす]
+type = PlaySnd
+trigger1 = P2Movetype = H
+trigger1 = P2Stateno = 335
+trigger1 = P2Statetype = A
+trigger1 = enemy, Pos Y >= 0
+trigger1 = enemy, Vel Y > 0
+value = s12,8
+
+[State 100,]
+type = StopSnd
+trigger1 = command != "holdfwd"
+trigger2 = Anim != 100
+channel = 6
+
+
+;※※※※※※※※※※※※※※※※※※※※ハイジャンプ・東方萃夢想風味
+;理論は簡単
+;ハイジャンプコマンドを入れた「瞬間」、varスイッチを１にする。
+;でハイジャンプのコマンドは最後がU、つまりジャンプする。
+;そしてジャンプステート５０の時にvarスイッチが１以上ならveladdで加速します。
+;varスイッチを０にするトリガーは「ステート５０の２フレーム目」です。
+
+[State -3, コマンドを入れたらVarをON] 
+type = VarSet
+triggerall = !var(59)
+trigger1 = command = "jump"
+trigger1 = ctrl
+trigger1 = statetype = S
+v = 3
+value = 1
+
+[State -3, sysvarを引継ぐ]
+type = VarSet
+triggerall = !var(59)
+trigger1 = Var(3) = 1
+trigger1 = stateno = 40 ;ジャンプする前のステート
+trigger1 = AnimTime = 0 ;ジャンプ方向を決めるsysvarがリセットされる寸前
+var(3) = ifelse(sysvar(1)=0, 2, ifelse(sysvar(1)=1, 3, 4))
+
+[State -3, sysvarを引継ぐ]
+type = VarSet
+triggerall = var(59)
+trigger1 = stateno = 44 ;ジャンプする前のステート
+trigger1 = AnimTime = 0 ;ジャンプ方向を決めるsysvarがリセットされる寸前
+var(3) = 3
+
+[State -3, varをOFFにするステート]
+type = VarSet
+triggerall = Time = 2
+trigger1 = stateno = 50
+trigger2 = stateno != [40,59]
+v = 3
+value = 0
+
+[State -3, 前にボタンを押してたら前にも加速]
+type = VelAdd
+trigger1 = var(3) = 3
+trigger1 = stateno = 50
+y = -0.8
+x = 2
+
+[State -3, 後ろなら後ろに加速]
+type = VelAdd
+trigger1 = var(3) = 4
+trigger1 = stateno = 50
+y = -0.8
+x = -2.1
+
+[State -3, 垂直ジャンプにveladdを使って上に加速]
+type = VelAdd
+trigger1 = var(3) = 2
+trigger1 = stateno = 50
+y = -2
+
+[State -3, 成功したときの残像]
+type = AfterImage
+trigger1 = var(3) >= 1
+trigger1 = stateno = 50
+time = 25
+trans = add1
+length = 4
+timeGap = 3
+frameGap = 1
+palBright = 0, 0, 0
+palContrast = 128, 128, 128
+palAdd = 0, 0, 0
+palMul = 1, 1, 1
+
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;対AI殺しとか
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[State -3,ジャンプ禁止]
+Type = ParentVarSet
+Trigger1 = EnemyNear(Parent,fvar(37)),Name="IGNIZ"&&EnemyNear(Parent,fvar(37)),AuthorName="GONZO-"&&EnemyNear(Parent,var(56)),StateNo=1000
+Trigger2 = EnemyNear(Parent,fvar(37)),Name="Kain"&&EnemyNear(Parent,fvar(37)),AuthorName="abuhachi"
+Trigger2 = EnemyNear(Parent,fvar(37)),NumHelper(1005)||EnemyNear(Parent,fvar(37)),NumHelper(3150)||EnemyNear(Parent,var(56)),NumHelper(3350)
+fvar(33) = 2
+
+[State -3,起き攻め禁止]
+Type = ParentVarSet
+Trigger1 = EnemyNear(Parent,fvar(37)),Name="Mizuchi"&&EnemyNear(Parent,fvar(37)),AuthorName="TightRiam"
+Trigger2 = EnemyNear(Parent,fvar(37)),Name="Goro Daimon"&&EnemyNear(Parent,fvar(37)),AuthorName="Sander71113"
+Trigger3 = EnemyNear(Parent,fvar(37)),Name="EFZaya"&&EnemyNear(Parent,fvar(37)),AuthorName="frule"
+fvar(33) = 3
+
+[State -3,↑解除]
+Type = ParentVarAdd
+Trigger1 = Parent,fvar(33) > 0
+fvar(33) = -1
+
+;--------------------------------------------------------------------------------------
+; ガード用
+;--------------------------------------------------------------------------------------
+[State -3, 下段]
+Type = ParentVarSet
+Trigger1 = EnemyNear(Parent,fvar(37)),Name="MAXIMA_PRO"&&EnemyNear(Parent,fvar(37)),AuthorName="CROSS†CAT"&&EnemyNear(Parent,fvar(37)),StateNo=[3400,3414]
+Trigger2 = EnemyNear(Parent,fvar(37)),Name="KUSANAGI"&&EnemyNear(Parent,fvar(37)),AuthorName="jin"&&EnemyNear(Parent,fvar(37)),StateNo=1640
+Trigger3 = EnemyNear(Parent,fvar(37)),Name="Krizalid"&&EnemyNear(Parent,fvar(37)),AuthorName="Nyankoro"&&EnemyNear(Parent,fvar(37)),StateNo=[1040,1041]
+Trigger4 = EnemyNear(Parent,fvar(37)),Name="Kohaku"&&EnemyNear(Parent,fvar(37)),AuthorName="⑨"&&EnemyNear(Parent,fvar(37)),StateNo=1005
+Trigger5 = EnemyNear(Parent,fvar(37)),Name="Duck King"&&EnemyNear(Parent,fvar(37)),AuthorName="ahuron"&&EnemyNear(Parent,fvar(37)),StateNo=1200
+Trigger6 = EnemyNear(Parent,fvar(37)),Name="Momoko"&&EnemyNear(Parent,fvar(37)),AuthorName="Juke Kisaragi"&&EnemyNear(Parent,fvar(37)),StateNo=1210
+Trigger7= EnemyNear(Parent,fvar(37)),Name="Fliz"&&EnemyNear(Parent,fvar(37)),AuthorName="Juke Kisaragi"&&(EnemyNear(Parent,fvar(37)),NumHelper(1548)||EnemyNear(Parent,fvar(37)),NumHelper(1549))
+Trigger8= EnemyNear(Parent,fvar(37)),Name="millia"&&EnemyNear(Parent,fvar(37)),AuthorName="muteki"&&EnemyNear(Parent,fvar(37)),StateNo=1500
+Trigger9= EnemyNear(Parent,fvar(37)),Name="jam"&&EnemyNear(Parent,fvar(37)),AuthorName="muteki"&&EnemyNear(Parent,fvar(37)),StateNo=210
+fvar(38) = 2
+
+[State -3, 中段]
+Type = ParentVarSet
+Trigger1 = EnemyNear(Parent,fvar(37)),Name="K'"&&EnemyNear(Parent,fvar(37)),AuthorName="Hazakura"&&EnemyNear(Parent,fvar(37)),StateNo=[250,255]
+Trigger2 = EnemyNear(Parent,fvar(37)),Name="Yagami-AKOF"&&EnemyNear(Parent,fvar(37)),AuthorName="jin"&&EnemyNear(Parent,fvar(37)),StateNo=[1400,1450]
+Trigger3 = EnemyNear(Parent,fvar(37)),Name="d-Yagami"&&EnemyNear(Parent,fvar(37)),AuthorName="jin"&&EnemyNear(Parent,fvar(37)),StateNo=[1400,1450]
+Trigger4 = EnemyNear(Parent,fvar(37)),Name="KUSANAGI"&&EnemyNear(Parent,fvar(37)),AuthorName="jin"&&EnemyNear(Parent,fvar(37)),StateNo=1620
+Trigger5 = EnemyNear(Parent,fvar(37)),Name="Foxy"&&EnemyNear(Parent,fvar(37)),AuthorName="Ahuron"&&((EnemyNear(Parent,fvar(37)),StateNo=[250,255])||(EnemyNear(Parent,fvar(37)),StateNo=[1300,1310]))
+Trigger6 = EnemyNear(Parent,fvar(37)),Name="Syo Hayate"&&EnemyNear(Parent,fvar(37)),AuthorName="Ahuron"&&EnemyNear(Parent,fvar(37)),StateNo=1000||EnemyNear(Parent,fvar(37)),StateNo=2001||EnemyNear(Parent,fvar(37)),StateNo=2100
+Trigger7 = EnemyNear(Parent,fvar(37)),Name="Yuki"&&EnemyNear(Parent,fvar(37)),AuthorName="Ahuron"&&EnemyNear(Parent,fvar(37)),StateNo=250
+Trigger8 =(EnemyNear(Parent,fvar(37)),Name="K'"||EnemyNear(Parent,fvar(37)),Name="BK'"||EnemyNear(Parent,fvar(37)),Name="kill")&&EnemyNear(Parent,fvar(37)),AuthorName="BLACK"&&EnemyNear(Parent,fvar(37)),StateNo=[330,331]
+Trigger9 = EnemyNear(Parent,fvar(37)),Name="K9999"&&EnemyNear(Parent,fvar(37)),AuthorName="BLACK"&&EnemyNear(Parent,fvar(37)),StateNo=330
+Trigger10= EnemyNear(Parent,fvar(37)),Name="Sula"&&EnemyNear(Parent,fvar(37)),AuthorName="NAO&T-K"&&EnemyNear(Parent,fvar(37)),StateNo=[1000,1051]
+Trigger11= EnemyNear(Parent,fvar(37)),Name="Gelato"&&EnemyNear(Parent,fvar(37)),AuthorName="Aoba"&&EnemyNear(Parent,fvar(37)),StateNo=720
+Trigger12= EnemyNear(Parent,fvar(37)),Name="Nao"&&EnemyNear(Parent,fvar(37)),AuthorName="NAO&M."&&EnemyNear(Parent,fvar(37)),StateNo=[500,530]
+Trigger13= EnemyNear(Parent,fvar(37)),Name="Magaki"&&EnemyNear(Parent,fvar(37)),AuthorName="jin"&&EnemyNear(Parent,fvar(37)),NumHelper(1321)
+Trigger14= EnemyNear(Parent,fvar(37)),Name="Terry"&&EnemyNear(Parent,fvar(37)),AuthorName="vyn"&&(EnemyNear(Parent,fvar(37)),StateNo=300||EnemyNear(Parent,fvar(37)),StateNo=310)
+Trigger15= EnemyNear(Parent,fvar(37)),AuthorName="muteki"||EnemyNear(Parent,fvar(37)),AuthorName="Akutagawa"&&EnemyNear(Parent,fvar(37)),StateNo=240
+Trigger16= EnemyNear(Parent,fvar(37)),Name="testa"&&EnemyNear(Parent,fvar(37)),AuthorName="muteki"&&EnemyNear(Parent,fvar(37)),StateNo=205
+Trigger17= EnemyNear(Parent,fvar(37)),Name="millia"&&EnemyNear(Parent,fvar(37)),AuthorName="muteki"&&EnemyNear(Parent,fvar(37)),StateNo=215
+Trigger18= EnemyNear(Parent,fvar(37)),Name="BRIDGET"&&EnemyNear(Parent,fvar(37)),AuthorName="muteki"&&EnemyNear(Parent,fvar(37)),StateNo=215
+Trigger19= EnemyNear(Parent,fvar(37)),Name="eddie"&&EnemyNear(Parent,fvar(37)),AuthorName="muteki"&&EnemyNear(Parent,fvar(37)),StateNo=215
+Trigger20= EnemyNear(Parent,fvar(37)),Name="faust"&&EnemyNear(Parent,fvar(37)),AuthorName="muteki"&&EnemyNear(Parent,fvar(37)),StateNo=235
+Trigger21= EnemyNear(Parent,fvar(37)),Name="johnny"&&EnemyNear(Parent,fvar(37)),AuthorName="muteki"&&EnemyNear(Parent,fvar(37)),StateNo=1500||EnemyNear(Parent,fvar(37)),StateNo=[3500,3501]
+Trigger22= EnemyNear(Parent,fvar(37)),Name="order-sol=Badguy"&&EnemyNear(Parent,fvar(37)),StateNo=432
+fvar(38) = 3
+
+[State -3, 投げ]
+Type = ParentVarSet
+Trigger1 = EnemyNear(Parent,fvar(37)),Name="Alex"&&EnemyNear(Parent,fvar(37)),AuthorName="GM"
+Trigger1 = EnemyNear(Parent,fvar(37)),StateNo=1000||EnemyNear(Parent,fvar(37)),StateNo=1010||P2StateNo=1020||P2StateNo=1500||P2StateNo=1510||P2StateNo=1520||P2StateNo=3000
+Trigger2 = EnemyNear(Parent,fvar(37)),Name="Hugo"&&EnemyNear(Parent,fvar(37)),AuthorName="GM"
+Trigger2 = P2StateNo=1000||P2StateNo=1010||P2StateNo=1020||P2StateNo=1100||P2StateNo=1110||P2StateNo=1120||P2StateNo=1200||P2StateNo=1210||P2StateNo=1220||P2StateNo=1300||P2StateNo=1310||P2StateNo=1320||P2StateNo=3000||P2StateNo=3100
+Trigger3 = EnemyNear(Parent,fvar(37)),Name="The Griffon"&&EnemyNear(Parent,fvar(37)),AuthorName="GM"
+Trigger3 = P2StateNo=1000||P2StateNo=1010||P2StateNo=1020||P2StateNo=1300||P2StateNo=1400||P2StateNo=1500||P2StateNo=3000||P2StateNo=3010
+Trigger4 = EnemyNear(Parent,fvar(37)),Name="Makoto"&&EnemyNear(Parent,fvar(37)),AuthorName="NHK"&&EnemyNear(Parent,fvar(37)),StateNo=[1800,1801]
+Trigger5 = EnemyNear(Parent,fvar(37)),Name="Mizuchi"&&EnemyNear(Parent,fvar(37)),AuthorName="ahuron"&&EnemyNear(Parent,fvar(37)),StateNo = 2000
+Trigger6 = EnemyNear(Parent,fvar(37)),Name="Goro Daimon"&&EnemyNear(Parent,fvar(37)),AuthorName="Sander71113"&&EnemyNear(Parent,fvar(37)),StateNo = 2400
+Trigger7 = EnemyNear(Parent,fvar(37)),Name="Cammy"&&EnemyNear(Parent,fvar(37)),AuthorName="Phantom.of.the.Server"&&EnemyNear(Parent,fvar(37)),StateNo = [1300,1320]
+fvar(38) = 4
+
+[State -3, 解除]
+Type = ParentVarAdd
+Trigger1 = Parent,fvar(38) > 0
+fvar(38) = -1
+
+;--------------------------------------------------------------------------------------
+[State -3, AttackDist足らず]
+Type = ParentVarSet
+TriggerAll = EnemyNear(0),facing!=facing
+Trigger1 = EnemyNear(0),Name="K9999"&&EnemyNear(0),AuthorName="BLACK"&&EnemyNear(0),StateNo=[790,792]
+Trigger2 = EnemyNear(0),Name="K9999"&&EnemyNear(0),AuthorName="BLACK"&&EnemyNear(0),StateNo=3010&&EnemyNear(0),Time<117
+Trigger3 = EnemyNear(0),Name="K9999"&&EnemyNear(0),AuthorName="BLACK"&&EnemyNear(0),StateNo=3015&&EnemyNear(0),Time<125
+Trigger4 = EnemyNear(0),Name="K9999"&&EnemyNear(0),AuthorName="BLACK"&&EnemyNear(0),StateNo=[3020,3035]
+Trigger5 = EnemyNear(0),Name="Nameless"&&EnemyNear(0),AuthorName="Ahuron"&&EnemyNear(0),StateNo=2100&&EnemyNear(0),Time<115
+Trigger6 = EnemyNear(0),Name="Nameless"&&EnemyNear(0),AuthorName="Ahuron"&&EnemyNear(0),StateNo=2200
+Trigger7 = EnemyNear(0),Name="Sula"&&EnemyNear(0),AuthorName="NAO&T-K"&&EnemyNear(0),StateNo=2050&&EnemyNear(0),Time<50
+Trigger8 = EnemyNear(0),Name="Sula"&&EnemyNear(0),AuthorName="NAO&T-K"&&EnemyNear(0),StateNo=4000
+Trigger9 = EnemyNear(0),Name="Sula"&&EnemyNear(0),AuthorName="NAO&T-K"&&EnemyNear(0),StateNo=7500
+Trigger10= EnemyNear(0),Name="Gelato"&&EnemyNear(0),AuthorName="Aoba"&&((EnemyNear(0),StateNo=[1000,1005])||EnemyNear(0),NumProjID(1002)||EnemyNear(0),NumProjID(1004))
+Trigger11= EnemyNear(0),Name="Krizalid"&&EnemyNear(0),AuthorName="Nyankoro"&&StateType!=A&&EnemyNear(0),StateNo=1040&&EnemyNear(0),Time<35
+Trigger12= EnemyNear(0),Name="Krizalid"&&EnemyNear(0),AuthorName="GoD_Ryu"&&EnemyNear(0),StateNo=1000;&&EnemyNear(0),Time<35
+Trigger13= EnemyNear(0),Name="KENSHIRO"&&EnemyNear(0),AuthorName="Drowin hokuto"&&EnemyNear(0),StateNo=2000&&EnemyNear(0),Time<80
+Trigger14= EnemyNear(0),Name="K'"&&EnemyNear(0),AuthorName="BLACK"&&StateType!=A&&((EnemyNear(0),StateNo=[1000,1007])||EnemyNear(0),NumProjID(1000))
+Trigger15= EnemyNear(0),Name="K9999"&&EnemyNear(0),AuthorName="BLACK"&&((EnemyNear(0),StateNo=[1000,1005])||EnemyNear(0),StateNo=3016)
+Trigger16= EnemyNear(0),Name="A-igniz"&&EnemyNear(0),AuthorName="Chin-ya"&&EnemyNear(0),StateNo=1000
+fvar(35) = 2
+
+[State -3, 完全無敵・全体攻撃･ろーぜんさくりふぁいす]
+Type = ParentVarSet
+Trigger1 = EnemyNear(0),Name="IGNIZ"&&EnemyNear(0),AuthorName="GONZO-"&&EnemyNear(0),StateNo=[2100,2101]
+Trigger2 = EnemyNear(0),Name="A-igniz"&&EnemyNear(0),AuthorName="Chin-ya"&&EnemyNear(0),StateNo=4001&&EnemyNear(0),AnimTime<-48
+Trigger3 = EnemyNear(0),Name="ORIGINAL ZERO"&&EnemyNear(0),AuthorName="ICCHA"&&EnemyNear(0),StateNo=[3100,3120]
+Trigger4 = EnemyNear(0),Name="ZERO"&&EnemyNear(0),AuthorName="GONZO-"&&EnemyNear(0),StateNo=[3020,3051]
+Trigger5 = EnemyNear(0),Name="ZERO"&&EnemyNear(0),AuthorName="ICCHA"&&((EnemyNear(0),StateNo=[3100,3120])||(EnemyNear(0),StateNo=[3200,3220]))
+Trigger6 = EnemyNear(0),Name="Krizalid"&&EnemyNear(0),AuthorName="GoD_Ryu"&&EnemyNear(0),StateNo=[3000,3010]
+Trigger7 = EnemyNear(0),Name="Magaki"&&EnemyNear(0),AuthorName="jin"&&EnemyNear(0),StateNo=3000
+Trigger8 = EnemyNear(0),Name="MUKAI"&&EnemyNear(0),AuthorName="GONZO-"&&EnemyNear(0),StateNo=1200
+Trigger9 = EnemyNear(0),Name="Mizuchi"&&(EnemyNear(0),AuthorName="ahuron"||EnemyNear(0),AuthorName="TightRiam")&&(EnemyNear(0),StateNo = 2100||(EnemyNear(0),StateNo = [2200,2210]))
+Trigger10= EnemyNear(0),Name="Gill"&&EnemyNear(0),AuthorName="GM"&&EnemyNear(0),StateNo=3200
+Trigger11= EnemyNear(0),Name="Sachiel"&&EnemyNear(0),AuthorName="Rikard"&&(EnemyNear(0),StateNo=3100||EnemyNear(0),StateNo=3500)
+Trigger12= EnemyNear(0),Name="Shiki_Nanaya"&&EnemyNear(0),AuthorName="Toma & Raien Makoto"&&(EnemyNear(0),StateNo=1100||(EnemyNear(0),StateNo=[1250,1254]))
+Trigger13= EnemyNear(0),Name="Ciel"&&EnemyNear(0),AuthorName="Shiroto"&&EnemyNear(0),StateNo=1220
+Trigger14= EnemyNear(0),Name="CHIEL"&&EnemyNear(0),AuthorName="QWERTY"&&EnemyNear(0),StateNo=[2000,2003]
+Trigger15= EnemyNear(0),Name="HIRO"&&EnemyNear(0),AuthorName="IF"&&EnemyNear(0),var(13)
+Trigger16= EnemyNear(0),Name="FUWA JIN"&&EnemyNear(0),AuthorName="Tin"&&EnemyNear(0),StateNo=[13000,13100]
+Trigger17= EnemyNear(0),Name="fliz"&&EnemyNear(0),AuthorName="Juke Kisaragi"&&(EnemyNear(0),StateNo=3500||EnemyNear(0),StateNo=3700)
+Trigger18= EnemyNear(0),Name="Gelato"&&EnemyNear(0),AuthorName="Aoba"&&EnemyNear(0),StateNo=3200
+Trigger19= EnemyNear(0),Name="I-NO"&&EnemyNear(0),AuthorName="muteki"&&EnemyNear(0),StateNo=3500
+Trigger20= EnemyNear(0),Name="Mildred_Avallone"&&EnemyNear(0),AuthorName="Ina"&&EnemyNear(0),StateNo=[500,503]
+Trigger21= EnemyNear(0),Name="K9999"&&EnemyNear(0),AuthorName="BLACK"&&EnemyNear(0),StateNo=[3020,3035]
+Trigger22= EnemyNear(0),Name="Warachia"&&EnemyNear(0),AuthorName="⑨"&&EnemyNear(0),StateNo=[3000,3050]
+Trigger23= EnemyNear(0),Name="Mizuchi"&&EnemyNear(0),AuthorName="TightRiam"&&(EnemyNear(0),StateNo=1100||EnemyNear(0),StateNo=1151)
+Trigger24= EnemyNear(0),Name="MAXIMA_PRO"&&EnemyNear(0),AuthorName="CROSS†CAT"&&EnemyNear(0),StateNo=[3400,3414]
+fvar(35) = 3
+
+[State -3, ガー不関連]
+Type = ParentVarSet
+TriggerAll = P2Dist X > 0
+TriggerAll = EnemyNear(Parent,fvar(37)),facing=facing
+Trigger1 = EnemyNear(Parent,fvar(37)),Name="Tohno_Shiki"&&EnemyNear(Parent,var(56)),AuthorName="⑨"&&EnemyNear(Parent,fvar(37)),StateNo=[3000,3051]
+Trigger2 = EnemyNear(Parent,fvar(37)),Name="Nanaya_Shiki"&&EnemyNear(Parent,var(56)),AuthorName="⑨"&&EnemyNear(Parent,fvar(37)),StateNo=[3000,3001]
+Trigger3 = EnemyNear(Parent,fvar(37)),Name="Nrvnqsr_Chaos"&&EnemyNear(Parent,var(56)),AuthorName="⑨"&&EnemyNear(Parent,fvar(37)),StateNo=[3000,3002]
+Trigger4 = EnemyNear(Parent,fvar(37)),Name="White"&&EnemyNear(Parent,var(56)),AuthorName="Rin & Bat"&&EnemyNear(Parent,fvar(37)),StateNo=[4500,4510]
+Trigger5 = EnemyNear(Parent,fvar(37)),Name="MN"&&EnemyNear(Parent,var(56)),AuthorName="Cerenas"&&EnemyNear(Parent,fvar(37)),StateNo=[8400,8500]
+Trigger6 = EnemyNear(Parent,fvar(37)),Name="keine"&&EnemyNear(Parent,var(56)),AuthorName="minoo"&&EnemyNear(Parent,fvar(37)),StateNo=930
+fvar(35) = 3
+
+[State -3,↑解除]
+Type = ParentVarAdd
+Trigger1 = Parent,fvar(37) > 0
+fvar(35) = -1
+
+

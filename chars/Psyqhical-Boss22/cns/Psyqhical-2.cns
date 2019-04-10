@@ -1,0 +1,750 @@
+;===============================================================================
+;EN ESTA SECCION SE ENCUENTRABN TODOS LOS ESTADOS DE -2 Y -3
+;DEL CHAR LA MODIFICACION SIN AUTORIZACION PUEDE SIGNIFICAR
+;UNA FALLA TOTAL EN EL MISMO
+;===============================================================================
+;-----------------------------------------------------------------------------
+[Statedef -2]
+
+[State -2, DEBUG]
+trigger1 = !IsHelper
+type = DisplayToClipboard
+text = "p2vel X=%f,p2vel Y=%f,attack=%f,power=%f,AI=%d"
+params = enemy,vel x,enemy,vel y,fvar(35),fvar(10),var(59)
+IgnoreHitPause = 1
+
+[State 1000, ]
+type = Varset
+triggerall = !IsHelper
+trigger1 = helper(1087),movehit
+var(10) = 1
+
+[State 1000, ]
+type = Varset
+triggerall = !IsHelper
+trigger1 = EnemyNear(fvar(36)),Movetype != H
+var(10) = 0
+
+[State 1000, ]
+type = Varset
+triggerall = !IsHelper
+trigger1 = var(12) = 0
+trigger1 = projhittime(1080) = 1
+trigger2 = var(15) = 1 && numexplod(4150) <= 1 && var(6) = 0
+trigger3 = stateno = 300 && movehit && var(12) = 0
+var(12) = 1
+
+[State 1000, ]
+type = Varset
+triggerall = !IsHelper
+trigger1 = projhittime(1082) = 1
+var(12) = 2
+
+[State 1000, ]
+type = Varset
+triggerall = !IsHelper
+trigger1 = EnemyNear(fvar(36)),Movetype != H
+var(12) = 0
+;-------------------------------------------------------------------------------
+[State -2, Counter Hit1]
+type = VarSet
+triggerall = !IsHelper
+trigger1 = enemynear(fvar(36)),movetype = A
+ignorehitpause = 1
+var(15) = 1
+
+[State -2, Counter Hit2]
+type = VarSet
+triggerall = !IsHelper
+trigger1 = enemynear(fvar(36)),movetype = I || var(16) >= 1
+ignorehitpause = 1
+var(15) = 0
+
+[State -2, Counter Hit3]
+type = VarSet
+triggerall = !IsHelper
+trigger1 = var(16) > 10 && enemynear(fvar(36)), movetype = H
+ignorehitpause = 1
+var(15) = 0
+
+[State -2, Counter Hit4]
+type = VarSet
+triggerall = !IsHelper
+trigger1 = var(15) = 1 && (movehit || projhittime(1000) = 1)
+ignorehitpause = 1
+var(16) = 1
+
+[State -2, Counter Hit5]
+type = Varadd
+triggerall = !IsHelper
+trigger1 = var(16) >= 1
+ignorehitpause = 1
+var(16) = 1
+
+[State -2, Counter Hit6]
+type = VarSet
+triggerall = !IsHelper
+trigger1 = p2movetype != H
+trigger2 = var(16) > 22 && (p2stateno = 5030 || p2stateno = 1300)
+trigger3 = p2statetype = L
+trigger4 = var(16) > 30 && movehit
+ignorehitpause = 1
+var(16) = 0
+
+[State -2, EnvColor]
+type = EnvColor
+triggerall = !IsHelper
+trigger1 = var(16) = [1,2]
+value = 255,255,255
+time = 1
+ignorehitpause = 1
+under = 1
+
+[State -2, Counter Hit7]
+type = Assertspecial
+triggerall = !IsHelper
+trigger1 = var(15) = 1 && numexplod(4150) <= 1
+trigger2 = var(12) = 1 && numprojid(1082)
+trigger3 = var(6) = 1  && var(7) = 1
+trigger4 = stateno = 300 && anim = 305
+flag = Nojugglecheck
+
+[State -2, Counter Explod1]
+type = Explod
+triggerall = !IsHelper
+triggerall = var(15) = 1 && numexplod(4150) <= 0 && teamside = 2
+trigger1 = movehit || projhittime(1000) = 1
+ignorehitpause = 1
+persistent = 0
+anim = 7020
+id = 4150
+pos = -62,206
+postype = right
+bindtime = -1
+ontop = 1
+ownpal = 1
+pausemovetime = 2147483647
+supermovetime = 2147483647
+
+[State -2, Counter Explod2]
+type = Explod
+triggerall = !IsHelper
+triggerall = var(15) = 1 && numexplod(4150) <= 0 && teamside = 1
+trigger1 = movehit || projhittime(1000) = 1
+ignorehitpause = 1
+persistent = 0
+anim = 7020
+id = 4150
+pos = 4,206
+postype = left
+bindtime = -1
+ontop = 1
+ownpal = 1
+pausemovetime = 2147483647
+supermovetime = 2147483647
+;-------------------------------------------------------------------------------
+[State -2, EnvColor]
+type = EnvColor
+triggerall = !IsHelper
+trigger1 = Projhittime(1000) >= 0 && Projhittime(1000) <= 1
+trigger2 = Projhittime(1080) >= 0 && Projhittime(1080) <= 1
+trigger3 = Projhittime(1082) >= 0 && Projhittime(1082) <= 1
+value = 255,255,255
+time = 1
+under = 1
+;-----------------------------------------------------------------------------
+[State 100, StopSnd]
+type = StopSnd
+triggerall = !IsHelper
+trigger1 = stateno != 910 && stateno != 911
+channel = 8
+
+[State 100, StopSnd]
+type = StopSnd
+triggerall = !IsHelper
+trigger1 = stateno != 910 && stateno != 911
+channel = 9
+;-----------------------------------------------------------------------------
+
+[State -2, Guarding KO]
+type = ChangeState
+triggerall = !IsHelper
+trigger1 = prevstateno = [120,152]
+trigger1 = !alive && palno != 6
+value = 6010
+ignorehitpause = 1
+
+[State -2, 二人目のイントロ]
+type = ChangeState
+value = 190
+triggerall = !IsHelper
+triggerall = TeamMode = Turns
+triggerall = RoundsExisted = 0
+trigger1 = stateno = 5900
+
+[State -2]
+type = SelfState
+value = 2072
+trigger1 = stateno != 2072
+trigger1 = ishelper(2072)
+ignorehitpause = 1
+;----------------------------------------------------------------------------
+[State 0, PosSet]
+type = PosSet
+triggerall = !IsHelper
+trigger1 = stateno = 0
+trigger2 = stateno = 5120
+y = 0
+
+[State -2, 1]
+type = helper
+trigger1 = Palno = 6
+trigger1 = !Numhelper(2060)
+id = 2060
+name = "A_A"
+pos = 0,-144
+postype = p1
+persistent = 0
+stateno = 2061
+ownpal = 1
+pausemovetime = 2147483647
+supermovetime = 2147483647
+
+[State -2, 1]
+type = helper
+trigger1 = Palno = 6
+trigger1 = !Numhelper(2063)
+id = 2063
+name = " "
+pos = 0,0
+postype = p1
+persistent = 0
+stateno = 2063
+ownpal = 1
+pausemovetime = 2147483647
+supermovetime = 2147483647
+
+[State -2, 1]
+type = helper
+trigger1 = Palno = 6
+trigger1 = !Numhelper(2064)
+id = 2064
+name = " "
+pos = 0,0
+postype = p1
+persistent = 0
+stateno = 2063
+ownpal = 1
+ontop = 1
+pausemovetime = 2147483647
+supermovetime = 2147483647
+
+[State -2]
+type = VarSet
+trigger1 = !Ishelper && fvar(10) < ifelse(palno = 6,0.5,0.2)
+fvar(10) = ifelse(palno = 6,0.5,0.2)
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+trigger1 = !Ishelper && fvar(34) < ifelse(palno = 6,55,20)
+fvar(34) = ifelse(palno = 6,55,20)
+ignorehitpause = 1
+
+[State -2, 残像]
+type = AfterImage
+trigger1 = Movetype = H
+time = 1
+
+[State -2,]
+type = StopSnd
+triggerall = !IsHelper
+trigger1 = stateno != 100
+trigger1 = Anim != 100
+channel = 6
+
+[State -3]
+type = Varset
+triggerall = !IsHelper
+trigger1 = var(7) > 600
+trigger2 = movetype = H
+trigger3 = winko = 1
+var(6) = 0
+ignorehitpause = 1
+
+[State -3]
+type = Varadd
+triggerall = !IsHelper
+trigger1 = var(6) = 1
+var(7) = 1
+ignorehitpause = 1
+
+[State -3]
+type = Varset
+triggerall = !IsHelper
+trigger1 = var(6) = 0
+var(7) = 0
+ignorehitpause = 1
+
+[State -3]
+type = Pause
+triggerall = !IsHelper
+trigger1 = var(7) != 0
+trigger1 = var(7) < 600
+trigger1 = gametime%4 = 0
+time = 3
+movetime = 3
+ignorehitpause = 1
+
+[State -3, dash]
+type = PlaySnd
+triggerall = !IsHelper
+trigger1 = var(7) = 1
+value = s13,37
+
+[State -3]
+type = BGPalfx
+triggerall = !IsHelper
+trigger1 = var(7) != 0
+trigger1 = var(7) < 250
+mul = var(7),var(7),var(7)
+color = var(7)
+time = 1
+ignorehitpause = 1
+;-------------------------------------------------------------------------------
+[State -2]
+type = SelfState
+Trigger1 = IsHelper(10000)
+Trigger1 = StateNo != 10000
+Trigger2 = IsHelper(1086)
+Trigger2 = StateNo != 1086
+Trigger2 = StateNo != 1088
+value = ifelse(IsHelper(10000),10000,1086)
+ignorehitpause = 1
+
+[State -2]
+type = SelfState
+Trigger1 = IsHelper(1087)
+Trigger1 = StateNo != 1087
+Trigger2 = IsHelper(1021)
+Trigger2 = StateNo != 1021
+value = 52000
+ignorehitpause = 1
+
+[State -2]
+type = SelfState
+trigger1 = IsHelper(1075)
+value = 1075
+ignorehitpause = 1
+
+[State -2]
+type = AssertSpecial
+triggerall = !ishelper
+triggerall = gametime%2 = 0
+trigger1 = numhelper(2060)
+trigger2 = stateno = 1031
+trigger3 = stateno = 1041
+trigger4 = stateno = 2040
+trigger5 = stateno = 5120
+trigger6 = var(6) || anim = 1010 || anim = 1060
+flag = noshadow
+ignorehitpause = 1
+
+[State -2]
+type = PalFX
+trigger1 = 1
+time = 1
+mul = 256,256,256
+ignorehitpause = 1
+
+[State -2]
+type = PowerAdd
+triggerall = !ishelper
+trigger1 = Time = 0 && StateNo = [150,154]
+trigger2 = MoveType = H && Time = 0
+trigger3 = palno = 6
+value = floor(100*fvar(10)) + Random%2 - var(59)
+ignorehitpause = 1
+persistent = 0
+
+[State -2]
+type = LifeAdd
+Triggerall = Alive
+Trigger1 = Life < Var(49)
+Trigger1 = Life > 0 && !LoseKO && RoundState = 2
+Trigger1 = GameTime % 10 = [1,9]
+Trigger1 = palno = 6
+Trigger2 = life = 0
+value = 1
+ignorehitpause = 1
+
+[State -2]
+type = NotHitBy
+triggerall = !IsHelper
+trigger1 = EnemyNear(fvar(36)),StateNo = 5120
+trigger1 = EnemyNear(fvar(36)),AnimTime = -1
+value = ,NT,ST,HT
+time = 14
+
+[State -2]
+type = NotHitBy
+triggerall = !IsHelper
+trigger1 = StateNo = [150,159]
+value = ,NT,ST,HT
+time = 1
+
+[State -2]
+type = NotHitBy
+triggerall = !IsHelper
+trigger1 = EnemyNear(fvar(36)),StateNo = 5120
+trigger1 = EnemyNear(fvar(36)),AnimTime = -1
+value2 = SCA
+time = 5
+
+[State -2]
+type = NotHitBy
+triggerall = !IsHelper
+trigger1 = Anim = 5100
+value2 = SCA
+time = 25
+
+[State -2]
+type = SelfState
+triggerall = !ishelper && palno = 6
+triggerall = !Alive && stateno != 710
+trigger1 = Pos y >= -1 && Vel y > 0
+trigger2 = Statetype = L && Stateno != 5150
+value = 710
+ignorehitpause = 1
+
+[State -2]
+type = SelfState
+triggerall = !IsHelper
+triggerall = !Alive && stateno = [5000,5190]
+trigger1 = var(48) != GameTime + ((Name = "Psyqhical-Boss") + 8055)
+value = stateno
+ignorehitpause = 1
+
+[State -2]
+type = VarSet
+triggerall = !IsHelper
+trigger1 = var(49) < life
+trigger2 = movetype != H && ctrl && Var(48) = GameTime + ((Name = "Psyqhical-Boss") + 8055)
+trigger3 = roundstate < 2
+trigger4 = Var(48) = GameTime + ((Name = "Psyqhical-Boss") + 8055)
+trigger4 = movetype = A || stateno = 5120
+v = 49
+value = life
+ignorehitpause = 1
+
+[State -2]
+type = LifeSet
+triggerall = !IsHelper
+trigger1 = StateNo = 150 || StateNo = 152 || StateNo = 154
+trigger1 = AnimElemTime(1) = 1
+trigger1 = Var(49) - Life > 0
+value = Var(49)
+ignorehitpause = 1
+
+[State -2]
+type = DefenceMulSet
+trigger1 = StateNo > 5900
+value = 0.00001
+ignorehitpause = 1
+
+[State -2]
+type = DefenceMulSet
+trigger1 = StateNo <= 5900
+value = Const(data.defence) * 0.0035
+ignorehitpause = 1
+
+[State -2]
+type = AssertSpecial
+triggerall = !IsHelper
+trigger1 = statetype = A
+flag = noairguard
+ignorehitpause = 1
+
+[State -2]
+type = Turn
+triggerall = !ishelper && stateno != 1031 && stateno != 1041 && stateno != 1091
+triggerall = p2dist x < 0 && Time <= 0 && roundstate = 2 && alive
+trigger1 = var(59) && ctrl
+trigger1 = life < enemynear(fvar(36)),life
+trigger2 = movetype = A && stateno != 1031
+trigger3 = stateno = [120,159]
+trigger3 = life < enemynear(fvar(36)),life
+
+[State -2]
+type = NotHitBy
+trigger1 = Roundstate != 2
+value2 = SCA
+time = 1
+ignorehitpause = 1
+
+[State -2]
+type = SelfState
+triggerall = !ishelper && alive
+triggerall = Var(48) != GameTime + ((Name = "Psyqhical-Boss") + 8055)
+trigger1 = Ctrl || Stateno = 5120 || stateno = 0 || stateno = 5150
+trigger2 = enemynear(fvar(36)),movetype != A && Time > 600
+value = 52000
+ignorehitpause = 1
+
+[State -2]
+type = AssertSpecial
+triggerall = fvar(33) = 1
+triggerall = !ishelper && !winko
+trigger1 = var(49) > 700 || var(49) > lifemax*.7
+trigger1 = Var(48) != GameTime + ((Name = "Psyqhical-Boss") + 8055)
+trigger2 = var(49) > 700 || var(49) > lifemax*.7
+trigger2 = Var(48) = GameTime + ((Name = "Psyqhical-Boss") + 8055) && movetype = H
+trigger3 = roundstate < 2
+trigger3 = Var(48) != GameTime + ((Name = "Psyqhical-Boss") + 8055) || movetype = H
+flag = noko
+ignorehitpause = 1
+
+[State -2]
+type = LifeSet
+triggerall = alive
+triggerall = fvar(33) = 1
+triggerall = Var(48) = GameTime + ((Name = "Psyqhical-Boss") + 8055)
+trigger1 = var(49)-life > lifemax*.7 && gethitvar(hitcount) < 50
+trigger2 = var(49)-life > 700 && gethitvar(hitcount) < 45
+trigger3 = gethitvar(damage) > 700 && gethitvar(hitcount) < 40
+trigger4 = var(49) > 700 || var(49) > lifemax*.7
+trigger4 = gethitvar(damage) != var(49)-life && life <= 1
+value = var(49)
+ignorehitpause = 1
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+;-------------------------------------------------------------------------------
+[State -2, 1]
+type = helper
+triggerall = !ishelper
+trigger1 = !alive && palno != 6
+trigger1 = roundstate < 4
+trigger1 = !numhelper(10001)
+id = 10001
+name = "!alive"
+pos = 0,0
+postype = p1
+persistent = 0
+stateno = 10001
+ownpal = 1
+pausemovetime = 2147483647
+supermovetime = 2147483647
+
+[State -3, 1]
+Type = HelPer
+triggerall = !IsHelper
+TriggerAll = Var(59)
+Trigger1 = NumHelPer(35000) = 0
+HelPerType = Normal
+Name = "AI_Learning"
+StateNo = 35000
+ID = 35000
+OwnPal = 1
+pausemovetime = 2147483647
+supermovetime = 2147483647
+IgnoreHitPause = 1
+
+[State -3, AIhelper]
+Type = HelPer
+Trigger1 = !IsHelPer
+Trigger1 = !NumHelPer(35002)
+HelPerType = Normal
+Name = "AI_Learning_2"
+StateNo = 35002
+ID = 35002
+OwnPal = 1
+IgnoreHitPause = 1
+PauseMoveTime = 2147483647
+SuperMoveTime = 2147483647
+
+[State -3, 2]
+Type = HelPer
+triggerall = !IsHelper
+TriggerAll = Var(59)
+Trigger1 = NumHelPer(35001) = 0
+HelPerType = Normal
+Name = "AI_Learning2"
+StateNo = 35001
+ID = 35001
+OwnPal = 1
+pausemovetime = 2147483647
+supermovetime = 2147483647
+
+[State -2, 1]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = Var(59)
+TriggerAll = Enemy,TeamMode = Single || Enemy,TeamMode = Turns
+TriggerAll = RoundState = 2
+TriggerAll = NumHelPer(35000) > 0
+TriggerAll = StateNo != [120,155]
+TriggerAll = GetHitVar(Damage) = 0
+TriggerAll = MoveType = H
+TriggerAll = Var(57) = 0
+TriggerAll = Var(56) = 0
+Trigger1 = HelPer(35000),Var(17) = [1,2]
+Trigger1 = HelPer(35000),Var(1) = 1
+Trigger1 = HelPer(35000),Var(0) = [1,2]
+V = 57
+Value = EnemyNear,PrevStateNo
+IgnoreHitPause = 1
+
+[State -2, 2]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = Var(59)
+TriggerAll = Enemy,TeamMode = Single || Enemy,TeamMode = Turns
+TriggerAll = RoundState = 2
+TriggerAll = NumHelPer(35000) > 0
+TriggerAll = StateNo != [120,155]
+TriggerAll = GetHitVar(Damage) = 0
+TriggerAll = MoveType = H
+TriggerAll = Var(57) = 0
+TriggerAll = Var(56) = 0
+Trigger1 = HelPer(35000),Var(17) = [1,2]
+Trigger1 = HelPer(35000),Var(1) = 1
+Trigger1 = HelPer(35000),Var(0) = 3
+V = 57
+Value = -(EnemyNear,PrevStateNo)
+IgnoreHitPause = 1
+
+[State -2, 3]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = Var(59)
+TriggerAll = Enemy,TeamMode = Single || Enemy,TeamMode = Turns
+TriggerAll = RoundState = 2
+TriggerAll = NumHelPer(35000) > 0
+TriggerAll = StateNo != [120,155]
+TriggerAll = GetHitVar(Damage) = 0
+TriggerAll = MoveType = H
+TriggerAll = Var(57) = 0
+TriggerAll = Var(56) = 0
+Trigger1 = HelPer(35000),Var(17) = 3
+Trigger1 = HelPer(35000),Var(1) = 1
+Trigger1 = HelPer(35000),Var(0) = [1,2]
+V = 57
+Value = 10000*EnemyNear,PrevStateNo
+IgnoreHitPause = 1
+
+[State -2,4]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = Var(59)
+TriggerAll = Enemy,TeamMode = Single || Enemy,TeamMode = Turns
+TriggerAll = RoundState = 2
+TriggerAll = NumHelPer(35000) > 0
+TriggerAll = StateNo != [120,155]
+TriggerAll = GetHitVar(Damage) = 0
+TriggerAll = MoveType = H
+TriggerAll = Var(57) = 0
+TriggerAll = Var(56) = 0
+Trigger1 = HelPer(35000),Var(17) = 3
+Trigger1 = HelPer(35000),Var(1) = 1
+Trigger1 = HelPer(35000),Var(0) = 3
+V = 57
+Value = -10000*EnemyNear,PrevStateNo
+IgnoreHitPause = 1
+
+
+[State -2,5]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = Var(59)
+TriggerAll = Enemy,TeamMode = Single || Enemy,TeamMode = Turns
+TriggerAll = RoundState = 2
+TriggerAll = NumHelPer(35000) > 0
+TriggerAll = StateNo != [120,155]
+TriggerAll = GetHitVar(Damage) > 0
+TriggerAll = EnemyNear,StateType != A
+TriggerAll = Var(56) = 0
+Trigger1 = HelPer(35000),Var(0) = 2
+Trigger1 = HelPer(35000),Var(1) = 1
+Trigger2 = PrevStateNo = 131
+Trigger3 = PrevStateNo = [152,153]
+V = 56
+Value = EnemyNear,StateNo
+IgnoreHitPause = 1
+
+[State -2,6]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = Var(59)
+TriggerAll = Enemy,TeamMode = Single || Enemy,TeamMode = Turns
+TriggerAll = RoundState = 2
+TriggerAll = NumHelPer(35000) > 0
+TriggerAll = StateNo != [120,155]
+TriggerAll = GetHitVar(Damage) > 0
+TriggerAll = EnemyNear,StateType != C
+TriggerAll = Var(56) = 0
+Trigger1 = HelPer(35000),Var(0) = 1
+Trigger1 = HelPer(35000),Var(1) = 1
+Trigger2 = PrevStateNo = 130
+Trigger3 = PrevStateNo = [150,151]
+V = 56
+Value = -(EnemyNear,StateNo)
+IgnoreHitPause = 1
+
+[State -2,7]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = Var(59)
+TriggerAll = Enemy,TeamMode = Single || Enemy,TeamMode = Turns
+TriggerAll = RoundState = 2
+TriggerAll = NumHelPer(35000) > 0
+TriggerAll = StateNo != [120,155]
+TriggerAll = GetHitVar(Damage) > 0
+TriggerAll = Var(56) = 0
+Trigger1 = HelPer(35000),Var(0) = 3
+Trigger1 = HelPer(35000),Var(1) = 1
+Trigger2 = PrevStateNo = 132
+Trigger3 = PrevStateNo = [153,154]
+V = 56
+Value = 10000*EnemyNear,StateNo
+IgnoreHitPause = 1
+
+[State -2,8]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = Var(59)
+TriggerAll = Enemy,TeamMode = Single || Enemy,TeamMode = Turns
+TriggerAll = RoundState = 2
+TriggerAll = NumHelPer(35000) > 0
+TriggerAll = StateNo != [120,155]
+TriggerAll = GetHitVar(Damage) > 0
+TriggerAll = Var(56) = 0
+Trigger1 = HelPer(35000),Var(3) = 1
+V = 56
+Value = -10000*EnemyNear,StateNo
+IgnoreHitPause = 1
+
+
+[State -2,9]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = Var(59)
+TriggerAll = Enemy,TeamMode = Single || Enemy,TeamMode = Turns
+Trigger1 = GetHitVar(Damage) = 0
+V = 56
+Value = 0
+IgnoreHitPause = 1
+
+[State -2,10]
+Type = VarSet
+triggerall = !IsHelper
+TriggerAll = Var(59)
+TriggerAll = Enemy,TeamMode = Single || Enemy,TeamMode = Turns
+TriggerAll = Var(57) != 0
+Trigger1 = MoveType != H
+V = 57
+Value = 0
+IgnoreHitPause = 1

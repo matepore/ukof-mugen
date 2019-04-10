@@ -1,0 +1,749 @@
+; Varのラウンド持ち越し
+[Statedef 5900]
+type = S
+
+[State a];MAX発動ゲージ
+type = VarSet
+trigger1 = time = 0
+v = 20
+value = 0
+
+[State a];MAX2勝利判定
+type = VarSet
+trigger1 = time = 0
+v = 22
+value = 0
+
+[State 5900, 1] ;Clear all int variables
+type = null;VarRangeSet
+trigger1 = roundsexisted = 0
+farst = 2
+last = 59
+value = 0
+
+[State 5900, 2] ;Clear all float variables
+type = null;VarRangeSet
+trigger1 = roundsexisted = 0
+fvalue = 0
+
+[State 5900, 3] ;Intro for round 1
+type = ChangeState
+trigger1 = roundno = 1
+value = 190
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+
+;\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+[Statedef -2]
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+[state -2, a];右向き設定
+type = varset
+trigger1 = var(10) = 0
+trigger1 = facing = 1
+v = 10
+value = 1
+
+[state -2, a];左向き設定
+type = varset
+trigger1 = var(10) = 0
+trigger1 = facing = -1
+v = 10
+value = 2
+
+[State -2, 1];ダッシュの音止め
+type = stopSnd
+trigger1 = stateno != 100
+channel = 1
+
+[State -2, 4];ハイジャンプ判定
+type = varadd
+trigger1 = 1
+v = 15
+value = -1
+
+[State 1000, 音を鳴らす]
+type = PlaySnd
+trigger1 = P2Movetype = H
+trigger1 = P2Stateno = 2155
+trigger1 = P2Statetype = A
+trigger1 = enemy, Pos Y >= 0
+trigger1 = enemy, Vel Y > 0
+value = s2150,10
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;::::::::カウンターヒット設定
+[state a]
+type = varset
+trigger1 = enemy,movetype = A
+v = 8
+value = 1
+ignorehitpause = 1
+
+[State a]
+type = EnvColor
+trigger1 = movehit
+trigger1 = var(8) = 1
+persistent = 0
+ignorehitpause = 1
+time = 1
+value = 255,255,255
+under = 2
+
+[state a]
+type = varset
+trigger1 = enemy,movetype != A
+v = 8
+value = 0
+ignorehitpause = 1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;::::::::スロー処理
+
+[state -2, a];スロー処理をする時間のカウント
+type = varadd
+trigger1 = 1
+persistent = 0
+ignorehitpause = 1
+v = 4
+value = -1
+
+[state -2, a];スロー処理
+type = pause
+trigger1 = var(4) >= 1
+trigger1 = gametime % 2
+persistent = 0
+ignorehitpause = 1
+time = 1
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ダメージ時のエフェクト、サウンドの消去
+;//////////////////////////////////////////////////////////////////////////
+;ダッシュ終了時のエフェクトの消去
+[State 1];ブレスレットのエフェクト消去、主に通常動作
+type = removeexplod
+trigger1 = MoveType = H && stateno != [120,159]
+ID = 3000
+
+
+;ダメージ時の残像の消去
+[state a];
+type = afterimagetime
+trigger1 = MoveType = H
+time = 0
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;//////////////////////////////////////////////////////////////////////////
+;ダメージボイス
+[state a]
+type = PlaySnd
+triggerall = stateno = 5000 ||  stateno = 5010 || stateno = 5020
+triggerall = time = 0
+triggerall = alive = 1
+trigger1 = GetHitVar(animtype) = 0
+value = 5000,0+(random%4)
+persistent = 0
+
+[state a]
+type = PlaySnd
+triggerall = stateno = 5000 ||  stateno = 5010 || stateno = 5020
+triggerall = time = 0
+triggerall = alive = 1
+trigger1 = GetHitVar(animtype) = 1
+value = 5001,0+(random%4)
+persistent = 0
+
+[state a]
+type = PlaySnd
+triggerall = stateno = 5000 ||  stateno = 5010 || stateno = 5020
+triggerall = time = 0
+triggerall = alive = 1
+trigger1 = GetHitVar(animtype) = 2
+trigger2 = GetHitVar(animtype) = 3
+trigger3 = GetHitVar(animtype) = 4
+value = 5002,0+(random%4)
+persistent = 0
+
+
+;///////////////////////////////////////////////////////////////////////
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;コンボによるダメージ補正
+;//////////////////////////////////////////////////////////////////////////
+; 
+;ネバリ補正関係
+[state a];第一段階
+type = varset
+trigger1 = enemy,life >= 400
+v = 26
+value = 0
+
+[state a];第二段階
+type = varset
+trigger1 = enemy,life <= 399 && enemy,life >= 150
+v = 26
+value = 1
+
+[state a];第三段階
+type = varset
+trigger1 = enemy,life <= 149
+v = 26
+value = 2
+
+
+[state a];MAX発動補正
+type = varset
+trigger1 = var(20) = 0
+fvar(5) = 1.0
+
+[state a];MAX発動補正
+type = varset
+trigger1 = var(20) > 0
+fvar(5) = 0.9
+
+
+[state a]
+type = varset
+trigger1 = 1
+fvar(0) = 1.0
+
+[state a]
+type = varset
+trigger1 = 1
+fvar(2) = 0.0
+
+[state a]
+type = varset
+trigger1 = var(14) >= 1
+fvar(2) = 0.1
+
+[state a];補正
+type = varset
+trigger1 = enemy,movetype = H
+trigger1 = enemy,gethitvar(hitcount) > 1
+;trigger1 = stateno != [2200,2299]
+fvar(0) = ((100.0-(25.0+(enemy,gethitvar(hitcount)/2.0)*5.0))/115.0)
+
+[state a];補正
+type = varset
+trigger1 = fvar(0) <= 0
+fvar(0) = 0.01
+
+[state a]
+type = attackmulset
+trigger1 = var(26) = 0
+value = (fvar(0) + fvar(2))*fvar(5)
+
+[state a]
+type = attackmulset
+trigger1 = var(26) = 1
+value = ((fvar(0) + fvar(2))*0.75)*fvar(5)
+
+[state a]
+type = attackmulset
+trigger1 = var(26) = 2
+value = ((fvar(0) + fvar(2))*0.5)*fvar(5)
+
+
+[state a]
+type = DefenceMulSet
+trigger1 = var(14) = 1
+value = 1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;勝利時のサウンドストップ
+;//////////////////////////////////////////////////////////////////////////
+;
+[State 1]
+type = null;AssertSpecial
+;triggerall = Win
+trigger1 = RoundState != 2 && RoundsExisted = 0
+trigger2 = RoundState >= 3 && RoundsExisted != 0
+flag = nomusic
+
+[State 181, 1];無敵
+type = null;NotHitBy
+trigger1 = RoundState != 2 && RoundsExisted = 0
+trigger2 = RoundState >= 3 && RoundsExisted != 0
+value = SCA
+time = 1
+
+[State 1]
+type = null;varset
+;triggerall = Win
+trigger1 = RoundState != 2
+v = 26
+value = 0
+
+[state a]
+type = null;stopsnd
+trigger1 = RoundState = 2
+channel = 2
+ignorehitpause = 1
+
+[state a];イントロ時ボイスの消去
+type = null;stopsnd
+trigger1 = RoundState = 2
+channel = 5
+ignorehitpause = 1
+
+
+[state a]
+type = null;playsnd
+trigger1 = WinKO
+trigger1 = RoundState = 3
+trigger1 = var(12) = 0
+IgnoreHitPause = 1
+persistent = 0
+value = 11,1
+
+[state a]
+type = null;varset
+trigger1 = RoundState = 3
+IgnoreHitPause = 1
+v = 12
+value = 1
+
+[state a]
+type = null;varset
+trigger1 = RoundState = 2
+IgnoreHitPause = 1
+v = 12
+value = 0
+
+
+[State a]
+type = AssertSpecial
+trigger1 = RoundState != 2
+flag = nobardisplay
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;特殊イントロ
+;//////////////////////////////////////////////////////////////////////////
+[state a];特殊イントロ(草薙京)
+type = varset
+trigger1 = p2name = "kyo" || p4name = "kyo"
+trigger2 = p2name = "kyo kusanagi" || p4name = "kyo kusanagi"
+v = 9
+value = 1
+
+[state a];特殊イントロ(K')
+type = varset
+trigger1 = p2name = "K'" || p4name = "K'"
+trigger2 = p2name = "AK'" || p4name = "AK'"
+v = 9
+value = 2
+
+[state a];特殊イントロ(クーラ)
+type = varset
+trigger1 = p2name = "Kula" || p4name = "Kula"
+trigger2 = p2name = "Kula Diamond" || p4name = "Kula Diamond"
+v = 9
+value = 3
+
+[state a];特殊イントロ(ネスツボス)
+type = varset
+trigger1 = p2name = "Krizalid" || p4name = "Krizalid"
+trigger2 = p2name = "ZERO" || p4name = "ZERO"
+trigger3 = p2name = "C-ZERO" || p4name = "C-ZERO"
+trigger4 = p2name = "ORIGINAL ZERO" || p4name = "ORIGINAL ZERO"
+trigger5 = p2name = "IGNIZ" || p4name = "IGNIZ"
+trigger6 = p2name = "zeroko" || p4name = "zeroko"
+v = 9
+value = 4
+
+[state a];特殊イントロ(クローンチーム)
+type = varset
+trigger1 = p2name = "KUSANAGI" || p4name = "KUSANAGI"
+trigger2 = p2name = "kyo-1" || p4name = "kyo-1"
+trigger3 = p2name = "kyo-2" || p4name = "kyo-2"
+trigger4 = p2name = "clone kyo" || p4name = "clone kyo"
+trigger5 = p2name = "k9999" || p4name = "k9999"
+trigger6 = p2name = "CloneKyo" || p4name = "CloneKyo"
+trigger7 = p2name = "Kyo-1" || p4name = "Kyo-1"
+trigger8 = p2name = "Kyo-2" || p4name = "Kyo-2"
+v = 9
+value = 5
+
+[state a]
+type = varset
+trigger1 = winko
+trigger1 = stateno = 2500
+v = 22
+value = 1
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;MAX
+;//////////////////////////////////////////////////////////////////////////
+;---------------------[変数]
+[state -2 ,1];MAX発動時のパワーセット
+type = varset
+trigger1 = var(20) = 900
+v = 21
+value = power
+
+[state a]
+type = varadd
+trigger1 = var(20) > 0
+v = 20
+value = -1
+
+[state a]
+type = varset
+trigger1 = var(20) < 0
+v = 20
+value = 0
+
+[state a]
+type = powerset
+trigger1 = var(20) > 0
+trigger1 = stateno != [2000,2999]
+value = var(21)
+ignorehitpause = 1
+
+;---------------------[演出]
+[State a];点滅
+type = palfx
+trigger1 = var(20) > 0
+trigger1 = gametime % 2 = 0
+time = 1
+add = 126,126,0
+color = 1
+ignorehitpause = 1
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ゲージ
+;//////////////////////////////////////////////////////////////////////////
+;---------------------[ヘルパー]
+[state a];ＫＯ演出
+type = Helper
+trigger1 = numhelper(8010) = 0
+id = 8010
+name = "g"
+sprpriority = 1
+pos = 0,0
+postype = p1
+stateno = 8010
+helpertype = normal
+pausemovetime = 999999
+keyctrl = 1 
+ownpal = 1
+
+;---------------------[ヘルパー]
+[state a];ゲージ
+type = Helper
+trigger1 = numhelper(7500) = 0
+id = 7500
+name = "g"
+sprpriority = 1
+pos = 0,0
+postype = p1
+stateno = 7500
+helpertype = normal
+pausemovetime = 99999999
+supermovetime = 99999999
+keyctrl = 0 
+ownpal = 1
+
+
+
+;---------------------[ヘルパー]
+[state a];MAX発動ゲージ
+type = Helper
+trigger1 = numhelper(7550) = 0
+id = 7550
+name = "MAX"
+sprpriority = 1
+pos = 0,0
+postype = p1
+stateno = 7550
+helpertype = normal
+pausemovetime = 99999999
+supermovetime = 99999999
+keyctrl = 0 
+ownpal = 1
+
+;\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+[Statedef -3]
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+[State -3, Landing Sound]
+type = PlaySnd
+triggerall = Time = 1
+trigger1 = stateno = 52 
+trigger2 = stateno = 106
+value = 41, 0
+
+[State -3, 2];ジャンプ音
+type = PlaySnd
+triggerall = time = 1
+trigger1 = stateno = 40 
+trigger1 = var(15) <= 0
+value = 40, 0
+channel = 3
+
+[State -3, 2];ジャンプ音
+type = PlaySnd
+triggerall = time = 1
+trigger1 = stateno = 40 
+trigger1 = var(15) > 1
+value = 40, 1
+channel = 3
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ハイジャンプ処理
+[State -3, 5];ハイジャンプ判定
+type = varset
+trigger1 = stateno = 10
+trigger1 = time = 0
+trigger2 = stateno = 100
+v = 15
+value = 20
+
+[State -3, 5];ハイジャンプ消去
+type = varset
+trigger1 = stateno = 52
+trigger1 = time = 0
+v = 15
+value = 0
+
+; 小ジャンプ処理
+[State -3, 5];小ジャンプ判定
+type = varset
+trigger1 = stateno = 40
+trigger1 = command != "holdup"
+v = 16
+value = 1
+
+[State -3, 5];小ジャンプ消去
+type = varset
+trigger1 = stateno = 40
+trigger1 = command = "holdup"
+v = 16
+value = 0
+
+[State -3, 5]
+type = velset
+trigger1 = stateno = 50
+trigger1 = anim = 42
+trigger1 = time = 1
+trigger1 = var(15) >= 1
+x = 5
+;y = -9
+
+
+[State -3, 5]
+type = velset
+trigger1 = stateno = 50
+trigger1 = anim = 43
+trigger1 = time = 1
+trigger1 = var(15) >= 1
+x = -5
+;y = -9
+
+[State -3, 5];小ジャンプ
+type = veladd
+trigger1 = stateno = 50
+trigger1 = time = 1
+trigger1 = var(16) = 1
+y = 3
+
+[State -3, 5]
+type = AfterImage
+trigger1 = stateno = 50
+trigger1 = time = 1
+trigger1 = var(15) >= 1
+time = 10
+trans = add1
+timegap = 1
+framegap = 2
+length = 8
+palbright = 12,12,12
+palcontrast = 225,225,225
+palpostbright = 0,0,0
+paladd = 0,0,0
+palmul = 1,1,1
+
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;AI用記述
+[State -3, AI起動用ヘルパー]
+type=helper
+trigger1=!NumHelper(10000)
+trigger1=roundstate=2
+trigger1=alive
+trigger1=var(59)!=1
+Trigger1=PrevStateNo=(191)||PrevStateNo=5900
+Trigger1=ctrl&&stateno=0
+helpertype=normal
+name="AI"
+stateno=10000
+ID=10000
+pos=9999,9999
+keyctrl=1
+pausemovetime=2147483647
+supermovetime=2147483647
+persistent = 0
+
+;念のため↓も付けておく
+[State -3, 関係無いステートに行かないように]
+type=changestate
+trigger1= ishelper(10000)
+trigger1= stateno!=10000
+value=10000
+
+;-AIフラグ-
+[State -3, AIフラグセット]
+type = VarSet
+triggerall = !var(58) 
+triggerall = RoundState = [1,2]
+trigger1 = Command = "AI0"
+trigger2 = Command = "AI1"
+trigger3 = Command = "AI2"
+trigger4 = Command = "AI3"
+trigger5 = Command = "AI4"
+trigger6 = Command = "AI5"
+trigger7 = Command = "AI6"
+trigger8 = Command = "AI7"
+trigger9 = Command = "AI8"
+trigger10 = Command = "AI9"
+trigger11 = Command = "AI10"
+trigger12 = Command = "AI11"
+trigger13 = Command = "AI12"
+trigger14 = Command = "AI13"
+trigger15 = Command = "AI14"
+trigger16 = Command = "AI15"
+trigger17 = Command = "AI16"
+trigger18 = Command = "AI17"
+trigger19 = Command = "AI18"
+trigger20 = Command = "AI19"
+trigger21 = Command = "AI20"
+trigger22 = Command = "AI21"
+trigger23 = Command = "AI22"
+trigger24 = Command = "AI23"
+trigger25 = Command = "AI24"
+trigger26 = Command = "AI25"
+trigger27 = Command = "AI26"
+trigger28 = Command = "AI27"
+trigger29 = Command = "AI28"
+trigger30 = Command = "AI29"
+trigger31 = Command = "AI30"
+trigger32 = Command = "AI31"
+trigger33 = Command = "AI32"
+trigger34 = Command = "AI33"
+trigger35 = Command = "AI34"
+trigger36 = Command = "AI35"
+trigger37 = Command = "AI36"
+trigger38 = Command = "AI37"
+trigger39 = Command = "AI38"
+trigger40 = Command = "AI39"
+trigger41 = Command = "AI40"
+trigger42 = Command = "AI41"
+trigger43 = Command = "AI42"
+trigger44 = Command = "AI43"
+trigger45 = Command = "AI44"
+trigger46 = Command = "AI45"
+trigger47 = Command = "AI46"
+trigger48 = Command = "AI47"
+trigger49 = Command = "AI48"
+trigger50 = Command = "AI49"
+trigger51 = Command = "AI50"
+Trigger52 = Helper(10000),var(59)
+;trigger53 = RoundState = 2  ;常時AI起動トリガー　
+var(59) = 1
+
+[state -3, AIレベル]
+type = VarSet
+trigger1 = var(59) = 1
+trigger1 = roundstate = 2
+v = 58	
+Value = 11 ;1～11の値で変更
+
+[state -3, 飛び道具レベル]
+type = VarSet
+trigger1 = var(59) = 1
+trigger1 = roundstate = 2
+v = 57	
+Value = 10 ;1～10の値で変更
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+;AI起動ヘルパー
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Statedef 10000]
+anim=10000;なにも表示しないｱﾆﾒでもいいけど入れなくても全然問題ない
+ctrl=0
+
+[State 10000,間違いで本体が来たら立ちへ移行]
+type=selfstate
+trigger1=!ishelper
+value=0
+
+[State 10000,プレイヤー判定]
+type=varset
+trigger1=command="up"&&root,command="up"
+trigger2=command="down"&&root,command="down"
+trigger3=command="back"&&root,command="back"
+trigger4=command="fwd"&&root,command="fwd"
+trigger5=command="a"&&root,command="a"
+trigger6=command="b"&&root,command="b"
+trigger7=command="c"&&root,command="c"
+trigger8=command="x"&&root,command="x"
+trigger9=command="y"&&root,command="y"
+trigger10=command="z"&&root,command="z"
+trigger11=command="start"&&root,command="start"
+var(59)=-1
+
+[State 10000,立ったら消失]
+Type = DestroySelf
+triggerAll = isHelper
+Trigger1 = root,var(59)||var(59)=-1
+trigger2=command="up"&&root,command="up"
+trigger3=command="down"&&root,command="down"
+trigger4=command="back"&&root,command="back"
+trigger5=command="fwd"&&root,command="fwd"
+trigger6=command="a"&&root,command="a"
+trigger7=command="b"&&root,command="b"
+trigger8=command="c"&&root,command="c"
+trigger9=command="x"&&root,command="x"
+trigger10=command="y"&&root,command="y"
+trigger11=command="z"&&root,command="z"
+trigger12=command="start"&&root,command="start"
+
+[State 10000,ﾌﾗｸﾞON]
+type=varset
+triggerall=var(59)!=-1
+trigger1=root,command="up"
+trigger2=root,command="down"
+trigger3=root,command="back"
+trigger4=root,command="fwd"
+trigger5=root,command="a"
+trigger6=root,command="b"
+trigger7=root,command="c"
+trigger8=root,command="x"
+trigger9=root,command="y"
+trigger10=root,command="z"
+trigger11=root,command="start"
+var(59)=1
+
+
+

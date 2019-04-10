@@ -1,0 +1,6624 @@
+;=====================================================================
+;  CNS File For "Refuse Hinako Shijo"                Made By OG子 OGヲ
+;                                       Ver. 1.0            2007/10/01
+;=====================================================================
+
+;---------------------------------------------------------------------
+; ヘルパー 初期化処理・終了処理
+;---------------------------------------------------------------------
+[StateDef 19900]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 19900, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; check
+;---------------------------------------------------------------------
+;------------------- キー
+[State 19900, Key]
+type		= VarSet
+triggerall	= !(Var(1) & 1)
+trigger1	= Var(59) <= 0
+trigger1	= RoundState >= 1
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- MyID
+[State 19900, MyID]
+type		= VarSet
+triggerall	= !(Var(1) & 1)
+triggerall	= Var(59) != 1
+triggerall	= Var(0) != 20000
+triggerall	= Var(0) != [30000, 30099]
+triggerall	= Var(0) != 40000
+triggerall	= Var(0) != 50000
+triggerall	= Var(0) != 60000
+trigger1	= 1
+var(59)		= 1
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; common processing
+;---------------------------------------------------------------------
+;------------------- 初期化フラグを可変させる
+[State 19900, Init Flag Change]
+type		= VarSet
+triggerall	= Var(59) != 1
+trigger1	= 1
+var(1)		= (Var(1) | 1) - 1 * ((Var(1) & 1) != 0)
+ignorehitpause	= 1
+
+;------------------- 各ヘルパー処理に移行
+[State 19900, Helper Process]
+type		= SelfState
+triggerall	= (Var(1) & 1)
+triggerall	= Var(59) != 1
+trigger1	= 1
+value		= IfElse( (Var(0) = [30000, 30099]), 30000, Var(0) )
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; unique processing
+;---------------------------------------------------------------------
+;------------------- ステートを奪われていないときは、パワーゲージ保持
+[State 19900, Power Buf]
+type		= ParentVarSet
+triggerall	= Var(59) != 1
+triggerall	= !(Root,Var(1) & 1024)
+trigger1	= IsHelper(20000)
+var(23)		= Parent,Power + Parent,Var(59)
+ignorehitpause	= 1
+
+;------------------- 試合終了後に演出飛ばしさせない
+[State 19900, AssertSpecial]
+type		= AssertSpecial
+triggerall	= IsHelper(20000)
+triggerall	= RoundState = 3
+trigger1	= Root,Alive
+flag		= roundnotover
+ignorehitpause = 1
+
+;------------------- 試合後のSuperPause、強制無効試合対策
+[State 19900, AssertSpecial]
+type		= AssertSpecial
+triggerall	= IsHelper(20000)
+triggerall	= RoundState = 4
+triggerall	= Root,Alive
+trigger1	= Var(14) <= 180	; over.wintime次第なのでなんとも言えん
+flag		= roundnotover
+ignorehitpause = 1
+
+[State 19900, VarAdd]
+type		= VarAdd
+triggerall	= IsHelper(20000)
+triggerall	= RoundState = 4
+trigger1	= Var(14) < 1024-1
+var(14)		= 1
+ignorehitpause	= 1
+
+;------------------- 本体のカウンター状態の保持
+[State 19900, VarSet]
+type		= VarSet
+triggerall	= IsHelper(60000)
+trigger1	= 1
+var(22)		= (Var(22) | 1) - 1 + 1*!!(Root,Var(1) & 1)
+ignorehitpause	= 1
+
+;------------------- バグ
+[State 19900, Bug]
+type		= ParentVarSet
+trigger1	= Var(59) = 1
+var(59)		= 1
+ignorehitpause	= 1
+
+[State 19900, Bug]
+type		= SelfState
+trigger1	= Var(59) = 1
+value		= 19901
+ignorehitpause	= 1
+
+[State 19900, End]
+type		= SelfState
+trigger1	= 1
+value		= 5150
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー 削除
+;---------------------------------------------------------------------
+[StateDef 19901]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 19901, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 19901, DestroySelf]
+type		= DestroySelf
+trigger1	= 1
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー スーパーポーズ即解除
+;---------------------------------------------------------------------
+[StateDef 19902]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 19902, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 19902, Pause]
+type		= Pause
+trigger1	= 1
+time		= 0
+movetime	= 0
+ignorehitpause	= 1
+
+[State 19902, SuperPause]
+type		= SuperPause
+trigger1	= 1
+time		= 0
+movetime	= 0
+anim		= -1
+sound		= -1
+darken		= 0
+unhittable	= 1
+p2defmul	= 1.0
+ignorehitpause	= 1
+
+[State 19902, End]
+type		= SelfState
+trigger1	= 1
+value		= 19901
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; プレイヤー バグ
+;---------------------------------------------------------------------
+[StateDef 19903]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 19903, Helper Check]
+type		= SelfState
+trigger1	= IsHelper
+value		= 19900
+ignorehitpause	= 1
+
+[State 19903, Helper Check]
+type		= SelfState
+trigger1	= IsHelper
+value		= 19900
+ignorehitpause	= 1
+
+[State 19903, Helper Check]
+type		= SelfState
+trigger1	= IsHelper
+value		= 19900
+ignorehitpause	= 1
+
+[State 19903, Check]
+type		= VarSet
+trigger1	= 1
+var(59)		= 1
+ignorehitpause	= 1
+
+[State 19903, End]
+type		= SelfState
+trigger1	= 1
+value		= 5900
+ignorehitpause	= 1
+
+[State 19903, End]
+type		= SelfState
+trigger1	= 1
+value		= 5900
+ignorehitpause	= 1
+
+[State 19903, End]
+type		= SelfState
+trigger1	= 1
+value		= 5900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー 何もしない
+;---------------------------------------------------------------------
+[StateDef 19904]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 19904, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 19904, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger1	= !(Var(0) = [30000, 30099])
+trigger1	= !(Var(0) = 40000)
+trigger1	= !(Var(0) = 50000)
+trigger1	= !(Var(0) = 60000)
+value		= 19901
+ignorehitpause	= 1
+
+[State 19904, End]
+type		= SelfState
+trigger1	= Root,Var(59) > 1
+value		= 19900
+ignorehitpause	= 1
+
+;------------------- 姿を消す
+[State 19904, AssertSpecial]
+type		= AssertSpecial
+trigger1	= 1
+flag		= invisible
+ignorehitpause	= 1
+
+;------------------- 親に張り付く
+[State 19904, Bind]
+type		= BindToRoot
+trigger1	= 1
+ignorehitpause	= 1
+
+;------------------- 親の向きへ変更
+[State 19904, Turn]
+type		= Turn
+trigger1	= Root,Facing != Facing
+ignorehitpause	= 1
+
+;------------------- 無敵
+[State 19904, NotHit]
+type		= NotHitBy
+trigger1	= 1
+value		= SCA
+ignorehitpause	= 1
+
+[State 19904, HitOverride]
+type		= HitOverride
+trigger1	= 1
+attr		= SCA, AA, AT, AP
+stateno		= 19904
+ignorehitpause	= 1
+
+;------------------- 画面無視
+[State 19904, ScreenBound]
+type		= ScreenBound
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+;------------------- ぶつかり判定無し
+[State 19904, PlayerPush]
+type		= PlayerPush
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+;------------------- 自分のステート
+[State 19904, My State]
+type		= VarSet
+trigger1	= 1
+var(2)		= (Var(2) | 19900)
+ignorehitpause	= 1
+
+[State 19904, StateType Reset]
+type		= StateTypeSet
+trigger1	= 1
+statetype	= L
+movetype	= I
+physics		= N
+ignorehitpause	= 1
+
+[State 19904, Vel Reset]
+type		= VelSet
+trigger1	= 1
+x			= 0
+y			= 0
+ignorehitpause	= 1
+
+;------------------- 試合終了後に演出飛ばしさせない
+[State 19904, AssertSpecial]
+type		= AssertSpecial
+triggerall	= IsHelper(20000)
+triggerall	= RoundState = 3
+trigger1	= Root,Alive
+flag		= roundnotover
+ignorehitpause = 1
+
+;------------------- 試合後のSuperPause、強制無効試合対策
+[State 19904, AssertSpecial]
+type		= AssertSpecial
+triggerall	= IsHelper(20000)
+triggerall	= RoundState = 4
+triggerall	= Root,Alive
+trigger1	= Var(14) <= 180	; over.wintime次第なのでなんとも言えん
+flag		= roundnotover
+ignorehitpause = 1
+
+[State 19904, VarAdd]
+type		= VarAdd
+triggerall	= IsHelper(20000)
+triggerall	= RoundState = 4
+trigger1	= Var(14) < 1024-1
+var(14)		= 1
+ignorehitpause	= 1
+
+[State 19904, End]
+type		= SelfState
+trigger1	= 1
+value		= 5150
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー スーパーポーズ解除用 生成ヘルパー
+;---------------------------------------------------------------------
+[StateDef 19905]
+type		= L
+movetype	= I
+physics		= N
+anim		= 9999
+ctrl		= 0
+facep2		= 1
+velset		= 0, 0
+
+[State 19905, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+;------------------- スーパーポーズヘルパーを出す
+[State 19905, Helper]
+type				= Helper
+trigger1			= 1
+helpertype			= player
+name				= "Hinako's SuperPause Helper"
+ID					= 19902
+pos					= 0, 0
+postype				= p1
+facing				= 1
+stateno				= 5150
+keyctrl				= 1
+ownpal				= 1
+supermovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause		= 1
+
+[State 19905, End]
+type		= SelfState
+trigger1	= 1
+value		= 19902
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー スーパーポーズ1F
+;---------------------------------------------------------------------
+[StateDef 19906]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 19906, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 19906, Pause]
+type		= Pause
+trigger1	= 1
+time		= 1
+movetime	= 1
+ignorehitpause	= 1
+
+[State 19906, SuperPause]
+type		= SuperPause
+trigger1	= 1
+time		= 1
+movetime	= 1
+anim		= -1
+sound		= -1
+darken		= 0
+unhittable	= 1
+p2defmul	= 1.0
+ignorehitpause	= 1
+
+[State 19906, End]
+type		= SelfState
+trigger1	= 1
+value		= 19901
+ignorehitpause	= 1
+
+;=====================================================================
+; ヘルパー(常時)
+; このヘルパーはHitDefにattrのステート状態(StateType = S or C etc...)や、ReversalDefにattrを持ってはいけない
+; pausemovetimeあり
+;
+; 変数表
+;	Var(0)	:	自分のID
+;	Var(1)	:	各種ビットフラグ
+;		0(1):				初期化したか
+;		1(2):				Hitdefを引き継ぐか
+;		2(4):				ヒット、ガード、空振り状態を引き継ぐか
+;		3(8):				ヒットカウントを引き継ぐか
+;		4(16):				ステート開始時の向き(0=右 1=左)
+;		5(32):				時間経過するか
+;		6(64):				前フレでMoveType=Aだったか
+;		7(128):				現在の敵(Target?が)P2MoveType=Hかのバッファ(ガードのMoveType=Hは含まず)
+;		8(256):				新MUGENか
+;		9(512):				
+;		10(1024):			ステートを奪取されたか
+;		11(2048):			ステートを奪取前判定用
+;	Var(2)	:	自分のステート
+;	Var(3)	:	SuperPauseで止められている総フレーム
+;	Var(4)	:	スーパーポーズ要請インターバルタイマー
+;	Var(5)	:	各種ビットフラグ
+;		0(1):				親が試合終了後のスーパーポーズをしたか？
+;		1(2):				
+;		2(4):				
+;		3(8):				
+;		4(16):				ParentがHitShakeOverか
+;		5(32):				
+;		6(64):				カットインが出ているか？
+;		7(128):				スーパーポーズ要請
+;		8(256):				すでにRoundState=3になったか
+;		9(512):				試合終了後のスーパーポーズ要請
+;		10(1024):			前フレでスーパーポーズ要請があったか
+;	Var(6)	:				カットインが出現してからのフレーム
+;
+;	Var(10)	:	プレーコンフィグ表示開始位置
+;		0-8(511):			x座標
+;		9-17(261632):		y座標 (0～511要素)
+;	Var(11)	:	
+;	Var(12)	:	色々
+;		0-6(127):			起き攻め確率補正率
+;
+;	Var(13)	:	親のやられ時間
+;	Var(14)	:	RoundState=4になってからの時間(兼、roundnotoverをやっているカウンター)
+;	Var(15)	:	自分以外の長すぎるSuperPauseにペナルティを付けるフレーム
+;	Var(16)	:	バグステートやループで固まるステートにペナルティを付けるフレーム
+;
+;	Var(18)	:	ラウンドの状態
+;		0-2(7):
+;			0:					RoundState=0
+;			1:					RoundState=1
+;			2:					RoundState=2
+;			3:					RoundState=3
+;			4:					RoundState=4
+;		3(8):				試合が開始したか
+;	Var(19)	:	ゲームタイム
+;	Var(20)	:	前フレのゲームタイム
+;	Var(21)	:	毎フレパワーゲージ増加用タイム
+;
+;	Var(23)	:	キャラモード履歴
+;
+;	Var(39)	:	AIレベル
+;	Var(40)	:	前回行った動作
+;	Var(41)	:	AI用ビットフラグ
+;		0(1):				ゲージ連続技を使わないか
+;		1(2):				空中連続技か
+;		2(4):				起き攻めフラグ
+;		3(8):				
+;		4(16):				
+;		5(32):				投げを使わないか(敵1体目用)
+;		6(64):				投げを使わないか回数を増加させるかのチェックフラグ(敵1体目用、確定投げ用)
+;		7(128):				投げを使わないか回数を増加させるかのチェックフラグ(敵1体目用)
+;		8-11(3840):			投げを使わないか回数(敵1体目用) (0～15要素)
+;		12(4096):			投げを使わないか(敵2体目用)
+;		13(8192):			投げを使わないか回数を増加させるかのチェックフラグ(敵2体目用、確定投げ用)
+;		14(16384):			投げを使わないか回数を増加させるかのチェックフラグ(敵2体目用)
+;		15-18(491520):		投げを使わないか回数(敵2体目用) (0～15要素)
+;		19(524288):			ゲージ連続技判定を初期化したか
+;	Var(42)	:	AI用汎用継続カウンタ
+;	Var(43)	:	AI用汎用インターバルカウンタ
+;	Var(44)	:	AI用何かのカウンタとか
+;		0-1(3):				諸手突きカウンタ
+;		2-4(28):			起き攻めの種類
+;			0:					暴れ潰し？
+;			4:					打撃
+;			8:					投げ
+;			12:					
+;			16:					
+;			20:					
+;			24:					
+;			28:					
+;
+;	Var(51)	:	temp
+;	Var(52)	:	temp
+;	Var(53)	:	temp
+;	Var(54)	:	temp
+;	Var(55)	:	temp
+;	Var(56)	:	temp
+;	Var(57)	:	temp
+;	Var(58)	:	temp
+;	Var(59)	:	キー
+;
+;	FVar(0)	:	本体参照用の攻撃力倍率結果
+;	FVar(1)	:	本体参照用の防御力倍率結果
+;	FVar(2)	:	本体参照用のパワーゲージ上昇倍率結果
+;	FVar(3)	:	(optionの)デファイン 本体の攻撃力倍率
+;	FVar(4)	:	(optionの)デファイン 本体の防御力倍率
+;	FVar(5)	:	(optionの)デファイン 本体のパワーゲージ上昇倍率
+;	FVar(6)	:	本体参照用のガードクラッシュ値倍率結果
+;	FVar(7)	:	(optionの)デファイン 本体のガードクラッシュ値倍率
+;
+;	FVar(10):	このフレームでのパワーゲージ上昇倍率結果
+;
+;	FVar(37):	temp
+;	FVar(38):	temp
+;	FVar(39):	temp
+;=====================================================================
+
+;---------------------------------------------------------------------
+; ヘルパー常時 初期化
+;---------------------------------------------------------------------
+[StateDef 19999]
+type		= L
+movetype	= I
+physics		= N
+anim		= 9999
+ctrl		= 0
+facep2		= 1
+velset		= 0, 0
+
+[State 19999, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 19999, Helper Check]
+type		= SelfState
+trigger1	= Parent,IsHelper
+trigger2	= NumHelper(20000) > 1
+trigger3	= !IsHelper(20000)
+value		= 19901
+ignorehitpause	= 1
+
+[State 19999, Init] ;Clear all int variables
+type		= VarRangeSet
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+[State 19999, Init] ;Clear all float variables
+type		= VarRangeSet
+trigger1	= 1
+fvalue		= 0
+ignorehitpause	= 1
+
+;------------------- キー
+[State 19999, Key]
+type		= VarSet
+trigger1	= 1
+var(59)		= (Random % 14) + 2
+ignorehitpause	= 1
+
+;------------------- MyID
+[State 19999, ID]
+type		= VarSet
+trigger1	= 1
+var(0)		= 20000
+ignorehitpause	= 1
+
+;------------------- ゲームタイム
+[State 19999, GameTime]
+type		= VarSet
+trigger1	= 1
+var(19)		= GameTime - 1
+ignorehitpause	= 1
+
+;------------------- キャラモード履歴
+[State 19999, Char Mode Buf]
+type		= VarSet
+trigger1	= 1
+var(23)		= (Root,Var(32) & 7)
+ignorehitpause	= 1
+
+;------------------- AI継続カウンタ
+[State 19999, AI Continue Counter]
+type		= VarSet
+trigger1	= 1
+var(42)		= -1
+ignorehitpause	= 1
+
+;------------------- デファイン 本体の攻撃力倍率
+[State 19999, Attack Rate]
+type		= VarSet
+trigger1	= 1
+fvar(0)		= 1.0
+ignorehitpause	= 1
+
+;------------------- デファイン 本体の防御力倍率
+[State 19999, Defence Rate]
+type		= VarSet
+trigger1	= 1
+fvar(1)		= 1.0
+ignorehitpause	= 1
+
+;------------------- デファイン 本体のパワーゲージ上昇倍率
+[State 19999, Power Rate]
+type		= VarSet
+trigger1	= 1
+fvar(2)		= 1.0
+ignorehitpause	= 1
+
+;------------------- デファイン 本体のガードクラッシュ値倍率
+[State 19999, Guard Crush Rate]
+type		= VarSet
+trigger1	= 1
+fvar(6)		= 1.0
+ignorehitpause	= 1
+
+;------------------- このフレームでのパワーゲージ上昇倍率結果
+[State 19999, Root Power Rate]
+type		= VarSet
+trigger1	= 1
+fvar(10)	= 1.0
+ignorehitpause	= 1
+
+[State 19999, End]
+type		= SelfState
+trigger1	= 1
+value		= 5901
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー常時 待機
+;---------------------------------------------------------------------
+[StateDef 20000]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 20000, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20000, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- ラウンド状態
+[State 20000, Round State]
+type		= VarSet
+trigger1	= 1
+var(18)		= (Var(18) | 7) - 7 + RoundState
+ignorehitpause	= 1
+
+[State 20000, Round State]
+type		= VarSet
+triggerall	= RoundState >= 2
+trigger1	= Root,Ctrl
+trigger2	= (Root,Var(19) & 131072)
+var(18)		= (Var(18) | 8)
+ignorehitpause	= 1
+
+;------------------- ゲームタイム
+[State 20000, Old GameTime]
+type		= VarSet
+trigger1	= 1
+var(20)		= Var(19)
+ignorehitpause	= 1
+
+[State 20000, GameTime]
+type		= VarSet
+trigger1	= 1
+var(19)		= GameTime
+ignorehitpause	= 1
+
+;------------------- 開始時の向き
+[State 20000, Start Facing]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 16) - 16*(Facing >= 0)
+ignorehitpause	= 1
+
+;------------------- 時間経過するか
+[State 20000, GameTime Check]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 32) - 32 * !(Var(19) = (Parent,Var(24) - Parent,Var(59)))
+ignorehitpause	= 1
+
+;------------------- 姿を消す
+[State 20000, AssertSpecial]
+type		= AssertSpecial
+trigger1	= 1
+flag		= invisible
+ignorehitpause	= 1
+
+;------------------- 親に張り付く
+[State 20000, Bind]
+type		= BindToRoot
+trigger1	= 1
+ignorehitpause	= 1
+
+;------------------- 親の向きへ変更
+[State 20000, Turn]
+type		= Turn
+trigger1	= Root,Facing != Facing
+ignorehitpause	= 1
+
+;------------------- 無敵
+[State 20000, NotHit]
+type		= NotHitBy
+trigger1	= 1
+value		= SCA
+ignorehitpause	= 1
+
+[State 20000, HitOverride]
+type		= HitOverride
+trigger1	= 1
+attr		= SCA, AA, AT, AP
+stateno		= 19900
+ignorehitpause	= 1
+
+;------------------- 画面無視
+[State 20000, ScreenBound]
+type		= ScreenBound
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+;------------------- ぶつかり判定無し
+[State 20000, PlayerPush]
+type		= PlayerPush
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+;------------------- 自分のステート
+[State 20000, My State]
+type		= VarSet
+trigger1	= 1
+var(2)		= (Var(2) | 19900)
+ignorehitpause	= 1
+
+[State 20000, MoveType Buf]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 64) - 64 * !(MoveType = A)
+ignorehitpause	= 1
+
+[State 20000, StateType Reset]
+type		= StateTypeSet
+trigger1	= 1
+statetype	= L
+movetype	= I
+physics		= N
+ignorehitpause	= 1
+
+[State 20000, Vel Reset]
+type		= VelSet
+trigger1	= 1
+x			= 0
+y			= 0
+ignorehitpause	= 1
+
+;------------------- 親のステートを奪取前判定用
+[State 20000, Root Pre Steal State Check]
+type		= ParentVarSet
+trigger1	= 1
+var(1)		= (Parent,Var(1) | 2048) - 2048
+ignorehitpause	= 1
+
+;------------------- 親のやられ時間
+[State 20000, Root Yarare Time]
+type		= VarSet
+triggerall	= 1
+trigger1	= (Var(1) & 32)
+var(13)		= IfElse( Root,MoveType = H || (Root,Var(1) & 1024), IfElse(Var(13) < 2147483647, Var(13) + 1, Var(13)), 0 )
+ignorehitpause	= 1
+
+;------------------- 親のパワーゲージ上昇倍率
+[State 20000, Root Power Rate]
+type		= VarSet
+trigger1	= 1
+fvar(10)	= FVar(2)
+ignorehitpause	= 1
+
+;------------------- 毎フレパワーゲージ加算
+[State 20000, Power Counter]
+type		= VarSet
+trigger1	= 1
+fvar(39)	= 1.0
+ignorehitpause	= 1
+
+[State 20000, Power Counter]
+type		= VarSet
+trigger1	= Root,Const(data.power) > 0
+fvar(39)	= IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power))
+ignorehitpause	= 1
+
+[State 20000, Power Counter]
+type		= VarSet
+triggerall	= 1
+triggerall	= RoundState = 2
+trigger1	= (Root,Var(32) & 7) < 3
+var(58)		= IfElse( Floor(10000.0 * FVar(10) * FVar(39)) < 1, 1, Floor(10000.0 * FVar(10) * FVar(39)) )
+ignorehitpause	= 1
+
+[State 20000, Power Counter]
+type		= VarSet
+triggerall	= 1
+triggerall	= RoundState = 2
+trigger1	= (Root,Var(32) & 7) < 3
+var(21)		= IfElse( Var(21) < 0, 0, Var(21) + Var(58) )
+ignorehitpause	= 1
+
+[State 20000, PowerAdd]
+type		= PowerAdd
+triggerall	= 1
+triggerall	= RoundState = 2
+triggerall	= Var(21) >= 30000
+trigger1	= (Root,Var(32) & 7) < 3
+value		= Var(21) / 30000
+ignorehitpause	= 1
+
+[State 20000, Power Counter]
+type		= VarSet
+triggerall	= 1
+trigger1	= 1
+var(21)		= Var(21) % 30000
+ignorehitpause	= 1
+
+;------------------- やられフレパワーゲージ加算
+[State 20000, PowerAdd]
+type		= PowerAdd
+triggerall	= 1
+triggerall	= RoundState = 2
+triggerall	= Var(13) > 120
+trigger1	= (Root,Var(32) & 7) < 3
+value		= Floor( (Var(13) - 120.0) / 120.0 * FVar(10) * FVar(39) )
+ignorehitpause	= 1
+
+;------------------- 真・親のパワーゲージ上昇倍率; LifeMax<1000になった時用のLifeMax値
+[State 20000, LifeMax]
+type		= VarSet
+trigger1	= 1
+var(54)		= IfElse( Root,LifeMax > 1000, Root,LifeMax, 1000 )
+ignorehitpause	= 1
+
+; LifeMax=1000とした時の、防御力補正が開始する体力の値
+; 値の範囲は 0～1000
+[State 20000, Correct Life Rate Value]
+type		= VarSet
+trigger1	= 1
+var(55)		= 700
+ignorehitpause	= 1
+
+[State 20000, HP Init]
+type		= VarSet
+trigger1	= 1
+var(56)		= Root,Life
+ignorehitpause	= 1
+
+[State 20000, Now HP]
+type		= VarSet
+trigger1	= !(Root,Var(1) & 1024)
+var(56)		= (Root,Var(17) & 268435455)
+ignorehitpause	= 1
+
+; 残Life補正による、パワーゲージ上昇倍率
+[State 20000, Root Power Rate]
+type		= VarSet
+trigger1	= 1
+fvar(10)	= FVar(2) * IfElse(Var(54)*Var(55)/1000.0 <= Var(56), 1.0, IfElse(Var(56) > Var(54)*240/1000.0, 1.0 + 0.125*(1.0 - 1.0*(Var(56) - Var(54)*100/1000.0)/(Var(54)*Var(55)/1000.0 - Var(54)*250/1000.0)), 1.125) )
+ignorehitpause	= 1
+
+[State 20000, End]
+type		= SelfState
+trigger1	= 1
+value		= 20010
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー常時 
+;---------------------------------------------------------------------
+[StateDef 20010]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 20010, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20010, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 20010, End Branch User Key Input]
+type		= SelfState
+trigger1	= !(Root,Var(1) & 32)
+value		= 20012
+ignorehitpause	= 1
+
+[State 20010, End Branch AI Key Input]
+type		= SelfState
+trigger1	= 1
+value		= 20015
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー常時 ユーザー コマンド入力
+;---------------------------------------------------------------------
+[StateDef 20012]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 20012, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20012, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;=====================================================================
+; Command Bit Flag
+;=====================================================================
+;------------------- ビット履歴
+[State 20012, Buf]
+type		= VarSet
+trigger1	= 1
+var(58)		= Root,Var(25)
+ignorehitpause	= 1
+
+;------------------- ビットリセット
+[State 20012, Reset]
+type		= ParentVarSet
+trigger1	= 1
+var(25)		= (Parent,Var(25) & (-268435456))
+ignorehitpause	= 1
+
+[State 20012, Reset]
+type		= ParentVarSet
+trigger1	= 1
+var(34)		= (Parent,Var(34) & 15)
+ignorehitpause	= 1
+
+;------------------- "x"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "x"
+var(25)		= (Parent,Var(25) | 1)
+ignorehitpause	= 1
+
+;------------------- "y"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "y"
+var(25)		= (Parent,Var(25) | 2)
+ignorehitpause	= 1
+
+;------------------- "z"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "z"
+var(25)		= (Parent,Var(25) | 4)
+ignorehitpause	= 1
+
+;------------------- "a"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "a"
+var(25)		= (Parent,Var(25) | 8)
+ignorehitpause	= 1
+
+;------------------- "b"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "b"
+var(25)		= (Parent,Var(25) | 16)
+ignorehitpause	= 1
+
+;------------------- "c"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "c"
+var(25)		= (Parent,Var(25) | 32)
+ignorehitpause	= 1
+
+;------------------- "s"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "s"
+var(25)		= (Parent,Var(25) | 64)
+ignorehitpause	= 1
+
+;------------------- "holdup"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "holdup"
+var(25)		= (Parent,Var(25) | 128)
+ignorehitpause	= 1
+
+;------------------- "holddown"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "holddown"
+var(25)		= (Parent,Var(25) | 256)
+ignorehitpause	= 1
+
+;------------------- "holdfwd"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "holdfwd"
+var(25)		= (Parent,Var(25) | 512)
+ignorehitpause	= 1
+
+;------------------- "holdback"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "holdback"
+var(25)		= (Parent,Var(25) | 1024)
+ignorehitpause	= 1
+
+;------------------- "hold_x"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "x"
+trigger2	= (Var(58) & 1) || (Var(58) & 2048)
+trigger2	= Command = "hold_x"
+trigger3	= !(Var(18) & 8) && RoundState <= 2 && Command = "hold_x"
+var(25)		= (Parent,Var(25) | 2048)
+ignorehitpause	= 1
+
+;------------------- "hold_y"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "y"
+trigger2	= (Var(58) & 2) || (Var(58) & 4096)
+trigger2	= Command = "hold_y"
+trigger3	= !(Var(18) & 8) && RoundState <= 2 && Command = "hold_y"
+var(25)		= (Parent,Var(25) | 4096)
+ignorehitpause	= 1
+
+;------------------- "hold_z"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "z"
+trigger2	= (Var(58) & 4) || (Var(58) & 8192)
+trigger2	= Command = "hold_z"
+trigger3	= !(Var(18) & 8) && RoundState <= 2 && Command = "hold_z"
+var(25)		= (Parent,Var(25) | 8192)
+ignorehitpause	= 1
+
+;------------------- "hold_a"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "a"
+trigger2	= (Var(58) & 8) || (Var(58) & 16384)
+trigger2	= Command = "hold_a"
+trigger3	= !(Var(18) & 8) && RoundState <= 2 && Command = "hold_a"
+var(25)		= (Parent,Var(25) | 16384)
+ignorehitpause	= 1
+
+;------------------- "hold_b"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "b"
+trigger2	= (Var(58) & 16) || (Var(58) & 32768)
+trigger2	= Command = "hold_b"
+trigger3	= !(Var(18) & 8) && RoundState <= 2 && Command = "hold_b"
+var(25)		= (Parent,Var(25) | 32768)
+ignorehitpause	= 1
+
+;------------------- "hold_c"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "c"
+trigger2	= (Var(58) & 32) || (Var(58) & 65536)
+trigger2	= Command = "hold_c"
+trigger3	= !(Var(18) & 8) && RoundState <= 2 && Command = "hold_c"
+var(25)		= (Parent,Var(25) | 65536)
+ignorehitpause	= 1
+
+;------------------- "hold_s"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "hold_s"
+var(25)		= (Parent,Var(25) | 131072)
+ignorehitpause	= 1
+
+;------------------- "hold_right"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= !(Var(1) & 16)
+trigger1	= Command = "holdfwd"
+trigger2	= (Var(1) & 16)
+trigger2	= Command = "holdback"
+var(25)		= (Parent,Var(25) | 262144)
+ignorehitpause	= 1
+
+;------------------- "hold_left"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= !(Var(1) & 16)
+trigger1	= Command = "holdback"
+trigger2	= (Var(1) & 16)
+trigger2	= Command = "holdfwd"
+var(25)		= (Parent,Var(25) | 524288)
+ignorehitpause	= 1
+
+;------------------- "recovery"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "recovery"
+var(25)		= (Parent,Var(25) | 4194304)
+ignorehitpause	= 1
+
+;------------------- "hatakikomi"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "hatakikomi"
+var(25)		= (Parent,Var(25) | 16777216)
+ignorehitpause	= 1
+
+;------------------- "tsukidashi"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "tsukidashi"
+var(25)		= (Parent,Var(25) | 33554432)
+ignorehitpause	= 1
+
+;------------------- "ketaguri"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "ketaguri"
+var(25)		= (Parent,Var(25) | 67108864)
+ignorehitpause	= 1
+
+;------------------- "yorikiri2"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "yorikiri2"
+var(25)		= (Parent,Var(25) | 134217728)
+ignorehitpause	= 1
+
+;------------------- "injure"
+[State 20012, Input Bit]
+type		= ParentVarSet
+trigger1	= Command = "injure"
+var(34)		= (Parent,Var(34) | 64)
+ignorehitpause	= 1
+
+;------------------- "injure_damage_up"
+[State 20012, Input Bit]
+type		= ParentVarSet
+triggerall	= Command != "holddown"
+trigger1	= Command = "z"
+trigger1	= Command = "c"
+var(34)		= (Parent,Var(34) | 128)
+ignorehitpause	= 1
+
+;------------------- "injure_damage_down"
+[State 20012, Input Bit]
+type		= ParentVarSet
+triggerall	= Command = "holddown"
+trigger1	= Command = "z"
+trigger1	= Command = "c"
+var(34)		= (Parent,Var(34) | 256)
+ignorehitpause	= 1
+
+;=====================================================================
+; Char Mode
+;=====================================================================
+[State 20012, Char Mode Reset]
+type		= VarSet
+trigger1	= 1
+var(58)		= -1
+ignorehitpause	= 1
+
+[State 20012, Char Mode Normal]
+type		= VarSet
+triggerall	= Command = "hold_s"
+triggerall	= Command = "holddown"
+trigger1	= Command = "y"
+var(58)		= 4
+ignorehitpause	= 1
+
+[State 20012, Char Mode Strong Counter]
+type		= VarSet
+triggerall	= Command = "hold_s"
+triggerall	= Command = "holddown"
+trigger1	= Command = "z"
+var(58)		= 3
+ignorehitpause	= 1
+
+[State 20012, Char Mode Strong]
+type		= VarSet
+triggerall	= Command = "hold_s"
+triggerall	= Command = "holddown"
+trigger1	= Command = "a"
+var(58)		= 2
+ignorehitpause	= 1
+
+[State 20012, Char Mode God]
+type		= VarSet
+triggerall	= Command = "hold_s"
+triggerall	= Command = "holddown"
+trigger1	= Command = "b"
+var(58)		= 1
+ignorehitpause	= 1
+
+[State 20012, Char Mode SUMOU]
+type		= VarSet
+triggerall	= Command = "hold_s"
+triggerall	= Command = "holddown"
+trigger1	= Command = "c"
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 20012, Char Mode Set]
+type		= VarSet
+trigger1	= Var(58) >= 0
+var(23)		= Var(58)
+ignorehitpause	= 1
+
+[State 20012, Char Mode Set]
+type		= ParentVarSet
+trigger1	= Var(58) >= 0
+var(32)		= (Parent,Var(32) | 7) - 7 + Var(23)
+ignorehitpause	= 1
+
+;=====================================================================
+; User Config
+;=====================================================================
+;------------------- フラグ可変
+[State 20012, User Config Attack Rate Type]
+type		= ParentVarSet
+triggerall	= Command = "hold_s"
+triggerall	= Command != "holddown"
+trigger1	= Command = "x"
+var(22)		= IfElse( (Parent,Var(22) & 16), (Parent,Var(22) - 16), (Parent,Var(22) | 16) )
+ignorehitpause	= 1
+
+[State 20012, User Config Entire No Atemi]
+type		= Null;ParentVarSet
+triggerall	= Command = "hold_s"
+triggerall	= Command != "holddown"
+trigger1	= Command = "y"
+var(22)		= IfElse( (Parent,Var(22) & 32), (Parent,Var(22) - 32), (Parent,Var(22) | 32) )
+ignorehitpause	= 1
+
+[State 20012, User Config Entire Eternal Target]
+type		= Null;ParentVarSet
+triggerall	= Command = "hold_s"
+triggerall	= Command != "holddown"
+trigger1	= Command = "z"
+var(22)		= IfElse( (Parent,Var(22) & 64), (Parent,Var(22) - 64), (Parent,Var(22) | 64) )
+ignorehitpause	= 1
+
+[State 20012, User Config HP Damage NotHit Penalty]
+type		= Null;ParentVarSet
+triggerall	= Command = "hold_s"
+triggerall	= Command != "holddown"
+trigger1	= Command = "a"
+var(22)		= IfElse( (Parent,Var(22) & 128), (Parent,Var(22) - 128), (Parent,Var(22) | 128) )
+ignorehitpause	= 1
+
+[State 20012, User Config No Target Penalty]
+type		= Null;ParentVarSet
+triggerall	= Command = "hold_s"
+triggerall	= Command != "holddown"
+trigger1	= Command = "b"
+var(22)		= IfElse( (Parent,Var(22) & 256), (Parent,Var(22) - 256), (Parent,Var(22) | 256) )
+ignorehitpause	= 1
+
+[State 20012, User Config HitOverride Penalty]
+type		= Null;ParentVarSet
+triggerall	= Command = "hold_s"
+triggerall	= Command != "holddown"
+trigger1	= Command = "c"
+var(22)		= IfElse( (Parent,Var(22) & 512), (Parent,Var(22) - 512), (Parent,Var(22) | 512) )
+ignorehitpause	= 1
+
+[State 20012, User Config HitOverride Penalty]
+type		= Null;ParentVarSet
+triggerall	= Command = "hold_s"
+triggerall	= Command = "holddown"
+trigger1	= Command = "x"
+var(22)		= IfElse( (Parent,Var(22) & 1024), (Parent,Var(22) - 1024), (Parent,Var(22) | 1024) )
+ignorehitpause	= 1
+
+;=====================================================================
+; Input Command
+;=====================================================================
+[State 20012, Input Command]	; A
+type		= ParentVarSet
+trigger1	= Command = "x"
+var(8)		= (Parent,Var(8) | 3)
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; B
+type		= ParentVarSet
+trigger1	= Command = "a"
+var(8)		= (Parent,Var(8) | 12)
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; C
+type		= ParentVarSet
+trigger1	= Command = "y"
+var(8)		= (Parent,Var(8) | 48)
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; D
+type		= ParentVarSet
+trigger1	= Command = "b"
+var(8)		= (Parent,Var(8) | 192)
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; C+D
+type		= ParentVarSet
+trigger1	= (Command = "y") && (Command = "b")
+var(8)		= (Parent,Var(8) | 768)
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; A+B
+type		= ParentVarSet
+trigger1	= (Command = "z") || ((Command = "x") && (Command = "a"))
+var(8)		= (Parent,Var(8) | 7168) - 7168 + 5*1024
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; シールド
+type		= ParentVarSet
+trigger1	= Command = "c"
+var(8)		= (Parent,Var(8) | 24576)
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 挑発
+type		= ParentVarSet
+trigger1	= Command = "s"
+var(8)		= (Parent,Var(8) | 786432)
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; ダッシュ
+type		= ParentVarSet
+trigger1	= Command = "FF"
+var(8)		= (Parent,Var(8) | 29360128)
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; バクステ
+type		= ParentVarSet
+trigger1	= Command = "BB"
+var(8)		= (Parent,Var(8) | 234881024)
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; high_jump_flag
+type		= ParentVarSet
+trigger1	= Command = "high_jump_flag"
+var(8)		= (Parent,Var(8) | -268435456) - -268435456 + 9*268435456
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 寄り切り
+type		= ParentVarSet
+trigger1	= Command = "yorikiri"
+var(9)		= (Parent,Var(9) | 7) - 7 + 5*1
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; がぶり寄り
+type		= ParentVarSet
+trigger1	= Command = "gaburiyori"
+var(9)		= (Parent,Var(9) | 56) - 56 + 5*8
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 掛け投げ(弱)
+type		= ParentVarSet
+trigger1	= Command = "kakenage_a"
+var(9)		= (Parent,Var(9) | 448) - 448 + 5*64
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 掛け投げ(強)
+type		= ParentVarSet
+trigger1	= Command = "kakenage_b"
+var(9)		= (Parent,Var(9) | 3584) - 3584 + 5*512
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 超頭突き(弱)
+type		= ParentVarSet
+trigger1	= Command = "tyozutsuki_a"
+var(9)		= (Parent,Var(9) | 28672) - 28672 + 5*4096
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 超頭突き(強)
+type		= ParentVarSet
+trigger1	= Command = "tyozutsuki_b"
+var(9)		= (Parent,Var(9) | 229376) - 229376 + 5*32768
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 小手投げ(弱)
+type		= ParentVarSet
+trigger1	= Command = "kotenage_a"
+var(9)		= (Parent,Var(9) | 1835008) - 1835008 + 5*262144
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 小手投げ(強)
+type		= ParentVarSet
+trigger1	= Command = "kotenage_b"
+var(9)		= (Parent,Var(9) | 14680064) - 14680064 + 5*2097152
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 五輪突き(弱)
+type		= ParentVarSet
+trigger1	= Command = "gorinduki_a"
+var(9)		= (Parent,Var(9) | 117440512) - 117440512 + 5*16777216
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 五輪突き(強)
+type		= ParentVarSet
+trigger1	= Command = "gorinduki_b"
+var(9)		= (Parent,Var(9) | 939524096) - 939524096 + 5*134217728
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 突き上げ(弱)
+type		= ParentVarSet
+trigger1	= Command = "tsukiage_a"
+var(10)		= (Parent,Var(10) | 7) - 7 + 5*1
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 突き上げ(強)
+type		= ParentVarSet
+trigger1	= Command = "tsukiage_b"
+var(10)		= (Parent,Var(10) | 56) - 56 + 5*8
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 四股踏み(弱)
+type		= ParentVarSet
+triggerall	= !(Command = "holdup")
+triggerall	= !(Command = "holdfwd")
+triggerall	= !(Command = "holdback")
+trigger1	= Command = "holddown"
+trigger1	= Command = "shiko_a"
+trigger2	= Command = "shiko_a2"
+var(10)		= (Parent,Var(10) | 448) - 448 + 5*64
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 四股踏み(強)
+type		= ParentVarSet
+triggerall	= !(Command = "holdup")
+triggerall	= !(Command = "holdfwd")
+triggerall	= !(Command = "holdback")
+trigger1	= Command = "holddown"
+trigger1	= Command = "shiko_b"
+trigger2	= Command = "shiko_b2"
+var(10)		= (Parent,Var(10) | 3584) - 3584 + 5*512
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 合掌ひねり(弱)
+type		= ParentVarSet
+trigger1	= Command = "gassyou_a"
+var(11)		= (Parent,Var(11) | 7) - 7 + 5*1
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 合掌ひねり(強)
+type		= ParentVarSet
+trigger1	= Command = "gassyou_b"
+var(11)		= (Parent,Var(11) | 56) - 56 + 5*8
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; MAX合掌ひねり
+type		= ParentVarSet
+trigger1	= Command = "gassyou_ab"
+var(11)		= (Parent,Var(11) | 448) - 448 + 5*64
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 大一番(弱)
+type		= ParentVarSet
+trigger1	= Command = "ooichiban_a"
+var(11)		= (Parent,Var(11) | 3584) - 3584 + 5*512
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 大一番(強)
+type		= ParentVarSet
+trigger1	= Command = "ooichiban_b"
+var(11)		= (Parent,Var(11) | 28672) - 28672 + 5*4096
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; MAX大一番
+type		= ParentVarSet
+trigger1	= Command = "ooichiban_ab"
+var(11)		= (Parent,Var(11) | 229376) - 229376 + 5*32768
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 諸手突き(弱)
+type		= ParentVarSet
+trigger1	= Command = "moroteduki_a"
+var(11)		= (Parent,Var(11) | 1835008) - 1835008 + 5*262144
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 諸手突き(強)
+type		= ParentVarSet
+trigger1	= Command = "moroteduki_b"
+var(11)		= (Parent,Var(11) | 14680064) - 14680064 + 5*2097152
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; MAX諸手突き
+type		= ParentVarSet
+trigger1	= Command = "moroteduki_ab"
+var(11)		= (Parent,Var(11) | 117440512) - 117440512 + 5*16777216
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 我慢(弱)
+type		= ParentVarSet
+triggerall	= !(Command = "holdup")
+triggerall	= !(Command = "holdfwd")
+triggerall	= !(Command = "holdback")
+trigger1	= Command = "holddown"
+trigger1	= Command = "endure_a"
+trigger2	= Command = "endure_a2"
+var(10)		= (Parent,Var(10) | 28672) - 28672 + 5*4096
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; 我慢(強)
+type		= ParentVarSet
+triggerall	= !(Command = "holdup")
+triggerall	= !(Command = "holdfwd")
+triggerall	= !(Command = "holdback")
+trigger1	= Command = "holddown"
+trigger1	= Command = "endure_b"
+trigger2	= Command = "endure_b2"
+var(10)		= (Parent,Var(10) | 229376) - 229376 + 5*32768
+ignorehitpause	= 1
+
+[State 20012, Input Command]	; MAX我慢
+type		= ParentVarSet
+triggerall	= !(Command = "holdup")
+triggerall	= !(Command = "holdfwd")
+triggerall	= !(Command = "holdback")
+trigger1	= Command = "holddown"
+trigger1	= Command = "endure_ab"
+trigger2	= Command = "endure_ab2"
+var(10)		= (Parent,Var(10) | 1835008) - 1835008 + 5*262144
+ignorehitpause	= 1
+
+[State 20012, End]
+type		= SelfState
+trigger1	= 1
+value		= 20019
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー常時 AI コマンド入力結果
+;---------------------------------------------------------------------
+[StateDef 20016]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 20016, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20016, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;=====================================================================
+; Input Command AI
+;=====================================================================
+[State 20016, Input Command]	; A
+type		= ParentVarSet
+trigger1	= (Var(56) = 200) || (Var(56) = 300)
+trigger2	= (Var(56) = 700)	; 張り手
+trigger3	= (Var(56) = 710)	; まえみつ叩き
+var(8)		= (Parent,Var(8) | 3)
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; B
+type		= ParentVarSet
+trigger1	= (Var(56) = 210) || (Var(56) = 310)
+trigger2	= (Var(56) = 720)	; 突っ張り
+var(8)		= (Parent,Var(8) | 12)
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; C
+type		= ParentVarSet
+trigger1	= (Var(56) = 220) || (Var(56) = 320)
+trigger2	= (Var(56) = 730)	; 喉輪
+trigger3	= (Var(56) = 900)	; C投げ
+var(8)		= (Parent,Var(8) | 48)
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; D
+type		= ParentVarSet
+trigger1	= (Var(56) = 230) || (Var(56) = 330)
+trigger2	= (Var(56) = 740)	; EHキック
+trigger3	= (Var(56) = 910)	; D投げ
+var(8)		= (Parent,Var(8) | 192)
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; C+D
+type		= ParentVarSet
+trigger1	= (Var(56) = 600)
+trigger2	= !((Root,Var(2) & 131071) = [600, 629])
+trigger2	= (Var(56) = 601)
+trigger3	= (Var(56) = 1700)	; ぶちかまし
+var(8)		= (Parent,Var(8) | 768)
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; A+B
+type		= ParentVarSet
+trigger1	= (Var(56) = 4090) || (Var(56) = 4000) || (Var(56) = 4070)
+trigger2	= (Var(55) & 1)
+var(8)		= (Parent,Var(8) | 7168) - 7168 + 5*1024
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; シールド
+type		= ParentVarSet
+trigger1	= (Var(56) = 4600) || (Var(56) = 4610)
+trigger2	= (Var(55) & 1)
+var(8)		= (Parent,Var(8) | 24576)
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 挑発
+type		= ParentVarSet
+trigger1	= (Var(56) = 195)
+var(8)		= (Parent,Var(8) | 786432)
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; ダッシュ
+type		= ParentVarSet
+triggerall	= !((Root,Var(2) & 131071) = [100, 103])
+trigger1	= (Var(56) = 100)
+var(8)		= (Parent,Var(8) | 29360128)
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; バクステ
+type		= ParentVarSet
+triggerall	= !((Root,Var(2) & 131071) = [100, 103])
+trigger1	= (Var(56) = 105)
+var(8)		= (Parent,Var(8) | 234881024)
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; high_jump_flag
+type		= ParentVarSet
+trigger1	= (Var(56) = [43, 45])	; 大ジャンプ
+trigger2	= (Var(56) = [49, 51])	; 中ジャンプ
+var(8)		= (Parent,Var(8) | -268435456) - -268435456 + 9*268435456
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 寄り切り
+type		= ParentVarSet
+trigger1	= (Var(56) = 1200)
+trigger2	= (Var(56) = 1210)
+var(9)		= (Parent,Var(9) | 7) - 7 + 5*1
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; がぶり寄り
+type		= ParentVarSet
+trigger1	= (Var(56) = 1600)
+var(9)		= (Parent,Var(9) | 56) - 56 + 5*8
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 掛け投げ(弱)
+type		= ParentVarSet
+trigger1	= (Var(56) = 1300)
+trigger2	= (Var(56) = 1310)
+var(9)		= (Parent,Var(9) | 448) - 448 + 5*64
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 掛け投げ(強)
+type		= ParentVarSet
+trigger1	= (Var(56) = 1301)
+trigger2	= (Var(56) = 1311)
+var(9)		= (Parent,Var(9) | 3584) - 3584 + 5*512
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 超頭突き(弱)
+type		= ParentVarSet
+trigger1	= (Var(56) = 1500)
+var(9)		= (Parent,Var(9) | 28672) - 28672 + 5*4096
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 超頭突き(強)
+type		= ParentVarSet
+trigger1	= (Var(56) = 1502)
+var(9)		= (Parent,Var(9) | 229376) - 229376 + 5*32768
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 小手投げ(弱)
+type		= ParentVarSet
+trigger1	= (Var(56) = 1100)
+var(9)		= (Parent,Var(9) | 1835008) - 1835008 + 5*262144
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 小手投げ(強)
+type		= ParentVarSet
+trigger1	= (Var(56) = 1101)
+var(9)		= (Parent,Var(9) | 14680064) - 14680064 + 5*2097152
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 五輪突き(弱)
+type		= ParentVarSet
+trigger1	= (Var(56) = 1900)
+var(9)		= (Parent,Var(9) | 117440512) - 117440512 + 5*16777216
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 五輪突き(強)
+type		= ParentVarSet
+trigger1	= (Var(56) = 1901)
+var(9)		= (Parent,Var(9) | 939524096) - 939524096 + 5*134217728
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 突き上げ(弱)
+type		= ParentVarSet
+trigger1	= (Var(56) = 1400)
+var(10)		= (Parent,Var(10) | 7) - 7 + 5*1
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 突き上げ(強)
+type		= ParentVarSet
+trigger1	= (Var(56) = 1410)
+var(10)		= (Parent,Var(10) | 56) - 56 + 5*8
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 四股踏み(弱)
+type		= ParentVarSet
+trigger1	= (Var(56) = 1800)
+var(10)		= (Parent,Var(10) | 448) - 448 + 5*64
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 四股踏み(強)
+type		= ParentVarSet
+trigger1	= (Var(56) = 1801)
+var(10)		= (Parent,Var(10) | 3584) - 3584 + 5*512
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 合掌ひねり(弱)
+type		= ParentVarSet
+trigger1	= (Var(56) = 3000)
+var(11)		= (Parent,Var(11) | 7) - 7 + 5*1
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 合掌ひねり(強)
+type		= ParentVarSet
+trigger1	= 0
+var(11)		= (Parent,Var(11) | 56) - 56 + 5*8
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; MAX合掌ひねり
+type		= ParentVarSet
+trigger1	= (Var(56) = 3100)
+var(11)		= (Parent,Var(11) | 448) - 448 + 5*64
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 大一番(弱)
+type		= ParentVarSet
+trigger1	= (Var(56) = 3200)
+trigger2	= (Var(56) = 3210)
+var(11)		= (Parent,Var(11) | 3584) - 3584 + 5*512
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 大一番(強)
+type		= ParentVarSet
+trigger1	= 0
+var(11)		= (Parent,Var(11) | 28672) - 28672 + 5*4096
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; MAX大一番
+type		= ParentVarSet
+trigger1	= (Var(56) = 3300)
+trigger2	= (Var(56) = 3310)
+var(11)		= (Parent,Var(11) | 229376) - 229376 + 5*32768
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 諸手突き(弱)
+type		= ParentVarSet
+trigger1	= (Var(56) = 3400)
+var(11)		= (Parent,Var(11) | 1835008) - 1835008 + 5*262144
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 諸手突き(強)
+type		= ParentVarSet
+trigger1	= 0
+var(11)		= (Parent,Var(11) | 14680064) - 14680064 + 5*2097152
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; MAX諸手突き
+type		= ParentVarSet
+trigger1	= (Var(56) = 3500)
+var(11)		= (Parent,Var(11) | 117440512) - 117440512 + 5*16777216
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 我慢(弱)
+type		= ParentVarSet
+trigger1	= (Var(56) = 3600)
+var(10)		= (Parent,Var(10) | 28672) - 28672 + 5*4096
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; 我慢(強)
+type		= ParentVarSet
+trigger1	= 0
+var(10)		= (Parent,Var(10) | 229376) - 229376 + 5*32768
+ignorehitpause	= 1
+
+[State 20016, Input Command]	; MAX我慢
+type		= ParentVarSet
+trigger1	= (Var(56) = 3700)
+var(10)		= (Parent,Var(10) | 1835008) - 1835008 + 5*262144
+ignorehitpause	= 1
+
+[State 20016, End]
+type		= SelfState
+trigger1	= 1
+value		= 20019
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー常時 モード変更処理
+;---------------------------------------------------------------------
+[StateDef 20019]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 20019, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20019, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------------- 基本倍率
+;------------------- 基本攻撃力倍率
+[State 20019, Base Attack Correct]
+type		= VarSet
+trigger1	= 1
+fvar(39)	= 1.0
+ignorehitpause	= 1
+
+[State 20019, Base Attack Correct]
+type		= VarSet
+trigger1	= (Root,Var(32) & 7) = 2
+fvar(39)	= 1.1
+ignorehitpause	= 1
+
+[State 20019, Base Attack Correct]
+type		= VarSet
+trigger1	= (Root,Var(32) & 7) = 1
+fvar(39)	= 1.15
+ignorehitpause	= 1
+
+[State 20019, Base Attack Correct]
+type		= VarSet
+trigger1	= (Root,Var(32) & 7) = 0
+fvar(39)	= 1.2
+ignorehitpause	= 1
+
+[State 20019, Base Attack Correct]
+type		= VarSet
+trigger1	= 1
+fvar(0)		= FVar(3) * FVar(39)
+ignorehitpause	= 1
+
+;------------------- 基本防御力倍率
+[State 20019, Base Defense Correct]
+type		= VarSet
+trigger1	= 1
+fvar(39)	= 1.0
+ignorehitpause	= 1
+
+[State 20019, Base Defense Correct]
+type		= VarSet
+trigger1	= (Root,Var(32) & 7) = 2
+fvar(39)	= 1.25
+ignorehitpause	= 1
+
+[State 20019, Base Defense Correct]
+type		= VarSet
+trigger1	= (Root,Var(32) & 7) = 1
+fvar(39)	= 2.0
+ignorehitpause	= 1
+
+[State 20019, Base Defense Correct]
+type		= VarSet
+trigger1	= (Root,Var(32) & 7) = 0
+fvar(39)	= 5.0
+ignorehitpause	= 1
+
+[State 20019, Base Defense Correct]
+type		= VarSet
+trigger1	= 1
+fvar(1)		= FVar(4) * FVar(39)
+ignorehitpause	= 1
+
+;------------------- パワーゲージ上昇倍率
+[State 20019, Base Power Gauge Correct]
+type		= VarSet
+trigger1	= 1
+fvar(39)	= 1.0
+ignorehitpause	= 1
+
+[State 20019, Base Power Gauge Correct]
+type		= VarSet
+trigger1	= (Root,Var(32) & 7) = 2
+fvar(39)	= 1.1
+ignorehitpause	= 1
+
+[State 20019, Base Power Gauge Correct]
+type		= VarSet
+trigger1	= (Root,Var(32) & 7) = 1
+fvar(39)	= 1.2
+ignorehitpause	= 1
+
+[State 20019, Base Power Gauge Correct]
+type		= VarSet
+trigger1	= (Root,Var(32) & 7) = 0
+fvar(39)	= 1.5
+ignorehitpause	= 1
+
+[State 20019, Base Power Gauge Correct]
+type		= VarSet
+trigger1	= 1
+fvar(2)		= FVar(5) * FVar(39)
+ignorehitpause	= 1
+
+;------------------- ガードクラッシュ値倍率
+[State 20019, Base Guard Crush Correct]
+type		= VarSet
+trigger1	= 1
+fvar(39)	= 1.0
+ignorehitpause	= 1
+
+[State 20019, Base Guard Crush Correct]
+type		= VarSet
+trigger1	= (Root,Var(32) & 7) = 2
+fvar(39)	= 1.25
+ignorehitpause	= 1
+
+[State 20019, Base Guard Crush Correct]
+type		= VarSet
+trigger1	= (Root,Var(32) & 7) = 1
+trigger2	= (Root,Var(32) & 7) = 0
+fvar(39)	= 1.5
+ignorehitpause	= 1
+
+[State 20019, Base Guard Crush Correct]
+type		= VarSet
+trigger1	= 1
+fvar(6)		= FVar(7) * FVar(39)
+ignorehitpause	= 1
+;---------------------------------------------------------------------------- 基本倍率
+
+;---------------------------------------------------------------------------- コンフィグ
+;------------------- 当身可能攻撃じゃないと残り鋼体回数が減らないか
+[State 20019, User Config Entire No Atemi]
+type		= ParentVarSet
+trigger1	= 1
+var(22)		= (Parent,Var(22) | 32) - 32
+ignorehitpause	= 1
+
+;------------------- 鋼体回数に永続Targetを付加するか
+[State 20019, User Config Entire Eternal Target]
+type		= ParentVarSet
+trigger1	= 1
+var(22)		= (Parent,Var(22) | 64) - 64
+ignorehitpause	= 1
+
+;------------------- HPダメージ無視発動にペナルティを付加するか
+[State 20019, User Config HP Damage NotHit Penalty]
+type		= ParentVarSet
+trigger1	= 1
+var(22)		= (Parent,Var(22) | 128) - 128
+ignorehitpause	= 1
+
+;------------------- 演出技中にTargetが無くなったらペナルティを付加するか
+[State 20019, User Config No Target Penalty]
+type		= ParentVarSet
+trigger1	= 1
+var(22)		= (Parent,Var(22) | 256) - 256
+ignorehitpause	= 1
+
+;------------------- 相手のHitOverrideにペナルティを付加するか
+[State 20019, User Config HitOverride Penalty]
+type		= ParentVarSet
+trigger1	= 1
+var(22)		= (Parent,Var(22) | 512) - 512
+ignorehitpause	= 1
+
+;------------------- F1とかで死なないか？
+[State 20019, User Config F1 NotHit]
+type		= ParentVarSet
+trigger1	= 1
+var(22)		= (Parent,Var(22) | 1024) - 1024
+ignorehitpause	= 1
+
+;------------------- 当身可能攻撃じゃないと残り鋼体回数が減らないか
+[State 20019, VarSet]
+type		= ParentVarSet
+trigger1	= (Parent,Var(32) & 7) = 3
+trigger2	= (Parent,Var(32) & 7) = 2
+trigger3	= (Parent,Var(32) & 7) = 1
+trigger4	= (Parent,Var(32) & 7) = 0
+var(22)		= (Parent,Var(22) | 32)
+ignorehitpause	= 1
+
+;------------------- 鋼体回数に永続Targetを付加するか
+[State 20019, VarSet]
+type		= ParentVarSet
+trigger1	= 0
+trigger2	= 0
+trigger3	= (Parent,Var(32) & 7) = 1
+trigger4	= (Parent,Var(32) & 7) = 0
+var(22)		= (Parent,Var(22) | 64)
+ignorehitpause	= 1
+
+;------------------- HPダメージ無視発動にペナルティを付加するか
+[State 20019, VarSet]
+type		= ParentVarSet
+trigger1	= 0
+trigger2	= (Parent,Var(32) & 7) = 2
+trigger3	= (Parent,Var(32) & 7) = 1
+trigger4	= (Parent,Var(32) & 7) = 0
+var(22)		= (Parent,Var(22) | 128)
+ignorehitpause	= 1
+
+;------------------- 演出技中にTargetが無くなったらペナルティを付加するか
+[State 20019, VarSet]
+type		= ParentVarSet
+trigger1	= (Parent,Var(32) & 7) = 3
+trigger2	= (Parent,Var(32) & 7) = 2
+trigger3	= (Parent,Var(32) & 7) = 1
+trigger4	= (Parent,Var(32) & 7) = 0
+var(22)		= (Parent,Var(22) | 256)
+ignorehitpause	= 1
+
+;------------------- 相手のHitOverrideにペナルティを付加するか
+[State 20019, VarSet]
+type		= ParentVarSet
+trigger1	= 0
+trigger2	= (Parent,Var(32) & 7) = 2
+trigger3	= (Parent,Var(32) & 7) = 1
+trigger4	= (Parent,Var(32) & 7) = 0
+var(22)		= (Parent,Var(22) | 512)
+ignorehitpause	= 1
+
+;------------------- F1とかで死なないか？
+[State 20019, User Config F1 NotHit]
+type		= ParentVarSet
+trigger1	= 0
+trigger2	= (Parent,Var(32) & 7) = 2
+trigger3	= (Parent,Var(32) & 7) = 1
+trigger4	= (Parent,Var(32) & 7) = 0
+var(22)		= (Parent,Var(22) | 1024)
+ignorehitpause	= 1
+;---------------------------------------------------------------------------- コンフィグ
+
+[State 20019, End]
+type		= SelfState
+trigger1	= 1
+value		= 20020
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー常時 共通処理
+;---------------------------------------------------------------------
+[StateDef 20020]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 20020, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20020, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- P2MoveType=Hかの履歴
+[State 20020, P2MoveType=H Buf]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 128) - 128 + 128*((Root,P2MoveType = H) && !(Root,P2StateNo = [150, 155]))
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------------- プレーコンフィグ
+;------------------- 1Pか2Pかによる、基準座標割り出し
+[State 20020, Base Pos]
+type		= VarSet
+trigger1	= 1
+var(58)		= IfElse( TeamSide = 1, (Var(10) & 511), 318 - (Var(10) & 511) )
+ignorehitpause	= 1
+
+;------------------- 基準y座標割り出し
+[State 20020, Base Pos]
+type		= VarSet
+trigger1	= 1
+var(56)		= (Var(10) & 261632) / 512
+ignorehitpause	= 1
+
+[State 20020, Base Pos]
+type		= VarSet
+triggerall	= 1
+triggerall	= NumPartner
+trigger1	= Partner,ID < Root,ID
+var(56)		= Var(56) + 15
+ignorehitpause	= 1
+
+;------------------- 1Pか2Pかによる、加算座標割り出し
+[State 20020, Pos Add]
+type		= VarSet
+trigger1	= 1
+var(57)		= IfElse( TeamSide = 1, 13, -13 )
+ignorehitpause	= 1
+
+;------------------- キャラモード
+[State 20020, Explod]
+type		= Explod
+triggerall	= RoundState >= 1
+triggerall	= RoundState < 4 && Root,Alive
+trigger1	= (Root,Var(32) & 7) < 4
+anim		= 2954 + (Root,Var(32) & 7)
+ID			= 2954 + (Root,Var(32) & 7)
+pos			= Var(58), Var(56)
+postype		= left
+sprpriority	= -2
+scale		= 1.0, 1.0
+bindtime	= 1
+ownpal		= 1
+supermovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause	= 1
+
+;------------------- 攻撃力補正タイプ
+[State 20020, Explod]
+type		= Explod
+triggerall	= RoundState >= 1
+triggerall	= RoundState < 4 && Root,Alive
+trigger1	= (Root,Var(22) & 16)
+anim		= 2951
+ID			= 2951
+pos			= Var(58) + Var(57), Var(56)
+postype		= left
+sprpriority	= -2
+scale		= 1.0, 1.0
+bindtime	= 1
+ownpal		= 1
+supermovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause	= 1
+;---------------------------------------------------------------------------- プレーコンフィグ
+
+;---------------------------------------------------------------------------- スーパーポーズ前処理
+;------------------- Target
+[State 20020, TargetState]
+type		= TargetState
+trigger1	= (Var(5) & 128)
+value		= 7060
+ignorehitpause	= 1
+
+[State 20020, TargetDrop]
+type		= TargetDrop
+trigger1	= 1
+excludeID	= -1
+keepone		= 0
+ignorehitpause	= 1
+
+;------------------- SuperPause
+[State 20020, SuperPause Req Buf Reset]
+type		= VarAdd
+trigger1	= Var(4) > 0
+var(4)		= -1
+ignorehitpause	= 1
+
+[State 20020, SuperPause Req Buf Check]
+type		= VarSet
+trigger1	= (Var(5) & 128)
+trigger2	= (Var(5) & 512)
+var(4)		= 2
+ignorehitpause	= 1
+
+[State 20020, SuperPause Req Reset]
+type		= VarSet
+trigger1	= 1
+var(5)		= (Var(5) | 128) - 128
+ignorehitpause	= 1
+
+[State 20020, Round End SuperPause Req Reset]
+type		= VarSet
+trigger1	= 1
+var(5)		= (Var(5) | 512) - 512
+ignorehitpause	= 1
+
+[State 20020, SuperPause Time Reset]
+type		= VarSet
+triggerall	= Root,HitShakeOver
+triggerall	= (Var(5) & 16)
+triggerall	= NumHelper(40000)
+trigger1	= (Var(19) = Helper(40000),Var(19))
+trigger2	= (Var(20) = Helper(40000),Var(19))	; MoveType!=Aになっても、その前に本体が要請によってSPするため、40000が動かなくなる
+var(3)		= 0
+ignorehitpause	= 1
+
+[State 20020, SuperPause Time Add]
+type		= VarAdd
+triggerall	= Var(3) < 65535
+trigger1	= !(Var(1) & 32)
+var(3)		= 1
+ignorehitpause	= 1
+
+[State 20020, SuperPause HitShakeOver]
+type		= VarSet
+trigger1	= 1
+var(5)		= (Var(5) | 16) - 16 * !Root,HitShakeOver
+ignorehitpause	= 1
+
+;------------------- バースト
+[State 20020, Cancel Enable Check Reset]
+type		= VarSet
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 20020, Cancel Enable Check]
+type		= VarSet
+triggerall	= (Var(18) & 8)
+trigger1	= Root,Ctrl
+trigger2	= Root,Alive && Root,MoveReversed && Root,MoveType != H
+trigger3	= (Root,Var(2) & 131071) = [100, 104]
+var(58)		= 1
+ignorehitpause	= 1
+
+[State 20020, Psych Burst]
+type		= ParentVarSet
+triggerall	= !(Var(5) & 512)
+triggerall	= (Var(18) & 8)
+triggerall	= (Root,Var(32) & 7) < 4
+triggerall	= Root,Const(data.power) > 0
+triggerall	= Root,Power >= Floor( 2000 * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+triggerall	= (Var(58) = 1) || Root,MoveType = H || (Root,Var(1) & 1024) || (Root,Var(18) & 1073741824)
+triggerall	= Root,Alive
+triggerall	= IfElse( !(Root,Var(1) & 1024), ((Root,Var(2) & 131071) != [4500, 4509]), 1 )
+trigger1	= (Root,Var(25) & 8) && (Root,Var(25) & 32768) && (Root,Var(25) & 65536)
+trigger2	= (Root,Var(25) & 16384) && (Root,Var(25) & 16) && (Root,Var(25) & 65536)
+trigger3	= (Root,Var(25) & 16384) && (Root,Var(25) & 32768) && (Root,Var(25) & 32)
+var(8)		= (Parent,Var(8) | 3145728) - 3145728 + 2*1048576
+ignorehitpause	= 1
+
+;------------------- スーパーポーズ長すぎる用
+[State 20020, SuperPause End]
+type		= ParentVarSet
+triggerall	= !(Var(5) & 512)
+triggerall	= (Root,Var(32) & 7) < 4 && Var(15)
+triggerall	= Root,Alive
+trigger1	= Var(3) >= Var(15)
+var(1)		= (Parent,Var(1) | 131072)
+ignorehitpause	= 1
+
+;------------------- 試合終了後にスーパーポーズしてるか
+[State 20020, Round End SuperPause Check Reset]
+type		= VarSet
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 20020, Round End SuperPause Check]
+type		= VarSet
+triggerall	= RoundState >= 3
+triggerall	= Root,Alive
+trigger1	= (Root,MoveType != H) && (Var(19) != (Root,Var(24) - Root,Var(59))) && (Var(20) != (Root,Var(24) - Root,Var(59)))
+var(58)		= 1
+ignorehitpause	= 1
+
+[State 20020, Round End SuperPause Request Reset]
+type		= ParentVarSet
+trigger1	= Var(58)
+var(16)		= (Parent,Var(16) | 536870912) - 536870912
+ignorehitpause	= 1
+
+[State 20020, Round End SuperPause Request Reset]
+type		= VarSet
+trigger1	= Var(58)
+var(5)		= (Var(5) | 1) - 1
+ignorehitpause	= 1
+
+;------------------- スーパーポーズ要請
+[State 20020, SuperPause Request]
+type		= VarSet
+triggerall	= !Var(4)
+triggerall	= !(Var(5) & 512)
+trigger1	= (Root,Var(1) & 131072)
+trigger2	= (Root,Var(8) & 3145728) = 2*1048576
+trigger3	= Var(58)
+var(5)		= (Var(5) | 128)
+ignorehitpause	= 1
+
+;------------------- 試合終了後のスーパーポーズ要請
+[State 20020, SuperPause Request]
+type		= VarSet
+triggerall	= RoundState >= 3
+trigger1	= Root,Alive
+trigger1	= !(Var(5) & 256)
+trigger2	= !(Var(5) & 1)
+trigger2	= (Root,Var(16) & 536870912)
+trigger3	= Root,Alive
+trigger3	= (Root,Var(25) & 16384) && (Root,Var(25) & 32768)
+var(5)		= (Var(5) | 512)
+ignorehitpause	= 1
+
+;------------------- 本体へスーパーポーズ要請
+[State 20020, SuperPause Request]
+type		= ParentVarSet
+triggerall	= !(Var(5) & 512)
+trigger1	= (Var(5) & 128)
+var(1)		= (Parent,Var(1) | 67108864)
+ignorehitpause	= 1
+
+;------------------- 試合終了系初期化フラグ
+[State 20020, Round Decide Init]
+type		= VarSet
+triggerall	= RoundState >= 3
+trigger1	= (Root,Var(16) & 536870912)
+var(5)		= (Var(5) | 1)
+ignorehitpause	= 1
+
+[State 20020, Round Decide Init]
+type		= VarSet
+triggerall	= RoundState >= 3
+trigger1	= 1
+var(5)		= (Var(5) | 256)
+ignorehitpause	= 1
+;---------------------------------------------------------------------------- スーパーポーズ前処理
+
+;------------------- アニメリセット
+[State 20020, ChangeAnim]
+type		= ChangeAnim
+trigger1	= 1
+value		= 29999
+ignorehitpause	= 1
+
+[State 20020, ChangeAnim]
+type		= ChangeAnim
+trigger1	= Root,StateType = S
+value		= 29997
+ignorehitpause	= 1
+
+[State 20020, ChangeAnim]
+type		= ChangeAnim
+trigger1	= Root,StateType = C
+trigger2	= Root,StateType = L
+value		= 29998
+ignorehitpause	= 1
+
+;------------------- ヒットフラグ系初期化
+[State 20020, Hit Flag Init]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 2) - 2
+ignorehitpause	= 1
+
+[State 20020, Hit Flag Init]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 4) - 4
+ignorehitpause	= 1
+
+[State 20020, Hit Flag Init]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 8) - 8
+ignorehitpause	= 1
+
+;------------------- カットイン
+[State 20020, CutIn Init]
+type		= VarSet
+trigger1	= (Root,Var(1) & 256)
+var(6)		= 0
+ignorehitpause	= 1
+
+[State 20020, CutIn Init Require Reset]
+type		= ParentVarSet
+trigger1	= (Parent,Var(1) & 256)
+var(1)		= (Parent,Var(1) | 256) - 256
+ignorehitpause	= 1
+
+[State 20020, CutIn Check]
+type		= VarSet
+trigger1	= 1
+var(5)		= (Var(5) | 64) - 64
+ignorehitpause	= 1
+
+[State 20020, CutIn Check]
+type		= VarSet
+trigger1	= Root,NumExplod(6200)
+var(5)		= (Var(5) | 64)
+ignorehitpause	= 1
+
+[State 20020, CutIn Scale Time]
+type		= VarAdd
+triggerall	= (Var(1) & 32)
+trigger1	= (Var(5) & 64)
+var(6)		= 1
+ignorehitpause	= 1
+
+;------------------- 背景演出
+[State 20020, BGPalFx]
+type		= BGPalFx
+triggerall	= !(Root,Var(1) & 1024)
+trigger1	= (Root,Var(2) & 131071) = 3101 && Root,AnimElemTime(1) - 1 >= 0 && Root,AnimTime < 0
+trigger2	= (Root,Var(2) & 131071) = 3111
+trigger3	= (Root,Var(2) & 131071) = 3121 && Root,AnimTime < 0
+trigger4	= (Root,Var(2) & 131071) = 3131 && Root,AnimTime < 0
+trigger5	= (Root,Var(2) & 131071) = 3301 && Root,AnimTime < 0
+trigger6	= (Root,Var(2) & 131071) = 3309
+trigger7	= (Root,Var(2) & 131071) = 3311
+trigger8	= (Root,Var(2) & 131071) = 3321
+trigger9	= (Root,Var(2) & 131071) = 3331
+trigger10	= (Root,Var(2) & 131071) = 3341
+trigger11	= (Root,Var(2) & 131071) = 3351 && Root,AnimTime < 0
+trigger12	= (Root,Var(2) & 131071) = 3501 && Root,AnimElemTime(1) - 1 >= 0
+trigger13	= (Root,Var(2) & 131071) = 3511 && Root,AnimTime < 0
+trigger14	= (Root,Var(2) & 131071) = 3516 && Root,AnimTime < 0
+trigger15	= (Root,Var(2) & 131071) = 3701 && Root,AnimElemTime(1) - 1 >= 0 && Root,AnimTime < 0
+time		= 1
+invertall	= 1
+ignorehitpause	= 1
+
+;------------------- スーパーポーズ用終了
+[State 20020, SuperPause End]
+type		= SelfState
+triggerall	= !(Var(5) & 512)
+triggerall	= Root,Var(59) != 1
+trigger1	= (Var(5) & 128)
+value		= 20100
+ignorehitpause	= 1
+
+;------------------- ヒットポーズ待ち終了
+[State 20020, HitPause End]
+type		= SelfState
+trigger1	= !(Root,Var(1) & 1024)
+trigger1	= (Root,Var(3) & 131071) = [5907, 5908]
+trigger1	= (Root,Var(2) & 131071) = 1
+trigger2	= Root,Var(59) = 1
+value		= 20101
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------------- アクション補助
+;------------------- ぶつかり判定の有無
+[State 20020, PlayerPush]
+type		= PlayerPush
+triggerall	= !Root,Ctrl && Root,MoveType != H
+triggerall	= !((Root,Var(2) & 131071) = 901 || (Root,Var(26) & 131071) = 901)
+triggerall	= !((Root,Var(2) & 131071) = 911 || (Root,Var(26) & 131071) = 911)
+triggerall	= !((Root,Var(2) & 131071) = 922 || (Root,Var(26) & 131071) = 922)
+triggerall	= !((Root,Var(2) & 131071) = 1106 || (Root,Var(26) & 131071) = 1106)
+triggerall	= !((Root,Var(2) & 131071) = 1111 || (Root,Var(26) & 131071) = 1111)
+triggerall	= !((Root,Var(2) & 131071) = 1116 || (Root,Var(26) & 131071) = 1116)
+triggerall	= !((Root,Var(2) & 131071) = 1161 || (Root,Var(26) & 131071) = 1161)
+triggerall	= !((Root,Var(2) & 131071) = 1212 || (Root,Var(26) & 131071) = 1212)
+triggerall	= !((Root,Var(2) & 131071) = 1221 || (Root,Var(26) & 131071) = 1221)
+triggerall	= !((Root,Var(2) & 131071) = 1231 || (Root,Var(26) & 131071) = 1231)
+triggerall	= !((Root,Var(2) & 131071) = 1241 || (Root,Var(26) & 131071) = 1241)
+triggerall	= !((Root,Var(2) & 131071) = 1312 || (Root,Var(26) & 131071) = 1312)
+triggerall	= !((Root,Var(2) & 131071) = 1621 || (Root,Var(26) & 131071) = 1621)
+triggerall	= !((Root,Var(2) & 131071) = 1701 && (Root,AnimElemNo(0) = [16, 20]))
+triggerall	= !((Root,Var(2) & 131071) = 3031 || (Root,Var(26) & 131071) = 3031)
+triggerall	= !((Root,Var(2) & 131071) = 3131 || (Root,Var(26) & 131071) = 3131)
+triggerall	= !((Root,Var(2) & 131071) = 3209 || (Root,Var(26) & 131071) = 3209)
+triggerall	= !((Root,Var(2) & 131071) = 3211 || (Root,Var(26) & 131071) = 3211)
+triggerall	= !((Root,Var(2) & 131071) = 3221 || (Root,Var(26) & 131071) = 3221)
+triggerall	= !((Root,Var(2) & 131071) = 3309 || (Root,Var(26) & 131071) = 3309)
+triggerall	= !((Root,Var(2) & 131071) = 3311 || (Root,Var(26) & 131071) = 3311)
+triggerall	= !((Root,Var(2) & 131071) = 3321 || (Root,Var(26) & 131071) = 3321)
+triggerall	= !((Root,Var(2) & 131071) = 3331 || (Root,Var(26) & 131071) = 3331)
+triggerall	= !((Root,Var(2) & 131071) = 3341 || (Root,Var(26) & 131071) = 3341)
+triggerall	= !((Root,Var(2) & 131071) = 3351 || (Root,Var(26) & 131071) = 3351)
+triggerall	= !(((Root,Var(2) & 131071) = [4000, 4001]) || ((Root,Var(26) & 131071) = [4000, 4001]))
+triggerall	= !(((Root,Var(2) & 131071) = [4050, 4051]) || ((Root,Var(26) & 131071) = [4050, 4051]))
+triggerall	= !(((Root,Var(2) & 131071) = [4070, 4071]) || ((Root,Var(26) & 131071) = [4070, 4071]))
+triggerall	= !(((Root,Var(2) & 131071) = [4080, 4081]) || ((Root,Var(26) & 131071) = [4080, 4081]))
+triggerall	= !(((Root,Var(2) & 131071) = [4090, 4099]) || ((Root,Var(26) & 131071) = [4090, 4099]))
+triggerall	= !((Root,Var(2) & 131071) = 4097 || (Root,Var(26) & 131071) = 4097)
+triggerall	= !((Root,Var(2) & 131071) = 5131 || (Root,Var(26) & 131071) = 5131)
+triggerall	= !((Root,Var(2) & 131071) = 5136 || (Root,Var(26) & 131071) = 5136)
+triggerall	= !((Root,Var(2) & 131071) = 5202 || (Root,Var(26) & 131071) = 5202)
+triggerall	= !((Root,Var(2) & 131071) = 5204 || (Root,Var(26) & 131071) = 5204)
+trigger1	= !(Root,Var(1) & 1024)
+value		= 1
+ignorehitpause	= 1
+
+;------------------- 親の行動取得
+[State 20020, Command Reset]
+type		= VarSet
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 20020, Command]
+type		= VarSet
+triggerall	= !(Root,Var(1) & 1024)
+triggerall	= Root,MoveType = A
+trigger1	= (Root,Var(2) & 131071) = 601
+trigger2	= (Root,Var(2) & 131071) = 613
+trigger3	= (Root,Var(2) & 131071) = 1401
+trigger4	= (Root,Var(2) & 131071) = 1411
+trigger5	= (Root,Var(2) & 131071) = 1511
+trigger6	= (Root,Var(2) & 131071) = 1516
+trigger7	= (Root,Var(2) & 131071) = 1521
+var(58)		= (Root,Var(2) & 131071)
+ignorehitpause	= 1
+
+[State 20020, Command]
+type		= VarSet
+triggerall	= !(Root,Var(1) & 1024)
+triggerall	= Root,MoveType = A
+triggerall	= !Var(58)
+trigger1	= (Root,Var(2) & 131071) = 1206
+trigger2	= (Root,Var(2) & 131071) = 1611
+trigger3	= (Root,Var(2) & 131071) = 1631
+trigger4	= (Root,Var(2) & 131071) = 1636
+trigger5	= (Root,Var(2) & 131071) = 1641
+trigger6	= (Root,Var(2) & 131071) = 1646
+trigger7	= (Root,Var(2) & 131071) = 1651
+trigger8	= (Root,Var(2) & 131071) = 3111
+trigger9	= (Root,Var(2) & 131071) = 3201
+trigger10	= (Root,Var(2) & 131071) = 3301
+trigger11	= (Root,Var(2) & 131071) = 4302
+trigger12	= (Root,Var(2) & 131071) = 4352
+var(58)		= 200
+ignorehitpause	= 1
+
+;------------------- ヒットフラグ系初期化
+[State 20020, Hit Flag Init]
+type		= VarSet
+trigger1	= Var(58)
+var(1)		= (Var(1) | 2)
+ignorehitpause	= 1
+
+[State 20020, Hit Flag Init]
+type		= VarSet
+trigger1	= Var(58)
+var(1)		= (Var(1) | 4)
+ignorehitpause	= 1
+
+[State 20020, Hit Flag Init]
+type		= VarSet
+trigger1	= Var(58)
+var(1)		= (Var(1) | 8)
+ignorehitpause	= 1
+
+;------------------- 親の行動により分岐
+[State 20020, Branch]
+type		= SelfState
+trigger1	= Var(58)
+value		= 20000 + Var(58)
+ignorehitpause	= 1
+;---------------------------------------------------------------------------- アクション補助
+
+[State 20020, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 スーパーポーズ用終了
+;---------------------------------------------------------------------
+[Statedef 20100]
+type		= S
+movetype	= A
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 20100, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20100, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- ヒットフラグ系初期化
+[State 20100, Hit Flag Init]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 2)
+ignorehitpause	= 1
+
+[State 20100, Hit Flag Init]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 4)
+ignorehitpause	= 1
+
+[State 20100, Hit Flag Init]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 8)
+ignorehitpause	= 1
+
+;------------------- アニメ変更
+[State 20100, ChangeAnim]
+type		= ChangeAnim
+trigger1	= 1
+value		= 26105
+ignorehitpause	= 1
+
+[State 20100, Hit]
+type						= HitDef
+trigger1					= 1
+affectteam					= F
+attr						= , AA, AT, AP
+animtype					= Hard
+damage						= 0
+getpower					= 0, 0
+givepower					= 0, 0
+;guardflag					= M
+hitflag						= MAFD
+;priority					= 4, Hit
+pausetime					= 0, 99999999999999999999999999999999999999999999999999999999999999999999999999999999
+guard.pausetime				= 0, 99999999999999999999999999999999999999999999999999999999999999999999999999999999
+numhit						= 0
+hitonce						= 0
+sparkno						= -1
+guard.sparkno				= -1
+guard.dist					= 0
+ground.type					= High
+ground.slidetime			= 0
+ground.hittime				= 0
+guard.slidetime				= 0
+guard.ctrltime				= 0
+guard.hittime				= 0
+air.hittime					= 0
+fall.recovertime			= 0
+ground.velocity				= 0
+ground.cornerpush.veloff	= 0
+guard.velocity				= 0
+guard.cornerpush.veloff		= 0
+yaccel						= 0
+air.velocity				= 0
+air.cornerpush.veloff		= 0
+fall.recover				= 1
+ignorehitpause	= 1
+
+[State 20100, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 ヒットポーズ用終了
+;---------------------------------------------------------------------
+[Statedef 20101]
+type		= S
+movetype	= I
+physics		= N
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 20101, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20101, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- アニメ変更
+[State 20101, ChangeAnim]
+type		= ChangeAnim
+trigger1	= 1
+value		= 5908
+ignorehitpause	= 1
+
+[State 20101, HitBy]
+type		= HitBy
+trigger1	= 1
+value		= SCA, AA, AT, AP
+ignorehitpause	= 1
+
+[State 20101, HitBy]
+type		= HitBy
+trigger1	= 1
+value2		= SCA, AA, AT, AP
+ignorehitpause	= 1
+
+[State 20101, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 喰らい判定無し用の接触判定アニメ設定
+;---------------------------------------------------------------------
+[Statedef 20200]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 20200, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20200, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- アニメ変更
+[State 20200, ChangeAnim]
+type		= ChangeAnim
+trigger1	= SelfAnimExist(Root,Anim + 20000)
+value		= Root,Anim + 20000
+ignorehitpause	= 1
+
+[State 20200, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 溜CD
+;---------------------------------------------------------------------
+[Statedef 20601]
+type		= S
+movetype	= I
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 20601, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20601, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- アニメ変更
+[State 20601, ChangeAnim]
+type		= ChangeAnim
+trigger1	= Root,AnimElemNo(0) = [8, 18]
+value		= 20601
+elem		= Root,AnimElemNo(0) - 7
+ignorehitpause	= 1
+
+[State 20601, GetPower]
+type		= VarSet
+trigger1	= 1
+var(58)		= 20
+ignorehitpause	= 1
+
+[State 20601, GetPower]
+type		= VarSet
+trigger1	= Root,Const(data.power) > 0
+var(58)		= Floor( Var(58) * FVar(10) * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 20601, ReversalDef]	; ガードポイント
+type			= ReversalDef
+trigger1		= 1
+reversal.attr	= SCA, AA, AP
+getpower		= Var(58)
+givepower		= 0
+numhits			= 0
+pausetime		= ((Root,Var(32) & 7) >= 4) * !(Var(1) & 256), 8 - !!(Var(1) & 256)
+sparkno			= S2060
+sparkxy			= Floor(25 * Const(size.xscale)), Floor(15 * Const(size.yscale))
+hitsound		= S2010, 1
+hitflag			= P
+guard.dist		= 0
+ignorehitpause	= 1
+
+[State 20601, ReversalDef]	; ガードポイント
+type			= ReversalDef
+trigger1		= (Root,Var(32) & 7) < 4
+reversal.attr	= SCA, AA, AT, AP
+getpower		= Var(58)
+givepower		= 0
+numhits			= 0
+pausetime		= ((Root,Var(32) & 7) >= 4) * !(Var(1) & 256), 8 - !!(Var(1) & 256)
+sparkno			= S2060
+sparkxy			= Floor(25 * Const(size.xscale)), Floor(15 * Const(size.yscale))
+hitsound		= S2010, 1
+hitflag			= P
+guard.dist		= 0
+ignorehitpause	= 1
+
+[State 20601, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 溜CD(攻撃喰らった)
+;---------------------------------------------------------------------
+[StateDef 20602]
+type		= U
+movetype	= I
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 20602, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20602, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 20602, Explod]
+type		= Explod
+trigger1	= 1
+anim		= 2060
+ID			= 2060
+pos			= Floor(35 * Const(size.xscale)), Floor(5 * Const(size.yscale))
+postype		= p1
+sprpriority	= 2
+ownpal		= 1
+supermovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause	= 1
+
+[State 20602, PlaySnd]
+type		= PlaySnd
+trigger1	= 1
+value		= 2010, 1
+ignorehitpause	= 1
+
+[State 20602, Get Power]
+type		= VarSet
+trigger1	= 1
+var(58)		= 20
+ignorehitpause	= 1
+
+[State 20602, Get Power]
+type		= VarSet
+trigger1	= Root,Const(data.power) > 0
+var(58)		= Floor( Var(58) * FVar(10) * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 20602, PowerAdd]
+type		= PowerAdd
+trigger1	= 1
+value		= Var(58)
+ignorehitpause	= 1
+
+[State 20602, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 溜JCD(攻撃中)
+;---------------------------------------------------------------------
+[Statedef 20613]
+type		= A
+movetype	= I
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 20613, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20613, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- アニメ変更
+[State 20613, ChangeAnim]
+type		= ChangeAnim
+trigger1	= Root,AnimElemNo(0) = [1, 9]
+value		= 20613
+elem		= 1
+ignorehitpause	= 1
+
+[State 20613, GetPower]
+type		= VarSet
+trigger1	= 1
+var(58)		= 20
+ignorehitpause	= 1
+
+[State 20613, GetPower]
+type		= VarSet
+trigger1	= Root,Const(data.power) > 0
+var(58)		= Floor( Var(58) * FVar(10) * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 20613, ReversalDef]	; ガードポイント
+type			= ReversalDef
+trigger1		= 1
+reversal.attr	= SCA, AA, AP
+getpower		= Var(58)
+givepower		= 0
+numhits			= 0
+pausetime		= ((Root,Var(32) & 7) >= 4) * !(Var(1) & 256), 8 - !!(Var(1) & 256)
+sparkno			= S2060
+sparkxy			= Floor(10 * Const(size.xscale)), 0
+hitsound		= S2010, 1
+hitflag			= P
+guard.dist		= 0
+ignorehitpause	= 1
+
+[State 20613, ReversalDef]	; ガードポイント
+type			= ReversalDef
+trigger1		= (Root,Var(32) & 7) < 4
+reversal.attr	= SCA, AA, AT, AP
+getpower		= Var(58)
+givepower		= 0
+numhits			= 0
+pausetime		= ((Root,Var(32) & 7) >= 4) * !(Var(1) & 256), 8 - !!(Var(1) & 256)
+sparkno			= S2060
+sparkxy			= Floor(10 * Const(size.xscale)), 0
+hitsound		= S2010, 1
+hitflag			= P
+guard.dist		= 0
+ignorehitpause	= 1
+
+[State 20613, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 溜JCD(攻撃中、攻撃喰らった)
+;---------------------------------------------------------------------
+[StateDef 20614]
+type		= U
+movetype	= I
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 20614, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 20614, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 20614, Explod]
+type		= Explod
+trigger1	= 1
+anim		= 2060
+ID			= 2060
+pos			= Floor(20 * Const(size.xscale)), Floor(-20 * Const(size.yscale))
+postype		= p1
+sprpriority	= 2
+ownpal		= 1
+supermovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause	= 1
+
+[State 20614, PlaySnd]
+type		= PlaySnd
+trigger1	= 1
+value		= 2010, 1
+ignorehitpause	= 1
+
+[State 20614, Get Power]
+type		= VarSet
+trigger1	= 1
+var(58)		= 20
+ignorehitpause	= 1
+
+[State 20614, Get Power]
+type		= VarSet
+trigger1	= Root,Const(data.power) > 0
+var(58)		= Floor( Var(58) * FVar(10) * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 20614, PowerAdd]
+type		= PowerAdd
+trigger1	= 1
+value		= Var(58)
+ignorehitpause	= 1
+
+[State 20614, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 突き上げ　弱
+;---------------------------------------------------------------------
+[Statedef 21401]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 21401, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 21401, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- アニメ変更
+[State 21401, ChangeAnim]
+type		= ChangeAnim
+trigger1	= Root,AnimElemNo(0) = [7, 11]
+value		= 21401
+elem		= 1
+ignorehitpause	= 1
+
+[State 21401, GetPower]
+type		= VarSet
+trigger1	= 1
+var(58)		= 20
+ignorehitpause	= 1
+
+[State 21401, GetPower]
+type		= VarSet
+trigger1	= Root,Const(data.power) > 0
+var(58)		= Floor( Var(58) * FVar(10) * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 21401, ReversalDef]	; ガードポイント
+type			= ReversalDef
+trigger1		= 1
+reversal.attr	= SCA, AA, AP
+getpower		= Var(58)
+givepower		= 0
+numhits			= 0
+pausetime		= ((Root,Var(32) & 7) >= 4) * !(Var(1) & 256), 8 - !!(Var(1) & 256)
+sparkno			= S2060
+sparkxy			= Floor(10 * Const(size.xscale)), 0
+hitsound		= S2010, 1
+hitflag			= P
+guard.dist		= 0
+ignorehitpause	= 1
+
+[State 21401, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 突き上げ　強
+;---------------------------------------------------------------------
+[Statedef 21411]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 21411, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 21411, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- アニメ変更
+[State 21411, ChangeAnim]
+type		= ChangeAnim
+trigger1	= Root,AnimElemNo(0) = [8, 10]
+trigger2	= Root,AnimElemNo(0) = [21, 25]
+value		= 21411
+elem		= 1 + (Root,AnimElemNo(0) >= 21)
+ignorehitpause	= 1
+
+[State 21411, GetPower]
+type		= VarSet
+trigger1	= 1
+var(58)		= 20
+ignorehitpause	= 1
+
+[State 21411, GetPower]
+type		= VarSet
+trigger1	= Root,Const(data.power) > 0
+var(58)		= Floor( Var(58) * FVar(10) * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 21411, ReversalDef]	; ガードポイント
+type			= ReversalDef
+trigger1		= 1
+reversal.attr	= SCA, AA, AP
+getpower		= Var(58)
+givepower		= 0
+numhits			= 0
+pausetime		= ((Root,Var(32) & 7) >= 4) * !(Var(1) & 256), 8 - !!(Var(1) & 256)
+sparkno			= S2060
+sparkxy			= Floor(10 * Const(size.xscale)), 0
+hitsound		= S2010, 1
+hitflag			= P
+guard.dist		= 0
+ignorehitpause	= 1
+
+[State 21411, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 超頭突き(地上始動、ガードポイント)
+;---------------------------------------------------------------------
+[Statedef 21511]
+type		= A
+movetype	= I
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 21511, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 21511, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 21511, ChangeAnim]
+type		= ChangeAnim
+triggerall	= Root,Anim = [1510, 1511]
+trigger1	= Root,MoveType = A
+value		= 21511
+elem		= Root,AnimElemNo(0)
+ignorehitpause	= 1
+
+[State 21511, GetPower]
+type		= VarSet
+trigger1	= 1
+var(58)		= 20
+ignorehitpause	= 1
+
+[State 21511, GetPower]
+type		= VarSet
+trigger1	= Root,Const(data.power) > 0
+var(58)		= Floor( Var(58) * FVar(10) * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 21511, ReversalDef]	; ガードポイント
+type			= ReversalDef
+trigger1		= 1
+reversal.attr	= SCA, AA, AP
+getpower		= Var(58)
+givepower		= 0
+numhits			= 0
+pausetime		= ((Root,Var(32) & 7) >= 4) * !(Var(1) & 256), 8 - !!(Var(1) & 256)
+sparkno			= S2060
+sparkxy			= Floor(25 * Const(size.xscale)), Floor((-30 + 10*(AnimElemNo(0)>=11)*((AnimElemNo(0)-6)/5)) * Const(size.yscale))
+hitsound		= S2010, 1
+hitflag			= P
+guard.dist		= 0
+ignorehitpause	= 1
+
+[State 21511, ReversalDef]	; ガードポイント
+type			= ReversalDef
+trigger1		= (Root,Var(32) & 7) < 4
+reversal.attr	= SCA, AA, AT, AP
+getpower		= Var(58)
+givepower		= 0
+numhits			= 0
+pausetime		= ((Root,Var(32) & 7) >= 4) * !(Var(1) & 256), 8 - !!(Var(1) & 256)
+sparkno			= S2060
+sparkxy			= Floor(25 * Const(size.xscale)), Floor((-30 + 10*(AnimElemNo(0)>=11)*((AnimElemNo(0)-6)/5)) * Const(size.yscale))
+hitsound		= S2010, 1
+hitflag			= P
+guard.dist		= 0
+ignorehitpause	= 1
+
+[State 21511, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 超頭突き(空中、攻撃喰らった)
+;---------------------------------------------------------------------
+[StateDef 21512]
+type		= U
+movetype	= I
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 21512, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 21512, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 21512, Explod]
+type		= Explod
+trigger1	= 1
+anim		= 2060
+ID			= 2060
+pos			= Floor(35 * Const(size.xscale)), Floor((-40 + 10*(AnimElemNo(0)>=11)*((AnimElemNo(0)-6)/5)) * Const(size.yscale))
+postype		= p1
+sprpriority	= 2
+ownpal		= 1
+supermovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause	= 1
+
+[State 21512, PlaySnd]
+type		= PlaySnd
+trigger1	= 1
+value		= 2010, 1
+ignorehitpause	= 1
+
+[State 21512, Get Power]
+type		= VarSet
+trigger1	= 1
+var(58)		= 20
+ignorehitpause	= 1
+
+[State 21512, Get Power]
+type		= VarSet
+trigger1	= Root,Const(data.power) > 0
+var(58)		= Floor( Var(58) * FVar(10) * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 21512, PowerAdd]
+type		= PowerAdd
+trigger1	= 1
+value		= Var(58)
+ignorehitpause	= 1
+
+[State 21512, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 超頭突き(空中始動、ガードポイント)
+;---------------------------------------------------------------------
+[Statedef 21516]
+type		= A
+movetype	= I
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 21516, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 21516, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 21516, End]
+type		= SelfState
+trigger1	= 1
+value		= 21511
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 超頭突き(接地、ガードポイント)
+;---------------------------------------------------------------------
+[Statedef 21521]
+type		= S
+movetype	= I
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 21521, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 21521, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 21521, ChangeAnim]
+type		= ChangeAnim
+triggerall	= Root,Anim = [1520, 1521]
+trigger1	= Root,MoveType = A
+value		= 21521
+elem		= Root,AnimElemNo(0)
+ignorehitpause	= 1
+
+[State 21521, GetPower]
+type		= VarSet
+trigger1	= 1
+var(58)		= 20
+ignorehitpause	= 1
+
+[State 21521, GetPower]
+type		= VarSet
+trigger1	= Root,Const(data.power) > 0
+var(58)		= Floor( Var(58) * FVar(10) * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 21521, ReversalDef]	; ガードポイント
+type			= ReversalDef
+trigger1		= 1
+reversal.attr	= SCA, AA, AP
+getpower		= Var(58)
+givepower		= 0
+numhits			= 0
+pausetime		= ((Root,Var(32) & 7) >= 4) * !(Var(1) & 256), 8 - !!(Var(1) & 256)
+sparkno			= S2060
+sparkxy			= Floor(25 * Const(size.xscale)), 0
+hitsound		= S2010, 1
+hitflag			= P
+guard.dist		= 0
+ignorehitpause	= 1
+
+[State 21521, ReversalDef]	; ガードポイント
+type			= ReversalDef
+trigger1		= (Root,Var(32) & 7) < 4
+reversal.attr	= SCA, AA, AT, AP
+getpower		= Var(58)
+givepower		= 0
+numhits			= 0
+pausetime		= ((Root,Var(32) & 7) >= 4) * !(Var(1) & 256), 8 - !!(Var(1) & 256)
+sparkno			= S2060
+sparkxy			= Floor(25 * Const(size.xscale)), 0
+hitsound		= S2010, 1
+hitflag			= P
+guard.dist		= 0
+ignorehitpause	= 1
+
+[State 21521, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーアクション補助 超頭突き(接地、攻撃喰らった)
+;---------------------------------------------------------------------
+[StateDef 21522]
+type		= U
+movetype	= I
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 21522, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 21522, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 20000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 21522, Explod]
+type		= Explod
+trigger1	= 1
+anim		= 2060
+ID			= 2060
+pos			= Floor(35 * Const(size.xscale)), Floor(-10 * Const(size.yscale))
+postype		= p1
+sprpriority	= 2
+ownpal		= 1
+supermovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause	= 1
+
+[State 21522, PlaySnd]
+type		= PlaySnd
+trigger1	= 1
+value		= 2010, 1
+ignorehitpause	= 1
+
+[State 21522, Get Power]
+type		= VarSet
+trigger1	= 1
+var(58)		= 20
+ignorehitpause	= 1
+
+[State 21522, Get Power]
+type		= VarSet
+trigger1	= Root,Const(data.power) > 0
+var(58)		= Floor( Var(58) * FVar(10) * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 21522, PowerAdd]
+type		= PowerAdd
+trigger1	= 1
+value		= Var(58)
+ignorehitpause	= 1
+
+[State 21522, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;=====================================================================
+; ヘルパー(鋼体)
+; このヘルパーはHitDefにattrのステート状態(StateType = S or C etc...)や、ReversalDefにattrを持ってはいけない
+; pausemovetimeあり
+;
+; 変数表
+;	Var(0)	:	自分のID
+;	Var(1)	:	各種ビットフラグ
+;		0(1):				初期化したか
+;		1(2):				Hitdefを引き継ぐか
+;		2(4):				ヒット、ガード、空振り状態を引き継ぐか
+;		3(8):				ヒットカウントを引き継ぐか
+;		4(16):				
+;		5(32):				時間経過するか
+;		6(64):				前フレでMoveType=Aだったか
+;		7(128):				
+;		8(256):				
+;		9(512):				
+;		10(1024):			ステートを奪取されたか
+;		11(2048):			ステートを奪取前判定用
+;	Var(2)	:	自分のステート
+;	Var(3)	:	鋼体残り回数
+;	Var(4)	:	各種ビットフラグ2(カウンタの効果も？)
+;		0-2(7):				ReverasalDef用ヒットID
+;		3-6(120):			鋼体用インターバルカウンタ (0～15要素)
+;		7-14(32640):		永続Target用カウンタ (0～255要素)
+;		15-17(229376):		永続Target Life用Lifeの減り方(0～7要素)
+;		18-22(8126464):		永続Target Life用カウンタ(0～31要素)
+;	Var(5)	:	Target Player ID
+;	Var(6)	:	
+;	Var(7)	:	ペナルティ鋼体残り回数
+;
+;	Var(14)	:	RoundState=4になってからの時間
+;
+;	Var(17)	:	試合前の負傷で相手が仰け反ってない時間
+;
+;	Var(19)	:	ゲームタイム
+;	Var(20)	:	前フレのゲームタイム
+;	Var(22)	:	各種ビットフラグ3
+;		0(1):				初めて強キャラ以上になったか
+;		1(2):				初めて神キャラ以上になったか
+;		2(4):				以前に試合前の負傷が発生したか
+;		3(8):				TargetStateをするか
+;		4(16):				
+;		5(32):				1回でもHitOverride or NoTargetペナルティが発生したか
+;		6(64):				試合前の負傷が発生したか
+;		7(128):				鋼体回数の減る当身か
+;		8(256):				鋼体ヘルパー出現要求
+;
+;	Var(53)	:	temp
+;	Var(54)	:	temp
+;	Var(55)	:	temp
+;	Var(56)	:	temp
+;	Var(57)	:	temp
+;	Var(58)	:	temp
+;	Var(59)	:	キー
+;
+;	FVar(38):	temp
+;	FVar(39):	temp
+;=====================================================================
+
+;---------------------------------------------------------------------
+; ヘルパー鋼体 初期化
+;---------------------------------------------------------------------
+[StateDef 29999]
+type		= L
+movetype	= I
+physics		= N
+anim		= 9999
+ctrl		= 0
+facep2		= 1
+velset		= 0, 0
+
+[State 29999, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 29999, Helper Check]
+type		= SelfState
+trigger1	= !Parent,IsHelper
+trigger1	= NumHelper(30000) > 1
+trigger2	= Parent,IsHelper
+trigger2	= !Parent,IsHelper(30000)
+trigger3	= !(IsHelper(30000) || IsHelper(30001) || IsHelper(30002) || IsHelper(30003) || IsHelper(30004) || IsHelper(30005) || IsHelper(30006) || IsHelper(30007))
+value		= 19901
+ignorehitpause	= 1
+
+[State 29999, Init] ;Clear all int variables
+type		= VarRangeSet
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+[State 29999, Init] ;Clear all float variables
+type		= VarRangeSet
+trigger1	= 1
+fvalue		= 0
+ignorehitpause	= 1
+
+;------------------- キー
+[State 29999, Key]
+type		= VarSet
+trigger1	= 1
+var(59)		= (Random % 14) + 2
+ignorehitpause	= 1
+
+;------------------- MyID
+[State 29999, ID]
+type		= VarSet
+trigger1	= 1
+var(0)		= 30000
+ignorehitpause	= 1
+
+[State 29999, ID]
+type		= VarAdd
+trigger1	= Parent,IsHelper(30000)
+var(0)		= (Parent,Var(4) & 7)
+ignorehitpause	= 1
+
+;------------------- ゲームタイム
+[State 29999, GameTime]
+type		= VarSet
+trigger1	= 1
+var(19)		= GameTime - 1
+ignorehitpause	= 1
+
+[State 29999, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー鋼体 待機
+;---------------------------------------------------------------------
+[StateDef 30000]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 30000, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 30000, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = [30000, 30099])
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- ゲームタイム
+[State 30000, Old GameTime]
+type		= VarSet
+trigger1	= IsHelper(30000)
+var(20)		= Var(19)
+ignorehitpause	= 1
+
+[State 30000, GameTime]
+type		= VarSet
+trigger1	= IsHelper(30000)
+var(19)		= GameTime
+ignorehitpause	= 1
+
+;------------------- RoundState=4になってからの時間
+[State 30000, VarAdd]
+type		= VarAdd
+triggerall	= RoundState = 4
+trigger1	= Var(14) < 1024-1
+var(14)		= 1
+ignorehitpause	= 1
+
+;------------------- 時間経過するか
+[State 30000, GameTime Check]
+type		= VarSet
+trigger1	= IsHelper(30000)
+var(1)		= (Var(1) | 32) - 32 * !(Var(19) = (Parent,Var(24) - Parent,Var(59)))
+ignorehitpause	= 1
+
+;------------------- 姿を消す
+[State 30000, AssertSpecial]
+type		= AssertSpecial
+trigger1	= 1
+flag		= invisible
+ignorehitpause	= 1
+
+;------------------- 親に張り付く
+[State 30000, Bind]
+type		= BindToRoot
+trigger1	= 1
+ignorehitpause	= 1
+
+;------------------- 親の向きへ変更
+[State 30000, Turn]
+type		= Turn
+trigger1	= Root,Facing != Facing
+ignorehitpause	= 1
+
+;------------------- 無敵
+[State 30000, NotHit]
+type		= NotHitBy
+trigger1	= 1
+value		= SCA
+ignorehitpause	= 1
+
+[State 30000, HitOverride]
+type		= HitOverride
+trigger1	= 1
+attr		= SCA, AA, AT, AP
+stateno		= 19900
+ignorehitpause	= 1
+
+;------------------- 画面無視
+[State 30000, ScreenBound]
+type		= ScreenBound
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+;------------------- ぶつかり判定無し
+[State 30000, PlayerPush]
+type		= PlayerPush
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+;------------------- 自分のステート
+[State 30000, My State]
+type		= VarSet
+trigger1	= 1
+var(2)		= (Var(2) | 19900)
+ignorehitpause	= 1
+
+[State 30000, MoveType Buf]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 64) - 64 * !(MoveType = A)
+ignorehitpause	= 1
+
+[State 30000, StateType Reset]
+type		= StateTypeSet
+trigger1	= 1
+statetype	= L
+movetype	= I
+physics		= N
+ignorehitpause	= 1
+
+[State 30000, Vel Reset]
+type		= VelSet
+trigger1	= 1
+x			= 0
+y			= 0
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------------- モード変更処理
+;------------------- ペナルティ鋼体残り回数
+[State 30000, Penalty Koutai]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= !(Var(22) & 1)
+trigger1	= (Root,Var(32) & 7) <= 2
+var(7)		= Var(7) + 2
+ignorehitpause	= 1
+
+[State 30000, Penalty Koutai]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= (Root,Var(32) & 7) <= 2
+var(22)		= (Var(22) | 1)
+ignorehitpause	= 1
+
+[State 30000, Penalty Koutai]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= !(Var(22) & 2)
+trigger1	= (Root,Var(32) & 7) <= 1
+var(7)		= Var(7) + 3
+ignorehitpause	= 1
+
+[State 30000, Penalty Koutai]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= (Root,Var(32) & 7) <= 1
+var(22)		= (Var(22) | 2)
+ignorehitpause	= 1
+;---------------------------------------------------------------------------- モード変更処理
+
+;---------------------------------------------------------------------------- 永続Target
+;------------------- 永続ターゲットをしないなら判定解除
+[State 30000, TargetDrop]
+type		= TargetDrop
+trigger1	= !(Root,Var(22) & 64)
+trigger2	= Var(14) > 210	; over.wintime次第なのでなんとも言えん
+trigger3	= !Root,Alive
+excludeID	= -1
+keepone		= 0
+ignorehitpause	= 1
+
+[State 30000, Target ID Reset]
+type		= VarSet
+trigger1	= 1
+var(5)		= 0
+ignorehitpause	= 1
+
+[State 30000, Target ID Set]
+type		= VarSet
+trigger1	= NumTarget
+var(5)		= Target,ID
+ignorehitpause	= 1
+
+;------------------- 判定
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(54)		= 0
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(55)		= 0
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(56)		= 0
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(56)		= 1
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(55)		= 1
+ignorehitpause	= 1
+
+;------------------- 負傷のパワーゲージ減り
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= Root,Const(data.power) > 0
+triggerall	= (Var(4) & 32640) = 32640 / 255
+triggerall	= (Var(22) & 4) ;|| (Var(22) & 64)
+trigger1	= Var(5)
+trigger1	= PlayerIDExist(Var(5))
+trigger1	= PlayerID(Var(5)),MoveType = H
+trigger2	= NumHelper(30001)
+trigger2	= Helper(30001),Var(5)
+trigger2	= PlayerIDExist(Helper(30001),Var(5))
+trigger2	= PlayerID(Helper(30001),Var(5)),MoveType = H
+trigger3	= NumHelper(30002)
+trigger3	= Helper(30002),Var(5)
+trigger3	= PlayerIDExist(Helper(30002),Var(5))
+trigger3	= PlayerID(Helper(30002),Var(5)),MoveType = H
+trigger4	= NumHelper(30003)
+trigger4	= Helper(30003),Var(5)
+trigger4	= PlayerIDExist(Helper(30003),Var(5))
+trigger4	= PlayerID(Helper(30003),Var(5)),MoveType = H
+var(58)		= -Floor( 1000 * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 30000, PowerAdd]
+type		= PowerAdd
+trigger1	= Var(58)
+value		= Var(58)
+ignorehitpause	= 1
+
+[State 30000, Power Buf]	; パワーゲージ保持更新
+type		= ParentVarSet
+triggerall	= IsHelper(30000)
+triggerall	= !(Root,Var(1) & 1024)
+trigger1	= Var(58)
+var(23)		= Parent,Power + Parent,Var(59)
+ignorehitpause	= 1
+
+;------------------- ステート変更カウンタ
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(53)		= 30000
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= NumHelper(Var(53))
+triggerall	= Helper(Var(53)),Var(5)
+triggerall	= PlayerIDExist(Helper(Var(53)),Var(5))
+triggerall	= PlayerID(Helper(Var(53)),Var(5)),MoveType = H
+triggerall	= (PlayerID(Helper(Var(53)),Var(5)),StateNo = 3800)
+triggerall	= (PlayerID(Helper(Var(53)),Var(5)),Anim = 3800)
+trigger1	= (Var(4) & 32640) && ((Var(4) & 32640) < 32640)
+var(58)		= 1
+ignorehitpause	= 1
+
+[State 30000, VarAdd]
+type		= VarAdd
+trigger1	= 1
+var(53)		= 1
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= NumHelper(Var(53))
+triggerall	= Helper(Var(53)),Var(5)
+triggerall	= PlayerIDExist(Helper(Var(53)),Var(5))
+triggerall	= PlayerID(Helper(Var(53)),Var(5)),MoveType = H
+triggerall	= (PlayerID(Helper(Var(53)),Var(5)),StateNo = 3800)
+triggerall	= (PlayerID(Helper(Var(53)),Var(5)),Anim = 3800)
+trigger1	= (Var(4) & 32640) && ((Var(4) & 32640) < 32640)
+var(58)		= 1
+ignorehitpause	= 1
+
+[State 30000, VarAdd]
+type		= VarAdd
+trigger1	= 1
+var(53)		= 1
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= NumHelper(Var(53))
+triggerall	= Helper(Var(53)),Var(5)
+triggerall	= PlayerIDExist(Helper(Var(53)),Var(5))
+triggerall	= PlayerID(Helper(Var(53)),Var(5)),MoveType = H
+triggerall	= (PlayerID(Helper(Var(53)),Var(5)),StateNo = 3800)
+triggerall	= (PlayerID(Helper(Var(53)),Var(5)),Anim = 3800)
+trigger1	= (Var(4) & 32640) && ((Var(4) & 32640) < 32640)
+var(58)		= 1
+ignorehitpause	= 1
+
+[State 30000, VarAdd]
+type		= VarAdd
+trigger1	= 1
+var(53)		= 1
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= NumHelper(Var(53))
+triggerall	= Helper(Var(53)),Var(5)
+triggerall	= PlayerIDExist(Helper(Var(53)),Var(5))
+triggerall	= PlayerID(Helper(Var(53)),Var(5)),MoveType = H
+triggerall	= (PlayerID(Helper(Var(53)),Var(5)),StateNo = 3800)
+triggerall	= (PlayerID(Helper(Var(53)),Var(5)),Anim = 3800)
+trigger1	= (Var(4) & 32640) && ((Var(4) & 32640) < 32640)
+var(58)		= 1
+ignorehitpause	= 1
+
+[State 30000, VarAdd]
+type		= VarAdd
+triggerall	= IsHelper(30000)
+trigger1	= Var(58) = 1
+var(4)		= 32640 / 255
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= !(Root,Var(22) & 64)
+trigger2	= ((Var(4) & 32640) > 32640 / 255 * 48)
+var(4)		= (Var(4) | 32640) - 32640
+ignorehitpause	= 1
+
+;------------------- 相手が仰け反ってない時間
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= (Var(4) & 32640)
+var(17)		= Var(17) + 1
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= Var(5)
+trigger1	= PlayerIDExist(Var(5))
+trigger1	= (PlayerID(Var(5)),MoveType = H)
+trigger1	= (PlayerID(Var(5)),StateNo = 3800)
+trigger1	= (PlayerID(Var(5)),Anim = 3800)
+trigger2	= NumHelper(30001)
+trigger2	= Helper(30001),Var(5)
+trigger2	= PlayerIDExist(Helper(30001),Var(5))
+trigger2	= (PlayerID(Helper(30001),Var(5)),MoveType = H)
+trigger2	= (PlayerID(Helper(30001),Var(5)),StateNo = 3800)
+trigger2	= (PlayerID(Helper(30001),Var(5)),Anim = 3800)
+trigger3	= NumHelper(30002)
+trigger3	= Helper(30002),Var(5)
+trigger3	= PlayerIDExist(Helper(30002),Var(5))
+trigger3	= (PlayerID(Helper(30002),Var(5)),MoveType = H)
+trigger3	= (PlayerID(Helper(30002),Var(5)),StateNo = 3800)
+trigger3	= (PlayerID(Helper(30002),Var(5)),Anim = 3800)
+trigger4	= NumHelper(30003)
+trigger4	= Helper(30003),Var(5)
+trigger4	= PlayerIDExist(Helper(30003),Var(5))
+trigger4	= (PlayerID(Helper(30003),Var(5)),MoveType = H)
+trigger4	= (PlayerID(Helper(30003),Var(5)),StateNo = 3800)
+trigger4	= (PlayerID(Helper(30003),Var(5)),Anim = 3800)
+var(17)		= 0
+ignorehitpause	= 1
+
+;------------------- Target負傷初期化
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= IsHelper(30000)
+var(22)		= (Var(22) | 4) - 4 * !(Var(22) & 64)
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= IsHelper(30000)
+var(22)		= (Var(22) | 64) - 64
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= Root,Const(data.power) > 0
+triggerall	= Power >= Floor( 1000 * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+triggerall	= (Root,Var(22) & 64)
+triggerall	= (Root,Var(34) & 64)
+trigger1	= Var(5)
+trigger2	= NumHelper(30001)
+trigger2	= Helper(30001),Var(5)
+trigger3	= NumHelper(30002)
+trigger3	= Helper(30002),Var(5)
+trigger4	= NumHelper(30003)
+trigger4	= Helper(30003),Var(5)
+var(22)		= (Var(22) | 64)
+ignorehitpause	= 1
+
+[State 30000, VarSet] ; 時間初期化
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= (Var(22) & 64)
+trigger1	= !(Var(4) & 32640)
+trigger2	= (Var(4) & 32640) && !(Var(22) & 4)
+var(4)		= IfElse( !(Var(4) & 32640), Var(4) + 32640 / 255, (Var(4) | 32640) - 32640 )
+ignorehitpause	= 1
+
+;------------------- 負傷エフェクト
+[State 30000, Explod]
+type		= Explod
+triggerall	= IsHelper(30000)
+trigger1	= (Var(22) & 64) && ((Var(4) & 32640) = 32640 / 255)
+anim		= 2262
+ID			= 2262
+pos			= 0, Floor(-60 * Const(size.yscale))
+postype		= p1
+scale		= Const(size.xscale), Const(size.yscale)
+sprpriority	= -1
+bindtime	= 1
+ownpal		= 1
+supermovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause	= 1
+
+[State 30000, PlaySnd]
+type		= PlaySnd
+triggerall	= IsHelper(30000)
+trigger1	= (Var(22) & 64) && ((Var(4) & 32640) = 32640 / 255)
+value		= 2100, 4
+ignorehitpause	= 1
+
+;------------------- ダメージカウンタ
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= 1
+var(4)		= IfElse( (Var(4) & 8126464) >= 8126464 / 31 * 19, (Var(4) | 8126464) - 8126464, Var(4) + 8126464 / 31 )
+ignorehitpause	= 1
+
+;------------------- ダメージの入り方変更
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= !!(Root,Var(34) & 128) - !!(Root,Var(34) & 256)
+var(4)		= IfElse( (!!(Root,Var(34) & 128) - !!(Root,Var(34) & 256)) > 0, IfElse((Var(4) & 229376) < 229376 / 7 * 5, Var(4) + 229376 / 7, Var(4)), IfElse((Var(4) & 229376), Var(4) - 229376 / 7, Var(4)) )
+ignorehitpause	= 1
+
+;------------------- ダメージ
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= Var(55) = 1
+var(58)		= Var(4)
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= Parent,IsHelper(30000)
+trigger1	= Var(55) = 1
+var(58)		= Parent,Var(4)
+ignorehitpause	= 1
+
+[State 30000, TargetLifeAdd]
+type		= TargetLifeAdd
+triggerall	= IsHelper(30000)
+triggerall	= (Root,Var(22) & 64)
+triggerall	= Var(5)
+triggerall	= PlayerIDExist(Var(5))
+triggerall	= PlayerID(Var(5)),Alive || PlayerID(Var(5)),Life > 1
+triggerall	= (Var(22) & 32) || (Root,Var(32) & 7) < 2
+trigger1	= ( (Var(58) & 229376) / (229376 / 7) = 1 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 20 = 0 )
+trigger2	= ( (Var(58) & 229376) / (229376 / 7) = 2 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 10 = 0 )
+trigger3	= ( (Var(58) & 229376) / (229376 / 7) = 3 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 5 = 0 )
+trigger4	= ( (Var(58) & 229376) / (229376 / 7) = 4 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 2 = 0 )
+trigger5	= ( (Var(58) & 229376) / (229376 / 7) >= 5 )
+value		= -Ceil( IfElse( (Root,Var(22) & 16), .00001 * IfElse(PlayerID(Var(5)),Const(data.defence) > 100, PlayerID(Var(5)),Const(data.defence), 100.0) * IfElse(PlayerID(Var(5)),Const(data.life) > 1000, PlayerID(Var(5)),Const(data.life), 1000.0), 1.0 ) )
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= (Root,Var(22) & 64)
+triggerall	= Var(5)
+triggerall	= PlayerIDExist(Var(5))
+triggerall	= PlayerID(Var(5)),Alive || PlayerID(Var(5)),Life > 1
+triggerall	= (Var(22) & 32) || (Root,Var(32) & 7) < 2
+trigger1	= ( (Var(58) & 229376) / (229376 / 7) = 1 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 20 = 19 )
+trigger2	= ( (Var(58) & 229376) / (229376 / 7) = 2 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 10 = 9 )
+trigger3	= ( (Var(58) & 229376) / (229376 / 7) = 3 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 5 = 4 )
+trigger4	= ( (Var(58) & 229376) / (229376 / 7) = 4 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 2 = 1 )
+trigger5	= ( (Var(58) & 229376) / (229376 / 7) >= 5 )
+var(54)		= Random % 2
+ignorehitpause	= 1
+
+[State 30000, TargetLifeAdd]
+type		= TargetLifeAdd
+triggerall	= Parent,IsHelper(30000)
+triggerall	= (Root,Var(22) & 64)
+triggerall	= Var(5)
+triggerall	= PlayerIDExist(Var(5))
+triggerall	= PlayerID(Var(5)),Alive || PlayerID(Var(5)),Life > 1
+triggerall	= (Parent,Var(22) & 32) || (Root,Var(32) & 7) < 2
+trigger1	= ( (Var(58) & 229376) / (229376 / 7) = 1 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 20 = 0 )
+trigger2	= ( (Var(58) & 229376) / (229376 / 7) = 2 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 10 = 0 )
+trigger3	= ( (Var(58) & 229376) / (229376 / 7) = 3 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 5 = 0 )
+trigger4	= ( (Var(58) & 229376) / (229376 / 7) = 4 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 2 = 0 )
+trigger5	= ( (Var(58) & 229376) / (229376 / 7) >= 5 )
+value		= -Ceil( IfElse( (Root,Var(22) & 16), .00001 * IfElse(PlayerID(Var(5)),Const(data.defence) > 100, PlayerID(Var(5)),Const(data.defence), 100.0) * IfElse(PlayerID(Var(5)),Const(data.life) > 1000, PlayerID(Var(5)),Const(data.life), 1000.0), 1.0 ) )
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= Parent,IsHelper(30000)
+triggerall	= (Root,Var(22) & 64)
+triggerall	= Var(5)
+triggerall	= PlayerIDExist(Var(5))
+triggerall	= PlayerID(Var(5)),Alive || PlayerID(Var(5)),Life > 1
+triggerall	= (Parent,Var(22) & 32) || (Root,Var(32) & 7) < 2
+trigger1	= ( (Var(58) & 229376) / (229376 / 7) = 1 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 20 = 19 )
+trigger2	= ( (Var(58) & 229376) / (229376 / 7) = 2 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 10 = 9 )
+trigger3	= ( (Var(58) & 229376) / (229376 / 7) = 3 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 5 = 4 )
+trigger4	= ( (Var(58) & 229376) / (229376 / 7) = 4 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 2 = 1 )
+trigger5	= ( (Var(58) & 229376) / (229376 / 7) >= 5 )
+var(54)		= Random % 2
+ignorehitpause	= 1
+
+[State 30000, TargetLifeAdd]
+type		= TargetLifeAdd
+triggerall	= IsHelper(30000)
+triggerall	= (Root,Var(22) & 64)
+triggerall	= Var(5)
+triggerall	= PlayerIDExist(Var(5))
+triggerall	= PlayerID(Var(5)),Alive || PlayerID(Var(5)),Life > 1
+triggerall	= !( (Var(22) & 32) || (Root,Var(32) & 7) < 2 )
+trigger1	= ( (Var(58) & 229376) / (229376 / 7) = 1 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 30 = 0 )
+trigger2	= ( (Var(58) & 229376) / (229376 / 7) = 2 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 20 = 0 )
+trigger3	= ( (Var(58) & 229376) / (229376 / 7) = 3 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 13 = 0 )
+trigger4	= ( (Var(58) & 229376) / (229376 / 7) = 4 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 9 = 0 )
+trigger5	= ( (Var(58) & 229376) / (229376 / 7) >= 5 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 6 = 0 )
+value		= -Ceil( IfElse( (Root,Var(22) & 16), .00001 * IfElse(PlayerID(Var(5)),Const(data.defence) > 100, PlayerID(Var(5)),Const(data.defence), 100.0) * IfElse(PlayerID(Var(5)),Const(data.life) > 1000, PlayerID(Var(5)),Const(data.life), 1000.0), 1.0 ) )
+kill		= 0
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= (Root,Var(22) & 64)
+triggerall	= Var(5)
+triggerall	= PlayerIDExist(Var(5))
+triggerall	= PlayerID(Var(5)),Alive || PlayerID(Var(5)),Life > 1
+triggerall	= !( (Var(22) & 32) || (Root,Var(32) & 7) < 2 )
+trigger1	= ( (Var(58) & 229376) / (229376 / 7) = 1 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 30 = 29 )
+trigger2	= ( (Var(58) & 229376) / (229376 / 7) = 2 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 20 = 19 )
+trigger3	= ( (Var(58) & 229376) / (229376 / 7) = 3 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 13 = 12 )
+trigger4	= ( (Var(58) & 229376) / (229376 / 7) = 4 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 9 = 8 )
+trigger5	= ( (Var(58) & 229376) / (229376 / 7) >= 5 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 6 = 5 )
+var(54)		= Random % 2
+ignorehitpause	= 1
+
+[State 30000, TargetLifeAdd]
+type		= TargetLifeAdd
+triggerall	= Parent,IsHelper(30000)
+triggerall	= (Root,Var(22) & 64)
+triggerall	= Var(5)
+triggerall	= PlayerIDExist(Var(5))
+triggerall	= PlayerID(Var(5)),Alive || PlayerID(Var(5)),Life > 1
+triggerall	= !( (Parent,Var(22) & 32) || (Root,Var(32) & 7) < 2 )
+trigger1	= ( (Var(58) & 229376) / (229376 / 7) = 1 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 30 = 0 )
+trigger2	= ( (Var(58) & 229376) / (229376 / 7) = 2 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 20 = 0 )
+trigger3	= ( (Var(58) & 229376) / (229376 / 7) = 3 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 13 = 0 )
+trigger4	= ( (Var(58) & 229376) / (229376 / 7) = 4 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 9 = 0 )
+trigger5	= ( (Var(58) & 229376) / (229376 / 7) >= 5 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 6 = 0 )
+value		= -Ceil( IfElse( (Root,Var(22) & 16), .00001 * IfElse(PlayerID(Var(5)),Const(data.defence) > 100, PlayerID(Var(5)),Const(data.defence), 100.0) * IfElse(PlayerID(Var(5)),Const(data.life) > 1000, PlayerID(Var(5)),Const(data.life), 1000.0), 1.0 ) )
+kill		= 0
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= Parent,IsHelper(30000)
+triggerall	= (Root,Var(22) & 64)
+triggerall	= Var(5)
+triggerall	= PlayerIDExist(Var(5))
+triggerall	= PlayerID(Var(5)),Alive || PlayerID(Var(5)),Life > 1
+triggerall	= !( (Parent,Var(22) & 32) || (Root,Var(32) & 7) < 2 )
+trigger1	= ( (Var(58) & 229376) / (229376 / 7) = 1 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 30 = 29 )
+trigger2	= ( (Var(58) & 229376) / (229376 / 7) = 2 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 20 = 19 )
+trigger3	= ( (Var(58) & 229376) / (229376 / 7) = 3 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 13 = 12 )
+trigger4	= ( (Var(58) & 229376) / (229376 / 7) = 4 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 9 = 8 )
+trigger5	= ( (Var(58) & 229376) / (229376 / 7) >= 5 ) && ( ((Var(58) & 8126464) / (8126464 / 31)) % 6 = 5 )
+var(54)		= Random % 2
+ignorehitpause	= 1
+
+;------------------- やられモーション
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(57)		= 3801 + ((Var(58) & 32640) >= 32640 / 255 * 5) + ((Var(58) & 32640) >= 32640 / 255 * 29) + ((Var(58) & 32640) >= 32640 / 255 * 43) + ((Var(58) & 32640) >= 32640 / 255 * 47)
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= (Var(57) = 3801)
+triggerall	= ((Var(58) & 32640) = 32640 / 255) && ((Var(58) & 229376) / (229376 / 7) >= 5)
+trigger1	= (Var(22) & 32)
+trigger2	= (Root,Var(32) & 7) < 2
+var(57)		= 3809
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= Parent,IsHelper(30000)
+triggerall	= (Var(57) = 3801)
+triggerall	= ((Var(58) & 32640) = 32640 / 255) && ((Var(58) & 229376) / (229376 / 7) >= 5)
+trigger1	= (Parent,Var(22) & 32)
+trigger2	= (Root,Var(32) & 7) < 2
+var(57)		= 3809
+ignorehitpause	= 1
+
+[State 30000, TargetState]
+type		= TargetState
+triggerall	= Var(56) = 1
+triggerall	= (Root,Var(22) & 64)
+triggerall	= Var(5)
+triggerall	= PlayerIDExist(Var(5))
+triggerall	= PlayerID(Var(5)),Alive
+triggerall	= (Var(58) & 32640)
+trigger1	= (Var(22) & 8)
+value		= Var(57)
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(22)		= (Var(22) | 8) - 8
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= Var(56) = 1
+triggerall	= (Root,Var(22) & 64)
+triggerall	= Var(5)
+triggerall	= PlayerIDExist(Var(5))
+triggerall	= PlayerID(Var(5)),Alive
+trigger1	= (Var(58) & 32640)
+var(22)		= (Var(22) | 8)
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= (Var(22) & 8)
+var(54)		= 1
+ignorehitpause	= 1
+
+[State 30000, StateTypeSet]
+type		= StateTypeSet
+trigger1	= Var(54) = 1
+movetype	= A
+ignorehitpause	= 1
+;---------------------------------------------------------------------------- 永続Target
+
+;---------------------------------------------------------------------------- 鋼体回数制御
+;------------------- 永続Target
+[State 30000, Destory]	; 削除
+type		= SelfState
+triggerall	= !IsHelper(30000)
+trigger1	= !(Root,Var(22) & 64)
+value		= 19901
+ignorehitpause	= 1
+
+[State 30000, Bit]	; HitDef引継ぎ
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 2) - 2 * !(Root,Var(22) & 64)
+ignorehitpause	= 1
+
+[State 30000, Bit]	; ヘルパーidxリセット
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= !(Root,Var(22) & 64)
+var(4)		= (Var(4) | 7) - 7
+ignorehitpause	= 1
+
+;------------------- 新規に鋼体ヘルパー出現
+[State 30000, Helper]
+type				= Helper
+triggerall			= IsHelper(30000)
+triggerall			= TeamSide = 1
+triggerall			= (Root,Var(22) & 64)
+triggerall			= (Var(4) & 7) < 7
+triggerall			= (Var(22) & 256)
+triggerall			= Helper(30000 + (Var(4) & 7)),Var(5)
+trigger1			= !NumPartner
+trigger2			= ID <= Partner,ID
+helpertype			= player
+name				= "Hinako's P1 Koutai Helper"
+ID					= 30000 + (Var(4) & 7) + 1
+pos					= 0, 0
+postype				= p1
+facing				= 1
+stateno				= 0
+keyctrl				= 1
+ownpal				= 1
+supermovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause		= 1
+
+[State 30000, Helper]
+type				= Helper
+triggerall			= IsHelper(30000)
+triggerall			= TeamSide != 1
+triggerall			= (Root,Var(22) & 64)
+triggerall			= (Var(4) & 7) < 7
+triggerall			= (Var(22) & 256)
+triggerall			= Helper(30000 + (Var(4) & 7)),Var(5)
+trigger1			= !NumPartner
+trigger2			= ID <= Partner,ID
+helpertype			= player
+name				= "Hinako's P2 Koutai Helper"
+ID					= 30000 + (Var(4) & 7) + 1
+pos					= 0, 0
+postype				= p1
+facing				= 1
+stateno				= 0
+keyctrl				= 1
+ownpal				= 1
+supermovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause		= 1
+
+[State 30000, Helper]
+type				= Helper
+triggerall			= IsHelper(30000)
+triggerall			= TeamSide = 1
+triggerall			= (Root,Var(22) & 64)
+triggerall			= (Var(4) & 7) < 7
+triggerall			= (Var(22) & 256)
+triggerall			= Helper(30000 + (Var(4) & 7)),Var(5)
+triggerall			= NumPartner
+trigger1			= ID > Partner,ID
+helpertype			= player
+name				= "Hinako's P3 Koutai Helper"
+ID					= 30000 + (Var(4) & 7) + 1
+pos					= 0, 0
+postype				= p1
+facing				= 1
+stateno				= 0
+keyctrl				= 1
+ownpal				= 1
+supermovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause		= 1
+
+[State 30000, Helper]
+type				= Helper
+triggerall			= IsHelper(30000)
+triggerall			= TeamSide != 1
+triggerall			= (Root,Var(22) & 64)
+triggerall			= (Var(4) & 7) < 7
+triggerall			= (Var(22) & 256)
+triggerall			= Helper(30000 + (Var(4) & 7)),Var(5)
+triggerall			= NumPartner
+trigger1			= ID > Partner,ID
+helpertype			= player
+name				= "Hinako's P4 Koutai Helper"
+ID					= 30000 + (Var(4) & 7) + 1
+pos					= 0, 0
+postype				= p1
+facing				= 1
+stateno				= 0
+keyctrl				= 1
+ownpal				= 1
+supermovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause		= 1
+
+[State 30000, VarSet]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= (Root,Var(22) & 64)
+triggerall	= (Var(4) & 7) < 7
+trigger1	= (Var(22) & 256)
+var(4)		= Var(4) + 1
+ignorehitpause	= 1
+
+[State 30000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(22)		= (Var(22) | 256) - 256
+ignorehitpause	= 1
+
+;------------------- 鋼体回数の減る当身か
+[State 30000, Reset]
+type		= VarSet
+trigger1	= 1
+var(22)		= (Var(22) | 128) - 128
+ignorehitpause	= 1
+
+[State 30000, Set]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= !(Root,Var(16) & 268435456)
+trigger1	= (Root,Var(1) & 262144)
+trigger2	= (Var(4) & 120)
+var(22)		= (Var(22) | 128)
+ignorehitpause	= 1
+
+[State 30000, Set]
+type		= VarSet
+triggerall	= Parent,IsHelper(30000)
+triggerall	= !(Root,Var(16) & 268435456)
+trigger1	= (Root,Var(1) & 262144)
+trigger2	= (Parent,Var(4) & 120)
+var(22)		= (Var(22) | 128)
+ignorehitpause	= 1
+
+;------------------- 鋼体残り時間中にダメージ状態になったら、インターバルリセット
+[State 30000, Koutai Interval Add]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= (Var(4) & 120)
+triggerall	= (Root,Var(1) & 16384)
+trigger1	= (Root,Var(1) & 8)
+var(4)		= (Var(4) | 120) - 120 + 120 / 15 * (5 + 2)			; 最初期化。処理タイミングが1F早い上にあとで-1されるのでtime+2の値を設定すること
+ignorehitpause	= 1
+
+;------------------- 鋼体回数増加
+; 我慢による鋼体用上限値
+[State 30000, Koutai Decrease Check]
+type		= VarSet
+trigger1	= 1
+var(58)		= 2*((Root,Var(32) & 7) >= 3) + 3*((Root,Var(32) & 7) = 2) + 7*((Root,Var(32) & 7) <= 1)
+ignorehitpause	= 1
+
+[State 30000, Koutai Increase]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= Root,MoveType != H
+triggerall	= !(Root,Var(1) & 1024)
+triggerall	= (Root,Var(2) & 131071) = 3601
+triggerall	= Root,AnimElemTime(1) - 1 = 0
+trigger1	= Var(3) < Var(58)
+var(3)		= IfElse( Var(3) + 1 < Var(58), Var(3) + 1, Var(58) )
+ignorehitpause	= 1
+
+[State 30000, Koutai Increase]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= Root,MoveType != H
+triggerall	= !(Root,Var(1) & 1024)
+triggerall	= (Root,Var(2) & 131071) = 3701
+triggerall	= Root,AnimElemTime(1) - 1 = 0
+trigger1	= Var(3) < Var(58)
+var(3)		= IfElse( Var(3) + 2 < Var(58), Var(3) + 2, Var(58) )
+ignorehitpause	= 1
+
+[State 30000, Koutai Assert]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= Var(3) < 0
+var(3)		= Var(58)
+ignorehitpause	= 1
+
+; ペナルティ鋼体用上限値
+[State 30000, Koutai Decrease Check]
+type		= VarSet
+trigger1	= 1
+var(58)		= 4*((Root,Var(32) & 7) >= 3) + 10*((Root,Var(32) & 7) = 2) + 248*((Root,Var(32) & 7) <= 1)
+ignorehitpause	= 1
+
+[State 30000, Koutai Increase]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= (Root,Var(1) & 524288)
+trigger1	= Var(7) < Var(58)
+var(7)		= IfElse( Var(7) + 1 < Var(58), Var(7) + 1, Var(58) )
+ignorehitpause	= 1
+
+[State 30000, Koutai Increase]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= (Root,Var(1) & 8388608)
+trigger1	= Var(7) < Var(58)
+var(7)		= IfElse( Var(7) + 10 < Var(58), Var(7) + 10, Var(58) )
+ignorehitpause	= 1
+
+[State 30000, Koutai Increase]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= RoundState = 2
+triggerall	= Var(17) >= 180
+trigger1	= Var(7) < Var(58)
+var(7)		= IfElse( Var(7) + 1 < Var(58), Var(7) + 1, Var(58) )
+ignorehitpause	= 1
+
+[State 30000, Koutai Increase]
+type		= ParentVarSet
+triggerall	= Parent,IsHelper(30000)
+triggerall	= RoundState = 2
+triggerall	= Var(17) >= 180
+trigger1	= Parent,Var(7) < Var(58)
+var(7)		= IfElse( Parent,Var(7) + 1 < Var(58), Parent,Var(7) + 1, Var(58) )
+ignorehitpause	= 1
+
+[State 30000, Koutai Assert]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= Var(7) < 0
+var(7)		= Var(58)
+ignorehitpause	= 1
+
+[State 30000, Koutai Assert]
+type		= ParentVarSet
+triggerall	= Parent,IsHelper(30000)
+trigger1	= Parent,Var(7) < 0
+var(7)		= Var(58)
+ignorehitpause	= 1
+
+[State 30000, Koutai Penalty Flag Set]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= Var(7) > 6
+var(22)		= (Var(22) | 32)
+ignorehitpause	= 1
+
+;------------------- 鋼体ペナルティ発生フラグ解除
+[State 30000, Koutai Penalty Flag Reset]
+type		= ParentVarSet
+triggerall	= IsHelper(30000)
+trigger1	= 1
+var(1)		= (Parent,Var(1) | 524288) - 524288
+ignorehitpause	= 1
+
+[State 30000, Koutai Penalty Flag Reset]
+type		= ParentVarSet
+triggerall	= IsHelper(30000)
+trigger1	= 1
+var(1)		= (Parent,Var(1) | 8388608) - 8388608
+ignorehitpause	= 1
+
+[State 30000, Target No Yarare Time Reset]
+type		= VarSet
+trigger1	= Var(17) >= 180
+var(17)		= Var(17) - 20
+ignorehitpause	= 1
+
+;------------------- Helper(30000)で鋼体回数が減るか
+[State 30000, Koutai Decrease Check]
+type		= VarSet
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 30000, Koutai Decrease Check Force]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= RoundState = 2
+triggerall	= (Root,Var(19) & 1024)
+triggerall	= NumHelper(40000)
+trigger1	= !(Var(1) & 64) && (Var(19) = Helper(40000),Var(19))
+trigger2	= (Var(1) & 64) && (Var(20) = Helper(40000),Var(19))
+var(4)		= (Var(4) | 120) - 120 + (120 / 15)
+ignorehitpause	= 1
+
+[State 30000, Koutai Decrease Check]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= RoundState = 2
+triggerall	= (Var(4) & 120) = (120 / 15)
+triggerall	= NumHelper(40000)
+trigger1	= !(Var(1) & 64) && (Var(19) = Helper(40000),Var(19))
+trigger2	= (Var(1) & 64) && (Var(20) = Helper(40000),Var(19))
+var(58)		= 1
+ignorehitpause	= 1
+
+;------------------- 鋼体残り回数を減らす
+[State 30000, Koutai Decrease]
+type		= VarAdd
+triggerall	= Var(58)
+triggerall	= !Var(3)
+trigger1	= Var(7) > 0
+var(7)		= -1
+ignorehitpause	= 1
+
+[State 30000, Koutai Decrease]
+type		= VarAdd
+triggerall	= Var(58)
+trigger1	= Var(3) > 0
+var(3)		= -1
+ignorehitpause	= 1
+
+;------------------- 鋼体が減ったエフェクト
+[State 30000, Explod]
+type		= Explod
+trigger1	= Var(58)
+anim		= 2710
+ID			= 2710
+pos			= 0, Floor(-50 * Const(size.yscale))
+postype		= p1
+scale		= Const(size.xscale), Const(size.yscale)
+sprpriority	= 2
+bindtime	= 9999
+ownpal		= 1
+supermovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause	= 1
+
+[State 30000, PlaySnd]
+type		= PlaySnd
+trigger1	= Var(58)
+value		= 2200, 3
+volume		= 200
+ignorehitpause	= 1
+
+;------------------- 本来の方法じゃなくても、鋼体の回数を減らせる用のインターバルタイマーセット
+[State 30000, Koutai Interval Add]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= (Var(22) & 128)
+; 当身可能攻撃じゃなくて良い場合
+trigger1	= !(Root,Var(22) & 32)
+trigger1	= (Root,Var(1) & 16384)
+trigger1	= !(Root,Var(16) & 268435456) && (Root,Var(1) & 262144)
+; 鋼体中の攻撃を当身で取られた場合
+trigger2	= (Root,Var(1) & 65536)
+var(4)		= (Var(4) | 120) - 120 + 120 / 15 * (5 + 2)			; 最初期化。処理タイミングが1F早い上にあとで-1されるのでtime+2の値を設定すること
+ignorehitpause	= 1
+
+;------------------- 鋼体のインターバルタイマー減算
+[State 30000, Koutai Interval]
+type		= VarAdd
+triggerall	= IsHelper(30000)
+triggerall	= (Var(4) & 120)
+triggerall	= NumHelper(40000)
+trigger1	= !(Var(1) & 64) && (Var(19) = Helper(40000),Var(19))
+trigger2	= (Var(1) & 64) && (Var(20) = Helper(40000),Var(19))
+var(4)		= -120 / 15
+ignorehitpause	= 1
+
+[State 30000, Decrease Koutai Check Reset]
+type		= ParentVarSet
+triggerall	= IsHelper(30000)
+trigger1	= 1
+var(1)		= (Parent,Var(1) | 65536) - 65536
+ignorehitpause	= 1
+;---------------------------------------------------------------------------- 鋼体回数制御
+
+;---------------------------------------------------------------------------- 鋼体表示処理の初期化
+;------------------- x座標加算オフセット
+[State 30000, X Pos Add]
+type		= VarSet
+trigger1	= IsHelper(30000)
+var(57)		= 10
+ignorehitpause	= 1
+
+;------------------- 1Pか2Pかによる、基準x座標割り出し
+[State 30000, Base Pos X]
+type		= VarSet
+trigger1	= IsHelper(30000)
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 30000, Base Pos X]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= NumHelper(20000)
+var(58)		= IfElse( TeamSide = 1, ((Helper(20000),Var(10) & 511) + 25), 318 - ((Helper(20000),Var(10) & 511) + 25) )
+ignorehitpause	= 1
+
+;------------------- 基準y座標割り出し
+[State 30000, Base Pos Y]
+type		= VarSet
+trigger1	= IsHelper(30000)
+var(56)		= 0
+ignorehitpause	= 1
+
+[State 30000, Base Pos Y]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= NumHelper(20000)
+var(56)		= (Helper(20000),Var(10) & 261632) / 512
+ignorehitpause	= 1
+
+[State 30000, Base Pos Y]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= NumPartner
+trigger1	= Partner,ID < Root,ID
+var(56)		= Var(56) + 15
+ignorehitpause	= 1
+
+;------------------- 鋼体回数関連
+[State 30000, Koutai Num]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= 1
+var(55)		= (Var(3) + Var(7))
+ignorehitpause	= 1
+
+[State 30000, Koutai Number Place Init]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= 1
+var(54)		= 0
+ignorehitpause	= 1
+
+[State 30000, Koutai Num Buf]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= 1
+var(53)		= Var(55)
+ignorehitpause	= 1
+;---------------------------------------------------------------------------- 鋼体表示処理の初期化
+
+[State 30000, Branch]
+type		= SelfState
+trigger1	= IsHelper(30000)
+value		= 30001
+ignorehitpause	= 1
+
+[State 30000, End]
+type		= SelfState
+trigger1	= 1
+value		= 30009
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー常時 鋼体回数桁割り出し処理
+;---------------------------------------------------------------------
+[StateDef 30001]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 30001, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 30001, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 30000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 30001, Koutai Num Place Add]
+type		= VarAdd
+trigger1	= 1
+var(54)		= 1
+ignorehitpause	= 1
+
+[State 30001, Koutai Num Place Check]
+type		= VarSet
+trigger1	= 1
+var(53)		= Var(53) / 10
+ignorehitpause	= 1
+
+[State 30001, Branch]
+type		= SelfState
+trigger1	= Var(53) > 0
+value		= StateNo
+ignorehitpause	= 1
+
+[State 30001, Koutai Num Place Buf]
+type		= VarSet
+trigger1	= 1
+var(53)		= Var(54)
+ignorehitpause	= 1
+
+[State 30001, End]
+type		= SelfState
+trigger1	= 1
+value		= 30002
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー常時 鋼体回数表示処理
+;---------------------------------------------------------------------
+[StateDef 30002]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 30002, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 30002, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 30000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- 鋼体回数表示
+[State 30002, Explod]
+type		= Explod
+triggerall	= RoundState >= 1
+triggerall	= RoundState < 4 && Root,Alive
+trigger1	= Var(55) >= 1
+trigger2	= (Root,Var(18) & 1008)
+anim		= IfElse( !(Root,Var(18) & 1008), 2920, 2930 ) + (Var(55) % Floor(10.0 ** (1.0*Var(53)))) / Floor(10.0 ** (1.0*(Var(53) - 1)))
+ID			= 2920
+pos			= Var(58) + Var(57) * IfElse( TeamSide = 1, (Var(54) - Var(53)), -(Var(53) - 1) ), Var(56)
+postype		= left
+sprpriority	= -2
+scale		= 1.0, 1.0
+bindtime	= 1
+ownpal		= 1
+supermovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime	= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause	= 1
+
+[State 30002, Num Place Decrease]
+type		= VarAdd
+trigger1	= 1
+var(53)		= -1
+ignorehitpause	= 1
+
+[State 30002, Branch]
+type		= SelfState
+trigger1	= Var(53) > 0
+value		= StateNo
+ignorehitpause	= 1
+
+[State 30002, End]
+type		= SelfState
+trigger1	= 1
+value		= 30009
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー常時 鋼体判定枠処理
+;---------------------------------------------------------------------
+[StateDef 30009]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 30009, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 30009, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = [30000, 30099])
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------------- 鋼体判定枠
+;------------------- アニメ変更
+[State 30009, ChangeAnim]
+type		= ChangeAnim
+trigger1	= 1
+value		= 9999
+ignorehitpause	= 1
+
+[State 30009, ChangeAnim Init]
+type		= VarSet
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 30009, Koutai Get State]
+type		= VarSet
+trigger1	= 1
+var(57)		= 30010
+ignorehitpause	= 1
+
+;------------------- 投げ専用
+[State 30009, ChangeAnim Check]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= !Var(58)
+triggerall	= !(Var(22) & 256)
+triggerall	= !(Root,Var(1) & 1024)
+triggerall	= ((Root,Var(1) & 262144) && !(Root,Var(19) & 8192)) || (Root,Var(16) & 268435456)
+triggerall	= !NumHelper(Var(0) + 1) || !(Root,Var(22) & 64)
+trigger1	= (Root,Var(2) & 131071) = 4051 && Root,AnimElemTime(3) >= 0 && Root,AnimElemTime(8) < 0
+trigger2	= (Root,Var(2) & 131071) = 4081 && Root,AnimElemTime(4) >= 0 && Root,AnimElemTime(9) < 0
+trigger3	= (Root,Var(2) & 131071) = 4097 && Root,AnimElemTime(4) >= 0
+var(58)		= 10
+ignorehitpause	= 1
+
+[State 30009, ChangeAnim Check]
+type		= VarSet
+triggerall	= Parent,IsHelper(30000)
+triggerall	= !Var(58)
+triggerall	= !(Parent,Var(22) & 256)
+triggerall	= !(Root,Var(1) & 1024)
+triggerall	= ((Root,Var(1) & 262144) && !(Root,Var(19) & 8192)) || (Root,Var(16) & 268435456)
+triggerall	= !NumHelper(Var(0) + 1) || !(Root,Var(22) & 64)
+trigger1	= (Root,Var(2) & 131071) = 4051 && Root,AnimElemTime(3) >= 0 && Root,AnimElemTime(8) < 0
+trigger2	= (Root,Var(2) & 131071) = 4081 && Root,AnimElemTime(4) >= 0 && Root,AnimElemTime(9) < 0
+trigger3	= (Root,Var(2) & 131071) = 4097 && Root,AnimElemTime(4) >= 0
+var(58)		= 10
+ignorehitpause	= 1
+
+;------------------- 通常ダメージ用
+[State 30009, ChangeAnim Check]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= !Var(58)
+triggerall	= !(Var(22) & 256)
+triggerall	= !(Root,Var(1) & 1024)
+triggerall	= !NumHelper(Var(0) + 1) || !(Root,Var(22) & 64)
+trigger1	= ((Root,Var(1) & 262144) && !(Root,Var(19) & 8192)) || (Root,Var(16) & 268435456)
+trigger2	= !(Root,Var(19) & 8192) && (Var(4) & 120)
+var(58)		= 1
+ignorehitpause	= 1
+
+[State 30009, ChangeAnim Check]
+type		= VarSet
+triggerall	= Parent,IsHelper(30000)
+triggerall	= !Var(58)
+triggerall	= !(Parent,Var(22) & 256)
+triggerall	= !(Root,Var(1) & 1024)
+triggerall	= !NumHelper(Var(0) + 1) || !(Root,Var(22) & 64)
+trigger1	= ((Root,Var(1) & 262144) && !(Root,Var(19) & 8192)) || (Root,Var(16) & 268435456)
+trigger2	= !(Root,Var(19) & 8192) && (Parent,Var(4) & 120)
+var(58)		= 1
+ignorehitpause	= 1
+
+[State 30009, ChangeAnim]
+type		= ChangeAnim
+trigger1	= Var(58)
+value		= IfElse( SelfAnimExist(Root,Anim + 30000), Root,Anim + 30000, 9999 )
+elem		= IfElse( SelfAnimExist(Root,Anim + 30000), Root,AnimElemNo(0), 1 )
+ignorehitpause	= 1
+
+;------------------- 鋼体判定
+[State 30009, ReversalDef]
+type			= ReversalDef
+triggerall		= NumHelper(20000)
+trigger1		= Var(58) && Var(58) != 10
+reversal.attr	= SCA, AA, AT, AP
+getpower		= 0
+givepower		= 0
+numhits			= 0
+pausetime		= 1 * !(Helper(20000),Var(1) & 256), 1
+sparkno			= -1
+sparkxy			= Floor(10 * Const(size.xscale)), 0
+;hitsound		= S0, 0
+hitflag			= P
+priority		= 7, Hit
+;id				= 30000 ; mugenの仕様でヘルパーのヒットIDは0固定
+hitonce			= 0
+guard.dist		= 0
+p1stateno		= Var(57)
+ignorehitpause	= 1
+
+[State 30009, ReversalDef]
+type			= ReversalDef
+triggerall		= NumHelper(20000)
+trigger1		= Var(58) = 10
+reversal.attr	= SCA, AT
+getpower		= 0
+givepower		= 0
+numhits			= 0
+pausetime		= 1 * !(Helper(20000),Var(1) & 256), 1
+sparkno			= -1
+sparkxy			= Floor(10 * Const(size.xscale)), 0
+;hitsound		= S0, 0
+hitflag			= P
+priority		= 7, Hit
+;id				= 30000 ; mugenの仕様でヘルパーのヒットIDは0固定
+hitonce			= 0
+guard.dist		= 0
+p1stateno		= Var(57)
+ignorehitpause	= 1
+
+;------------------- 自分のステート
+[State 30009, My State]
+type		= VarSet
+trigger1	= Var(58)
+var(2)		= (Var(2) | Var(57))
+ignorehitpause	= 1
+;---------------------------------------------------------------------------- 鋼体判定枠
+
+[State 30009, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー常時 鋼体に攻撃を食らった
+;---------------------------------------------------------------------
+[StateDef 30010]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 30010, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 30010, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = [30000, 30099])
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 30010, VarSet]
+type		= VarSet
+trigger1	= 1
+var(5)		= 0
+ignorehitpause	= 1
+
+[State 30010, TargetDrop]
+type		= TargetDrop
+trigger1	= 1
+excludeID	= 0
+keepone		= 1
+ignorehitpause	= 1
+
+[State 30010, Function Init]
+type		= VarSet
+trigger1	= IsHelper(30000)
+var(58)		= IfElse( (Var(4) & 7) + 1 < 7, (Var(4) & 7) + 1, 6 )
+ignorehitpause	= 1
+
+[State 30010, Function Var Init]
+type		= VarSet
+trigger1	= Parent,IsHelper(30000)
+var(58)		= IfElse( (Parent,Var(4) & 7) + 1 < 7, (Parent,Var(4) & 7) + 1, 6 )
+ignorehitpause	= 1
+
+[State 30010, Function Var Init]
+type		= VarSet
+trigger1	= 1
+var(57)		= 0
+ignorehitpause	= 1
+
+[State 30010, Function Var Init]
+type		= VarSet
+trigger1	= 1
+var(56)		= 44
+ignorehitpause	= 1
+
+[State 30010, Debug]
+type		= Null;AppendToClipboard
+trigger1	= IsHelper(30000)
+text		= "%d:%d:%d:%d "
+params		= NumTarget, Target,ID, Target,IsHelper, Var(4) & 7
+ignorehitpause	= 1
+
+[State 30010, Debug]
+type		= Null;AppendToClipboard
+trigger1	= !IsHelper(30000)
+text		= "%d:%d:%d:%d "
+params		= NumTarget, Target,ID, Target,IsHelper, Parent,Var(4) & 7
+ignorehitpause	= 1
+
+;------------------- 攻撃者の情報を記録関数
+[State 30010, End]
+type		= SelfState
+triggerall	= NumTarget
+triggerall	= !Target,IsHelper
+triggerall	= Target,Alive
+triggerall	= !Target,NumTarget
+triggerall	= !(Target,HitDefAttr = SCA, AT, AP)
+triggerall	= !(Target,Const(size.attack.dist) < Abs(Target,Pos X - Pos X))
+triggerall	= !( -1*Target,Facing*(Target,Pos X - Pos X) < -(Const(size.xscale)*(0.25*Const(size.height) + Const(size.ground.front))) )
+triggerall	= !( (Const(size.xscale)*(1.9*Const(size.height) + Const(size.ground.front))) < -1*Target,Facing*(Target,Pos X - Pos X) )
+triggerall	= !( (Target,Pos Y - Pos Y) > (Const(size.yscale)*1.35*Const(size.height)) )
+triggerall	= !( -1*(1.35*Const(size.yscale)*Const(size.height)) > (Target,Pos Y - Pos Y) )
+trigger1	= 1
+value		= 30011
+ignorehitpause	= 1
+
+[State 30010, TargetDrop]
+type		= TargetDrop
+trigger1	= 1
+excludeID	= -1
+keepone		= 0
+ignorehitpause	= 1
+
+[State 30010, End]
+type		= SelfState
+trigger1	= 1
+value		= 30012
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー常時 攻撃者の情報を記録
+;---------------------------------------------------------------------
+[StateDef 30011]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 30011, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 30011, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = [30000, 30099])
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 30011, Check]
+type		= SelfState
+trigger1	= !(0 <= Var(57) && Var(57) < 6)
+trigger2	= !(0 < Var(58) && Var(58) < 7)
+trigger3	= !(Var(56) = 44)
+value		= 30012
+ignorehitpause	= 1
+
+;------------------- 攻撃者の情報を全ヘルパーから検索
+[State 30011, Enemy Memory]
+type		= VarSet
+triggerall	= NumHelper(30000 + Var(57))
+trigger1	= Helper(30000 + Var(57)),Var(5) = Target,ID
+var(56)		= 66
+ignorehitpause	= 1
+
+;------------------- 見つかったら、Targetを外してループを抜ける
+[State 30011, Loop Force End]
+type		= VarSet
+trigger1	= Var(56) = 66
+var(57)		= Var(58) - 1
+ignorehitpause	= 1
+
+[State 30011, TargetDrop]
+type		= TargetDrop
+trigger1	= Var(56) = 66
+excludeID	= -1
+keepone		= 0
+ignorehitpause	= 1
+
+[State 30011, Loop Count]
+type		= VarAdd
+trigger1	= 1
+var(57)		= 1
+ignorehitpause	= 1
+
+;------------------- 攻撃者の情報を記録
+[State 30011, Enemy Memory]
+type		= VarSet
+triggerall	= Var(57) >= Var(58)
+trigger1	= !(Var(56) = 66)
+var(5)		= Target,ID
+ignorehitpause	= 1
+
+;------------------- 永続Targetをしないなら、Target解除
+[State 30011, Target Reset]
+type		= VarSet
+triggerall	= Var(57) >= Var(58)
+trigger1	= !(Root,Var(22) & 64)
+var(5)		= 0
+ignorehitpause	= 1
+
+[State 30011, TargetDrop]
+type		= TargetDrop
+triggerall	= Var(57) >= Var(58)
+trigger1	= !(Root,Var(22) & 64)
+excludeID	= -1
+keepone		= 0
+ignorehitpause	= 1
+
+[State 30011, End]
+type		= SelfState
+trigger1	= 1
+value		= IfElse( Var(57) < Var(58), 30011, 30012 )
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー常時 鋼体時に攻撃を受けた後
+;---------------------------------------------------------------------
+[StateDef 30012]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= (Var(1) & 2)
+movehitpersist	= (Var(1) & 4)
+hitcountpersist	= (Var(1) & 8)
+
+[State 30012, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 30012, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = [30000, 30099])
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 30012, Koutai Interval Timer Reset]
+type		= VarSet
+trigger1	= IsHelper(30000)
+var(4)		= (Var(4) | 120) - 120
+ignorehitpause	= 1
+
+[State 30012, Koutai Interval Timer Reset]
+type		= ParentVarSet
+trigger1	= Parent,IsHelper(30000)
+var(4)		= (Parent,Var(4) | 120) - 120
+ignorehitpause	= 1
+
+[State 30012, Koutai Interval Timer Set]
+type		= VarSet
+triggerall	= IsHelper(30000)
+triggerall	= (Var(22) & 128)
+triggerall	= 0 < Var(58) && Var(58) < 7
+triggerall	= Var(56) = 44 || Var(56) = 66
+trigger1	= Var(57) = Var(58)
+trigger2	= !(Root,Var(22) & 32)
+var(4)		= Var(4) + 120 / 15 * (5 + 1)	; 事前に初期化してある。あとで-1されるのでtime+1の値を設定すること
+ignorehitpause	= 1
+
+[State 30012, Koutai Interval Timer Set]
+type		= ParentVarSet
+triggerall	= Parent,IsHelper(30000)
+triggerall	= (Var(22) & 128)
+triggerall	= 0 < Var(58) && Var(58) < 7
+triggerall	= Var(56) = 44 || Var(56) = 66
+trigger1	= Var(57) = Var(58)
+trigger2	= !(Root,Var(22) & 32)
+var(4)		= Parent,Var(4) + 120 / 15 * (5 + 0)	; 事前に初期化してある。同F内であとで減算する事は無いのでtime+0の値を設定すること
+ignorehitpause	= 1
+
+[State 30012, Koutai Helper Request]
+type		= VarSet
+triggerall	= IsHelper(30000)
+trigger1	= Var(5)
+var(22)		= (Var(22) | 256)
+ignorehitpause	= 1
+
+[State 30012, Koutai Helper Request]
+type		= ParentVarSet
+triggerall	= Parent,IsHelper(30000)
+trigger1	= Var(5)
+var(22)		= (Parent,Var(22) | 256)
+ignorehitpause	= 1
+
+[State 30012, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;=====================================================================
+; ヘルパー(ゲーム停止検知)
+; このヘルパーはHitDefにattrのステート状態(StateType = S or C etc...)や、ReversalDefにattrを持ってはいけない
+; pausemovetimeなし
+;
+; 変数表
+;	Var(0)	:	自分のID
+;	Var(1)	:	各種ビットフラグ
+;		0(1):				初期化したか
+;		1(2):				Hitdefを引き継ぐか
+;		2(4):				ヒット、ガード、空振り状態を引き継ぐか
+;		3(8):				ヒットカウントを引き継ぐか
+;		4(16):				
+;		5(32):				時間経過するか
+;		6(64):				
+;		7(128):				
+;		8(256):				
+;		9(512):				
+;		10(1024):			ステートを奪取されたか
+;		11(2048):			ステートを奪取前判定用
+;	Var(2)	:	自分のステート
+;	Var(19)	:	ゲームタイム
+;	Var(20)	:	前フレのゲームタイム
+;	Var(57)	:	temp
+;	Var(58)	:	temp
+;	Var(59) :	キー
+;=====================================================================
+;---------------------------------------------------------------------
+; ヘルパーゲーム停止検地 初期化
+;---------------------------------------------------------------------
+[StateDef 39999]
+type		= L
+movetype	= I
+physics		= N
+anim		= 9999
+ctrl		= 0
+facep2		= 1
+velset		= 0, 0
+
+[State 39999, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 39999, Helper Check]
+type		= SelfState
+trigger1	= Parent,IsHelper
+trigger2	= NumHelper(40000) > 1
+trigger3	= !IsHelper(40000)
+value		= 19901
+ignorehitpause	= 1
+
+[State 39999, Pause]
+type		= Pause
+trigger1	= 1
+time		= 0
+movetime	= 0
+ignorehitpause	= 1
+
+[State 39999, SuperPause]
+type		= SuperPause
+trigger1	= 1
+time		= 0
+movetime	= 0
+anim		= -1
+sound		= -1
+darken		= 0
+unhittable	= 1
+p2defmul	= 1.0
+ignorehitpause	= 1
+
+[State 39999, Init] ;Clear all int variables
+type		= VarRangeSet
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+[State 39999, Init] ;Clear all float variables
+type		= VarRangeSet
+trigger1	= 1
+fvalue		= 0
+ignorehitpause	= 1
+
+;------------------- キー
+[State 39999, Key]
+type		= VarSet
+trigger1	= 1
+var(59)		= (Random % 14) + 2
+ignorehitpause	= 1
+
+;------------------- MyID
+[State 39999, ID]
+type		= VarSet
+trigger1	= 1
+var(0)		= 40000
+ignorehitpause	= 1
+
+;------------------- ゲームタイム
+[State 39999, GameTime]
+type		= VarSet
+trigger1	= 1
+var(19)		= GameTime - 1
+ignorehitpause	= 1
+
+[State 39999, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパーゲーム停止検知 待機
+;---------------------------------------------------------------------
+[StateDef 40000]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 40000, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 40000, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 40000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- 姿を消す
+[State 40000, AssertSpecial]
+type		= AssertSpecial
+trigger1	= 1
+flag		= invisible
+ignorehitpause	= 1
+
+;------------------- 親に張り付く
+[State 40000, Bind]
+type		= BindToRoot
+trigger1	= 1
+ignorehitpause	= 1
+
+;------------------- 親の向きへ変更
+[State 40000, Turn]
+type		= Turn
+trigger1	= Root,Facing != Facing
+ignorehitpause	= 1
+
+;------------------- 無敵
+[State 40000, NotHit]
+type		= NotHitBy
+trigger1	= 1
+value		= SCA
+ignorehitpause	= 1
+
+[State 40000, HitOverride]
+type		= HitOverride
+trigger1	= 1
+attr		= SCA, AA, AT, AP
+stateno		= 19900
+ignorehitpause	= 1
+
+;------------------- 画面無視
+[State 40000, ScreenBound]
+type		= ScreenBound
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+;------------------- ぶつかり判定無し
+[State 40000, PlayerPush]
+type		= PlayerPush
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+;------------------- 自分のステート
+[State 40000, My State]
+type		= VarSet
+trigger1	= 1
+var(2)		= (Var(2) | 19900)
+ignorehitpause	= 1
+
+;------------------- ゲームタイム
+[State 40000, Old GameTime]
+type		= VarSet
+trigger1	= 1
+var(20)		= Var(19)
+ignorehitpause	= 1
+
+[State 40000, GameTime]
+type		= VarSet
+trigger1	= 1
+var(19)		= GameTime
+ignorehitpause	= 1
+
+[State 40000, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;=====================================================================
+; ヘルパー(スーパーポーズ用)
+; このヘルパーはHitDefにattrのステート状態(StateType = S or C etc...)や、ReversalDefにattrを持ってはいけない
+; pausemovetimeあり
+;
+; 変数表
+;	Var(0)	:	自分のID
+;	Var(1)	:	各種ビットフラグ
+;		0(1):				初期化したか
+;		1(2):				Hitdefを引き継ぐか
+;		2(4):				ヒット、ガード、空振り状態を引き継ぐか
+;		3(8):				ヒットカウントを引き継ぐか
+;		4(16):				
+;		5(32):				時間経過するか
+;		6(64):				
+;		7(128):				
+;		8(256):				
+;		9(512):				
+;		10(1024):			ステートを奪取されたか
+;		11(2048):			ステートを奪取前判定用
+;	Var(2)	:	自分のステート
+;	Var(18)	:	各種ビットフラグ2
+;		0(1):				初期化したか
+;	Var(19)	:	ゲームタイム
+;	Var(20)	:	前フレのゲームタイム
+;	Var(57)	:	temp
+;	Var(58)	:	temp
+;	Var(59) :	キー
+;=====================================================================
+;---------------------------------------------------------------------
+; ヘルパースーパーポーズ 初期化
+;---------------------------------------------------------------------
+[StateDef 49999]
+type		= L
+movetype	= I
+physics		= N
+anim		= 9999
+ctrl		= 0
+facep2		= 1
+velset		= 0, 0
+
+[State 49999, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 49999, Helper Check]
+type		= SelfState
+trigger1	= Parent,IsHelper
+trigger2	= NumHelper(50000) > 1
+trigger3	= !IsHelper(50000)
+value		= 19901
+ignorehitpause	= 1
+
+[State 49999, Init] ;Clear all int variables
+type		= VarRangeSet
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+[State 49999, Init] ;Clear all float variables
+type		= VarRangeSet
+trigger1	= 1
+fvalue		= 0
+ignorehitpause	= 1
+
+;------------------- キー
+[State 49999, Key]
+type		= VarSet
+trigger1	= 1
+var(59)		= (Random % 14) + 2
+ignorehitpause	= 1
+
+;------------------- MyID
+[State 49999, ID]
+type		= VarSet
+trigger1	= 1
+var(0)		= 50000
+ignorehitpause	= 1
+
+;------------------- ゲームタイム
+[State 49999, GameTime]
+type		= VarSet
+trigger1	= 1
+var(19)		= GameTime - 1
+ignorehitpause	= 1
+
+[State 49999, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパースーパーポーズ 待機
+;---------------------------------------------------------------------
+[StateDef 50000]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 50000, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 50000, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 50000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- ゲームタイム
+[State 50000, Old GameTime]
+type		= VarSet
+trigger1	= 1
+var(20)		= Var(19)
+ignorehitpause	= 1
+
+[State 50000, GameTime]
+type		= VarSet
+trigger1	= 1
+var(19)		= GameTime
+ignorehitpause	= 1
+
+;------------------- 時間経過するか
+[State 50000, GameTime Check]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 32) - 32 * !(Var(19) = (Root,Var(24) - Root,Var(59)))
+ignorehitpause	= 1
+
+;------------------- 姿を消す
+[State 50000, AssertSpecial]
+type		= AssertSpecial
+trigger1	= 1
+flag		= invisible
+ignorehitpause	= 1
+
+;------------------- 親に張り付く
+[State 50000, Bind]
+type		= BindToRoot
+trigger1	= 1
+ignorehitpause	= 1
+
+;------------------- 親の向きへ変更
+[State 50000, Turn]
+type		= Turn
+trigger1	= Root,Facing != Facing
+ignorehitpause	= 1
+
+;------------------- 無敵
+[State 50000, NotHit]
+type		= NotHitBy
+trigger1	= 1
+value		= SCA
+ignorehitpause	= 1
+
+[State 50000, HitOverride]
+type		= HitOverride
+trigger1	= 1
+attr		= SCA, AA, AT, AP
+stateno		= 19900
+ignorehitpause	= 1
+
+;------------------- 画面無視
+[State 50000, ScreenBound]
+type		= ScreenBound
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+;------------------- ぶつかり判定無し
+[State 50000, PlayerPush]
+type		= PlayerPush
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+;------------------- 自分のステート
+[State 50000, My State]
+type		= VarSet
+trigger1	= 1
+var(2)		= (Var(2) | 19900)
+ignorehitpause	= 1
+
+;------------------- 通常の2回用スーパーポーズヘルパーを出す用
+[State 50000, SuperPause Reset]
+type		= VarSet
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 50000, SuperPause Check]
+type		= VarSet
+triggerall	= (Var(18) & 1)
+triggerall	= !Var(58)
+trigger1	= Root,Alive
+trigger1	= Root,Var(59) = 1
+trigger2	= NumHelper(20000)
+trigger2	= (Helper(20000),Var(5) & 128)
+trigger2	= !(Helper(20000),Var(5) & 512)
+var(58)		= 1
+ignorehitpause	= 1
+
+;------------------- 試合終了後の1回用スーパーポーズヘルパーを出す
+[State 50000, SuperPause Check]
+type		= VarSet
+triggerall	= (Var(18) & 1)
+triggerall	= !Var(58)
+triggerall	= Root,Var(59) != 1
+trigger1	= NumHelper(20000)
+trigger1	= (Helper(20000),Var(5) & 512)
+var(58)		= 2
+ignorehitpause	= 1
+
+;------------------- 隔Fのスーパーポーズヘルパーを出す
+[State 50000, SuperPause Check]
+type		= VarSet
+triggerall	= (Var(18) & 1)
+triggerall	= !Var(58)
+triggerall	= Root,Alive
+triggerall	= Root,Var(59) != 1
+triggerall	= (Var(1) & 32)
+trigger1	= NumHelper(60000)
+trigger1	= Helper(60000),Var(23) > 0
+var(58)		= 3
+ignorehitpause	= 1
+
+[State 50000, Helper]
+type				= Helper
+trigger1			= Var(58) = 1
+helpertype			= player
+name				= "Hinako's SuperPause Create Helper"
+ID					= 19905
+pos					= 0, 0
+postype				= p1
+facing				= 1
+stateno				= 5150
+keyctrl				= 1
+ownpal				= 1
+supermovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause		= 1
+
+[State 50000, Helper]
+type				= Helper
+trigger1			= Var(58) = 2
+helpertype			= player
+name				= "Hinako's SuperPause Helper"
+ID					= 19902
+pos					= 0, 0
+postype				= p1
+facing				= 1
+stateno				= 5150
+keyctrl				= 1
+ownpal				= 1
+supermovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause		= 1
+
+[State 50000, Helper]
+type				= Helper
+trigger1			= Var(58) = 3
+helpertype			= player
+name				= "Hinako's SuperPause Helper Every Two Frame"
+ID					= 19906
+pos					= 0, 0
+postype				= p1
+facing				= 1
+stateno				= 5150
+keyctrl				= 1
+ownpal				= 1
+supermovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+pausemovetime		= 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+ignorehitpause		= 1
+
+;------------------- スーパーポーズヘルパーが出なかった際の、スーパーポーズしながら終了
+[State 50000, SuperPause End]
+type		= SelfState
+trigger1	= Var(58) = 1 && !NumHelper(19905)
+trigger2	= Var(58) = 2 && !NumHelper(19902)
+value		= 19902
+ignorehitpause	= 1
+
+;------------------- 初期化完了
+[State 50000, VarSet]
+type		= VarSet
+trigger1	= 1
+var(18)		= (Var(18) | 1)
+ignorehitpause	= 1
+
+[State 50000, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;=====================================================================
+; ヘルパー(攻撃用)
+; pausemovetimeあり
+;
+; 変数表
+;	Var(0)	:	自分のID
+;	Var(1)	:	各種ビットフラグ
+;		0(1):				初期化したか
+;		1(2):				Hitdefを引き継ぐか
+;		2(4):				ヒット、ガード、空振り状態を引き継ぐか
+;		3(8):				ヒットカウントを引き継ぐか
+;		4(16):				
+;		5(32):				時間経過するか
+;		6(64):				
+;		7(128):				
+;		8(256):				
+;		9(512):				
+;		10(1024):			ステートを奪取されたか
+;		11(2048):			ステートを奪取前判定用
+;	Var(2)	:	自分のステート
+;
+;	Var(5)	:	Target Player ID
+;	Var(6)	:	攻撃ID
+;
+;	Var(19)	:	ゲームタイム
+;	Var(20)	:	前フレのゲームタイム
+;	Var(21)	:	ステート固定タイム
+;	Var(22)	:	各種ビットフラグ3
+;		0(1):				前フレームがカウンター状態だったか
+;		1(2):				この攻撃判定が当たった事の更新はされたか
+;		2(4):				
+;	Var(23)	:	隔Fでスーパーポーズがかかってほしい期間
+;
+;	Var(50) :	temp(-3、-2、-1で使用。通常ステートからは書き換えてOK)
+;
+;	Var(53)	:	temp
+;	Var(54)	:	temp
+;	Var(55)	:	temp
+;	Var(56)	:	temp
+;	Var(57)	:	temp
+;	Var(58)	:	temp
+;	Var(59) :	キー
+;
+;	FVar(6)	:	ガードクラッシュ補正
+;=====================================================================
+;---------------------------------------------------------------------
+; ヘルパー攻撃 初期化
+;---------------------------------------------------------------------
+[StateDef 59999]
+type		= L
+movetype	= I
+physics		= N
+anim		= 9999
+ctrl		= 0
+facep2		= 1
+velset		= 0, 0
+
+[State 59999, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 59999, Helper Check]
+type		= SelfState
+trigger1	= Parent,IsHelper
+trigger2	= NumHelper(60000) > 1
+trigger3	= !IsHelper(60000)
+value		= 19901
+ignorehitpause	= 1
+
+[State 59999, Init] ;Clear all int variables
+type		= VarRangeSet
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+[State 59999, Init] ;Clear all float variables
+type		= VarRangeSet
+trigger1	= 1
+fvalue		= 0
+ignorehitpause	= 1
+
+;------------------- キー
+[State 59999, Key]
+type		= VarSet
+trigger1	= 1
+var(59)		= (Random % 14) + 2
+ignorehitpause	= 1
+
+;------------------- MyID
+[State 59999, ID]
+type		= VarSet
+trigger1	= 1
+var(0)		= 60000
+ignorehitpause	= 1
+
+;------------------- ゲームタイム
+[State 59999, GameTime]
+type		= VarSet
+trigger1	= 1
+var(19)		= GameTime - 1
+ignorehitpause	= 1
+
+[State 59999, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー攻撃 共通
+;---------------------------------------------------------------------
+[StateDef 60000]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 60000, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 60000, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 60000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- ゲームタイム
+[State 60000, Old GameTime]
+type		= VarSet
+trigger1	= 1
+var(20)		= Var(19)
+ignorehitpause	= 1
+
+[State 60000, GameTime]
+type		= VarSet
+trigger1	= 1
+var(19)		= GameTime
+ignorehitpause	= 1
+
+;------------------- 時間経過するか
+[State 60000, GameTime Check]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 32) - 32
+ignorehitpause	= 1
+
+[State 60000, GameTime Check]
+type		= VarSet
+trigger1	= (Var(19) = (Root,Var(24) - Root,Var(59)))
+trigger2	= (MoveType = A) && (Var(20) = (Root,Var(24) - Root,Var(59)))
+var(1)		= (Var(1) | 32)
+ignorehitpause	= 1
+
+;------------------- 姿を消す
+[State 60000, AssertSpecial]
+type		= AssertSpecial
+trigger1	= 1
+flag		= invisible
+ignorehitpause	= 1
+
+;------------------- 無敵
+[State 60000, NotHit]
+type		= NotHitBy
+trigger1	= 1
+value		= SCA
+ignorehitpause	= 1
+
+[State 60000, HitOverride]
+type		= HitOverride
+trigger1	= 1
+attr		= SCA, AA, AT, AP
+stateno		= 19900
+ignorehitpause	= 1
+
+;------------------- 画面無視
+[State 60000, ScreenBound]
+type		= ScreenBound
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+;------------------- ぶつかり判定無し
+[State 60000, PlayerPush]
+type		= PlayerPush
+trigger1	= 1
+value		= 0
+ignorehitpause	= 1
+
+[State 60000, StateType Reset]
+type		= StateTypeSet
+trigger1	= 1
+statetype	= L
+movetype	= I
+physics		= N
+ignorehitpause	= 1
+
+[State 60000, Vel Reset]
+type		= VelSet
+trigger1	= 1
+x			= 0
+y			= 0
+ignorehitpause	= 1
+
+[State 60000, ChangeAnim]
+type		= ChangeAnim
+trigger1	= 1
+value		= 9999
+ignorehitpause	= 1
+
+;------------------- ステート固定タイマー減算
+[State 60000, State Fix Timer Decrease]
+type		= VarAdd
+triggerall	= (Var(1) & 32)
+trigger1	= Var(21) > 0
+var(21)		= -1
+ignorehitpause	= 1
+
+;------------------- 隔Fスーパーポーズタイマー減算
+[State 60000, Every two frame Super Pause]
+type		= VarAdd
+triggerall	= (Var(1) & 32)
+trigger1	= Var(23) > 0
+var(23)		= -1
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------------- アクション補助
+;------------------- 親の行動取得
+[State 60000, Command Reset]
+type		= VarSet
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 60000, Command]
+type		= VarSet
+triggerall	= !(Root,Var(1) & 1024)
+triggerall	= Root,MoveType = A
+trigger1	= (Root,Var(2) & 131071) = 1901
+trigger2	= (Root,Var(2) & 131071) = 1906
+var(58)		= (Root,Var(2) & 131071)
+ignorehitpause	= 1
+
+;------------------- ヒットフラグ系初期化
+[State 60000, Hit Flag Init]
+type		= VarSet
+trigger1	= Var(58)
+var(1)		= (Var(1) | 2)
+ignorehitpause	= 1
+
+[State 60000, Hit Flag Init]
+type		= VarSet
+trigger1	= Var(58)
+var(1)		= (Var(1) | 4)
+ignorehitpause	= 1
+
+[State 60000, Hit Flag Init]
+type		= VarSet
+trigger1	= Var(58)
+var(1)		= (Var(1) | 8)
+ignorehitpause	= 1
+
+;------------------- 親の行動により分岐
+[State 60000, Branch]
+type		= SelfState
+trigger1	= Var(58)
+value		= 60000 + Var(58)
+ignorehitpause	= 1
+
+;------------------- ステート固定タイムにより分岐
+[State 60000, Branch]
+type		= SelfState
+triggerall	= Var(2)
+trigger1	= Var(21)
+value		= Var(2)
+ignorehitpause	= 1
+;---------------------------------------------------------------------------- アクション補助
+
+[State 60000, End]
+type		= SelfState
+trigger1	= 1
+value		= 60001
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー攻撃 待機
+;---------------------------------------------------------------------
+[StateDef 60001]
+type		= U
+movetype	= U
+physics		= U
+
+[State 60001, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 60001, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 60000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+;------------------- 自分のステート
+[State 60001, My State]
+type		= VarSet
+trigger1	= 1
+var(2)		= 0
+ignorehitpause	= 1
+
+;------------------- ステート固定タイム
+[State 60001, VarSet]
+type		= VarSet
+trigger1	= 1
+var(21)		= 0
+ignorehitpause	= 1
+
+;------------------- 親に張り付く
+[State 60001, Bind]
+type		= BindToRoot
+trigger1	= 1
+ignorehitpause	= 1
+
+;------------------- 親の向きへ変更
+[State 60001, Turn]
+type		= Turn
+trigger1	= Root,Facing != Facing
+ignorehitpause	= 1
+
+;------------------- ヒットフラグ系初期化
+[State 60001, Hit Flag Init]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 2) - 2
+ignorehitpause	= 1
+
+[State 60001, Hit Flag Init]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 4) - 4
+ignorehitpause	= 1
+
+[State 60001, Hit Flag Init]
+type		= VarSet
+trigger1	= 1
+var(1)		= (Var(1) | 8) - 8
+ignorehitpause	= 1
+
+[State 60001, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ヘルパー攻撃 五輪突き
+;---------------------------------------------------------------------
+;------------------- 弱
+[StateDef 61901]
+type		= A
+movetype	= I
+physics		= N
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 61901, Root Check]
+type		= SelfState
+trigger1	= !IsHelper
+value		= 19903
+ignorehitpause	= 1
+
+[State 61901, Helper Check]
+type		= SelfState
+trigger1	= !(Var(0) = 60000)
+trigger2	= !IsHelper(Var(0))
+value		= 19901
+ignorehitpause	= 1
+
+[State 61901, My State]
+type		= VarSet
+trigger1	= 1
+var(2)		= StateNo
+ignorehitpause	= 1
+
+;------------------- 初期化処理
+[State 61901, VarSet]
+type		= VarSet
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 61901, Init Check]
+type		= VarSet
+triggerall	= !(Root,Var(1) & 1024)
+triggerall	= Root,AnimElemTime(1) = 0
+trigger1	= ((Root,Var(2) & 131071) = 1901)
+trigger2	= ((Root,Var(2) & 131071) = 1906)
+var(58)		= 1
+ignorehitpause	= 1
+
+[State 61901, State Fix Timer Reset]
+type		= VarSet
+trigger1	= Var(58)
+var(21)		= 0
+ignorehitpause	= 1
+
+[State 61901, Hit record Reset]
+type		= VarSet
+trigger1	= Var(58)
+var(22)		= (Var(22) | 2) - 2
+ignorehitpause	= 1
+
+[State 61901, MoveHitReset]
+type		= MoveHitReset
+trigger1	= Var(58)
+ignorehitpause	= 1
+
+;------------------- 攻撃ヒット時の処理
+[State 61901, TargetState]
+type		= TargetState
+triggerall	= NumTarget
+triggerall	= (Var(22) & 1)
+trigger1	= MoveHit = 1
+value		= 3420
+ignorehitpause	= 1
+
+[State 61901, Every two Super Pause]
+type		= VarSet
+triggerall	= NumTarget
+triggerall	= !Target,IsHelper
+trigger1	= MoveHit = 1
+var(23)		= 10
+ignorehitpause	= 1
+
+[State 61901, Every two Super Pause]
+type		= VarSet
+triggerall	= (Var(1) & 32)
+trigger1	= MoveContact
+trigger2	= MoveReversed
+var(22)		= (Var(22) | 2)
+ignorehitpause	= 1
+
+[State 61901, TargetState]
+type		= TargetDrop
+trigger1	= 1
+excludeID	= -1
+keepone		= 0
+ignorehitpause	= 1
+
+;------------------- 攻撃判定が始めて出るか
+[State 61901, VarSet]
+type		= VarSet
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 61901, VarSet]
+type		= VarSet
+triggerall	= (Var(1) & 32)
+triggerall	= !(Root,Var(1) & 1024)
+trigger1	= ((Root,Var(2) & 131071) = 1901)
+trigger1	= Root,AnimElemTime(9) = 0
+trigger2	= ((Root,Var(2) & 131071) = 1906)
+trigger2	= Root,AnimElemTime(9) = 0
+var(58)		= 1
+ignorehitpause	= 1
+
+;------------------- 親の位置に移動
+[State 61901, Bind]
+type		= BindToRoot
+trigger1	= Var(58)
+ignorehitpause	= 1
+
+;------------------- 親の向きへ変更
+[State 61901, Turn]
+type		= Turn
+triggerall	= Var(58)
+trigger1	= Root,Facing != Facing
+ignorehitpause	= 1
+
+;------------------- ステート固定タイマー設定
+[State 61901, State Fix Timer Set]
+type		= VarSet
+trigger1	= Var(58)
+var(21)		= 13
+ignorehitpause	= 1
+
+[State 61901, StateType Reset]
+type		= StateTypeSet
+trigger1	= Var(21)
+statetype	= A
+movetype	= A
+physics		= N
+ignorehitpause	= 1
+
+[State 61901, ChangeAnim]
+type		= ChangeAnim
+trigger1	= Var(21)
+value		= 1905
+ignorehitpause	= 1
+
+[State , Hit Dummy]	; ヒットストップ中を当身で取られないようにする用
+type		= Null;HitDef
+trigger1	= 1
+attr		=
+hitflag		=
+guardflag	=
+guard.dist	= Floor(Const(size.attack.dist) * Const(size.xscale))
+ignorehitpause	= 1
+
+[State 61901, Get Power]
+type		= VarSet
+trigger1	= 1
+var(54)		= 80
+ignorehitpause	= 1
+
+[State 61901, Give Power]
+type		= VarSet
+trigger1	= 1
+var(55)		= 0
+ignorehitpause	= 1
+
+[State 61901, Give Power]
+type		= VarSet
+triggerall	= Var(21)
+triggerall	= Root,Const(data.power) > 0
+trigger1	= NumEnemy
+var(55)		= Floor( Var(54) / 4.0 * Root,FVar(5) * IfElse(Enemy,PowerMax<Root,Const(data.power),Enemy,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 61901, Get Power]
+type		= VarSet
+triggerall	= Var(21)
+trigger1	= Root,Const(data.power) > 0
+var(54)		= Floor( Var(54) / 1.0 * Root,FVar(5) * IfElse(Root,PowerMax<Root,Const(data.power),Root,PowerMax,Root,Const(data.power))/(1.0*Root,Const(data.power)) )
+ignorehitpause	= 1
+
+[State 61901, Hit]	; 全ヒット
+type						= HitDef
+triggerall					= !MoveContact && !MoveReversed
+triggerall					= (Root,P2StateType != A || !(Root,Var(1) & 2))
+trigger1					= Var(21)
+affectteam					= E
+attr						= , AP
+animtype					= Hard
+damage						= Ceil(120 * Root,FVar(3)), Ceil(15 * Root,FVar(9))
+getpower					= Var(54), Var(54)
+givepower					= Var(55), Var(55)
+guardflag					= M
+hitflag						= MAFP
+;priority					= 4, Hit
+pausetime					= 1, 15
+guard.pausetime				= 1, 13
+id							= 0
+numhit						= 1
+guard.kill					= 1
+sparkno						= S2030
+guard.sparkno				= S2060
+sparkxy						= Floor(-15 * Root,Const(size.xscale)), Floor(-45 * Root,Const(size.yscale))
+hitsound					= S2000, 4
+guardsound					= S2010, 1
+guard.dist					= Floor(Root,Const(size.attack.dist) * Root,Const(size.xscale))
+ground.type					= Low
+ground.slidetime			= 16
+ground.hittime				= 16
+guard.slidetime				= 16
+guard.ctrltime				= 16
+guard.hittime				= 25
+air.hittime					= 255
+fall.recovertime			= 255
+ground.velocity				= (-10.0 + -3.0 * !!(Root,Var(1) & 1)) * Root,Const(size.xscale), -0.5
+ground.cornerpush.veloff	= 0
+guard.velocity				= -10.4 * Root,Const(size.xscale) * Root,FVar(2)
+guard.cornerpush.veloff		= 0
+yaccel						= 0.44
+air.velocity				= (-10.0 + -3.0 * !!(Root,Var(1) & 1)) * Root,Const(size.xscale), -0.5
+air.cornerpush.veloff		= 0
+fall.recover				= 0
+fall						= 1
+envshake.ampl				= 8
+envshake.time				= 16
+ignorehitpause	= 1
+
+[State 61901, Hit]	; 喰らい中無し
+type						= HitDef
+triggerall					= !MoveContact && !MoveReversed
+triggerall					= (Root,P2StateType = A && (Root,Var(1) & 2))
+trigger1					= Var(21)
+affectteam					= E
+attr						= , AP
+animtype					= Hard
+damage						= Ceil(120 * Root,FVar(3)), Ceil(15 * Root,FVar(9))
+getpower					= Var(54), Var(54)
+givepower					= Var(55), Var(55)
+guardflag					= M
+hitflag						= MAFP-
+;priority					= 4, Hit
+pausetime					= 1, 15
+guard.pausetime				= 1, 13
+id							= 0
+numhit						= 1
+guard.kill					= 1
+sparkno						= S2030
+guard.sparkno				= S2060
+sparkxy						= Floor(-15 * Root,Const(size.xscale)), Floor(-45 * Root,Const(size.yscale))
+hitsound					= S2000, 4
+guardsound					= S2010, 1
+guard.dist					= Floor(Root,Const(size.attack.dist) * Root,Const(size.xscale))
+ground.type					= Low
+ground.slidetime			= 16
+ground.hittime				= 16
+guard.slidetime				= 16
+guard.ctrltime				= 16
+guard.hittime				= 25
+air.hittime					= 255
+fall.recovertime			= 255
+ground.velocity				= (-10.0 + -3.0 * !!(Root,Var(1) & 1)) * Root,Const(size.xscale), -0.5
+ground.cornerpush.veloff	= 0
+guard.velocity				= -10.4 * Root,Const(size.xscale) * Root,FVar(2)
+guard.cornerpush.veloff		= 0
+yaccel						= 0.44
+air.velocity				= (-10.0 + -3.0 * !!(Root,Var(1) & 1)) * Root,Const(size.xscale), -0.5
+air.cornerpush.veloff		= 0
+fall.recover				= 0
+fall						= 1
+envshake.ampl				= 8
+envshake.time				= 16
+ignorehitpause	= 1
+
+[State 61901, End]
+type		= SelfState
+trigger1	= 1
+value		= 19900
+ignorehitpause	= 1
+
+;------------------- 強
+[StateDef 61906]
+type		= U
+movetype	= U
+physics		= U
+hitdefpersist	= 1
+movehitpersist	= 1
+hitcountpersist	= 1
+
+[State 61906, End]
+type		= ChangeState
+trigger1	= 1
+value		= 61901
+ignorehitpause	= 1

@@ -1,0 +1,925 @@
+;======================================================
+; Constants
+;======================================================
+
+[Data]
+life = 3000
+power = 5000
+attack = 100
+defence = 100
+fall.defence_up = 50
+liedown.time = 30
+airjuggle = 15
+KO.echo = 0
+;Volume = 255
+IntPersistIndex = 60
+FloatPersistIndex = 40
+
+
+[Size]
+xscale = 1
+yscale = 1
+ground.back = 25
+ground.front = 18
+air.back = 16
+air.front = 16
+height = 60
+attack.dist = 160
+proj.attack.dist = 90
+proj.doscale = 0
+head.pos = 5, -74
+mid.pos = -5, -60
+shadowoffset = 0
+draw.offset = 0,0
+
+[Velocity]
+walk.fwd  = 2.4
+walk.back = -2.4
+run.fwd  = 6.6, 0
+run.back = -5,-3 
+jump.neu = 0,-9.6
+jump.back = -3
+jump.fwd = 3
+runjump.back = -2.55,-8.1
+runjump.fwd = 4.78,-8
+airjump.neu = 0,-8
+airjump.back = -2.55
+airjump.fwd = 2.5
+
+[Movement]
+airjump.num = 0
+airjump.height = 35
+yaccel = .53
+stand.friction = .86
+crouch.friction = .83
+
+;======================================================
+; Variable List
+;======================================================
+; Variable - Controls:
+;
+;  var(1)  - Combo Condition Reset.
+;  Var(2)  - Is used to remember whether or not the
+;            player was holding forward at the start
+;            of the state.
+;  var(3)  - Special Hit controller.
+;  Var(4)  - Select Randomly an Intro state.
+;  Var(5)  - Check enemy names & select a random Win
+;        	 State.
+;  Var(6)  - Binary porpouse variable to tells player
+;            When to play Attack Voice.
+;  Var(7)  - Variable used to detect GetHitVar and
+;            play it's correct GetHit Voice.
+;  var(8)  - Jump System.
+;  Var(9)  - Victory screen Random Winquotes.
+;  Var(11) - Crush System.
+;  Var(13) - Stun System.
+;  Var(14) - Stun System.
+;  Var(15) - Crush System (Recovery).
+;  Var(16) - Collapse K.O. System.
+;  Var(17) - Nikuman Respect.
+;  Var(20) - Counter System.
+;  Var(21) - Counter System.
+;  Var(22) - Counter System.
+;  Var(23) - Max-On.
+;  Var(30) - Trans Helper
+;  Var(41) - Hyper Screen FX.
+;
+;======================================================
+; States that are always executed
+;======================================================
+[Statedef -2]
+;======================================================
+
+[State -2, 1: Debug Display]
+type = DisplayToClipboard
+trigger1 = 1
+;text = "Thank you for use SP-Ex Kensou v.050511 by JFCT555\n"
+text = "STUN = %d CRUSH = %d RECOVERY = %d Max-On = %d Condition = %d"
+params = var(13), var(11), var(15), Var(23), var(3)
+ignorehitpause = 1
+
+[State -2, 2: Debug Display]
+type = AppendToClipboard
+trigger1 = 1
+text = "For more M.U.G.E.N. stuff visit: http://jfct555.webuda.com"
+ignorehitpause = 1
+
+[State -2, 3]
+type = Width
+trigger1 = Enemy, BackEdgeDist < 10
+trigger2 = Enemy, FrontEdgeDist < 10
+edge = 10
+
+[State -2, 4: Sumione Raitatsu]
+type = attackmulset
+triggerall = NumHelper(3505) = 1
+trigger1 = time = 1
+value = 1.3
+
+[State -2, 5: Sumione Raitatsu]
+type = PalFX
+triggerall = NumHelper(3505) = 1
+triggerall = var(23) <= 0
+trigger1 = (GameTime%60) = 0
+time = 30
+add = 0,32,64
+sinadd = 5,32,64,60
+ownpal = 1
+IgnoreHitPause = 1
+persistent = 1
+
+[State -2, 6: Sumione Raitatsu]
+type = DefenceMulSet
+triggerall = NumHelper(3505) = 1
+trigger1 = time = 1
+value = 0.75
+
+[State -2, 7: Sumione Raitatsu]
+type = attackmulset
+triggerall = NumHelper(3505) != 1
+trigger1 = time = 1
+value = 1
+
+[State -2, 8]
+type = explod
+trigger1 = projhit3701 = 1
+trigger2 = projhit3702 = 1
+anim = 6002
+pos = 0,-65
+postype = p2
+sprpriority = 5
+ownpal = 1
+bindtime = 1
+supermove = 0
+random = 40,80
+
+[State -2, 9]
+type = Pause
+trigger1 = ProjHitTime(1200) = [10,20]
+time = 1
+anim = -1
+sound = -1
+darken = 0
+p2defmul = 1
+ignorehitpause = 0
+
+[State -2, 10]
+type = explod
+trigger1 = projguarded3701 = 1
+trigger2 = projguarded3702 = 1
+anim = 6014
+facing = -1
+pos = 0,-65
+postype = p2
+sprpriority = 5
+ownpal = 1
+bindtime = 1
+supermove = 0
+random = 40,80
+
+[state -2, 11: Intro & Victory]
+type = assertspecial
+trigger1 = roundstate != 2
+flag = NoBarDisplay
+
+[State -2, 12: Hyper Flag] 
+type = AssertSpecial
+trigger1 = (stateno=3000&&time<30)||(stateno=3050&&time<30)||(stateno=3100&&time<29)||(stateno=3200&&(Animelemtime(4)>=0&&Animelemtime(7)<=3))||(stateno=3200&&(Animelemtime(8)>=0&&Animelemtime(10)<=2))||(stateno=3300&&time<29)
+trigger2 = (stateno = 3500&time<71) || (stateno = 1200 && Animelemtime(4)>= 0) || (stateno = 1201) || (stateno = 3600 && time < 30)
+trigger3 = stateno = 3800 || stateno = 3801 || (stateno = 3802 && time < 84) || ((prevstateno = 3801 && stateno = 1262) && time < 2) || ((prevstateno = 3900 && stateno = 1231) && time < 2)
+flag = noFG
+ignorehitpause = 1
+
+[State -2, 13: Afterimage]
+type = Afterimage
+triggerall = Movetype = H
+trigger1 = 1
+
+[State -2, 14]
+type = Varset
+trigger1 = prevstateno=300
+v = 3
+value = 1
+
+[State -2, 15]
+type = Varset
+trigger1 = Movetype = H
+trigger2 = var(3) = 1 && (Movecontact || P2Statetype = S || Stateno = 1294)
+trigger3 = var(3) = 2 && (Stateno = 1294 || stateno = 1001 || stateno = 3900 || P2statetype = S)
+trigger4 = var(3) = 3 && (Stateno = 272 || Stateno = 1231 || statetype = S)
+trigger5 = (var(3) = 4) && (P2Statetype = S)
+trigger6 = (var(3) = 5) && (P2Statetype = S)
+trigger7 = (var(3) = 5) && Stateno = [200,650]
+v = 3
+value = 0
+
+[State -2, 16: MAX2 Finish Helper]
+type = Helper
+trigger1 = ((movetype = H) && (prevstateno = 3801 || prevstateno = 3900 || prevstateno = 3800 || (prevstateno = 1231 && numhelper(6320)=1))) && time = 0
+trigger2 = stateno = 3802 && animelem = 10,0
+trigger3 = stateno = 3500 && Animelem = 30
+trigger4 = stateno = 3900 && Animelem = 43
+trigger5 = (prevstateno = 3801 && stateno = 1262) && Time = 1
+trigger6 = stateno = 1201 && Animelem = 11,2
+ID = 6390
+name = "MAX2 Finish Helper"
+stateno = 6390
+postype = p1
+pos = 0,0
+pausemovetime = 9999
+ignorehitpause = 1
+
+[State -2, 17: Collapse KO System]
+type = Varset
+triggerall = Stateno = 5000 && PrevStateNo = 131
+trigger1 = 1
+V = 16
+value = 1
+ignorehitpause = 1
+
+[State -2, 18: Finish Screen VarSet]
+type = Varset
+triggerall = var(41)<2
+triggerall = movecontact
+trigger1 = HitDefAttr = SCA, HP, HA
+var(41) = 1
+ignorehitpause = 1
+
+[State -2, 19: Finish Screen VarSet]
+type = Varset
+triggerall = var(41)<2
+trigger1 = Projhit1200 = 1
+trigger2 = Projhit33031 = 1
+trigger3 = Projhit33032 = 1
+trigger4 = Projhit35010 = 1
+var(41) = 1
+ignorehitpause = 1
+
+[State -2, 20: Finish Screen Var Reset]
+type = Varset
+triggerall = var(41) > 0
+trigger1 = p2movetype != H & numproj = 0 
+trigger2 = p2stateno = [5200,5210]
+var(41) = 0
+
+[State -2, 21: Hyper Finish Screen Helper]
+type = Helper
+trigger1 = Winko & !NumHelper(10000) & var(41)>0
+ID = 10000
+stateno = 10000
+postype = p1
+pos = 0,0
+pausemovetime = 9999
+ignorehitpause = 1
+
+[State 3601, 22]
+type = VarSet
+trigger1 = Stateno != 3200
+var(17) = 0
+
+;======================================================
+; Start Stun Check
+;======================================================
+
+[State -2, 23: Reset Stun Var]
+type = VarSet
+trigger1 = RoundState = 0 || RoundState = 3 || (movetype = H &&  var(14) = 1 && stateno != 5254)
+ignorehitpause = 1
+var(13) = 0
+
+[State -2, 24: Reset Stun Var]
+type = VarSet
+trigger1 = var(13) <= 0 && var(14) = 1
+ignorehitpause = 1
+var(14) = 0
+
+[State -2, 25: Reset Recovery Var]
+type = VarSet
+trigger1 = stateno != 5254
+var(15) = 0
+
+[State -2, 26: Add Var Value]
+type = VarAdd
+trigger1 = (var(13) = [1,1199]) && movetype = H && enemy, hitdefattr = SCA, HA, HP
+var(13) = -50
+ignorehitpause = 1 
+
+[State -2, 27: Add Var Value]
+type = VarAdd
+trigger1 = (var(13) = [1,1199]) && movetype = H && gethitvar(hitcount) >= 5 
+var(13) = -20
+ignorehitpause = 1 
+
+[State -2, 28: Add Var Value]
+type = VarAdd
+trigger1 = var(13) = [1,1199]
+var(13) = -1
+ignorehitpause = 1 
+
+[State -2, 29: Add Var Value]
+type = Varset
+trigger1 = var(13) > 1200
+var(13) = 1200
+ignorehitpause = 1 
+
+;======================================================
+; Counter System!!! (Work In Progress)
+;======================================================
+
+[State -2, 30: Check The Side Of The Player]
+type = varset
+trigger1 = var(20) = 0
+v = 20
+value = ifelse((facing = 1),1,2)
+ignorehitpause = 1
+
+[State -2, 31: Check If The Attack Succeded]
+type = varadd
+trigger1= (stateno != 440) && (stateno != 3200) && (stateno != 350)
+trigger1 = movehit = 1|projhit = 1
+v = 21
+value = 1
+ignorehitpause = 1
+
+[State -2, 32: Removes P1 Counter Display]
+type = removeexplod
+trigger1 = (stateno != [800,851]) && numexplod(6019) = 1
+trigger1 = var(20) = 1 && var(21) = 1 && var(22) = 1
+ID = 6019
+ignorehitpause = 1
+
+[State -2, 33: Removes P2 Counter Display]
+type = removeexplod
+trigger1 = (stateno != [800,851]) && numexplod(6019) = 1
+trigger1 = var(20) = 2 && var(21) = 1 && var(22) = 1
+ID = 6019
+ignorehitpause = 1
+
+[State -2, 34: Counter Display P1]
+type = explod
+trigger1 = (stateno != [800,851])
+trigger1 = var(20) = 1 && var(21) = 1 && var(22) = 1
+anim = 60191
+ID = 6019
+postype = left
+pos = 43, 120
+ontop = 1
+ownpal = 1
+bindtime = -1
+scale = 0.5,0.5
+persistent = 0
+ignorehitpause = 1
+
+[State -2, 35: Counter Display P2]
+type = explod
+trigger1 = (stateno != [800,851])
+trigger1 = var(20) = 2 && var(21) = 1 && var(22) = 1
+anim = 60192
+ID = 6019
+postype = right
+pos = -43, 120
+ontop = 1
+ownpal = 1
+bindtime = -1
+scale = 0.5,0.5
+persistent = 0
+ignorehitpause = 1
+
+[State -2, 36: Resets JuggleCheck]
+type = varset
+trigger1 = var(24) = 2 && numtarget = 0
+v = 24
+value = 0
+ignorehitpause = 1
+
+[State -2, 37: Conditions For The Jugglechek]
+type = varset
+trigger1 = (stateno != [800,851])
+trigger1 = var(21) = 1 && var(22) = 1
+v = 24
+value = 1
+ignorehitpause = 1
+
+[State -2, 38: Checking Values]
+type = varset
+trigger1 = var(24) = 2
+trigger1 = hitpausetime = 1|projhittime(1000) = 1
+v = 24
+value = 3
+ignorehitpause = 1
+
+[State -2, 39: Checking Values]
+type = varset
+trigger1 = var(24) = 1
+trigger1 = hitpausetime = 1|projhittime(1000) = 1
+v = 24
+value = 2
+ignorehitpause = 1
+
+[State -2, 40: NojuggleCheck]
+type = AssertSpecial
+trigger1 = var(24) = [1,2]
+trigger2 = Numhelper(3310) = 1
+trigger3 = var(3) = 5
+flag = nojugglecheck
+
+[State -2, 41: Resets Variable]
+type = varset
+trigger1 = enemynear,movetype != A
+v = 22
+value = 0
+ignorehitpause = 1
+
+[State -2, 42: Take Value]
+type = varset
+trigger1 = enemynear,movetype = A
+v = 22
+value = 1
+ignorehitpause = 1
+
+[State -2, 43: Resets Variable]
+type = varset
+trigger1 = stateno = 0|stateno = 11|ctrl = 1|time = 1
+trigger1 = var(8) < 4
+v = 21
+value = 0
+
+;======================================================
+; Max-On System!!!
+;======================================================
+
+[State -2, Max-On 1]
+type = VarSet
+trigger1 = var(23) < 0
+trigger2 = (stateno = 1200 && Animelem = 4) || stateno = 3000 || stateno = 3050 || stateno = 3100 || stateno = 3200 || stateno = 3300 || stateno = 3500 || stateno = 3600 || stateno = 3900 || stateno = 3800
+var(23) = -1
+ignorehitpause = 1
+
+[State -2, Max-On PalFX]
+type = PalFX
+triggerall = Var(23) > 0
+trigger1 = (GameTime%2) = 1
+time = 1
+add = 96,48,9
+mul = 256,256,256
+sinadd = 0,0,0,1
+ownpal = 1
+IgnoreHitPause = 1
+persistent = 1
+
+[State -2, Max-On 3]
+type = VarAdd
+triggerall = Var(23) >= 0
+triggerall = Roundstate = 2
+trigger1 = (GameTime%3) = 0
+var(23) = -3
+ignorehitpause = 1
+persistent = 1
+
+[State -2, Max-On 4]
+type = attackmulset
+trigger1 = Var(23) >= 0
+value = ifelse(NumHelper(3505)=1,0.8,0.6)
+
+[State -2, 44: Max-On Background Layer P1]
+type = Explod
+triggerall = Var(23) >= 0
+trigger1 = TeamSide = 1 && NumExplod(908) = 0
+anim = 908
+id = 908
+postype = Left
+pos = 53,ifelse((ID = (33)),211,218)
+ownpal = 1
+bindtime = -1
+ignorehitpause = 1
+sprpriority = 10
+ontop = 1
+pausemovetime = 999999999999
+
+[State -2, 45: Max-On Background Layer P2]
+type = Explod
+triggerall = Var(23) >= 0
+trigger1 = TeamSide = 2 && NumExplod(908) = 0
+anim = 908
+id = 908
+postype = Right
+pos = -53,ifelse((ID = (35)),211,218)
+ownpal = 1
+bindtime = -1
+ignorehitpause = 1
+sprpriority = 10
+ontop = 1
+pausemovetime = 999999999999
+facing = -1
+
+[State -2, 46: Max-On Charge Layer P1]
+type = Explod
+triggerall = Var(23) >= 0
+trigger1 = TeamSide = 1 && NumExplod(906) = 0
+anim = 906
+id = 906
+postype = Left
+pos = 53,ifelse((ID = (33)),211,218)
+ownpal = 1
+bindtime = -1
+ignorehitpause = 1
+sprpriority = 10
+ontop = 1
+pausemovetime = 999999999999
+
+[State -2, 47: Max-On Charge Layer P2]
+type = Explod
+triggerall = Var(23) >= 0
+trigger1 = TeamSide = 2 && NumExplod(906) = 0
+anim = 906
+id = 906
+postype = Right
+pos = -53,ifelse((ID = (35)),211,218)
+ownpal = 1
+facing = -1
+bindtime = -1
+ignorehitpause = 1
+sprpriority = 10
+ontop = 1
+pausemovetime = 999999999999
+
+[State -2, 48: Max-On Time Layer P1]
+type = Explod
+triggerall = Var(23) >= 0
+trigger1 = TeamSide = 1 && NumExplod(905) = 0
+anim = 905
+id = 905
+postype = Left
+pos = 53,ifelse((ID = (33)),211,218)
+ownpal = 1
+bindtime = -1
+ignorehitpause = 1
+sprpriority = 10
+ontop = 1
+pausemovetime = 999999999999
+removetime = -1
+
+[State -2, 49: Max-On Time Layer P2]
+type = Explod
+triggerall = Var(23) >= 0
+trigger1 = TeamSide = 2 && NumExplod(905) = 0
+anim = 905
+id = 905
+postype = Right
+pos = -29,ifelse((ID = (35)),211,218)
+ownpal = 1
+bindtime = -1
+ignorehitpause = 1
+sprpriority = 10
+ontop = 1
+pausemovetime = 999999999999
+
+[State -2, Max-On Carga Mod]
+type = modifyExplod
+trigger1 = Numexplod(906)
+Id = 906
+scale = (var(23)/1000.0)*1,1
+ignorehitpause = 1
+
+[State -2, Max-On Barra Clean]
+type = RemoveExplod
+triggerall = Numexplod(905)
+trigger1 = var(23) < 0
+trigger2 = Roundstate != 2
+ID = 905
+ignorehitpause = 0
+
+[State -2, Max-On Carga Clean]
+type = RemoveExplod
+triggerall = Numexplod(906)
+trigger1 = var(23) < 0
+trigger2 = Roundstate != 2
+ID = 906
+ignorehitpause = 0
+
+[State -2, 50: Max-On Remove Charge]
+type = RemoveExplod
+triggerall = Numexplod(908)
+trigger1 = var(23) < 0
+trigger2 = Roundstate != 2
+ID = 908
+ignorehitpause = 0
+
+;======================================================
+; Crush System
+;======================================================
+
+[State -2, 51: Light Hit Guard]
+type = VarAdd
+triggerall = var(11) > 0
+trigger1 = stateno = 5001
+trigger1 = anim = 5000
+trigger2 = stateno = 5001
+trigger2 = anim = 5010
+trigger3 = stateno = 5011
+trigger3 = anim = 5020 
+persistent = 0
+var(11) = -1
+ignorehitpause = 1
+
+[State -2, 52: Medium Hit Guard]
+type = VarAdd
+triggerall = var(11) > 0
+trigger1 = stateno = 5001
+trigger1 = anim = 5001
+trigger2 = stateno = 5001
+trigger2 = anim = 5011
+trigger3 = stateno = 5011
+trigger3 = anim = 5021 
+persistent = 0
+var(11) = -3
+ignorehitpause = 1
+
+[State -2, 53: Strong Hit Guard]
+type = VarAdd
+triggerall = var(11) > 0
+trigger1 = stateno = 5001
+trigger1 = anim = 5002
+trigger2 = stateno = 5001
+trigger2 = anim = 5012
+trigger3 = stateno = 5011
+trigger3 = anim = 5022 
+persistent = 0
+var(11) = -6
+ignorehitpause = 1
+
+[State -2, 54: Fall Hit Guard]
+type = VarAdd
+trigger1 = var(11) > 0
+trigger1 = PrevStateNo = 5050
+persistent = 0
+var(11) = -10
+ignorehitpause = 1
+
+[State -2, 55: Special Add]
+type = VarAdd ; Add when hitshaketime had at lease 15 ticks - Heavy Guard
+triggerall = GetHitVar(hitshaketime) = 15
+trigger1 = stateno = 150
+trigger2 = stateno = 152
+var(11) = 6
+ignorehitpause = 1
+
+[State -2, 56: Special Add 2]
+type = Varadd ; Add when hitshaketime had at lease 12 ticks - Medium Guard
+triggerall = GetHitVar(hitshaketime) = 12
+trigger1 = stateno = 150
+trigger2 = stateno = 152
+var(11) = 4
+ignorehitpause = 1
+
+[State -2, 57: Special Add 3]
+type = Varadd ; Add when hitshaketime had at lease 8 ticks - Light Guard
+triggerall = GetHitVar(hitshaketime) = 8
+trigger1 = stateno = 150
+trigger2 = stateno = 152
+var(11) = 2
+ignorehitpause = 1
+
+[State -2, 58: Crush!!!]
+type = ChangeState ; Change To Guard Crush When Var(11) Limits Are Reached.
+trigger1 = var(11) >= 55
+value = 9000
+ctrl = 0
+ignorehitpause = 1
+
+;======================================================
+; Outline fixes
+;======================================================
+
+[state -2, 59: No Air guard]
+type = assertspecial
+trigger1 = 1
+flag = NoAirGuard
+
+[State -2, 60: StateTypeSet]
+type = StateTypeSet
+trigger1 = (anim = 235 || anim = 400) && animelem = 3
+trigger2 = (anim = 200 || anim = 230 || anim = 271 || anim = 410 || anim = 430 || anim = 440 || anim = 600 || anim = 610 || anim = 630 || anim = 730) && animelem = 4
+trigger3 = (anim = 240 || anim = 250 || anim = 635 || anim = 640) && animelem = 5
+trigger4 = (anim = 210 || anim = 350) && animelem = 6
+trigger5 = (anim = 300 || anim = 650) && animelem = 7
+trigger6 = (anim = 220 || anim = 260) && animelem = 10
+movetype = I
+
+;------------------------------------------------------------------------------
+[State -2, 攻撃値]
+type = VarSet
+trigger1 = 1
+fvar(7) = (1000/112)*0.75
+
+[State -2, パワー蓄積値]
+type = VarSet
+trigger1 = 1
+fvar(8) = (1000/112);*0.75
+
+;-----------------------------------------------------------------------------
+;投げ制限
+;-----------------------------------------------------------------------------
+[State -2, VarSet]
+type = VarSet
+trigger1 = var(18) < 0
+trigger2 = statetype != A && movehit = 1
+trigger3 = p2statetype = A || p2statetype = L
+var(18) = 0
+ignorehitpause = 1
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = moveguarded = 1
+trigger2 = statetype = A && movecontact = 1
+var(18) = 3
+ignorehitpause = 1 
+
+[State -2, VarAdd]
+type = VarAdd
+trigger1 = var(18) >= 1
+trigger1 = p2movetype != H
+var(18) = -1
+ignorehitpause = 1 
+
+;---------------------------------------------------------------------------
+; 設定用ヘルパー
+;---------------------------------------------------------------------------
+[state -2, Helper]
+Type = Helper
+trigger1 = numhelper(40000) = 0
+name = "Config"
+id = 40000
+pos =  0,-9999
+postype = left
+stateno = 40000
+helpertype = normal
+sprpriority = 1
+keyctrl = 0
+
+;---------------------------------------------------------------------------
+; AI用デバッグ項目
+;---------------------------------------------------------------------------
+; AI swich -> ON(デバッグ用)
+[State -2, AI]
+type = VarSet
+triggerall =!ishelper || isHelper(30000+id)
+triggerall = var(59)
+triggerall = RoundState = 2
+trigger1 = stateno = 215 && movecontact
+trigger2 = stateno = 400 && movecontact
+trigger3 = stateno = 410 && movecontact
+var(59) = 1
+
+;------------------------------------------------------------------------------------------------
+;State -2 For AI
+;------------------------------------------------------------------------------------------------
+[State -2, AI]
+type = VarSet
+trigger1 = 1
+fvar(11) = 0
+
+[State -2, AI]
+type = VarSet
+triggerall = RoundState = 2
+trigger1 = Enemy,name = "K'"
+trigger1 = Enemy,authorname = "Hazakura"
+trigger1 = Enemy,stateno = 3600
+trigger2 = Enemy,name = "Psyqhical" || Enemy,name = "Psyqhical-Boss"
+trigger2 = Enemy,authorname = "Zelgadis"
+trigger2 = Enemy,stateno = 1030
+trigger3 = Enemy,name = "Igniz-Boss"
+trigger3 = Enemy,authorname = "GONZO-"
+trigger3 = (Enemy,stateno = 1040 && Enemy,animtime <= -6) || Enemy,stateno = 1080 || Enemy,stateno = 2101 || (Enemy,stateno = [2500,2501])
+trigger4 = Enemy,name = "KFM_LvUP"
+trigger4 = Enemy,stateno = [1300,1340]
+trigger4 = Enemy,time <= 15
+trigger5 = (Enemy,name = "Absolute_White_Len")||(Enemy,name = "kyuketsuki_Satsuki")||(Enemy,name = "hukusyuki") 
+trigger5 = (Enemy,stateno = 900)||(Enemy,stateno = 910)||(Enemy,stateno = 920)
+trigger6 = Enemy,name = "hukusyuki" || Enemy,name = "satsujinshow"
+trigger6 = Enemy,stateno = 24500
+trigger7 = Enemy,name = "Geese Howard"
+trigger7 = Enemy,authorname = "Cannon Musume"
+trigger7 = (Enemy,stateno = 1400)||(Enemy,stateno = 1450)||(Enemy,stateno = 1500)
+trigger8 = Enemy,name = "Physalis" || Enemy,name = "Physalis_F"
+trigger8 = Enemy,stateno = 2400
+trigger9 = Enemy,name = "Rock Howard"
+trigger9 = Enemy,authorname = "vyn"
+trigger9 = Enemy,stateno = 1300 || Enemy,stateno = 3300
+trigger10 = Enemy,name = "moriya B" || Enemy,name = "TSUKIKAGE MORIYA" || Enemy,name = "washizuka B"
+trigger10 = Enemy,stateno = 4000 || Enemy,stateno = 4100 || Enemy,stateno = 4200
+trigger10 = Enemy,time <= 17
+trigger11 = Enemy,name = "kaede" || Enemy,name = "真田 小次郎"
+trigger11 = Enemy,stateno = 4000 || Enemy,stateno = 4100 || Enemy,stateno = 4200
+trigger11 = Enemy,time <= 17
+trigger12 = Enemy,name ="Kyo Clone-10"
+trigger12 = Enemy,authorname = "David Demianoff"
+trigger12 = Enemy,stateno = 4100 || Enemy,stateno = 4300 || Enemy,stateno = 1000 || Enemy,stateno = 1005 || (Enemy,stateno = [1600,1699]) || Enemy,stateno = 1700 || Enemy,stateno = 4205 || (Enemy,stateno = [3400,3401])
+trigger13 = Enemy,name ="A-Rock"
+trigger13 = Enemy,authorname = "aaa"
+trigger13 = Enemy,stateno = 1500
+trigger14 = Enemy,name ="Heidern"
+trigger14 = Enemy,authorname = "A,c,c"
+trigger14 = Enemy,stateno = 2500 || Enemy,stateno = 4500
+trigger15 = Enemy,name = "Kamui_Tokinomiya"
+trigger15 = Enemy,authorname = "Ina"
+trigger15 = (Enemy,stateno = [420,421]) || (Enemy,stateno = [600,604]) || Enemy,stateno = 680 || Enemy,stateno = 703 
+trigger16 = Enemy,name = "Igniz Eagrose Version"
+trigger16 = Enemy,authorname = "GONZO-,Eagrose" 
+trigger16 = (Enemy,stateno = 1040 && Enemy,animtime <= -6) || Enemy,stateno = 2101
+trigger17 = Enemy,name = "G-Adel" || Enemy,name = "Adelhell"
+trigger17 = Enemy,stateno = 3700
+trigger18 = Enemy,name = "saint-of-silver"
+trigger18 = Enemy,authorname = "simotsuki" 
+trigger18 = Enemy,stateno = 1100 || Enemy,stateno = 1110 || Enemy,stateno = 1130
+trigger19 = Enemy,Name = "Iori-97"
+trigger19 = Enemy,stateno = 1500 || Enemy,stateno = 1700 || Enemy,stateno = 1750
+trigger20 = Enemy,name = "Rozwel"
+trigger20 = Enemy,authorname = "Mizore"
+trigger20 = Enemy,stateno = 1500 || Enemy,stateno = 2200
+fvar(11) = 1
+
+;-----------------------------------------------------------------------------
+;ヒットストップ中無敵
+;-----------------------------------------------------------------------------
+[State -2, 無敵]
+type = NotHitBy
+trigger1 = HitPauseTime
+trigger1 = !(MoveReversed)
+value = SCA
+ignorehitpause = 1
+
+;-----------------------------------------------------------------------------
+;AI用重力加速度計測
+;-----------------------------------------------------------------------------
+[State -2, yaccel]
+type = VarSet
+trigger1 = fvar(20) != enemynear(var(58)),const(movement.yaccel)
+trigger1 = enemynear(var(58)),stateno != [5000,5210]
+trigger1 = enemynear(var(58)),Vel Y != 0
+FV = 20
+value = enemynear(var(58)),const(movement.yaccel)
+ignorehitpause = 1
+
+[State -2, yaccel]
+type = VarSet
+trigger1 = fvar(20) != enemynear(var(58)),GetHitVar(yaccel)
+trigger1 = enemynear(var(58)),stateno = [5000,5210]
+trigger1 = enemynear(var(58)),Vel Y != 0
+FV = 20
+value = enemynear(var(58)),GetHitVar(yaccel);(打撃当てた時のyaccel値)
+ignorehitpause = 1
+
+;敵が空中じゃない時
+[State -2, yaccel]
+type = VarSet
+trigger1 = fvar(20) != 0
+trigger1 = enemynear(var(58)),Vel Y = 0
+FV = 20
+value = 0;(打撃当てた時のyaccel値)
+ignorehitpause = 1
+
+;----------------------------------------------------------------------------
+;デバッグ支援記述集
+
+; ※ この一連の記述は、キャラが完成したら消すか";"を付けて無効化しましょう。
+;　　僅かにでも処理が重くなることが理由です。（ちなみにNullではダメです）
+
+
+;デバッグモードに白い文字の表示を加える
+[State -2, デバッグ表示]
+type = DisplayToClipboard
+trigger1 = 1
+text = "V5-B=%d"
+params = var(5)
+ignorehitpause = 1
+
+;デバッグモードに白い文字の表示を加える
+[State -2, デバッグ表示]
+type = DisplayToClipboard
+trigger1 = 1
+text = "V1-C=%d,V3-J=%d,V4-D=%d,V5-B=%d,V20-A=%d"
+params = var(1),var(3),var(4),var(5),var(20)
+ignorehitpause = 1
+
+;表示を横に加える
+[State -2, デバッグ表示その2]
+type = AppendToClipboard
+trigger1 = 1
+text = " V22-L=%d,V21-R=%d,Pos X=%d,Y=%d"
+params = var(22),var(21),ceil(Pos X),floor(Pos Y)
+ignorehitpause = 1
+
+;表示を下に加える
+[State -2, デバッグ表示その3]
+type = AppendToClipboard
+trigger1 = 1
+text = "\nDist X=%d,Y=%d, Vel X=%d/10,Y=%d/10 : Power=%d"
+params = floor(P2BodyDist X),ceil(P2BodyDist Y),ceil(Vel X*10),floor(Vel Y*10),Power
+ignorehitpause = 1
+
+; ※ 関数説明：floor(1.5) = 1、ceil(1.5) = 2になります。 小数を含む場合によく使います。
+;　　小数を詳しく見たい場合は%dの代わりに%fを使います。 MUGENに限らず結構常識です。
+;　　Vel X*10に対し、表記はVel X=%d/10になっています。 10で割った数値が目安のVel Xです。
+;　　PosとDistはfloorとceilが逆になっています。

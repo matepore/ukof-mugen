@@ -1,0 +1,3403 @@
+
+;======================================================================
+;======================================================================
+; A.I. Direction
+;======================================================================
+;======================================================================
+
+[StateDef 200000]
+Type = A
+Physics = N
+Velset = 0, 0
+Sprpriority = 000
+anim = 0
+ctrl = 0
+
+;----------------------------------------------------------------------
+;ＡＩレベル設定
+[State A.I. Level]
+Type = VarSet
+trigger1 = !Time
+trigger1 = !Var(59)
+v = 59
+value = 5		; ←の値を変更
+
+;　Var(59) の値を 1 ~ 5 の間で変更することで、ＡＩレベルを変更出来ます。
+;　レベルが上がるごとにガード率・超反応で当て身投げ, 無敵技を出す確率・牽制の精度等が上昇します。
+;　また, 例外的にMAX発動中は当て身投げを超反応で使うようになります。
+;　それ以外の戦法はあまり変わりません。 いわゆる凶キャラと戦わせないならば、Lv.4以下を推奨。
+
+;　Lv.1 : Easy		よわい。 サンドバッグに毛が生えた程度です。
+;　Lv.2 : Normal	ふつう。 自分が戦っていて楽しいくらい。
+;　Lv.3 : Hard		つよい。 だが低ダ崩しや中段などには引っ掛かる。 ここまでが対人に適しているLvだと思われます。
+;　Lv.4 : Hardest	超反応の確率が増加。 このレベルからガード精度は最大だが、暴れてダメージを負うこともあります。
+;　Lv.5 : Agent		常時超反応に加え、空キャンや1F投げを駆使したAI殺しな戦法を取る。 おそらく見栄えは悪い。
+
+;----------------------------------------------------------------------
+;ＡＩ強制起動設定
+[State A.I. Compulsive Start]
+Type = VarSet
+trigger1 = !Time
+trigger1 = !Var(57)
+v = 57
+value = 5		; ←の値を変更
+
+;　Var(57) の値を 1 ~ 5 の間で変更することで、ＡＩ起動の設定を変更出来ます。
+;　値が 0 のときは、必要に応じて自動的に起動しますが、起動が少し遅れます。
+;　値を 1 に設定すると、戦闘開始後確実ににAIが起動しますが、自分が操作したいときも勝手に起動します。
+;　値を 2 に設定すると、7Pカラー以降(Startボタンを押しながらキャラを選択)はすぐに起動、それ以外は起動が少し遅れます。
+;　逆に -1 にすると、AIは絶対に起動しません。
+
+;----------------------------------------------------------------------
+;コンボ精度設定
+[State Combo precision Level]
+Type = VarSet
+trigger1 = !Time
+trigger1 = !Var(56)
+v = 51
+value = 5		; ←の値を変更
+
+;　Var(56) の値を -1 ~ 5 の間で変更することで、コンボ精度を変更出来ます。
+;　残りLifeが一定値以下になる、またはカウンターヒットすると精度が上がります。
+;　Lv.-1の場合はAILvと同じLvに設定されます。
+
+;　Lv.1 : 初心者並み	ほぼコンボはしません。 反確のときにたまに決めるくらい。
+;　Lv.2 : 中級者並み	小技2~3回のヒット確認から通常技 > 必殺技くらいはします。 ミスは多め。
+;　Lv.3 : 上級者者並み	小技から安定してコンボを決めます。 でもミスはする。
+;　Lv.4 : 達人並み	コンボミスはしません(AI作者のミスが無い限り)。
+;　Lv.5 : A.I.		どんな状況からでも最適なコンボを決めます。
+
+;----------------------------------------------------------------------
+;Tag Team System設定
+[State Tag Team System]
+Type = VarSet
+trigger1 = !Time
+trigger1 = !Var(55)
+v = 55
+value = 0		; ←の値を変更
+
+;　Var(55) の値を 1 にすると、タッグ戦のときpprn氏規格のTagTeamSystemに対応します。
+;　シングル戦, チーム戦には影響しません。
+;　現在、機能していません。　更新をお待ちください。
+
+;======================================================================
+;======================================================================
+
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+; めくり対策 & いろいろ計算ヘルパー
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[State 20000, AsserrtSpercial]
+type = assertspecial
+trigger1 = 1
+flag = Invisible
+flag2 = Noshadow
+
+[State 20000, NotHitBy]
+Type = NotHitBy
+trigger1 = 1
+Value = SCA
+Time = -1
+
+[State 20000, SelfState]
+type = selfstate
+trigger1= !IsHelper
+value = 0
+ctrl = 1
+
+[State 20000, Turn]
+Type = Turn
+trigger1 = Facing * ifelse((PlayerID(Root,Var(46)),Pos X - Pos X) >= 0, 1, -1) < 0
+
+;----------------------------------------------------------[クリップボード]
+[State 20000, Clipboard1, Guard]
+type = AppendToClipboard
+trigger1 = IsHelper
+trigger1 = IsHelper(20000+Root,id)
+text = "Var(0)=%d\tVar(0)/10=%d\tVar(0)/100=%d\tVar(50)=%d\tVar(17)=%d\n"
+params = ((Var(0)) % 10), ((Var(0) / 10) % 10), ((Var(0) / 100) % 10), Var(50), Var(17)
+
+[State 20000, ClipBoard, Var(25)]
+type = AppendToClipboard
+trigger1 = IsHelper
+trigger1 = IsHelper(20000+Root,id)
+text = "Var(25)=%d\tVar(25)/1000=%d\tVar(25)/1000000=%d\tVar(25)=%d\t\n"
+params = ((Var(25)) % 1000), ((Var(25) / 1000) % 1000), ((Var(25) / 1000000) % 1000), Var(25)
+
+[State 20000, ClipBoard, Learning 30~34]
+type = AppendToClipboard
+trigger1 = IsHelper
+trigger1 = IsHelper(20000+Root,id)
+text = "20=%d\t21=%d\t22=%d\t23=%d\t24=%d\t\n"
+params = Var(20), Var(21), Var(22), Var(23), Var(24)
+
+[State 20000, ClipBoard, Learning 30~34]
+type = AppendToClipboard
+trigger1 = IsHelper
+trigger1 = 0	;IsHelper(20000+Root,id)
+text = "30=%d\t31=%d\t32=%d\t33=%d\t34=%d\t\n"
+params = Var(30), Var(31), Var(32), Var(33), Var(34)
+
+[State 20000, ClipBoard, Learning 35~39]
+type = AppendToClipboard
+trigger1 = IsHelper
+trigger1 = 0	;IsHelper(20000+Root,id)
+text = "35=%d\t36=%d\t37=%d\t38=%d\t39=%d\t\n"
+params = Var(35), Var(36), Var(37), Var(38), Var(39)
+
+[State 20000, ClipBoard4, Learning]
+type = AppendToClipboard
+trigger1 = IsHelper
+trigger1 = 0	;IsHelper(20000+Root,id)
+text = "40=%d\t41=%d\t42=%d\t43=%d\t49=%d\t\n"
+params = Var(40), Var(41), Var(42), Var(43), Var(49)
+
+[State 20000, Clipboard4, Learning]
+type = AppendToClipboard
+trigger1 = IsHelper
+trigger1 = 0	;IsHelper(20000+Root,id)
+text = "44=%d\t45=%d\t46=%d\t47=%d\t48=%d\t\n"
+params = Var(44), Var(45), Var(46), Var(47), Var(48)
+
+;----------------------------------------------------------[InGuardDist判断]
+[State 20000, Var(0) Reset]
+type = VarSet
+trigger1 = 1
+var(0) = 0
+
+;自分の後ろに
+[State 20000, Pos Back]
+Type = PosSet
+trigger1 = 1
+X = Root,Pos X + 60 * (PlayerID(Root,Var(46)),Facing)
+
+[State 20000, InGuardDist]
+type = VarAdd
+trigger1 = InGuardDist
+var(0) = 10
+
+;自分の前に
+[State 20000, Pos Forward]
+Type = PosSet
+trigger1 = 1
+X = Root,Pos X - 80 * PlayerID(Root,Var(46)),facing
+
+[State 20000, InGuardDist]
+type = VarAdd
+trigger1 = InGuardDist
+var(0) = 1
+
+;自分のさらに後ろに
+[State 20000, Pos Over Back]
+Type = PosSet
+trigger1 = NumEnemy >= 2
+X = Root,Pos X + 80 * (PlayerID(Root,Var(46)),Facing)
+
+[State 20000, InGuardDist]
+type = VarAdd
+trigger1 = NumEnemy >= 2
+trigger1 = InGuardDist
+var(0) = 100
+
+;自分のさらに前に
+[State 20000, Pos Over Forward]
+Type = PosSet
+trigger1 = 1
+X = Root,Pos X - 140 * PlayerID(Root,Var(46)),facing
+
+[State 20000, InGuardDist]
+type = VarAdd
+trigger1 = InGuardDist
+var(0) = 1000
+
+;終わったら本体の位置に戻しておく
+[State 20000, Pos Root]
+Type = PosSet
+trigger1 = 1
+X = Root,Pos X
+
+;----------------------------------------------------------[Root,PrevStateNo]
+[State 20000, Root,PrevStateNo]
+Type = VarSet
+trigger1 = Root,MoveType != H
+trigger1 = ((Root,StateNo != [0, 12]) && (Root,StateNo != [120, 149])) || Root,StateNo = [5, 6]
+var(1) = Root,StateNo
+
+;----------------------------------------------------------[グレイズできる東方キャラ判定]
+[State 20000, Toho Reset]
+Type = VarSet
+trigger1 = (Var(2)&1)	; Var(2)
+var(2) = 0
+
+[State 20000, 水影氏]
+type = varadd
+triggerall = (Var(2)&1) != 1
+triggerall = PlayerID(Root,Var(46)),Authorname = "mikage"
+trigger1 = PlayerID(Root,Var(46)),Name = "Alice Margatroid"
+var(2) = ((Var(2))|1)
+
+[State 20000, 黒鉄氏]
+type = varadd
+triggerall = (Var(2)&1) != 1
+triggerall = PlayerID(Root,Var(46)),Authorname = "kurogane"
+trigger1 = PlayerID(Root,Var(46)),Name = "Reimu_Hakurei"
+trigger2 = PlayerID(Root,Var(46)),Name = "Yukari_Yakumo"
+trigger3 = PlayerID(Root,Var(46)),Name = "Yuyuko_Saigyouji"
+trigger4 = PlayerID(Root,Var(46)),Name = "Youmu_Konpaku"
+trigger5 = PlayerID(Root,Var(46)),Name = "Patchouli_Knowledge"
+trigger6 = PlayerID(Root,Var(46)),Name = "Iku_Nagae"
+trigger7 = PlayerID(Root,Var(46)),Name = "Shinki"
+;trigger8 = PlayerID(Root,Var(46)),Name = "Flandre_Scarlet"
+var(2) = ((Var(2))|1)
+
+[State 20000, その他の方々]
+type = varadd
+triggerall = (Var(2)&1) != 1
+trigger1 = PlayerID(Root,Var(46)),Authorname = "Toma"
+trigger1 = PlayerID(Root,Var(46)),Name = "Marisa Kirisame"
+trigger2 = PlayerID(Root,Var(46)),Authorname = "Toma"
+trigger2 = PlayerID(Root,Var(46)),Name = "Patchouli"
+trigger3 = PlayerID(Root,Var(46)),Authorname = "som"
+trigger3 = PlayerID(Root,Var(46)),Name = "koakuma"
+trigger4 = PlayerID(Root,Var(46)),Authorname = "Ibukah"
+trigger4 = PlayerID(Root,Var(46)),Name = "Ibuki_Suika"
+trigger5 = PlayerID(Root,Var(46)),Authorname = "Nachel"
+trigger5 = PlayerID(Root,Var(46)),Name = "Reimu_Hakurei"
+trigger6 = PlayerID(Root,Var(46)),Authorname = "barai&1021gundamoo"
+trigger6 = PlayerID(Root,Var(46)),Name = "Yakumo_Ran"
+var(2) = ((Var(2))|1)
+
+;----------------------------------------------------------[グレイズできない東方キャラ判定]
+[State 20000, ふるれ氏]
+type = varadd
+triggerall = (Var(2)&2) != 2
+triggerall = PlayerID(Root,Var(46)),Authorname = "frule"
+trigger1 = PlayerID(Root,Var(46)),Name = "Chirno"
+trigger2 = PlayerID(Root,Var(46)),Name = "Sanae"
+var(2) = ((Var(2))|2)
+
+;trigger9 = PlayerID(Root,Var(46)),Name = ""
+
+;----------------------------------------------------------[AI殺し技対策用P2Name]
+[State 20000, 椅子]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+trigger1 = PlayerID(Root,Var(46)),Name = "Hisui"
+trigger1 = PlayerID(Root,Var(46)),StateNo = [220, 230]
+var(2) = 10
+
+[State 20000, さあ、生を謳歌しろ]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+trigger1 = PlayerID(Root,Var(46)),Name = "Nero_Chaos" || PlayerID(Root,Var(46)),Name = "Nrvnqsr_Chaos"
+trigger1 = (PlayerID(Root,Var(46)),StateNo = [3000, 3001]) || (PlayerID(Root,Var(46)),StateNo = [3050, 3052])
+var(2) = 20
+
+[State 20000, 瞬弾殺・ブレイジング]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+trigger1 = PlayerID(Root,Var(46)),Name = "Marisa Kirisame"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 1270 || PlayerID(Root,Var(46)),StateNo = [2040, 2043]
+var(2) = 30
+
+[State 20000, 瞬獄殺(悪咲)]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+trigger1 = PlayerID(Root,Var(46)),Name = "cvsgouki_ex"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 3300
+var(2) = 40
+
+[State 20000, ラストジャッジメント]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+trigger1 = PlayerID(Root,Var(46)),Name = "cvsg_rugal"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 3200
+var(2) = 50
+
+[State 20000, 瞬獄殺(Pots)]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+trigger1 = PlayerID(Root,Var(46)),Name = "Shin Gouki"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 4000
+var(2) = 60
+
+[State 20000, ファイナルサイコクラッシャー]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+trigger1 = PlayerID(Root,Var(46)),Name = "Vega"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 4000
+var(2) = 70
+
+[State 20000, たるのなか]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+triggerall = PlayerID(Root,Var(46)),Name = "UNKNOWN"
+triggerall = PlayerID(Root,Var(46)),AutHorName = "hanma"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 3100
+trigger2 = PlayerID(Root,Var(46)),StateNo = 3120
+trigger3 = PlayerID(Root,Var(46)),StateNo = 3140
+var(2) = 80
+
+[State 20000, たるのなか]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+triggerall = PlayerID(Root,Var(46)),Name = "UNKNOWN"
+triggerall = PlayerID(Root,Var(46)),AutHorName = "586"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 6200
+trigger2 = PlayerID(Root,Var(46)),StateNo = 6210
+trigger3 = PlayerID(Root,Var(46)),StateNo = 6220
+var(2) = 80
+
+[State 20000, スタープラチナ・ザ・ワールド(悪咲)]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+triggerall = PlayerID(Root,Var(46)),Name = "Jotaro Kujo"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 3200
+trigger2 = PlayerID(Root,Var(46)),StateNo = 3250
+var(2) = 90
+
+[State 20000, スタープラチナ・ザ・ワールド]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+triggerall = PlayerID(Root,Var(46)),Name = "jotaro"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 3050
+trigger2 = PlayerID(Root,Var(46)),StateNo = 3060
+var(2) = 90
+
+[State 20000, ザ・ワールド(悪咲)]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+triggerall = PlayerID(Root,Var(46)),Name = "shadow dio" || PlayerID(Root,Var(46)),Name = "final dio" || PlayerID(Root,Var(46)),Name = "dio"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 3200
+trigger2 = PlayerID(Root,Var(46)),StateNo = 3250
+var(2) = 100
+
+[State 20000, ザ・ワールド(キクラゲ)]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+triggerall = PlayerID(Root,Var(46)),Name = "Shadow Dio"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 6000
+var(2) = 100
+
+[State 20000, セラフィックウイング&リザレクション]
+Type = VarAdd
+triggerall = ((Var(2) / 10) % 100) = 0
+triggerall = PlayerID(Root,Var(46)),name = "Gill"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 3000
+trigger2 = PlayerID(Root,Var(46)),StateNo = 3200
+var(2) = 110
+
+;----------------------------------------------------------[味方特殊な技用P2Name]
+[State 20000, スタープラチナ・ザ・ワールド(悪咲)]
+Type = VarAdd
+triggerall = ((Var(2) / 1000) % 100) = 0
+triggerall = NumPartner
+triggerall = Partner,Name = "Jotaro Kujo"
+trigger1 = Partner,StateNo = 3200
+trigger2 = Partner,StateNo = 3250
+var(2) = 9000
+
+[State 20000, スタープラチナ・ザ・ワールド]
+Type = VarAdd
+triggerall = ((Var(2) / 1000) % 100) = 0
+triggerall = NumPartner
+triggerall = Partner,Name = "jotaro"
+trigger1 = Partner,StateNo = 3050
+trigger2 = Partner,StateNo = 3060
+var(2) = 9000
+
+[State 20000, ザ・ワールド(悪咲)]
+Type = VarAdd
+triggerall = ((Var(2) / 1000) % 100) = 0
+triggerall = NumPartner
+triggerall = Partner,Name = "shadow dio" || Partner,Name = "final dio" || Partner,Name = "dio"
+trigger1 = Partner,StateNo = 3200
+trigger2 = Partner,StateNo = 3250
+var(2) = 10000
+
+[State 20000, ザ・ワールド(キクラゲ)]
+Type = VarAdd
+triggerall = ((Var(2) / 1000) % 100) = 0
+triggerall = NumPartner
+triggerall = PlayerID(Root,Var(46)),Name = "Shadow Dio"
+trigger1 = PlayerID(Root,Var(46)),StateNo = 6000
+var(2) = 10000
+
+;----------------------------------------------------------[ガード切り替え用カウント]
+[State 20000, Enemy,StateType Reset]
+type = VarSet
+trigger1 = PlayerID(Root,Var(46)),StateType = A || PlayerID(Root,Var(46)),StateNo = [39, 40]
+trigger1 = Var(6) < 0
+trigger2 = PlayerID(Root,Var(46)),StateType = S || PlayerID(Root,Var(46)),StateType = C || PlayerID(Root,Var(46)),StateType = L
+trigger2 = PlayerID(Root,Var(46)),StateNo != [39, 40]
+trigger2 = Var(6) > 0
+var(6) = 0
+
+;空中状態
+[State 20000, Air]
+type = VarAdd
+trigger1 = PlayerID(Root,Var(46)),StateType = A || PlayerID(Root,Var(46)),StateNo = [39, 40]
+var(6) = 1
+
+;地上状態
+[State 20000, Stand & Crouch & Down]
+type = VarAdd
+triggerall = PlayerID(Root,Var(46)),StateNo != [39, 40]
+trigger1 = PlayerID(Root,Var(46)),StateType = S || PlayerID(Root,Var(46)),StateType = C
+trigger2 = PlayerID(Root,Var(46)),StateType = L
+var(6) = -1
+
+;----------------------------------------------------------[Proj裏周り対策]
+[State 20000, Proj Count]
+type = VarAdd
+trigger1 = Var(7) > 0
+var(7) = -1
+
+[State 20000, Proj Set]
+type = VarSet
+trigger1 = Root,InGuardDist
+trigger1 = PlayerID(Root,Var(46)),NumProj
+var(7) = 7
+
+;----------------------------------------------------------[StateType 記録]
+[State 20000, その他]
+Type = VarSet
+triggerall = Var(8) != 0
+triggerall = Root,Time
+trigger1 = Root,MoveType != H || Root,StateNo < 200
+trigger1 = Root,StateNo != 5210
+trigger2 = Root,MoveType = H && Root,StateNo >= 200
+var(8) = 0
+
+[State 20000, 立ち]
+Type = VarSet
+trigger1 = var(8) != 1
+trigger1 = Root,MoveType != H || Root,StateNo < 200
+trigger1 = Root,StateType = S
+trigger1 = (Root,StateNo = [120, 159])
+var(8) = 1
+
+[State 20000, しゃがみ]
+Type = VarSet
+trigger1 = var(8) != 2
+trigger1 = Root,MoveType != H || Root,StateNo < 200
+trigger1 = Root,StateType = C
+trigger1 = (Root,StateNo = [120, 159])
+var(8) = 2
+
+[State 200000, 空中(ガード)]
+Type = VarSet
+trigger1 = var(8) != 3
+trigger1 = Root,MoveType != H || Root,StateNo < 200
+trigger1 = Root,StateType = A
+trigger1 = (Root,StateNo = [120, 159])
+var(8) = 3
+
+[State 200000, 空中]
+Type = VarSet
+trigger1 = var(8) != 4
+trigger1 = Root,MoveType != H || Root,StateNo < 200
+trigger1 = Root,StateType = A
+var(8) = 4
+
+[State 200000, 投げ]
+Type = VarAdd
+triggerall = IsHelper
+trigger1 = PlayerIDExist(Root,Var(46))
+var(8) = (PlayerID(Root,Var(46)),HitDefAttr = SCA, AT) * 10
+
+[State 200000, 空中]
+Type = VarAdd
+triggerall = IsHelper
+triggerall = Root,Time
+trigger1 = Root,StateType = A
+var(8) = 100
+
+[State 200000, ガード可能]
+Type = VarAdd
+triggerall = IsHelper
+triggerall = Root,Time
+trigger1 = Root,MoveType != H ; !=
+trigger2 = Root,StateNo = 150 || Root,StateNo = 152 || Root,StateNo = 154 ;Root,StateNo = [150, 159]
+trigger2 = Root,PrevStateNo != [150, 155]
+var(8) = 1000
+
+[State 200000, 受け身]
+Type = VarAdd
+triggerall = IsHelper
+triggerall = Root,Time
+trigger1 = Root,MoveType != H ; !=
+trigger1 = Root,StateNo = 5210
+var(8) = 10000
+
+[State 200000, 攻撃]
+Type = VarAdd
+triggerall = IsHelper
+triggerall = Root,Time
+trigger1 = Root,MoveType = A && Root,StateNo >= 200 && !Root,ctrl
+var(8) = 100000
+
+[State 200000, 攻撃]
+Type = VarAdd
+triggerall = IsHelper
+triggerall = !((Var(8) / 1000000) % 10)
+trigger1 = Root,MoveType = H && Root,StateNo >= 200	; && Root,PrevStateNo >= 5000
+var(8) = 1000000
+
+[State 200000, ブーメランショット]
+Type = VarAdd
+triggerall = IsHelper
+triggerall = !((Var(8) / 10000000) % 10)
+trigger1 = Root,PrevStateNo = 1000 && !Root,ctrl
+trigger1 = Root,Time < 9
+var(8) = 10000000
+
+;----------------------------------------------------------[キャンセル可能か判断]
+[State 20000, Cancel Reset]
+type = VarSet
+trigger1 = Var(9)
+var(9) = 0
+
+[State 20000, Special move Cancel OK!]
+type = VarAdd
+triggerall = ((Var(9)) % 10) = 0
+triggerall = Root,MoveType = A && Root,Var(9)
+trigger1 = Root,StateNo = 200 && 0
+trigger2 = Root,StateNo = 205
+trigger3 = Root,StateNo = 210 && 0
+trigger4 = Root,StateNo = 215 && Root,AnimElemTime(4) < 0
+trigger5 = Root,StateNo = 230 && 0
+trigger6 = Root,StateNo = 235
+trigger7 = Root,StateNo = 240 && 0
+trigger8 = Root,StateNo = 245
+trigger9 = Root,StateNo = 250
+trigger10 = Root,StateNo = 400
+trigger11 = Root,StateNo = 410
+trigger12 = Root,StateNo = 415 && Root,AnimElemTime(4) < 0
+trigger13 = Root,StateNo = 430 && 0
+trigger14 = Root,StateNo = 305 && Root,MoveContact
+trigger15 = Root,StateNo = 310 && Root,MoveContact
+trigger16 = Root,StateNo = 320 && Root,MoveContact
+trigger17 = Root,StateNo = 325 && Root,MoveContact
+trigger18 = Root,StateNo = 345 && Root,MoveContact
+trigger19 = Root,StateNo = 1422 && Root,MoveContact
+var(9) = 1
+
+[State 20000, Anywhere Cancel OK!]
+type = VarAdd
+triggerall = ((Var(9) / 10) % 10) = 0
+triggerall = Root,MoveType = A
+triggerall = Root,var(6) && Root,fvar(0) > 0
+trigger1 = Root,StateNo = 200
+trigger2 = Root,StateNo = 205
+trigger3 = Root,StateNo = 210
+trigger4 = Root,StateNo = 215
+trigger5 = Root,StateNo = 230
+trigger6 = Root,StateNo = 235
+trigger7 = Root,StateNo = 240
+trigger8 = Root,StateNo = 245
+trigger9 = (Root,StateNo = 300 || Root,StateNo = 305) && Root,MoveContact
+trigger10 = Root,StateNo = 310 && Root,MoveContact
+trigger11 = (Root,StateNo = 320 || Root,StateNo = 325) && Root,MoveContact
+trigger12 = (Root,StateNo = 340 || Root,StateNo = 345) && Root,MoveContact
+trigger13 = Root,StateNo = 250
+trigger14 = Root,StateNo = 400
+trigger15 = Root,StateNo = 410
+trigger16 = Root,StateNo = 415 && (Root,AnimElemTime(3) > 0 || Root,AnimElemTime(5) <= 0)
+trigger17 = Root,StateNo = 430
+trigger18 = Root,StateNo = 440
+trigger19 = Root,StateNo = 930 && Root,MoveContact
+var(9) = 10
+
+[State 20000, Anywhere Cancel OK!]
+type = VarAdd
+triggerall = ((Var(9) / 100) % 10) = 0
+triggerall = Root,MoveType = A
+triggerall = Root,var(6) && Root,fvar(0) > 0
+triggerall = Root,StateType != A && Root,var(9) && Root,MoveContact
+trigger1 = Root,StateNo = 1005 || Root,StateNo = 1015
+trigger2 = Root,StateNo = 1100 || Root,StateNo = 1110
+var(9) = 100
+
+;----------------------------------------------------------[パートナーの位置]
+[State 20000, Partner Pos X Reset]
+type = VarSet
+trigger1 = fVar(8)
+trigger1 = NumPartner
+fvar(8) = 0
+
+;味方が前にいる状態を + とする
+[State 20000, Partner Pos X]
+type = VarSet
+trigger1 = NumPartner
+trigger1 = Partner,Alive
+fvar(8) = (Root,facing * (Partner,Pos X - Root,Pos X))
+
+;----------------------------------------------------------[遠い敵の位置]
+[State 20000, EnemyNear(1) Pos]
+type = VarSet
+trigger1 = fVar(9)
+trigger1 = NumEnemy >= 2
+fvar(9) = 0
+
+;敵が前にいる状態を + とする
+[State 20000, EnemyNear(1) Pos]
+type = VarSet
+trigger1 = NumEnemy >= 2
+trigger1 = EnemyNear(1),Alive
+fvar(9) = (Root,facing * (EnemyNear(1),Pos X - Root,Pos X))
+
+;----------------------------------------------------------[パートナーの状態]
+[State 20000, Partner Reset]
+type = VarSet
+trigger1 = 1
+var(10) = 0
+
+[State 20000, What is Partner doing ?]
+type = Null
+triggerall = NumPartner
+triggerall = Partner,Alive
+;攻撃中
+trigger1 = Partner,MoveType = A && Partner,StateNo >= 200
+trigger1 = Var(10) := 1 || 1
+;喰らい中
+trigger2 = Partner,MoveType = H && !Partner,ctrl
+trigger2 = Var(10) := 2 || 1
+;ピンチ中
+trigger3 = Partner,InGuardDist && (Partner,MoveType != A || Partner,StateNo < 200)
+trigger3 = Var(10) := 3 || 1
+;何もしていない
+trigger4 = Var(10) := 0 || 1
+
+[State 20000, Where is Partner ?]
+type = Null
+triggerall = NumPartner
+triggerall = Partner,Alive
+;地上
+trigger1 = Partner,StateType = S
+trigger1 = Var(10) := Var(10) + 10 || 1
+;しゃがみ
+trigger2 = Partner,StateType = C
+trigger2 = Var(10) := Var(10) + 20 || 1
+;空中
+trigger3 = Partner,StateType = A
+trigger3 = Var(10) := Var(10) + 30 || 1
+;ダウン
+trigger4 = Partner,StateType = L
+trigger4 = Var(10) := Var(10) + 40 || 1
+
+[State 20000, Is Partner Being Thrown?]
+type = Null
+triggerall = !((Var(10) / 100) % 10)
+trigger1 = NumPartner
+trigger1 = Partner,MoveType = H && Partner,StateNo != [5000, 5199]
+trigger1 = PlayerID(Root,Var(46)),MoveType = A && PlayerID(Root,Var(46)),StateNo >= 200
+trigger1 = Partner,StateNo - PlayerID(Root,Var(46)),StateNo = [-99, 99]
+trigger1 = Var(10) := Var(10) + 100 || 1
+
+;挟撃している
+[State 20000, I am attacking the enemy from both sides.]
+type = VarAdd
+triggerall = !((Var(10) / 10000) % 10)
+triggerall = NumPartner
+triggerall = Partner,Alive
+triggerall = Partner,MoveType != H
+triggerall = !Partner,InGuardDist
+triggerall = Partner,P2BodyDist X = [0, 120]
+trigger1 = facing != Partner,facing
+trigger1 = fVar(8) > 10
+trigger1 = Root,P2BodyDist X < Var(8)
+var(10) = 10000
+
+;挟撃されている
+[State 20000, I am caught between two fires.]
+type = VarAdd
+triggerall = !((Var(10) / 100000) % 10)
+triggerall = NumEnemy >= 2
+triggerall = EnemyNear(0),Alive && EnemyNear(1),Alive
+trigger1 = (Root,P2BodyDist X = [0, 80]) && (fVar(9) = [-80, 0])
+trigger2 = (fVar(9) = [0, 80]) && (Root,P2BodyDist X = [-80, 0])
+var(10) = 100000
+
+;----------------------------------------------------------[パートナーのヒット確認]
+[State 20000, Enemy Attack Reset]
+Type = VarSet
+triggerall = Var(11)
+triggerall = NumPartner
+trigger1 = Partner,StateNo < 200
+trigger2 = Partner,ctrl
+trigger3 = Partner,MoveType = H
+trigger4 = Partner,Time = 1
+var(11) = 0
+
+[State 20000, Partner,HitPauseTime]
+type = VarAdd
+triggerall = !((Var(11))%10)
+triggerall = NumPartner
+;ヒットポーズタイムが発生した
+trigger1 = Partner,MoveType = A && Partner,StateNo >= 200
+trigger1 = Partner,HitPauseTime >= 1
+var(11) = 1
+
+;----------------------------------------------------------[相手の無敵時間を計測]
+[State 20000, Invincible Count]
+Type = VarAdd
+trigger1 = Var(14) > 0
+var(14) = -1
+
+[State 20000, Invincible Count Start]
+Type = Null
+;起き上がり無敵
+trigger1 = PlayerID(Root,Var(46)),StateType = L
+;trigger1 = PlayerID(Root,Var(46)),StateNo = 5120
+trigger1 = Var(14) := 13 || 1
+;投げ無敵
+trigger2 = Var(14) < 5
+trigger2 = PlayerID(Root,Var(46)),StateNo = [150, 159]
+trigger2 = Var(14) := 5 || 1
+;受け身無敵
+trigger3 = PlayerID(Root,Var(46)),StateNo = 5210
+trigger3 = PlayerID(Root,Var(46)),Time = 1
+trigger3 = Var(14) := 15 || 1
+
+;----------------------------------------------------------[相手の残り時間の比率]
+[State 20000, Time Ratio AnimTime Reset]
+type = varset
+trigger1 = Var(15)
+var(15) = 0
+
+[State 20000, Time Ratio AnimTime]
+type = varset
+trigger1 = PlayerID(Root,Var(46)),StateNo >= 200
+trigger1 = PlayerID(Root,Var(46)),AnimTime <= -1
+var(15) = PlayerID(Root,Var(46)),Time * 100 / (PlayerID(Root,Var(46)),Time - PlayerID(Root,Var(46)),AnimTime)
+
+;----------------------------------------------------------[相手の攻撃を確認]
+[State 20000, Enemy Attack Reset]
+Type = VarSet
+triggerall = Var(16)
+trigger1 = PlayerID(Root,Var(46)),StateNo < 200
+trigger2 = PlayerID(Root,Var(46)),ctrl
+trigger3 = PlayerID(Root,Var(46)),MoveType = H
+var(16) = 0
+
+[State 20000, Enemy Attack Reset]
+Type = VarAdd
+triggerall = ((Var(16) / 100) % 10) = 1
+trigger1 = PlayerID(Root,Var(46)),Time = 1
+var(16) = -100
+
+[State 20000, Enemy Attack Reset]
+Type = VarAdd
+triggerall = ((Var(16) / 1000) % 10) = 1
+trigger1 = PlayerID(Root,Var(46)),Time = 1
+var(16) = -1000
+
+[State 20000, Enemy Attack Set]
+Type = null
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),StateType != L
+;リバサ
+trigger1 = !((Var(16)) % 10)
+trigger1 = Root,MoveType = A && Root,StateNo >= 200 ; && Root,AnimTime <= -1 && !PlayerID(Root,Var(46)),ctrl ;-8
+trigger1 = PlayerID(Root,Var(46)),InGuardDist || Root,StateNo = 1432 || ((Root,StateNo = [340, 345]) && Root,AnimElem ,>= 5) || ((Root,StateNo = 1005 || Root,StateNo = 1015) && Root,AnimElem ,>= 5) ; || (Root,HitDefAttr = SCA, AA, AT)
+trigger1 = PlayerID(Root,Var(46)),Time = 1	; && Root,Time != 1
+trigger1 = Var(16) := Var(16) + 1 || 1
+;昇竜(?)
+trigger2 = !((Var(16) / 10) % 10)
+trigger2 = PlayerID(Root,Var(46)),Vel Y < -1 ;-2
+trigger2 = PlayerID(Root,Var(46)),MoveType = A && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+trigger2 = (PlayerID(Root,Var(46)),HitDefAttr = SCA, NA, SA, HA, NT, ST, HT)
+trigger2 = Var(16) := Var(16) + 10 || 1
+;飛び道具を撃った
+trigger3 = !((Var(16) / 100) % 10)
+trigger3 = !(PlayerID(Root,Var(46)),HitDefAttr = SCA, AA, AT, AP)
+trigger3 = ((Helper(30000+Root,id),Var(59)) % 10) + PlayerID(Root,Var(46)),NumProj > fVar(19)
+trigger3 = Var(16) := Var(16) + 100 || 1
+;ヒットポーズタイムが発生した(=相手がキャンセル出来る？) MoveContactはあんまり信用できないのでこっちで
+trigger4 = !((Var(16) / 1000) % 10)
+trigger4 = PlayerID(Root,Var(46)),MoveType = A && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+trigger4 = PlayerID(Root,Var(46)),HitPauseTime >= 1
+trigger4 = Var(16) := Var(16) + 1000 || 1
+;相手がMoveType=Aになった
+trigger5 = !((Var(16) / 10000) % 10)
+trigger5 = PlayerID(Root,Var(46)),MoveType = A && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+trigger5 = PlayerID(Root,Var(46)),Time = 1
+trigger5 = Var(16) := Var(16) + 10000 || 1
+
+;----------------------------------------------------------[攻撃時間カウント]
+[State 20000, Attack Time Reset]
+type = varset
+triggerall = fVar(17)
+trigger1 = PlayerID(Root,Var(46)),StateNo < 200
+trigger2 = PlayerID(Root,Var(46)),MoveType = H
+trigger3 = PlayerID(Root,Var(46)),StateNo = [5200, 5299]
+trigger4 = PlayerID(Root,Var(46)),ctrl
+fvar(17) = 0
+
+[State 20000, Attack Time Count]
+type = varadd
+trigger1 = PlayerID(Root,Var(46)),StateNo >= 200
+trigger1 = PlayerID(Root,Var(46)),MoveType != H
+fvar(17) = 1.0
+
+;----------------------------------------------------------[起き上がりアニメ, 時間, X軸方向を計測01 (Anim = 5120)]
+[State 20000, Wake Up Anim Count]
+type = varadd
+triggerall = Var(17) = 0
+triggerall = ((Var(17)) % 100000) != PlayerID(Root,Var(46)),StateNo
+triggerall = ((Var(18)) % 100000) != PlayerID(Root,Var(46)),Anim
+triggerall = ((Var(19)) % 100000) != PlayerID(Root,Var(46)),Anim
+triggerall = ((Var(12)) % 100000) != PlayerID(Root,Var(46)),Anim
+trigger1 = PlayerID(Root,Var(46)),StateType = L && PlayerID(Root,Var(46)),MoveType != A && !PlayerID(Root,Var(46)),ctrl
+;trigger1 = PlayerID(Root,Var(46)),StateNo != [5100, 5110]
+;trigger1 = (PlayerID(Root,Var(46)),StateNo != [9911, 9912])
+;trigger1 = PlayerID(Root,Var(46)),StateNo != [5871, 5873]
+;trigger1 = PlayerID(Root,Var(46)),PrevStateNo = 5873
+trigger1 = PlayerID(Root,Var(46)),StateNo = 5120
+var(17) = PlayerID(Root,Var(46)),StateNo	; ifelse(Var(17) = 0, 100000, -100000)
+
+[State 20000, Wake Up Time Count]
+type = varadd
+triggerall = ((Var(17)) % 100000) && ((Var(17) / 10000000) % 10) = 0
+triggerall = ((Var(18)) % 100000) != PlayerID(Root,Var(46)),Anim
+triggerall = ((Var(19)) % 100000) != PlayerID(Root,Var(46)),Anim
+triggerall = ((Var(12)) % 100000) != PlayerID(Root,Var(46)),Anim
+trigger1 = PlayerID(Root,Var(46)),StateType = L && PlayerID(Root,Var(46)),MoveType != A && !PlayerID(Root,Var(46)),ctrl
+;trigger1 = PlayerID(Root,Var(46)),StateNo != [5100, 5110]
+;trigger1 = (PlayerID(Root,Var(46)),StateNo != [9911, 9912])
+;trigger1 = PlayerID(Root,Var(46)),StateNo != [5871, 5873]
+;trigger1 = PlayerID(Root,Var(46)),PrevStateNo = 5873
+trigger1 = PlayerID(Root,Var(46)),StateNo = 5120
+var(17) = 100000
+
+[State 20000, Wake Up Time Count End]
+type = varadd
+triggerall = ((Var(17)) % 100000) && ((Var(17) / 10000000) % 10) = 0
+trigger1 = PlayerID(Root,Var(46)),ctrl || PlayerID(Root,Var(46)),StateType != L || PlayerID(Root,Var(46)),StateNo < 200
+var(17) = 10000000
+
+[State 20000, Wake Up Vel X Count]
+type = varadd
+triggerall = ((Var(17)) % 100000) && ((Var(17) / 100000000) % 10) = 0
+trigger1 = PlayerID(Root,Var(46)),StateType = L && PlayerID(Root,Var(46)),MoveType != A && !PlayerID(Root,Var(46)),ctrl
+trigger1 = PlayerID(Root,Var(46)),Anim = ((Var(17)) % 100000)
+trigger1 = PlayerID(Root,Var(46)),Vel X != [-1, 1]
+var(17) = ifelse(PlayerID(Root,Var(46)),Vel X > 0, 100000000, 200000000)
+
+;----------------------------------------------------------[起き上がりアニメ, 時間, X軸方向を計測02]
+[State 20000, Wake Up Anim Count]
+type = varadd
+triggerall = var(18) = 0
+triggerall = ((Var(17)) % 100000) != PlayerID(Root,Var(46)),StateNo
+triggerall = ((Var(18)) % 100000) != PlayerID(Root,Var(46)),Anim
+triggerall = ((Var(19)) % 100000) != PlayerID(Root,Var(46)),Anim
+triggerall = ((Var(12)) % 100000) != PlayerID(Root,Var(46)),Anim
+trigger1 = PlayerID(Root,Var(46)),StateType = L && PlayerID(Root,Var(46)),MoveType != A && !PlayerID(Root,Var(46)),ctrl
+trigger1 = PlayerID(Root,Var(46)),StateNo != [5100, 5110]
+trigger1 = (PlayerID(Root,Var(46)),StateNo != [9911, 9912])
+trigger1 = PlayerID(Root,Var(46)),StateNo != [5871, 5873]
+var(18) = PlayerID(Root,Var(46)),Anim	; ifelse(var(18) = 0, 100000, -100000)
+
+[State 20000, Wake Up Time Count]
+type = varadd
+triggerall = ((var(18)) % 100000) && ((var(18) / 10000000) % 10) = 0
+;triggerall = ((Var(17)) % 100000) != PlayerID(Root,Var(46)),StateNo
+;triggerall = ((Var(19)) % 100000) != PlayerID(Root,Var(46)),Anim
+;triggerall = ((Var(12)) % 100000) != PlayerID(Root,Var(46)),Anim
+trigger1 = PlayerID(Root,Var(46)),StateType = L && PlayerID(Root,Var(46)),MoveType != A && !PlayerID(Root,Var(46)),ctrl
+trigger1 = PlayerID(Root,Var(46)),StateNo != [5100, 5110]
+trigger1 = (PlayerID(Root,Var(46)),StateNo != [9911, 9912])
+trigger1 = PlayerID(Root,Var(46)),StateNo != [5871, 5873]
+var(18) = 100000
+
+[State 20000, Wake Up Time Count End]
+type = varadd
+triggerall = ((var(18)) % 100000) && ((var(18) / 10000000) % 10) = 0
+trigger1 = PlayerID(Root,Var(46)),ctrl || PlayerID(Root,Var(46)),StateType != L || PlayerID(Root,Var(46)),StateNo < 200
+var(18) = 10000000
+
+[State 20000, Wake Up Vel X Count]
+type = varadd
+triggerall = ((var(18)) % 100000) && ((var(18) / 100000000) % 10) = 0
+trigger1 = PlayerID(Root,Var(46)),StateType = L && PlayerID(Root,Var(46)),MoveType != A && !PlayerID(Root,Var(46)),ctrl
+trigger1 = PlayerID(Root,Var(46)),Anim = ((var(18)) % 100000)
+trigger1 = PlayerID(Root,Var(46)),Vel X != [-1, 1]
+var(18) = ifelse(PlayerID(Root,Var(46)),Vel X > 0, 100000000, 200000000)
+
+;----------------------------------------------------------[起き上がりアニメ, 時間, X軸方向を計測03]
+[State 20000, Wake Up Anim Count]
+type = varadd
+triggerall = var(19) = 0
+triggerall = ((Var(17)) % 100000) != PlayerID(Root,Var(46)),StateNo
+triggerall = ((Var(18)) % 100000) != PlayerID(Root,Var(46)),Anim
+triggerall = ((Var(19)) % 100000) != PlayerID(Root,Var(46)),Anim
+triggerall = ((Var(12)) % 100000) != PlayerID(Root,Var(46)),Anim
+trigger1 = PlayerID(Root,Var(46)),StateType = L && PlayerID(Root,Var(46)),MoveType != A && !PlayerID(Root,Var(46)),ctrl
+trigger1 = PlayerID(Root,Var(46)),StateNo != [5100, 5110]
+trigger1 = (PlayerID(Root,Var(46)),StateNo != [9911, 9912])
+trigger1 = PlayerID(Root,Var(46)),StateNo != [5871, 5873]
+var(19) = PlayerID(Root,Var(46)),Anim	; ifelse(var(19) = 0, 100000, -100000)
+
+[State 20000, Wake Up Time Count]
+type = varadd
+triggerall = ((var(19)) % 100000) && ((var(19) / 10000000) % 10) = 0
+;triggerall = ((Var(17)) % 100000) != PlayerID(Root,Var(46)),StateNo
+;triggerall = ((Var(18)) % 100000) != PlayerID(Root,Var(46)),Anim
+;triggerall = ((Var(12)) % 100000) != PlayerID(Root,Var(46)),Anim
+trigger1 = PlayerID(Root,Var(46)),StateType = L && PlayerID(Root,Var(46)),MoveType != A && !PlayerID(Root,Var(46)),ctrl
+trigger1 = PlayerID(Root,Var(46)),StateNo != [5100, 5110]
+trigger1 = (PlayerID(Root,Var(46)),StateNo != [9911, 9912])
+trigger1 = PlayerID(Root,Var(46)),StateNo != [5871, 5873]
+var(19) = 100000
+
+[State 20000, Wake Up Time Count End]
+type = varadd
+triggerall = ((var(19)) % 100000) && ((var(19) / 10000000) % 10) = 0
+trigger1 = PlayerID(Root,Var(46)),ctrl || PlayerID(Root,Var(46)),StateType != L || PlayerID(Root,Var(46)),StateNo < 200
+var(19) = 10000000
+
+[State 20000, Wake Up Vel X Count]
+type = varadd
+triggerall = ((var(19)) % 100000) && ((var(19) / 100000000) % 10) = 0
+trigger1 = PlayerID(Root,Var(46)),StateType = L && PlayerID(Root,Var(46)),MoveType != A && !PlayerID(Root,Var(46)),ctrl
+trigger1 = PlayerID(Root,Var(46)),Anim = ((var(19)) % 100000)
+trigger1 = PlayerID(Root,Var(46)),Vel X != [-1, 1]
+var(19) = ifelse(PlayerID(Root,Var(46)),Vel X > 0, 100000000, 200000000)
+
+;----------------------------------------------------------[起き上がりアニメ, 時間, X軸方向を計測04]
+[State 20000, Wake Up Anim Count]
+type = varadd
+triggerall = var(12) = 0
+triggerall = ((Var(17)) % 100000) != PlayerID(Root,Var(46)),StateNo
+triggerall = ((Var(18)) % 100000) != PlayerID(Root,Var(46)),Anim
+triggerall = ((Var(19)) % 100000) != PlayerID(Root,Var(46)),Anim
+triggerall = ((Var(12)) % 100000) != PlayerID(Root,Var(46)),Anim
+trigger1 = PlayerID(Root,Var(46)),StateType = L && PlayerID(Root,Var(46)),MoveType != A && !PlayerID(Root,Var(46)),ctrl
+trigger1 = PlayerID(Root,Var(46)),StateNo != [5100, 5110]
+trigger1 = (PlayerID(Root,Var(46)),StateNo != [9911, 9912])
+trigger1 = PlayerID(Root,Var(46)),StateNo != [5871, 5873]
+var(12) = PlayerID(Root,Var(46)),Anim	; ifelse(var(12) = 0, 100000, -100000)
+
+[State 20000, Wake Up Time Count]
+type = varadd
+triggerall = ((var(12)) % 100000) && ((var(12) / 10000000) % 10) = 0
+;triggerall = ((Var(17)) % 100000) != PlayerID(Root,Var(46)),StateNo
+;triggerall = ((Var(18)) % 100000) != PlayerID(Root,Var(46)),Anim
+;triggerall = ((Var(19)) % 100000) != PlayerID(Root,Var(46)),Anim
+trigger1 = PlayerID(Root,Var(46)),StateType = L && PlayerID(Root,Var(46)),MoveType != A && !PlayerID(Root,Var(46)),ctrl
+trigger1 = PlayerID(Root,Var(46)),StateNo != [5100, 5110]
+trigger1 = (PlayerID(Root,Var(46)),StateNo != [9911, 9912])
+trigger1 = PlayerID(Root,Var(46)),StateNo != [5871, 5873]
+var(12) = 100000
+
+[State 20000, Wake Up Time Count End]
+type = varadd
+triggerall = ((var(12)) % 100000) && ((var(12) / 10000000) % 10) = 0
+trigger1 = PlayerID(Root,Var(46)),ctrl || PlayerID(Root,Var(46)),StateType != L || PlayerID(Root,Var(46)),StateNo < 200
+var(12) = 10000000
+
+[State 20000, Wake Up Vel X Count]
+type = varadd
+triggerall = ((var(12)) % 100000) && ((var(12) / 100000000) % 10) = 0
+trigger1 = PlayerID(Root,Var(46)),StateType = L && PlayerID(Root,Var(46)),MoveType != A && !PlayerID(Root,Var(46)),ctrl
+trigger1 = PlayerID(Root,Var(46)),Anim = ((var(12)) % 100000)
+trigger1 = PlayerID(Root,Var(46)),Vel X != [-1, 1]
+var(12) = ifelse(PlayerID(Root,Var(46)),Vel X > 0, 100000000, 200000000)
+
+;----------------------------------------------------------[起き上がり時間を計測(旧)]
+[State 20000, Wake Up Time Reset]
+type = null	;varset
+triggerall = Var(18)
+trigger1 = 0
+var(18) = 0
+
+[State 20000, Wake Up Time Count Start]
+type = null	;varadd
+trigger1 = Var(18) / 100000 = 0 && Var(18) % 100000 = 0
+trigger1 = PlayerID(Root,Var(46)),StateType = L
+trigger1 = PlayerID(Root,Var(46)),MoveType != H
+trigger1 = PlayerID(Root,Var(46)),StateNo = 5120
+trigger2 = Var(18) / 100000 && Var(18) % 100000
+trigger2 = PlayerID(Root,Var(46)),ctrl || PlayerID(Root,Var(46)),StateType != L || PlayerID(Root,Var(46)),StateNo < 200
+var(18) = ifelse(Var(18) = 0, 100000, -100000)
+
+[State 20000, Wake Up Time Count]
+type = null	;varadd
+triggerall = Var(18) / 100000
+triggerall = PlayerID(Root,Var(46)),StateType = L
+triggerall = PlayerID(Root,Var(46)),MoveType != H
+triggerall = PlayerID(Root,Var(46)),StateNo != 5110 && (PlayerID(Root,Var(46)),StateNo != [9911, 9912])
+trigger1 = PlayerID(Root,Var(46)),ctrl = 0
+var(18) = 1
+
+;----------------------------------------------------------[シールド？されたのを学習]
+[State 20000, MoveReversed Reset]
+type = VarAdd
+triggerall = ((Var(24)) % 10)
+trigger1 = Root,StateNo < 200
+trigger2 = Root,Time = 1
+trigger3 = Root,MoveType = H
+var(24) = -1
+
+[State 20000, MoveReversed VarAdd]
+type = VarAdd
+triggerall = ((Var(24) / 10) % 10) < 9
+trigger1 = ((Var(24)) % 10) = 0
+trigger1 = Root,MoveReversed = 1
+var(24) = 10
+
+[State 20000, MoveReversed Count]
+type = VarAdd
+trigger1 = ((Var(24)) % 10) = 0
+trigger1 = Root,MoveReversed = 1
+var(24) = 1
+
+;----------------------------------------------------------[自分の硬直時間]
+[State 20000, GuardTime Count]
+Type = VarAdd
+trigger1 = fVar(12)
+fvar(12) = -1
+
+[State 20000, GuardTime Set]
+Type = VarSet
+trigger1 = Parent,MoveType = H && Parent,StateNo < 200
+trigger1 = !(Parent,hitshakeover)
+trigger1 = Parent,StateNo = [150, 159]
+trigger1 = Parent,time = 1 || fVar(12) = 0
+fvar(12) = ifelse(Parent,gethitvar(ctrltime) < Parent,gethitvar(hittime), Parent,gethitvar(ctrltime), Parent,gethitvar(hittime)) + Parent,gethitvar(hitshaketime) + 1
+
+[State 20000, GuardTime Reset]
+Type = VarSet
+trigger1 = fVar(12)
+trigger1 = Parent,StateNo != [150, 159]
+fvar(12) = 0
+
+;----------------------------------------------------------[学習した技を相手が使用]
+[State 20000, Learning Moves Reset]
+type = VarSet
+triggerall = IsHelper
+trigger1 = Var(13)
+var(13) = 0
+
+[State 20000, Learning Moves N5B]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = !((Var(13)) % 10)
+trigger1 = PlayerID(Root,Var(46)),Anim = Var(30) % 100000
+trigger1 = Var(35) % 100000 - PlayerID(Root,Var(46)),Time > 4
+trigger2 = PlayerID(Root,Var(46)),Anim = Var(30) / 100000
+trigger2 = Var(35) / 100000 - PlayerID(Root,Var(46)),Time > 4
+trigger3 = PlayerID(Root,Var(46)),Anim = Var(31) % 100000
+trigger3 = Var(36) % 100000 - PlayerID(Root,Var(46)),Time > 4
+trigger4 = PlayerID(Root,Var(46)),Anim = Var(31) / 100000
+trigger4 = Var(36) / 100000 - PlayerID(Root,Var(46)),Time > 4
+trigger5 = PlayerID(Root,Var(46)),Anim = Var(32) % 100000
+trigger5 = Var(37) % 100000 - PlayerID(Root,Var(46)),Time > 4
+trigger6 = PlayerID(Root,Var(46)),Anim = Var(32) / 100000
+trigger6 = Var(37) / 100000 - PlayerID(Root,Var(46)),Time > 4
+trigger7 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger7 = (Var(44) % 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger8 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger8 = (Var(44) / 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger9 = PlayerID(Root,Var(46)),Anim = Var(41) % 100000
+trigger9 = (Var(45) % 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger10 = PlayerID(Root,Var(46)),Anim = Var(41) / 100000
+trigger10 = (Var(45) / 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger11 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger11 = (Var(46) % 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger12 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger12 = (Var(46) / 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger13 = PlayerID(Root,Var(46)),Anim = Var(43) % 100000
+trigger13 = (Var(47) % 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger14 = PlayerID(Root,Var(46)),Anim = Var(43) / 100000
+trigger14 = (Var(47) / 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger15 = PlayerID(Root,Var(46)),Anim = Root,Var(30) % 100000
+trigger15 = (Root,Var(35) % 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger16 = PlayerID(Root,Var(46)),Anim = Root,Var(30) / 100000
+trigger16 = (Root,Var(35) / 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger17 = PlayerID(Root,Var(46)),Anim = Root,Var(31) % 100000
+trigger17 = (Root,Var(36) % 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger18 = PlayerID(Root,Var(46)),Anim = Root,Var(31) / 100000
+trigger18 = (Root,Var(36) / 100000 - PlayerID(Root,Var(46)),Time) > 4
+;AnimTime > 0 の技
+trigger19 = PlayerID(Root,Var(46)),Anim = Var(32) % 100000
+trigger19 = (Var(37) % 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger20 = PlayerID(Root,Var(46)),Anim = Var(32) / 100000
+trigger20 = (Var(37) / 100000 - PlayerID(Root,Var(46)),Time) > 4
+;リーチが長い技
+trigger21 = PlayerID(Root,Var(46)),Anim = Var(33) % 100000
+trigger21 = (Var(38) % 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger22 = PlayerID(Root,Var(46)),Anim = Var(33) / 100000
+trigger22 = (Var(38) / 100000 - PlayerID(Root,Var(46)),Time) > 4
+;発生が遅い技
+trigger23 = PlayerID(Root,Var(46)),Anim = Var(34) % 100000
+trigger23 = (Var(39) % 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger24 = PlayerID(Root,Var(46)),Anim = Var(34) / 100000
+trigger24 = (Var(39) / 100000 - PlayerID(Root,Var(46)),Time) > 4
+;Projectile系飛び道具
+trigger25 = PlayerID(Root,Var(46)),Anim = Var(56) % 100000
+trigger25 = (Var(56) % 100000 - PlayerID(Root,Var(46)),Time) > 4
+trigger26 = PlayerID(Root,Var(46)),Anim = Var(56) / 100000
+trigger26 = (Var(57) / 100000 - PlayerID(Root,Var(46)),Time) > 4
+;フェイント
+;trigger25 = PlayerID(Root,Var(46)),Anim = Root,Var(33) % 100000
+;trigger25 = PlayerID(Root,Var(46)),Anim = Root,Var(33) / 100000
+var(13) = 1
+
+[State 20000, Learning Moves 2A]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = !((Var(13) / 10) % 10)
+trigger1 = PlayerID(Root,Var(46)),Anim = Var(30) % 100000
+trigger1 = (Var(35) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger2 = PlayerID(Root,Var(46)),Anim = Var(30) / 100000
+trigger2 = (Var(35) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger3 = PlayerID(Root,Var(46)),Anim = Var(31) % 100000
+trigger3 = (Var(36) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger4 = PlayerID(Root,Var(46)),Anim = Var(31) / 100000
+trigger4 = (Var(36) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger5 = PlayerID(Root,Var(46)),Anim = Var(32) % 100000
+trigger5 = (Var(37) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger6 = PlayerID(Root,Var(46)),Anim = Var(32) / 100000
+trigger6 = (Var(37) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger7 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger7 = (Var(44) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger8 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger8 = (Var(44) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger9 = PlayerID(Root,Var(46)),Anim = Var(41) % 100000
+trigger9 = (Var(45) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger10 = PlayerID(Root,Var(46)),Anim = Var(41) / 100000
+trigger10 = (Var(45) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger11 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger11 = (Var(46) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger12 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger12 = (Var(46) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger13 = PlayerID(Root,Var(46)),Anim = Var(43) % 100000
+trigger13 = (Var(47) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger14 = PlayerID(Root,Var(46)),Anim = Var(43) / 100000
+trigger14 = (Var(47) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger15 = PlayerID(Root,Var(46)),Anim = Root,Var(30) % 100000
+trigger15 = (Root,Var(35) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger16 = PlayerID(Root,Var(46)),Anim = Root,Var(30) / 100000
+trigger16 = (Root,Var(35) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger17 = PlayerID(Root,Var(46)),Anim = Root,Var(31) % 100000
+trigger17 = (Root,Var(36) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger18 = PlayerID(Root,Var(46)),Anim = Root,Var(31) / 100000
+trigger18 = (Root,Var(36) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger19 = PlayerID(Root,Var(46)),Anim = Root,Var(33) % 100000
+trigger20 = PlayerID(Root,Var(46)),Anim = Root,Var(33) / 100000
+;AnimTime > 0 の技
+trigger21 = PlayerID(Root,Var(46)),Anim = Var(32) % 100000
+trigger21 = (Var(37) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger22 = PlayerID(Root,Var(46)),Anim = Var(32) / 100000
+trigger22 = (Var(37) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+;リーチが長い技
+trigger23 = PlayerID(Root,Var(46)),Anim = Var(33) % 100000
+trigger23 = (Var(38) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger24 = PlayerID(Root,Var(46)),Anim = Var(33) / 100000
+trigger24 = (Var(38) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+;発生が遅い技
+trigger25 = PlayerID(Root,Var(46)),Anim = Var(34) % 100000
+trigger25 = (Var(39) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger26 = PlayerID(Root,Var(46)),Anim = Var(34) / 100000
+trigger26 = (Var(39) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+;Projectile系飛び道具
+trigger27 = PlayerID(Root,Var(46)),Anim = Var(56) % 100000
+trigger27 = (Var(56) % 100000 - PlayerID(Root,Var(46)),Time) > 5
+trigger28 = PlayerID(Root,Var(46)),Anim = Var(56) / 100000
+trigger28 = (Var(57) / 100000 - PlayerID(Root,Var(46)),Time) > 5
+var(13) = 10
+
+[State 20000, Learning Moves Super Jump]
+type = VarSet
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),StateNo < 100000
+triggerall = !((Var(13)) / 100)
+;波動
+trigger1 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger1 = ((Var(41) % 100000) / 1000 = 1)	;[0, 1]
+trigger1 = (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(41) % 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger1 = (((Var(41)) % 100) - PlayerID(Root,Var(46)),Time + ((P2BodyDist X - 80) / 8)) = [-18, 30]
+trigger2 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger2 = ((Var(41) / 100000) / 1000 = 1)	;[0, 1]
+trigger2 = (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(41) / 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger2 = (((Var(41) / 100000) % 100) - PlayerID(Root,Var(46)),Time + ((P2BodyDist X - 80) / 5)) = [-18, 30]
+trigger3 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger3 = ((Var(43) % 100000) / 1000 = 1)	;[0, 1]
+trigger3 = (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(43) % 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger3 = (((Var(43)) % 100) - PlayerID(Root,Var(46)),Time + ((P2BodyDist X - 80) / 8)) = [-18, 30]
+trigger4 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger4 = ((Var(43) / 100000) / 1000 = 1)	;[0, 1]
+trigger4 = (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(43) / 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger4 = (((Var(43) / 100000) % 100) - PlayerID(Root,Var(46)),Time + ((P2BodyDist X - 80) / 8)) = [-18, 30]
+trigger5 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger5 = ((Var(45) % 100000) / 1000 = 1)	;[0, 1]
+trigger5 = (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(43) % 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger5 = (((Var(45)) % 100) - PlayerID(Root,Var(46)),Time + ((P2BodyDist X - 80) / 8)) = [-18, 30]
+trigger6 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger6 = ((Var(45) / 100000) / 1000 = 1)	;[0, 1]
+trigger6 = (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(43) / 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger6 = (((Var(41) / 100000) % 100) - PlayerID(Root,Var(46)),Time + ((P2BodyDist X - 80) / 8)) = [-18, 30]
+;ビーム
+trigger7 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger7 = ((Var(41) % 100000) / 1000 = 9)	;[0, 1]
+trigger7 = (((Var(41) % 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 8
+trigger8 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger8 = ((Var(41) / 100000) / 1000 = 9)	;[0, 1]
+trigger8 = (((Var(41) / 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 8
+trigger9 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger9 = ((Var(43) % 100000) / 1000 = 9)	;[0, 1]
+trigger9 = (((Var(43) % 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 8
+trigger10 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger10 = ((Var(43) / 100000) / 1000 = 9)	;[0, 1]
+trigger10 = (((Var(43) / 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 8
+trigger11 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger11 = ((Var(45) % 100000) / 1000 = 9)	;[0, 1]
+trigger11 = (((Var(45) % 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 8
+trigger12 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger12 = ((Var(45) / 100000) / 1000 = 9)	;[0, 1]
+trigger12 = (((Var(45) / 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 8
+;落ちもの
+trigger13 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger13 = ((Var(41) % 100000) / 1000 = 4)	;[0, 1]
+trigger13 = (((Var(41) % 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 8
+trigger14 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger14 = ((Var(41) / 100000) / 1000 = 4)	;[0, 1]
+trigger14 = (((Var(41) / 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 8
+trigger15 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger15 = ((Var(43) % 100000) / 1000 = 4)	;[0, 1]
+trigger15 = (((Var(43) % 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 8
+trigger16 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger16 = ((Var(43) / 100000) / 1000 = 4)	;[0, 1]
+trigger16 = (((Var(43) / 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 8
+trigger17 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger17 = ((Var(45) % 100000) / 1000 = 4)	;[0, 1]
+trigger17 = (((Var(45) % 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 8
+trigger18 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger18 = ((Var(45) / 100000) / 1000 = 4)	;[0, 1]
+trigger18 = (((Var(45) / 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 8
+;中段, 下段(一度見えなかった)
+trigger19 = PlayerID(Root,Var(46)),Anim = Root,Var(30) % 100000
+trigger19 = (Root,Var(35) % 100000 - PlayerID(Root,Var(46)),Time) > 12
+trigger20 = PlayerID(Root,Var(46)),Anim = Root,Var(30) / 100000
+trigger20 = (Root,Var(35) / 100000 - PlayerID(Root,Var(46)),Time) > 12
+trigger21 = PlayerID(Root,Var(46)),Anim = Root,Var(31) % 100000
+trigger21 = (Root,Var(36) % 100000 - PlayerID(Root,Var(46)),Time) > 12
+trigger22 = PlayerID(Root,Var(46)),Anim = Root,Var(31) / 100000
+trigger22 = (Root,Var(36) / 100000 - PlayerID(Root,Var(46)),Time) > 12
+;遅い技
+trigger23 = PlayerID(Root,Var(46)),Anim = Var(34) % 100000
+trigger23 = (Var(39) % 100000 - PlayerID(Root,Var(46)),Time) > 12
+trigger24 = PlayerID(Root,Var(46)),Anim = Var(34) / 100000
+trigger24 = (Var(39) / 100000 - PlayerID(Root,Var(46)),Time) > 12
+;Projectile系飛び道具
+trigger25 = PlayerID(Root,Var(46)),Anim = Var(56) % 100000
+trigger25 = (Var(56) % 100000 - PlayerID(Root,Var(46)),Time) > 12
+trigger26 = PlayerID(Root,Var(46)),Anim = Var(56) / 100000
+trigger26 = (Var(57) / 100000 - PlayerID(Root,Var(46)),Time) > 12
+var(13) = 100
+
+[State 20000, Learning Moves N5D]
+type = VarSet
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),StateNo < 100000
+triggerall = !((Var(13)) / 1000)
+;波動
+trigger1 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger1 = ((Var(41) % 100000) / 1000 = 1)	;[0, 1]
+trigger1 = (((Var(41)) % 100) - PlayerID(Root,Var(46)),Time) > 10
+trigger2 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger2 = ((Var(41) / 100000) / 1000 = 1)	;[0, 1]
+trigger2 = (((Var(41) / 100000) % 100) - PlayerID(Root,Var(46)),Time) > 10
+trigger3 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger3 = ((Var(43) % 100000) / 1000 = 1)	;[0, 1]
+trigger3 = (((Var(43)) % 100) - PlayerID(Root,Var(46)),Time) > 10
+trigger4 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger4 = ((Var(43) / 100000) / 1000 = 1)	;[0, 1]
+trigger4 = (((Var(43) / 100000) % 100) - PlayerID(Root,Var(46)),Time) > 10
+trigger5 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger5 = ((Var(45) % 100000) / 1000 = 1)	;[0, 1]
+trigger5 = (((Var(45)) % 100) - PlayerID(Root,Var(46)),Time) > 10
+trigger6 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger6 = ((Var(45) / 100000) / 1000 = 1)	;[0, 1]
+trigger6 = (((Var(41) / 100000) % 100) - PlayerID(Root,Var(46)),Time) > 10
+;ビーム
+trigger7 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger7 = ((Var(41) % 100000) / 1000 = 9)	;[0, 1]
+trigger7 = (((Var(41) % 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 10
+trigger8 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger8 = ((Var(41) / 100000) / 1000 = 9)	;[0, 1]
+trigger8 = (((Var(41) / 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 10
+trigger9 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger9 = ((Var(43) % 100000) / 1000 = 9)	;[0, 1]
+trigger9 = (((Var(43) % 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 10
+trigger10 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger10 = ((Var(43) / 100000) / 1000 = 9)	;[0, 1]
+trigger10 = (((Var(43) / 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 10
+trigger11 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger11 = ((Var(45) % 100000) / 1000 = 9)	;[0, 1]
+trigger11 = (((Var(45) % 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 10
+trigger12 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger12 = ((Var(45) / 100000) / 1000 = 9)	;[0, 1]
+trigger12 = (((Var(45) / 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 10
+;落ちもの
+trigger13 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger13 = ((Var(41) % 100000) / 1000 = 4)	;[0, 1]
+trigger13 = (((Var(41) % 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 10
+trigger14 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger14 = ((Var(41) / 100000) / 1000 = 4)	;[0, 1]
+trigger14 = (((Var(41) / 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 10
+trigger15 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger15 = ((Var(43) % 100000) / 1000 = 4)	;[0, 1]
+trigger15 = (((Var(43) % 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 10
+trigger16 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger16 = ((Var(43) / 100000) / 1000 = 4)	;[0, 1]
+trigger16 = (((Var(43) / 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 10
+trigger17 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger17 = ((Var(45) % 100000) / 1000 = 4)	;[0, 1]
+trigger17 = (((Var(45) % 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 10
+trigger18 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger18 = ((Var(45) / 100000) / 1000 = 4)	;[0, 1]
+trigger18 = (((Var(45) / 100000) % 1000) - PlayerID(Root,Var(46)),Time) > 10
+;中段, 下段(一度見えなかった)
+trigger19 = PlayerID(Root,Var(46)),Anim = Root,Var(30) % 100000
+trigger19 = (Root,Var(35) % 100000 - PlayerID(Root,Var(46)),Time) > 10
+trigger20 = PlayerID(Root,Var(46)),Anim = Root,Var(30) / 100000
+trigger20 = (Root,Var(35) / 100000 - PlayerID(Root,Var(46)),Time) > 10
+trigger21 = PlayerID(Root,Var(46)),Anim = Root,Var(31) % 100000
+trigger21 = (Root,Var(36) % 100000 - PlayerID(Root,Var(46)),Time) > 10
+trigger22 = PlayerID(Root,Var(46)),Anim = Root,Var(31) / 100000
+trigger22 = (Root,Var(36) / 100000 - PlayerID(Root,Var(46)),Time) > 10
+;遅い技
+trigger23 = PlayerID(Root,Var(46)),Anim = Var(34) % 100000
+trigger23 = (Var(39) % 100000 - PlayerID(Root,Var(46)),Time) > 10
+trigger24 = PlayerID(Root,Var(46)),Anim = Var(34) / 100000
+trigger24 = (Var(39) / 100000 - PlayerID(Root,Var(46)),Time) > 10
+var(13) = 1000
+
+[State 20000, Learning Moves NormalJump]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),StateNo < 100000
+triggerall = !((Var(13) / 10000) % 10)
+trigger1 = PlayerID(Root,Var(46)),Anim = Var(41) % 100000
+trigger1 = (Var(45) % 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 80 * (Root,P2BodyDist X - 60) / 3.5)) = [15, 20]
+trigger2 = PlayerID(Root,Var(46)),Anim = Var(41) / 100000
+trigger2 = (Var(45) / 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 80 * (Root,P2BodyDist X - 60) / 3.5)) = [15, 20]
+trigger3 = PlayerID(Root,Var(46)),Anim = Var(43) % 100000
+trigger3 = (Var(47) % 100000 - PlayerID(Root,Var(46)),Time) = [15, 20]
+trigger4 = PlayerID(Root,Var(46)),Anim = Var(43) / 100000
+trigger4 = (Var(47) / 100000 - PlayerID(Root,Var(46)),Time) = [15, 20]
+trigger5 = PlayerID(Root,Var(46)),Anim = Var(32) % 100000
+trigger5 = (Var(37) % 100000 - PlayerID(Root,Var(46)),Time) = [15, 20]
+trigger6 = PlayerID(Root,Var(46)),Anim = Var(32) / 100000
+trigger6 = (Var(37) / 100000 - PlayerID(Root,Var(46)),Time) = [15, 20]
+trigger7 = PlayerID(Root,Var(46)),Anim = Var(33) % 100000
+trigger7 = (Var(38) % 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 80 * (Root,P2BodyDist X - 60) / 3.5)) = [15, 20]
+trigger8 = PlayerID(Root,Var(46)),Anim = Var(33) / 100000
+trigger8 = (Var(38) / 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 80 * (Root,P2BodyDist X - 60) / 3.5)) = [15, 20]
+trigger9 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger9 = (Var(44) % 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 80 * (Root,P2BodyDist X - 60) / 3.5)) = [15, 20]
+trigger10 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger10 = (Var(44) / 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 80 * (Root,P2BodyDist X - 60) / 3.5)) = [15, 20]
+trigger11 = PlayerID(Root,Var(46)),Anim = Root,Var(35) % 100000
+trigger11 = (Root,Var(36) % 100000 - PlayerID(Root,Var(46)),Time) = [30, 35]
+trigger12 = PlayerID(Root,Var(46)),Anim = Root,Var(35) / 100000
+trigger12 = (Root,Var(36) / 100000 - PlayerID(Root,Var(46)),Time) = [30, 35]
+trigger13 = PlayerID(Root,Var(46)),Anim = Var(30) % 100000
+trigger13 = (Var(35) % 100000 - PlayerID(Root,Var(46)),Time) > 12
+trigger14 = PlayerID(Root,Var(46)),Anim = Var(30) / 100000
+trigger14 = (Var(35) / 100000 - PlayerID(Root,Var(46)),Time) > 12
+var(13) = 10000
+
+[State 20000, Learning Moves for Throw]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),StateNo < 100000
+triggerall = !((Var(13) / 100000) % 10)
+trigger1 = PlayerID(Root,Var(46)),StateNo = Root,Var(32) % 100000
+trigger1 = (Root,Var(37) % 100000 - PlayerID(Root,Var(46)),Time) = [-5, 10]
+trigger2 = PlayerID(Root,Var(46)),StateNo = Root,Var(32) / 100000
+trigger2 = (Root,Var(37) / 100000 - PlayerID(Root,Var(46)),Time) = [-5, 10]
+var(13) = 100000
+
+[State 20000, Learning Moves for BackStep]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),StateNo < 100000
+triggerall = !((Var(13) / 1000000) % 10)
+;波動
+trigger1 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger1 = ((Var(41) % 100000) / 1000 = 1)	;[0, 1]
+trigger1 = (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(41) % 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger2 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger2 = ((Var(41) / 100000) / 1000 = 1)	;[0, 1]
+trigger2 = (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(41) / 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger3 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger3 = ((Var(43) % 100000) / 1000 = 1)	;[0, 1]
+trigger3 = (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(43) % 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger4 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger4 = ((Var(43) / 100000) / 1000 = 1)	;[0, 1]
+trigger4 = (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(43) / 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger5 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger5 = ((Var(45) % 100000) / 1000 = 1)	;[0, 1]
+trigger5 = (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(43) % 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger6 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger6 = ((Var(45) / 100000) / 1000 = 1)	;[0, 1]
+trigger6 = (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(43) / 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+;ビーム
+trigger7 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger7 = ((Var(41) % 100000) / 1000 = 9)	;[0, 1]
+trigger8 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger8 = ((Var(41) / 100000) / 1000 = 9)	;[0, 1]
+trigger9 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger9 = ((Var(43) % 100000) / 1000 = 9)	;[0, 1]
+trigger10 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger10 = ((Var(43) / 100000) / 1000 = 9)	;[0, 1]
+trigger11 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger11 = ((Var(45) % 100000) / 1000 = 9)	;[0, 1]
+trigger12 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger12 = ((Var(45) / 100000) / 1000 = 9)	;[0, 1]
+;落ちもの
+trigger13 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger13 = ((Var(41) % 100000) / 1000 = 4)	;[0, 1]
+trigger14 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger14 = ((Var(41) / 100000) / 1000 = 4)	;[0, 1]
+trigger15 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger15 = ((Var(43) % 100000) / 1000 = 4)	;[0, 1]
+trigger16 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger16 = ((Var(43) / 100000) / 1000 = 4)	;[0, 1]
+trigger17 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger17 = ((Var(45) % 100000) / 1000 = 4)	;[0, 1]
+trigger18 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger18 = ((Var(45) / 100000) / 1000 = 4)	;[0, 1]
+var(13) = 1000000
+
+[State 20000, Learning Moves for FrontRoll]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),StateNo < 100000
+triggerall = !((Var(13) / 10000000) % 10)
+;波動
+trigger1 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger1 = ((Var(41) % 100000) / 1000 = 1)	;[0, 1]
+trigger1 = 0	; (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(41) % 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger2 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger2 = ((Var(41) / 100000) / 1000 = 1)	;[0, 1]
+trigger2 = 0	; (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(41) / 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger3 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger3 = ((Var(43) % 100000) / 1000 = 1)	;[0, 1]
+trigger3 = 0	; (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(43) % 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger4 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger4 = ((Var(43) / 100000) / 1000 = 1)	;[0, 1]
+trigger4 = 0	; (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(43) / 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger5 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger5 = ((Var(45) % 100000) / 1000 = 1)	;[0, 1]
+trigger5 = 0	; (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(43) % 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+trigger6 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger6 = ((Var(45) / 100000) / 1000 = 1)	;[0, 1]
+trigger6 = 0	; (PlayerID(Root,Var(46)),AnimTime = [-50, -30]) || (PlayerID(Root,Var(46)),AnimTime > 1 && PlayerID(Root,Var(46)),Time < 10)	; (Var(43) / 100000 - PlayerID(Root,Var(46)),Time + (Root,P2BodyDist X > 60 * (Root,P2BodyDist X - 60) / 3)) = [15, 25]
+;ビーム
+trigger7 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger7 = ((Var(41) % 100000) / 1000 = 9)	;[0, 1]
+trigger8 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger8 = ((Var(41) / 100000) / 1000 = 9)	;[0, 1]
+trigger9 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger9 = ((Var(43) % 100000) / 1000 = 9)	;[0, 1]
+trigger10 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger10 = ((Var(43) / 100000) / 1000 = 9)	;[0, 1]
+trigger11 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger11 = ((Var(45) % 100000) / 1000 = 9)	;[0, 1]
+trigger12 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger12 = ((Var(45) / 100000) / 1000 = 9)	;[0, 1]
+;落ちもの
+trigger13 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger13 = ((Var(41) % 100000) / 1000 = 4)	;[0, 1]
+trigger14 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger14 = ((Var(41) / 100000) / 1000 = 4)	;[0, 1]
+trigger15 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger15 = ((Var(43) % 100000) / 1000 = 4)	;[0, 1]
+trigger16 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger16 = ((Var(43) / 100000) / 1000 = 4)	;[0, 1]
+trigger17 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger17 = ((Var(45) % 100000) / 1000 = 4)	;[0, 1]
+trigger18 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger18 = ((Var(45) / 100000) / 1000 = 4)	;[0, 1]
+;設置(?)
+trigger19 = PlayerID(Root,Var(46)),Anim = Var(40) % 100000
+trigger19 = ((Var(41) % 100000) / 1000 = 0)	;[0, 1]
+trigger20 = PlayerID(Root,Var(46)),Anim = Var(40) / 100000
+trigger20 = ((Var(41) / 100000) / 1000 = 0)	;[0, 1]
+trigger21 = PlayerID(Root,Var(46)),Anim = Var(42) % 100000
+trigger21 = ((Var(43) % 100000) / 1000 = 0)	;[0, 1]
+trigger22 = PlayerID(Root,Var(46)),Anim = Var(42) / 100000
+trigger22 = ((Var(43) / 100000) / 1000 = 0)	;[0, 1]
+trigger23 = PlayerID(Root,Var(46)),Anim = Var(44) % 100000
+trigger23 = ((Var(45) % 100000) / 1000 = 0)	;[0, 1]
+trigger24 = PlayerID(Root,Var(46)),Anim = Var(44) / 100000
+trigger24 = ((Var(45) / 100000) / 1000 = 0)	;[0, 1]
+var(13) = 10000000
+
+;----------------------------------------------------------[無敵技(?)学習]
+[State 20000, Anim Learning Invincible]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(20) / 100000 = 0
+triggerall = PlayerID(Root,Var(46)),Anim != Var(20) % 100000 && PlayerID(Root,Var(46)),Anim != Var(20) / 100000
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,StateNo >= 200 && Root,Time = 1
+triggerall = Root,StateNo != 5001 && Root,StateNo != 5011 && Root,StateNo != 5021
+trigger1 = PlayerID(Root,Var(46)),MoveType = A && !(PlayerID(Root,Var(46)),HitDefAttr = SCA, NA, NT, NP)
+trigger1 = ((Var(16)) % 10) && fVar(18) && ((Var(8) / 1000000) % 10)
+var(20) = ifelse(Var(20) = 0, PlayerID(Root,Var(46)),Anim, PlayerID(Root,Var(46)),Anim * 100000)
+
+[State 20000, Time Learning Invincible]
+type = VarSet
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(21)
+triggerall = Var(20) != 0
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,Time = 1
+triggerall = PlayerID(Root,Var(46)),MoveType = A && !(PlayerID(Root,Var(46)),HitDefAttr = SCA, NA, NT, NP)
+triggerall = ((var(8) / 1000000) % 10) && fVar(18)	; = 100000
+trigger1 = PlayerID(Root,Var(46)),Anim = Var(20) % 100000 && PlayerID(Root,Var(46)),Time < Var(21) % 100000
+trigger2 = PlayerID(Root,Var(46)),Anim = Var(20) / 100000 && PlayerID(Root,Var(46)),Time < Var(21) / 100000
+var(21) = ifelse(PlayerID(Root,Var(46)),Anim = Var(20) % 100000, (Var(21) / 100000) + PlayerID(Root,Var(46)),Time, (Var(21) % 100000) + PlayerID(Root,Var(46)),Time * 100000)
+
+[State 20000, Time Learning Invincible]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(21) / 100000 = 0
+triggerall = Var(20) != 0
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,Time = 1
+;triggerall = Root,StateNo != 5001 && Root,StateNo != 5011 && Root,StateNo != 5021
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(20) % 100000 && Var(21) % 100000 = 0) || (PlayerID(Root,Var(46)),Anim = Var(20) / 100000 && Var(21) / 100000 = 0)
+trigger1 = PlayerID(Root,Var(46)),MoveType = A && !(PlayerID(Root,Var(46)),HitDefAttr = SCA, NA, NT, NP)
+trigger1 = ((Var(16)) % 10) && fVar(18) && ((Var(8) / 1000000) % 10)
+var(21) = ifelse(Var(21) = 0, PlayerID(Root,Var(46)),Time, PlayerID(Root,Var(46)),Time * 100000)
+
+;----------------------------------------------------------[反確のタイミングが違う技学習]
+[State 20000, CounterAttack Miss Learning]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(22) / 100000 = 0
+triggerall = PlayerID(Root,Var(46)),Anim != Var(22) % 100000 && PlayerID(Root,Var(46)),Anim != Var(22) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(30) % 100000 && PlayerID(Root,Var(46)),Anim != Var(30) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(31) % 100000 && PlayerID(Root,Var(46)),Anim != Var(31) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(32) % 100000 && PlayerID(Root,Var(46)),Anim != Var(32) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(33) % 100000 && PlayerID(Root,Var(46)),Anim != Var(33) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(34) % 100000 && PlayerID(Root,Var(46)),Anim != Var(34) / 100000
+triggerall = PlayerID(Root,Var(46)),StateNo < 100000
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,StateNo >= 200 && Root,Time = 1
+triggerall = Root,StateNo != 5001 && Root,StateNo != 5011 && Root,StateNo != 5021
+trigger1 = PlayerID(Root,Var(46)),MoveType = A && !PlayerID(Root,Var(46)),ctrl && PlayerID(Root,Var(46)),AnimTime = [-10, -0]
+trigger1 = PlayerID(Root,Var(46)),Time >= 10 ;5
+trigger1 = ((var(8) / 100000) % 10)
+var(22) = ifelse(Var(22) = 0, PlayerID(Root,Var(46)),Anim, PlayerID(Root,Var(46)),Anim * 100000)
+
+[State 20000, Time Learning Invincible]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(23) / 100000 = 0
+triggerall = Var(22) != 0
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,Time = 1
+trigger1 = (PlayerID(Root,Var(46)),Anim = Var(22) % 100000 && Var(23) % 100000 = 0) || (PlayerID(Root,Var(46)),Anim = Var(22) / 100000 && Var(23) / 100000 = 0)
+var(23) = ifelse(Var(23) = 0, PlayerID(Root,Var(46)),Time, PlayerID(Root,Var(46)),Time * 100000)
+
+;----------------------------------------------------------[胴崩し(強)で取れない技学習]
+[State 20000, Anim Learning More Than DOH-KUZUSHI_y]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(25) = 0 || (((Var(25)) % 1000) && ((Var(25) / 1000) % 1000) = 0) || (((Var(25) / 1000) % 1000) && ((Var(25) / 1000000) % 1000) = 0)
+triggerall = ((((Var(25)) % 1000) != ((Var(25) / 1000) % 1000)) && (((Var(25)) % 1000) != ((Var(25) / 1000000) % 1000))) || ((Var(25)) % 1000) = 0
+triggerall = ((((Var(25) / 1000) % 1000) != ((Var(25) / 1000000) % 1000))) || ((Var(25)) % 1000) = 0
+triggerall = PlayerID(Root,Var(46)),MoveType = A && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),StateNo < 1000
+triggerall = Root,MoveType = H && Root,Time = 1
+triggerall = Root,StateNo != 5001 && Root,StateNo != 5011 && Root,StateNo != 5021
+trigger1 = PlayerID(Root,Var(46)),StateType = A || (PlayerID(Root,Var(46)),HitDefAttr = S, SA, HA, NT, ST, HT, NP, SP, HP)
+var(25) = ifelse(Var(25) = 0, PlayerID(Root,Var(46)),StateNo, ifelse(((Var(25) / 1000) % 1000) = 0, PlayerID(Root,Var(46)),StateNo * 1000, PlayerID(Root,Var(46)),StateNo * 1000000))
+
+;----------------------------------------------------------[N5Bで潰せる技学習]
+[State 20000, Anim Learning More Than N5B]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(30) / 100000 = 0
+triggerall = PlayerID(Root,Var(46)),Anim != Var(20) % 100000 && PlayerID(Root,Var(46)),Anim != Var(20) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(22) % 100000 && PlayerID(Root,Var(46)),Anim != Var(22) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(30) % 100000 && PlayerID(Root,Var(46)),Anim != Var(30) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(31) % 100000 && PlayerID(Root,Var(46)),Anim != Var(31) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(32) % 100000 && PlayerID(Root,Var(46)),Anim != Var(32) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(33) % 100000 && PlayerID(Root,Var(46)),Anim != Var(33) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(34) % 100000 && PlayerID(Root,Var(46)),Anim != Var(34) / 100000
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,Time = 1
+;triggerall = Root,StateNo != 5001 && Root,StateNo != 5011 && Root,StateNo != 5021
+trigger1 = PlayerID(Root,Var(46)),MoveType = A && (PlayerID(Root,Var(46)),HitDefAttr = SCA, AA, AT, AP)
+trigger1 = PlayerID(Root,Var(46)),Time > 4 && Root,P2BodyDist X < 15 && Root,P2Dist X >= 0 && Root,Pos Y = [-30, 10]
+trigger1 = ((var(8) / 1000) % 10)
+trigger1 = ((var(16) / 1000) % 10)
+;trigger1 = Enemy,MoveContact = 1
+var(30) = ifelse(Var(30) = 0, PlayerID(Root,Var(46)),Anim, PlayerID(Root,Var(46)),Anim * 100000)
+
+[State 20000, Time Learning More Than N5B]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(35) / 100000 = 0
+triggerall = Var(30) != 0
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(30) % 100000 && Var(35) % 100000 = 0) || (PlayerID(Root,Var(46)),Anim = Var(30) / 100000 && Var(35) / 100000 = 0)
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,Time = 1
+trigger1 = 1
+var(35) = ifelse(Var(35) = 0, PlayerID(Root,Var(46)),Time, PlayerID(Root,Var(46)),Time * 100000)
+
+;----------------------------------------------------------[2Aで潰せる技学習]
+[State 20000, Anim Learning More Than 2A]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(31) / 100000 = 0
+triggerall = PlayerID(Root,Var(46)),Anim != Var(22) % 100000 && PlayerID(Root,Var(46)),Anim != Var(22) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(30) % 100000 && PlayerID(Root,Var(46)),Anim != Var(30) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(31) % 100000 && PlayerID(Root,Var(46)),Anim != Var(31) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(32) % 100000 && PlayerID(Root,Var(46)),Anim != Var(32) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(33) % 100000 && PlayerID(Root,Var(46)),Anim != Var(33) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(34) % 100000 && PlayerID(Root,Var(46)),Anim != Var(34) / 100000
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,Time = 1
+triggerall = Root,StateNo != 5001 && Root,StateNo != 5011 && Root,StateNo != 5021
+trigger1 = PlayerID(Root,Var(46)),MoveType = A && (PlayerID(Root,Var(46)),HitDefAttr = SCA, AA, AT, AP)
+trigger1 = PlayerID(Root,Var(46)),Time > 5 && Root,P2BodyDist X < 48 && Root,P2Dist X >= 0 && Root,Pos Y = [-10, 10]
+trigger1 = ((var(8) / 1000) % 10)
+trigger1 = ((var(16) / 1000) % 10)
+var(31) = ifelse(Var(31) = 0, PlayerID(Root,Var(46)),Anim, PlayerID(Root,Var(46)),Anim * 100000)
+
+[State 20000, Time Learning More Than 2A]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(36) / 100000 = 0
+triggerall = Var(31) != 0
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(31) % 100000 && Var(36) % 100000 = 0) || (PlayerID(Root,Var(46)),Anim = Var(31) / 100000 && Var(36) / 100000 = 0)
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = 1
+var(36) = ifelse(Var(36) = 0, PlayerID(Root,Var(46)),Time, PlayerID(Root,Var(46)),Time * 100000)
+
+;----------------------------------------------------------[AnimTime > 0 の技学習]
+[State 20000, Anim Learning AnimTime > 0]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(32) / 100000 = 0
+triggerall = PlayerID(Root,Var(46)),Anim != Var(22) % 100000 && PlayerID(Root,Var(46)),Anim != Var(22) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(30) % 100000 && PlayerID(Root,Var(46)),Anim != Var(30) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(31) % 100000 && PlayerID(Root,Var(46)),Anim != Var(31) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(32) % 100000 && PlayerID(Root,Var(46)),Anim != Var(32) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(33) % 100000 && PlayerID(Root,Var(46)),Anim != Var(33) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(34) % 100000 && PlayerID(Root,Var(46)),Anim != Var(34) / 100000
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,Time = 1
+triggerall = Root,StateNo != 5001 && Root,StateNo != 5011 && Root,StateNo != 5021
+trigger1 = PlayerID(Root,Var(46)),MoveType = A && (PlayerID(Root,Var(46)),HitDefAttr = SCA, AA, AT, AP)
+trigger1 = PlayerID(Root,Var(46)),AnimTime > 0
+trigger1 = ((var(8) / 1000) % 10)
+trigger1 = ((var(16) / 1000) % 10)
+var(32) = ifelse(Var(32) = 0, PlayerID(Root,Var(46)),Anim, PlayerID(Root,Var(46)),Anim * 100000)
+
+[State 20000, Time Learning AnimTime > 0]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(37) / 100000 = 0
+triggerall = Var(32) != 0
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(32) % 100000 && Var(37) % 100000 = 0) || (PlayerID(Root,Var(46)),Anim = Var(32) / 100000 && Var(37) / 100000 = 0)
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = 1
+var(37) = ifelse(Var(37) = 0, PlayerID(Root,Var(46)),Time, PlayerID(Root,Var(46)),Time * 100000)
+
+;----------------------------------------------------------[長い打撃技学習]
+[State 20000, Anim Learning Invation Point X]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(33) / 100000 = 0
+triggerall = PlayerID(Root,Var(46)),Anim != Var(22) % 100000 && PlayerID(Root,Var(46)),Anim != Var(22) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(30) % 100000 && PlayerID(Root,Var(46)),Anim != Var(30) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(31) % 100000 && PlayerID(Root,Var(46)),Anim != Var(31) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(32) % 100000 && PlayerID(Root,Var(46)),Anim != Var(32) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(33) % 100000 && PlayerID(Root,Var(46)),Anim != Var(33) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(34) % 100000 && PlayerID(Root,Var(46)),Anim != Var(34) / 100000
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,Time = 1
+triggerall = Root,StateNo != 5001 && Root,StateNo != 5011 && Root,StateNo != 5021
+trigger1 = PlayerID(Root,Var(46)),MoveType = A && (PlayerID(Root,Var(46)),HitDefAttr = SCA, NA, SA, HA)
+trigger1 = PlayerID(Root,Var(46)),Time > 5 && P2BodyDist X > 80
+trigger1 = ((var(8) / 1000) % 10)
+trigger1 = ((var(16) / 1000) % 10)
+var(33) = ifelse(Var(36) = 0, PlayerID(Root,Var(46)),Anim, PlayerID(Root,Var(46)),Anim * 100000)
+
+[State 20000, Time Learning Invation Point X]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(38) / 100000 = 0
+triggerall = Var(33) != 0
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(33) % 100000 && Var(38) % 100000 = 0) || (PlayerID(Root,Var(46)),Anim = Var(33) / 100000 && Var(38) / 100000 = 0)
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = 1
+var(38) = ifelse(Var(38) = 0, PlayerID(Root,Var(46)),Time, PlayerID(Root,Var(46)),Time * 100000)
+
+;----------------------------------------------------------[発生が遅い技学習]
+[State 20000, Anim Learning More Than JumpAttack]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(34) / 100000 = 0
+triggerall = PlayerID(Root,Var(46)),Anim != Var(22) % 100000 && PlayerID(Root,Var(46)),Anim != Var(22) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(30) % 100000 && PlayerID(Root,Var(46)),Anim != Var(30) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(31) % 100000 && PlayerID(Root,Var(46)),Anim != Var(31) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(32) % 100000 && PlayerID(Root,Var(46)),Anim != Var(32) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(33) % 100000 && PlayerID(Root,Var(46)),Anim != Var(33) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(34) % 100000 && PlayerID(Root,Var(46)),Anim != Var(34) / 100000
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,Time = 1
+triggerall = Root,StateNo != 5001 && Root,StateNo != 5011 && Root,StateNo != 5021
+trigger1 = Root,StateType != A
+trigger1 = PlayerID(Root,Var(46)),MoveType = A && (PlayerID(Root,Var(46)),HitDefAttr = SCA, AA, AT, AP)
+trigger1 = PlayerID(Root,Var(46)),Time > 12
+trigger1 = ((var(8) / 1000) % 10)
+trigger1 = ((var(16) / 1000) % 10)
+var(34) = ifelse(Var(34) = 0, PlayerID(Root,Var(46)),Anim, PlayerID(Root,Var(46)),Anim * 100000)
+
+[State 20000, Time Learning More Than JumpAttack]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(39) / 100000 = 0
+triggerall = Var(34) != 0
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(34) % 100000 && Var(39) % 100000 = 0) || (PlayerID(Root,Var(46)),Anim = Var(34) / 100000 && Var(39) / 100000 = 0)
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,Time = 1
+trigger1 = 1
+var(39) = ifelse(Var(39) = 0, PlayerID(Root,Var(46)),Time, PlayerID(Root,Var(46)),Time * 100000)
+
+;----------------------------------------------------------[飛び道具学習01]
+[State 20000, Fire No Learning 40]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(40) / 100000 = 0
+triggerall = PlayerID(Root,Var(46)),Anim != Var(40) % 100000 && PlayerID(Root,Var(46)),Anim != Var(40) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(42) % 100000 && PlayerID(Root,Var(46)),Anim != Var(42) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(44) % 100000 && PlayerID(Root,Var(46)),Anim != Var(44) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = !(PlayerID(Root,Var(46)),HitDefAttr = SCA, AA, AT, AP)
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = ((Helper(30000+Root,id),Var(59)) % 10) > fVar(19)
+var(40) = ifelse(Var(40) = 0, PlayerID(Root,Var(46)),Anim, PlayerID(Root,Var(46)),Anim * 100000)
+
+[State 20000, Fire Time Learning 41]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(41) / 100000 = 0
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(40) % 100000 && Var(41) % 100000 = 0) || (PlayerID(Root,Var(46)),Anim = Var(40) / 100000 && Var(41) / 100000 = 0)
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = PlayerID(Root,Var(46)),Time < 1000
+var(41) = ifelse(Var(41) = 0, (PlayerID(Root,Var(46)),Time - 1), (PlayerID(Root,Var(46)),Time - 1) * 100000)
+
+[State 20000, Fire Kind(Hadoken) Learning 41]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(40) % 100000 && Var(41) % 100000 && ((Var(41) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(40) / 100000 && Var(41) / 100000 && ((Var(41) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = ((Helper(30000+Root,id),Var(58)) % 10) && !((Helper(30000+Root,id),Var(58) / 10) % 10)
+var(41) = ifelse(PlayerID(Root,Var(46)),Anim = Var(40) % 100000, 1000, 100000000)
+
+[State 20000, Fire Kind(Tengyo) Learning 41]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(40) % 100000 && Var(41) % 100000 && ((Var(41) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(40) / 100000 && Var(41) / 100000 && ((Var(41) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = !((Helper(30000+Root,id),Var(58)) % 10) && ((Helper(30000+Root,id),Var(58) / 10) % 10)
+var(41) = ifelse(PlayerID(Root,Var(46)),Anim = Var(40) % 100000, 2000, 200000000)
+
+[State 20000, Fire Kind(Zanku) Learning 41]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(40) % 100000 && Var(41) % 100000 && ((Var(41) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(40) / 100000 && Var(41) / 100000 && ((Var(41) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = !((Helper(30000+Root,id),Var(58)) % 10) && !((Helper(30000+Root,id),Var(58) / 10) % 10)
+trigger1 = ((Helper(30000+Root,id),Var(58) / 10000) % 10)
+var(41) = ifelse(PlayerID(Root,Var(46)),Anim = Var(40) % 100000, 3000, 300000000)
+
+[State 20000, Fire Kind(Down) Learning 41]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(40) % 100000 && Var(41) % 100000 && ((Var(41) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(40) / 100000 && Var(41) / 100000 && ((Var(41) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = !((Helper(30000+Root,id),Var(58)) % 10) && !((Helper(30000+Root,id),Var(58) / 10) % 10) && !((Helper(30000+Root,id),Var(58) / 10000) % 10)
+trigger1 = ((Helper(30000+Root,id),Var(58) / 100000000) % 10)
+var(41) = ifelse(PlayerID(Root,Var(46)),Anim = Var(40) % 100000, 4000, 400000000)
+
+[State 20000, Fire Kind(Beam) Learning 41]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(40) % 100000 && Var(41) % 100000 && ((Var(41) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(40) / 100000 && Var(41) / 100000 && ((Var(41) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = Root,P2BodyDist X > 90
+trigger1 = Root,P2BodyDist Y = [-40, 70]
+;trigger1 = Helper(30000+Root,id),fVar(4)	; = [-40, 60]
+trigger1 = Root,MoveType = H && Root,Time = 1
+var(41) = ifelse(PlayerID(Root,Var(46)),Anim = Var(40) % 100000, 9000, 900000000)
+
+;----------------------------------------------------------[飛び道具学習02]
+[State 20000, Fire No Learning 42]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(42) / 100000 = 0
+triggerall = PlayerID(Root,Var(46)),Anim != Var(40) % 100000 && PlayerID(Root,Var(46)),Anim != Var(40) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(42) % 100000 && PlayerID(Root,Var(46)),Anim != Var(42) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(44) % 100000 && PlayerID(Root,Var(46)),Anim != Var(44) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = !(PlayerID(Root,Var(46)),HitDefAttr = SCA, AA, AT, AP)
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = ((Helper(30000+Root,id),Var(59)) % 10) > fVar(19)
+var(42) = ifelse(Var(42) = 0, PlayerID(Root,Var(46)),Anim, PlayerID(Root,Var(46)),Anim * 100000)
+
+[State 20000, Fire Time Learning 43]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(43) / 100000 = 0
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(42) % 100000 && Var(45) % 100000 = 0) || (PlayerID(Root,Var(46)),Anim = Var(42) / 100000 && Var(43) / 100000 = 0)
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = PlayerID(Root,Var(46)),Time < 1000
+var(43) = ifelse(Var(43) = 0, (PlayerID(Root,Var(46)),Time - 1), (PlayerID(Root,Var(46)),Time - 1) * 100000)
+
+[State 20000, Fire Kind(Hadoken) Learning 43]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(42) % 100000 && Var(43) % 100000 && ((Var(43) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(42) / 100000 && Var(43) / 100000 && ((Var(43) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = ((Helper(30000+Root,id),Var(58)) % 10) && !((Helper(30000+Root,id),Var(58) / 10) % 10)
+var(43) = ifelse(PlayerID(Root,Var(46)),Anim = Var(42) % 100000, 1000, 100000000)
+
+[State 20000, Fire Kind(Tengyo) Learning 43]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(42) % 100000 && Var(43) % 100000 && ((Var(43) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(42) / 100000 && Var(43) / 100000 && ((Var(43) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = !((Helper(30000+Root,id),Var(58)) % 10) && ((Helper(30000+Root,id),Var(58) / 10) % 10)
+var(43) = ifelse(PlayerID(Root,Var(46)),Anim = Var(42) % 100000, 2000, 200000000)
+
+[State 20000, Fire Kind(Zanku) Learning 43]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(42) % 100000 && Var(43) % 100000 && ((Var(43) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(42) / 100000 && Var(43) / 100000 && ((Var(43) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = !((Helper(30000+Root,id),Var(58)) % 10) && !((Helper(30000+Root,id),Var(58) / 10) % 10)
+trigger1 = ((Helper(30000+Root,id),Var(58) / 10000) % 10)
+var(43) = ifelse(PlayerID(Root,Var(46)),Anim = Var(42) % 100000, 3000, 300000000)
+
+[State 20000, Fire Kind(Down) Learning 43]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(42) % 100000 && Var(43) % 100000 && ((Var(43) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(42) / 100000 && Var(43) / 100000 && ((Var(43) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = !((Helper(30000+Root,id),Var(58)) % 10) && !((Helper(30000+Root,id),Var(58) / 10) % 10) && !((Helper(30000+Root,id),Var(58) / 10000) % 10)
+trigger1 = ((Helper(30000+Root,id),Var(58) / 100000000) % 10)
+var(43) = ifelse(PlayerID(Root,Var(46)),Anim = Var(42) % 100000, 4000, 400000000)
+
+[State 20000, Fire Kind(Beam) Learning 43]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(42) % 100000 && Var(43) % 100000 && ((Var(43) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(42) / 100000 && Var(43) / 100000 && ((Var(43) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = Root,P2BodyDist X > 90
+trigger1 = Root,P2BodyDist Y = [-40, 70]
+;trigger1 = Helper(30000+Root,id),fVar(4)	; = [-40, 60]
+trigger1 = Root,MoveType = H && Root,Time = 1
+var(43) = ifelse(PlayerID(Root,Var(46)),Anim = Var(42) % 100000, 9000, 900000000)
+
+;----------------------------------------------------------[飛び道具学習03]
+[State 20000, Fire No Learning 44]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(41) / 100000 = 0
+triggerall = PlayerID(Root,Var(46)),Anim != Var(40) % 100000 && PlayerID(Root,Var(46)),Anim != Var(40) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(42) % 100000 && PlayerID(Root,Var(46)),Anim != Var(42) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim != Var(44) % 100000 && PlayerID(Root,Var(46)),Anim != Var(44) / 100000
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = !(PlayerID(Root,Var(46)),HitDefAttr = SCA, AA, AT, AP)
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = ((Helper(30000+Root,id),Var(59)) % 10) > fVar(19)
+var(44) = ifelse(Var(44) = 0, PlayerID(Root,Var(46)),Anim, PlayerID(Root,Var(46)),Anim * 100000)
+
+[State 20000, Fire Time Learning 45]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(45) / 100000 = 0
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(44) % 100000 && Var(46) % 100000 = 0) || (PlayerID(Root,Var(46)),Anim = Var(44) / 100000 && Var(46) / 100000 = 0)
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = PlayerID(Root,Var(46)),Time < 1000
+var(45) = ifelse(Var(45) = 0, (PlayerID(Root,Var(46)),Time - 1), (PlayerID(Root,Var(46)),Time - 1) * 100000)
+
+[State 20000, Fire kind Learning]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(45) / 100000 = 0
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(44) % 100000 && Var(46) % 100000 = 0) || (PlayerID(Root,Var(46)),Anim = Var(44) / 100000 && Var(46) / 100000 = 0)
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = PlayerID(Root,Var(46)),Time < 10000
+var(45) = ifelse(Var(45) = 0, (PlayerID(Root,Var(46)),Time - 1), (PlayerID(Root,Var(46)),Time - 1) * 100000)
+
+[State 20000, Fire Kind(Hadoken) Learning 45]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(44) % 100000 && Var(45) % 100000 && ((Var(45) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(44) / 100000 && Var(45) / 100000 && ((Var(45) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = ((Helper(30000+Root,id),Var(58)) % 10) && !((Helper(30000+Root,id),Var(58) / 10) % 10)
+var(45) = ifelse(PlayerID(Root,Var(46)),Anim = Var(44) % 100000, 1000, 100000000)
+
+[State 20000, Fire Kind(Tengyo) Learning 45]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(44) % 100000 && Var(45) % 100000 && ((Var(45) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(44) / 100000 && Var(45) / 100000 && ((Var(45) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = !((Helper(30000+Root,id),Var(58)) % 10) && ((Helper(30000+Root,id),Var(58) / 10) % 10)
+var(45) = ifelse(PlayerID(Root,Var(46)),Anim = Var(44) % 100000, 2000, 200000000)
+
+[State 20000, Fire Kind(Zanku) Learning 45]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(44) % 100000 && Var(45) % 100000 && ((Var(45) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(44) / 100000 && Var(45) / 100000 && ((Var(45) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = !((Helper(30000+Root,id),Var(58)) % 10) && !((Helper(30000+Root,id),Var(58) / 10) % 10)
+trigger1 = ((Helper(30000+Root,id),Var(58) / 10000) % 10)
+var(45) = ifelse(PlayerID(Root,Var(46)),Anim = Var(44) % 100000, 3000, 300000000)
+
+[State 20000, Fire Kind(Down) Learning 45]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(44) % 100000 && Var(45) % 100000 && ((Var(45) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(44) / 100000 && Var(45) / 100000 && ((Var(45) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = !((Helper(30000+Root,id),Var(58)) % 10) && !((Helper(30000+Root,id),Var(58) / 10) % 10) && !((Helper(30000+Root,id),Var(58) / 10000) % 10)
+trigger1 = ((Helper(30000+Root,id),Var(58) / 100000000) % 10)
+var(45) = ifelse(PlayerID(Root,Var(46)),Anim = Var(44) % 100000, 4000, 400000000)
+
+[State 20000, Fire Kind(Beam) Learning 45]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(44) % 100000 && Var(45) % 100000 && ((Var(44) % 100000) / 1000 = 0)) || (PlayerID(Root,Var(46)),Anim = Var(44) / 100000 && Var(45) / 100000 && ((Var(45) / 10000) / 1000 = 0))
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+trigger1 = ((Var(16) / 100) % 10) && !((var(16) / 1000) % 10)
+trigger1 = Root,P2BodyDist Y = [-40, 70]
+trigger1 = Root,P2BodyDist X > 90
+;trigger1 = Helper(30000+Root,id),fVar(4)	; = [-40, 60]
+trigger1 = Root,MoveType = H && Root,Time = 1
+var(45) = ifelse(PlayerID(Root,Var(46)),Anim = Var(44) % 100000, 9000, 900000000)
+
+;----------------------------------------------------------[ビーム系学習]
+
+
+;----------------------------------------------------------[多段技学習]
+[State 20000, Anim Learning Multi Attack]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(50) / 100000 = 0
+triggerall = PlayerID(Root,Var(46)),Anim != Var(50) % 100000 && PlayerID(Root,Var(46)),Anim != Var(50) / 100000
+triggerall = PlayerID(Root,Var(46)),MoveType != H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl
+triggerall = PlayerID(Root,Var(46)),Anim < 100000
+triggerall = Root,MoveType = H && Root,Time = 1
+triggerall = PlayerID(Root,Var(46)),MoveType = A && (PlayerID(Root,Var(46)),HitDefAttr = SCA, AA, AT, AP)
+;triggerall = ((var(8) / 1000) % 10)
+trigger1 = PlayerID(Root,Var(46)),HitCount >= 2
+var(50) = ifelse(Var(50) = 0, PlayerID(Root,Var(46)),Anim, PlayerID(Root,Var(46)),Anim * 100000)
+
+;----------------------------------------------------------[Projectile系飛び道具の速度学習(封印中)]
+; 速度よりもTimeを学習したほうがいいかも
+; 自分がその場から移動してないこと前提
+
+[State 20000, 距離保存]
+type = null	; varset
+trigger1 = ((var(55)) % 100000) = 0
+fvar(4) = (Root,P2BodyDist X)
+
+[State 20000, カウントスタート]
+type = null	; varset
+triggerall = Var(55) = 0
+trigger1 = PlayerID(Root,Var(46)),NumProj
+trigger1 = ((Var(16) / 100) % 10)
+trigger1 = Helper(30000+Root,id),Var(0) + PlayerID(Root,Var(46)),NumProj > fVar(19)
+var(55) = 1
+
+[State 20000, カウント終了]
+type = null	; varset
+trigger1 = ((var(55)) % 100000) = 1
+trigger1 = Root,StateNo = 150 || Root,StateNo = 152 || Root,StateNo = 154 || Root,StateNo = 5000 || Root,StateNo = 5010 || Root,StateNo = 5020
+trigger1 = Root,Time = 1
+trigger1 = !PlayerID(Root,Var(46)),NumProj
+var(55) = ((var(55)) / 100000) * 100000 + 2
+
+[State 20000, カウントリセット]
+type = null	; varset
+triggerall = ((var(55)) % 100000) = 1
+trigger1 = !PlayerID(Root,Var(46)),NumProj
+var(55) = 0
+
+[State 20000, 時間カウント]
+type = null	; varadd
+trigger1 = ((var(55)) % 100000) = 1
+var(55) = 100000
+
+[State 20000, 時間カウントリセット]
+type = null	; varset
+trigger1 = ((var(55)) % 100000) = 0
+var(55) = ((var(55)) % 100000)
+
+[State 20000, Projectileの速度計算]
+type = null	; varset
+trigger1 = ((var(55)) % 100000) = 2
+trigger1 = floor(fVar(4)) > 0 && ((Var(55)) / 100000)
+var(59) = floor(fVar(4) * 100 / ((var(55)) / 100000))
+
+;----------------------------------------------------------[Projectile系飛び道具の発生学習]
+[State 20000, 相手のAnim記憶]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(56) / 100000 = 0
+triggerall = PlayerID(Root,Var(46)),Anim != Var(56) % 100000 && PlayerID(Root,Var(46)),Anim != Var(56) / 100000
+;trigger1 = ((Var(55)) % 100000) = 1
+trigger1 = PlayerID(Root,Var(46)),NumProj
+trigger1 = ((Var(16) / 100) % 10)
+trigger1 = PlayerID(Root,Var(46)),NumProj > fVar(19)
+var(56) = ifelse(Var(56) = 0, PlayerID(Root,Var(46)),Anim, PlayerID(Root,Var(46)),Anim * 100000)
+
+[State 20000, 相手のTime記憶]
+type = VarAdd
+triggerall = IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(57) / 100000 = 0
+triggerall = (PlayerID(Root,Var(46)),Anim = Var(56) % 100000 && Var(57) % 100000 = 0) || (PlayerID(Root,Var(46)),Anim = Var(56) / 100000 && Var(57) / 100000 = 0)
+;trigger1 = ((Var(55)) % 100000) = 1
+trigger1 = PlayerID(Root,Var(46)),NumProj
+trigger1 = ((Var(16) / 100) % 10)
+trigger1 = PlayerID(Root,Var(46)),NumProj > fVar(19)
+var(57) = ifelse(Var(57) = 0, (PlayerID(Root,Var(46)),Time), (PlayerID(Root,Var(46)),Time) * 100000)
+
+;----------------------------------------------------------[攻めの思考]
+
+
+;----------------------------------------------------------[攻めの思考]
+[State 20000, Thought : Reset]
+type = VarSet
+triggerall = IsHelper
+triggerall = Var(52)
+trigger1 = PlayerID(Root,Var(46)),StateType != L || ((Var(52)) % 10) = 4 || ((Var(52) / 10) % 10) = 4 || ((Var(52) / 100) % 10) = 5
+trigger1 = Root,ctrl && Root,StateType != A && Root,StateNo != 21 && Root,StateNo != 100 && Root,Time > 5 || (Root,StateNo = 18 && Var(1) = 100) ;10
+trigger2 = Root,MoveType = H || Root,MoveType = A
+trigger3 = PlayerID(Root,Var(46)),MoveType = H && PlayerID(Root,Var(46)),StateNo >= 200 && !PlayerID(Root,Var(46)),ctrl && PlayerID(Root,Var(46)),Time = 1
+trigger3 = PlayerID(Root,Var(46)),StateType != L
+trigger4 = ((Var(52)) % 10) = 4 || ((Var(52)/10)%10) = 4 || ((Var(52)/100)%10) = 5
+trigger4 = (Root,StateNo = 13 || Root,StateNo = 18 || Root,StateNo = 19) && Root,Time > 10
+trigger5 = ((Var(52) / 100) % 10) = 4
+trigger5 = Root,StateNo = 101 || Var(1) = 101
+var(52) = 0
+
+[State 20000, Thought : Short range]
+type = Null
+triggerall = 0 ; IsHelper
+triggerall = Root,fVar(34) || Var(14) > 2
+triggerall = Root,ctrl && Root,StateType != A && Root,Time < 3 && Root,StateNo != 18
+triggerall = !Root,InGuardDist && !((Var(0)) % 10) && !((Var(0) / 10) % 10)
+triggerall = ((Var(52)) % 10) = 0
+triggerall = Root,P2BodyDist X >= -80
+triggerall = Root,P2BodyDist X <= 80
+;ダッシュから打撃
+trigger1 = Root,P2BodyDist X != [-15, 15]
+trigger1 = Random < 100	; 200
+trigger1 = Var(52) := 1 || 1
+;ダッシュから投げ
+;trigger2 = Root,P2BodyDist X > 0 ;15
+trigger2 = Var(14) < 10
+trigger2 = PlayerID(Root,Var(46)),MoveType != H || PlayerID(Root,Var(46)),StateNo < 200
+trigger2 = Random < 100	; 100
+trigger2 = 0	; Var(52) := 2 || 1
+;ジャンプから攻め
+;trigger3 = Root,StateNo != 52 || PlayerID(Root,Var(46)),StateType != L || Root,fVar(32) >= 8
+trigger3 = Random < 400	; 700
+trigger3 = Var(52) := 3 || 1
+;待ち
+trigger4 = Root,fVar(34) <= 1 && Root,fVar(32) <= 6 && (PlayerID(Root,Var(46)),MoveType != H || PlayerID(Root,Var(46)),StateNo < 200)
+trigger4 = Var(52) := 4 || 1
+
+[State 20000, Thought : Middle range]
+type = Null
+triggerall = 0	; IsHelper
+triggerall = Root,fVar(34) || Var(14) > 2
+triggerall = Root,ctrl && Root,StateType != A && Root,Time < 3 && Root,StateNo != 18
+triggerall = !Root,InGuardDist && !((Var(0)) % 10) && !((Var(0) / 10) % 10)
+triggerall = ((Var(52)) % 10) = 0 && ((Var(52) / 10) % 10) = 0
+triggerall = Root,P2BodyDist X > 80 || Root,P2BodyDist X < -80
+triggerall = Root,P2BodyDist X = [-140, 140]
+;ダッシュから攻め
+trigger1 = Random < 100	; 150
+trigger1 = Var(52) := 10 || 1
+;ダッシュからジャンプ
+trigger2 = Root,P2BodyDist X > 100 || Root,P2BodyDist X < -100
+trigger2 = Random < 300 ; 350
+trigger2 = Var(52) := 20 || 1
+;ジャンプから攻め
+trigger3 = Random < 300	; 400
+trigger3 = Var(52) := 30 || 1
+;待ち
+trigger4 = Root,fVar(34) <= 4 && Root,fVar(32) <= 6  && (PlayerID(Root,Var(46)),MoveType != H || PlayerID(Root,Var(46)),StateNo < 200)
+trigger4 = Var(52) := 40 || 1
+
+[State 20000, Thought : Long range]
+type = Null
+triggerall = 0	; IsHelper
+triggerall = Root,fVar(34) || Var(14) > 2
+triggerall = Root,ctrl && Root,StateType != A && Root,Time < 3 && Root,StateNo != 18
+triggerall = !Root,InGuardDist && !((Var(0)) % 10) && !((Var(0) / 10) % 10)
+triggerall = ((Var(52)) % 10) = 0 && ((Var(52) / 10) % 10) = 0 && ((Var(52) / 100) % 10) = 0
+triggerall = Root,P2BodyDist X >= 140 || Root,P2BodyDist X <= -140
+;ダッシュから攻め
+trigger1 = Random < 100	; 200
+trigger1 = Var(52) := 100 || 1
+;ダッシュからジャンプ
+trigger2 = Random < 200	; 500
+trigger2 = Var(52) := 200 || 1
+;ジャンプから攻め
+trigger3 = Root,P2BodyDist X = [-240, 240]
+trigger3 = Random < 200 + (Root,P2BodyDist X = [-225, 225]) * 100	; 600
+trigger3 = Var(52) := 300 || 1
+;ダッシュして待機
+trigger4 = Root,P2BodyDist X >= 210 || Root,P2BodyDist X <= -210
+trigger4 = Random < 200	; 300
+trigger4 = Var(52) := 400 || 1
+;その場で待機
+trigger5 = Root,fVar(34) <= 3 && Root,fVar(32) <= 12  && (PlayerID(Root,Var(46)),MoveType != H || PlayerID(Root,Var(46)),StateNo < 200)
+trigger5 = Var(52) := 500 || 1
+
+;----------------------------------------------------------[暗転感知]
+[State 20000, カウント]
+type = varset
+trigger1 = time = 0
+var(53) = Root,Var(52)
+
+[State 20000, カウント]
+type = parentvaradd
+trigger1 = Root,var(53) != Var(53)
+var(53) = 1
+
+[State 20000, カウント]
+type = varadd
+trigger1 = RoundState = 2
+var(53) = 1
+
+[State 20000, 暗転時間]
+type = VarSet
+trigger1 = 1
+var(54) = Var(53) - Root,Var(52) - 1
+
+;----------------------------------------------------------[コンボ精度決定]
+[State 20000, Combo Lv]
+type = VarSet
+triggerall = IsHelper
+triggerall = Var(51) = -1
+trigger1 = Var(51) != Var(59)
+var(51) = Var(59)
+
+;----------------------------------------------------------[摩擦計算1]
+[State 20000, Friction 1]
+Type = VarSet
+trigger1 = 1
+fvar(0) = ifelse(PlayerID(Root,Var(46)),Time + 6 >= PlayerID(Root,Var(46)),GetHitVar(SlideTime), 0.6, 1)
+
+;----------------------------------------------------------[摩擦計算2]
+[State 20000, Friction 2]
+Type = VarSet
+trigger1 = 1
+fvar(1) = ifelse(PlayerID(Root,Var(46)),StateType = C, (PlayerID(Root,Var(46)),Const(movement.crouch.friction)), (PlayerID(Root,Var(46)),Const(movement.stand.friction)))
+
+;----------------------------------------------------------[方向計算1]
+[State 20000, Facing 1]
+Type = VarSet
+trigger1 = 1
+fvar(2) = -floor(Root,facing * PlayerID(Root,Var(46)),facing)
+
+;----------------------------------------------------------[方向計算2]
+[State 20000, Facing 2]
+Type = VarSet
+trigger1 = Root,StateNo != 45
+fvar(3) = Root,Vel X
+
+;----------------------------------------------------------[TagTeamSystem用 待機時間カウント]
+[State 20000, TTS 358002 Reset]
+Type = VarSet
+triggerall = fVar(5)
+triggerall = NumPartner
+trigger1 = Root,StateNo = 358002
+fvar(5) = 0
+
+[State 20000, TTS 358002 Count]
+Type = VarAdd
+triggerall = NumPartner
+triggerall = Root,MoveType != H || Root,StateNo < 200
+trigger1 = Partner,MoveType = I && Partner,Alive
+trigger1 = Partner,StateNo = 358002
+fvar(5) = 1
+
+;----------------------------------------------------------[リバサ用1]
+[State 20000, Reversal Flag ReSet]
+Type = VarAdd
+trigger1 = fVar(10) > 0
+trigger1 = (Root,StateNo != [150, 159])
+fvar(10) = -1
+
+[State 20000, Reversal Flag Set]
+Type = VarSet
+triggerall = PlayerID(Root,Var(46)),ctrl || PlayerID(Root,Var(46)),StateNo < 200
+trigger1 = Root,StateNo = [150, 159]
+fvar(10) = 20
+
+;----------------------------------------------------------[リバサ用2]
+[State 20000, Reversal Flag ReSet]
+Type = VarAdd
+trigger1 = fVar(11) > 0
+trigger1 = Root,MoveType != H
+trigger1 = (Root,StateNo != [5000, 5299])
+fvar(11) = -1
+
+[State 20000, Reversal Flag Set]
+Type = VarSet
+triggerall = PlayerID(Root,Var(46)),ctrl || PlayerID(Root,Var(46)),StateNo < 200
+trigger1 = Root,StateNo = [5000, 5299]
+fvar(11) = 20
+
+;----------------------------------------------------------[本体のHitDefが発生]
+[State 20000, HitDef Reset]
+Type = VarSet
+trigger1 = fVar(18)
+trigger1 = Root,MoveType != I || Root,ctrl || Root,StateNo < 200
+fvar(18) = 0
+
+[State 20000, HitDef Reset]
+Type = VarAdd
+triggerall = !fVar(18)
+triggerall = Root,MoveType = A && Root,StateNo >= 200 && !Root,ctrl
+trigger1 = Root,StateNo = 200
+trigger1 = 0
+trigger2 = Root,StateNo = 205
+trigger2 = Root,Time = 6
+trigger3 = Root,StateNo = 220
+trigger3 = Root,Time >= 7
+trigger4 = Root,StateNo = 230
+trigger4 = Root,Time >= 9
+trigger5 = Root,StateNo = 235
+trigger5 = Root,Time >= 4
+trigger6 = Root,StateNo = 240
+trigger6 = Root,Time >= 10
+trigger7 = Root,StateNo = 245
+trigger7 = Root,Time >= 10
+trigger8 = Root,StateNo = 430
+trigger8 = Root,Time >= 7
+trigger9 = Root,StateNo = 440
+trigger9 = Root,Time >= 13
+trigger10 = Root,StateNo = 615
+trigger10 = Root,Time >= 14
+trigger11 = Root,StateNo = 645
+trigger11 = Root,Time >= 7
+trigger12 = Root,StateNo = 1000
+trigger12 = Root,Time >= 8
+trigger13 = Root,StateNo = 1010
+trigger13 = Root,Time >= 10
+fvar(18) = 1
+
+[State 20000, HitDef Reset]
+Type = VarAdd
+triggerall = !fVar(18)
+triggerall = Root,MoveType = A && Root,StateNo >= 200 && !Root,ctrl
+trigger1 = Root,StateNo = 1000
+trigger1 = Root,Time = [6, 7]
+fvar(18) = 10
+
+;----------------------------------------------------------[相手の飛び道具学習, 前準備]
+[State 20000, Fire Learning Fix]
+type = VarSet
+triggerall = IsHelper
+trigger1 = NumHelper(30000+Root,id)
+fvar(19) = ((Helper(30000+Root,id),Var(59)) % 10) + PlayerID(Root,Var(46)),NumProj
+
+;----------------------------------------------------------[距離計算の遅延]
+[State 20000, Dist calculate 9]
+type = VarSet
+trigger1 = 1
+fvar(29) = fVar(28) - Root,Vel X * 10
+
+[State 20000, Dist calculate EX]
+type = VarSet
+trigger1 = Root,Var(59) > 3
+fvar(29) = Root,P2BodyDist X
+
+[State 20000, Dist calculate 8]
+type = VarSet
+trigger1 = 1
+fvar(28) = fVar(27)
+
+[State 20000, Dist calculate 7]
+type = VarSet
+trigger1 = 1
+fvar(27) = fVar(26)
+
+[State 20000, Dist calculate 6]
+type = VarSet
+trigger1 = 1
+fvar(26) = fVar(25)
+
+[State 20000, Dist calculate 5]
+type = VarSet
+trigger1 = 1
+fvar(25) = fVar(24)
+
+[State 20000, Dist calculate 4]
+type = VarSet
+trigger1 = 1
+fvar(24) = fVar(23)
+
+[State 20000, Dist calculate 3]
+type = VarSet
+trigger1 = 1
+fvar(23) = fVar(22)
+
+[State 20000, Dist calculate 2]
+type = VarSet
+trigger1 = 1
+fvar(22) = fVar(21)
+
+[State 20000, Dist calculate 1]
+type = VarSet
+trigger1 = 1
+fvar(21) = fVar(20)
+
+[State 20000, Dist calculate 0]
+type = VarSet
+trigger1 = 1
+fvar(20) = Root,P2BodyDist X
+
+;----------------------------------------------------------[デバッグスイッチ
+[State 20000, DebugFlagSet]
+Type = VarSet
+trigger1 = !Var(58)
+var(58) = 0
+
+;  1 : ノーゲージ でコンボ
+;  2 : １ゲージ でコンボ
+;  3 : ２ゲージ でコンボ
+;  4 : ３ゲージ でコンボ
+;  5 : 
+;  6 : 
+;  7 : 
+;  8 : 
+;  9 : 
+; 10 : 
+; -1 : ガードテスト
+; -2 : 飛び道具避けテスト
+; -3 : 超反応で飛び道具避けテスト
+; -4 : 
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+; 画面端判断 ＆ 飛び道具認識ヘルパー
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+;画面左端判定
+[StateDef 31000]
+Type = A
+Ctrl = 0
+Anim = 0
+Velset = -5, 0
+MoveType = I
+Physics = N
+Sprpriority = 0
+
+[State 31000, AssertSpecial]
+type = assertspecial
+trigger1 = 1
+flag = invisible
+
+[State 31000, NotHitBy]
+type = NotHitBy
+value = SCA
+trigger1 = 1
+
+[State 31000, SelfState]
+type = SelfState
+trigger1 = !IsHelper
+value = 0
+ctrl = 1
+
+;ヘルパーと一緒に飛び道具を飛ばす
+[State 31000, Projectile]
+Type = Projectile
+trigger1 = time = 0
+Velocity = -5,0
+ProjID = 23000
+Projanim = 0
+projhits = 9999
+projpriority = 9999
+Offset = 0,0
+projstagebound = const(size.ground.front)
+Projedgebound = 100000
+Projremovetime = 180 ;-1
+supermovetime = 0 ;9999
+pausemovetime = 0 ;9999
+
+;飛び道具が消えたら止まる
+[State 31000, VelSet]
+type = velset
+trigger1 = Root,NumProjID(23000) = 0
+trigger1 = time > 0
+trigger2 = Root,NumProjID(23000)
+trigger2 = Time >= 180
+x = 0
+y = 0
+
+;端まで行ったら消滅する
+[State 31000, DestroySelf]
+type = DestroySelf
+trigger1 = IsHelper(31000+Root,id)
+trigger1 = Vel X = 0
+
+;------------------------------------------------------------------------------
+;画面右端判定
+[StateDef 32000]
+Type = A
+Ctrl = 0
+Anim = 0
+Velset = -5, 0
+MoveType = I
+Physics = N
+Sprpriority = 0
+
+[State 32000, AssertSpecial]
+type = assertspecial
+trigger1 = 1
+flag = invisible
+flag2 = noshadow
+
+[State 32000, NotHitBy]
+type = NotHitBy
+value = SCA
+trigger1 = 1
+
+[State 32000, SelfState]
+type = SelfState
+trigger1 = !IsHelper
+value = 0
+ctrl = 1
+
+;ヘルパーと一緒に飛び道具を飛ばす
+[State 32000, Projectile]
+Type = Projectile
+trigger1 = time = 0
+Velocity = -5,0
+ProjID = 22000
+projhits = 9999
+projpriority = 9999
+Projanim = 0
+Offset = 0,0
+projstagebound = const(size.ground.front)
+Projedgebound = 100000
+projremove = 0
+Projremovetime = 180 ;-1
+supermovetime = 0 ;9999
+pausemovetime = 0 ;9999
+
+;飛び道具が消えたら止まる
+[State 32000, VelSet]
+type = velset
+trigger1 = Root,NumProjID(22000) = 0
+trigger1 = time > 0
+trigger2 = Root,NumProjID(22000)
+trigger2 = Time >= 180
+x = 0
+y = 0
+
+;左端との距離
+[State 32000, Right To Left]
+type = VarSet
+trigger1 = StateNo = 32000
+trigger1 = NumHelper(31000+Root,id)
+var(1) = floor(Pos X - Helper(31000+Root,id),Pos X)
+
+;端まで行ったら飛び道具対策ステートへ移行
+[State 32000, ChangeState]
+type = ChangeState
+trigger1 = Vel X = 0
+trigger1 = Time > 0
+value = 30020
+
+;------------------------------------------------------------------------------
+; 飛び道具対策ステート30020（suparpause,pause無視）
+
+;var(0):
+;var(1): 左端との距離
+;var(2):
+;var(3)~var(53):ヘルパーリダイレクト用
+;var(54):最大ループ回数設定
+;var(55):30020,30029ループカウント用
+;var(56):30022ループカウント用
+;var(57):リダイレクト変数のうち、現在の最高の値
+;var(58):結果から状況判断
+;var(59):超必/射撃以外の飛び道具が存在する
+
+;fvar(0)~fvar(x):ｘ速度など。確率変動に使う
+
+;※var(3+var(55))が、「現在調査中のＩＤ用変数」
+
+;全員共通のループステート１
+[StateDef 30020]
+type=A
+movetype=I
+physics=N
+ctrl=0
+anim=0
+sprpriority=0
+velset=0,0
+
+[State 30020];ループ回数設定
+type=varset
+trigger1=!var(54)
+var(54)=40
+
+;ＩＤ探索ステートへ
+[State 30020]
+type = ChangeState
+triggerall=!numhelper(30021);このＦの中でまだＩＤ予測をしていない（失敗していない）
+trigger1=var(56)!=-1||PrevStateNo=30029;このＦの中でまだＩＤ探索に失敗していない
+trigger1=!playerIDexist(var(3+var(55)));変数が現在使用中ではない
+value=30022
+
+;透明化
+[State 30020]
+type=assertspecial
+trigger1=1
+flag=noshadow
+flag2=invisible
+
+;無敵化
+[State 30020]
+type=Nothitby
+trigger1=1
+value=SCA
+
+;ＩＤ用変数の最高値記録
+[State 30020]
+type=varset
+trigger1=var(57)<var(3+var(55))
+var(57)=var(3+var(55))
+
+;ループバック
+[State 30020]
+type=Changestate
+trigger1=!numhelper(30021)	;何か見つかった１
+trigger1=var(56)!=-1	;何か見つかった２
+trigger1=var(55)<var(54)	;ループが指定回数未満
+trigger1=var(55):=var(55)+1||1	;インクリメント（ループカウンタ増加処理）
+value=30020
+
+[State 30020];カウンタ初期化
+type=VarSet
+trigger1=1
+var(55)=0
+
+;終了したらキャラ別対策判断用のステートへ
+[State 30020]
+type = ChangeState
+trigger1=1
+value=30029
+
+;------------------------------------------------------------------------------
+;ＩＤ予測ヘルパー用ステート
+[StateDef 30021]
+anim=0
+ctrl=0
+
+;即消える
+[State 30021]
+type=destroyself
+trigger1=1
+
+;------------------------------------------------------------------------------
+;ループステート
+[StateDef 30022]
+anim=0
+ctrl=0
+
+;開始値を最高値に合わせる
+[State 30022]
+type=varset
+trigger1=PrevStateNo!=30022;
+var(3+var(55))=var(57)+1
+
+;ループカウンタ増加
+[State 30022]
+type=varadd
+var(56)=1
+trigger1=var(56)!=-1
+
+;ループカウンタ初期化
+[State 30022]
+type=Varset
+trigger1=PrevStateNo!=30022
+var(56)=0
+
+;ふるいにかける。１つでも該当するなら次へ
+[State 30022]
+type=varadd
+trigger1=!PlayerIDExist(var(3+var(55)))
+trigger2=playerID(var(3+var(55))),MoveType!=A;||!(playerID(var(3+var(55))),hitdefattr=SCA,AA,AP,AT)
+trigger2=playerID(var(3+var(55))),time>200-var(55)*10
+trigger3=abs(playerID(var(3+var(55))),Screenpos x)>500
+trigger4=abs(playerID(var(3+var(55))),Pos Y)>500
+trigger5=teamside=playerID(var(3+var(55))),teamside
+var(3+var(55))=1
+
+[state 30022];id確認用。１０回繰り返して当たりがこなかったら、中止して次に備える
+type=Helper
+trigger1=var(56)>10
+trigger1=var(56):=-1
+trigger1=!numhelper(30021)
+helpertype=normal
+name="id_check"
+ID=30021
+pos=0, 0
+postype=right
+facing=1
+stateno=30021
+ownpal=1
+supermovetime=99999
+pausemovetime=99999
+
+;変数の値を今出したばかりのヘルパーのものに
+[State 30022]
+type=varset
+trigger1=var(56)=-1
+trigger1=numhelper(30021)
+var(3+var(55))=helper(30021),id
+
+;ループバック
+[State 30022]
+type = ChangeState
+value=30022
+triggerall=var(56)!=-1
+trigger1=!PlayerIDExist(var(3+var(55)))
+trigger2=playerID(var(3+var(55))),MoveType!=A||!(playerID(var(3+var(55))),hitdefattr=SCA,AA,AP,AT)||PlayerID(var(3+var(55))),MoveReversed
+trigger2=!(PlayerID(Var(3+Var(55))),HitDefAttr=SCA,AA,AT,AP)
+trigger2=playerID(var(3+var(55))),time>200-var(55)*10
+trigger3=abs(playerID(var(3+var(55))),Screenpos x)>500
+trigger4=abs(playerID(var(3+var(55))),Pos Y)>500
+trigger5=teamside=playerID(var(3+var(55))),teamside
+
+;終わったら戻る
+[State 30022]
+type = ChangeState
+value=30020
+trigger1=1
+
+;------------------------------------------------------------------------------
+;飛び道具対策、キャラ別ステート
+[StateDef 30029]
+anim=0
+ctrl=0
+
+;１Ｆ経ったらまたＩＤ取得から
+[State 30029, ChangeState]
+type = ChangeState
+trigger1 = time > 0
+value = 30020
+
+;----------------------------------------------------------[ループ計算]
+[State 30029, VarSet]
+type = VarSet
+trigger1 = PrevStateNo != 30029
+fvar(30) = 0
+[State 30029, VarSet]
+type = VarSet
+trigger1 = PrevStateNo != 30029
+fvar(31) = 0
+[State 30029, VarSet]
+type = VarSet
+trigger1 = PrevStateNo != 30029
+fvar(32) = 0
+[State 30029, VarSet]
+type = VarSet
+trigger1 = PrevStateNo != 30029
+fvar(38) = 0
+[State 30029, VarSet]
+type = VarSet
+trigger1 = PrevStateNo != 30029
+fvar(39) = 0
+
+;----------------------------------------------------------[コンボ拾い用ループ計算]
+[State 30029, 2B]
+type = VarSet
+;triggerall = fVar(39) = 0 ; ONにすると一番小さい値, OFFだと一番大きな値
+trigger1 = Var(55) >= 8
+trigger1 = Root,fVar(23) >= Var(55) - 1
+trigger1 = Root,P2BodyDist X - 5.8 * (Var(55) - 5) + Root,facing * PlayerID(Root,Var(46)),facing * PlayerID(Root,Var(46)),Vel X * (Var(55) - 5) * (Root,fVar(31) >= 60) = [-15, 20] ;-20, 15
+trigger1 = Root,P2BodyDist Y + (4*(PlayerID(Root,Var(46)),Vel Y)+(4*(4+1)/2)*Root,fVar(39)) = [-35, 15] ;-40, 20
+fvar(30) = Var(55)
+
+[State 30029, D5B]
+type = VarSet
+;triggerall = fVar(39) = 0 ; ONにすると一番小さい値, OFFだと一番大きな値
+trigger1 = Var(55) >= 10 ; 9
+trigger1 = Root,fVar(23) >= Var(55) - 1
+trigger1 = Root,P2BodyDist X - 5.8 * (Var(55) - 8) + Root,facing * PlayerID(Root,Var(46)),facing * PlayerID(Root,Var(46)),Vel X * (Var(55) - 5) * (Root,fVar(31) >= 60) = [-30, 50] ;-20, 20
+trigger1 = Root,P2BodyDist Y + (10*(PlayerID(Root,Var(46)),Vel Y)+(10*(10+1)/2)*Root,fVar(39)) = [-150, -40] ;-50, -80	; -110
+fvar(31) = Var(55)
+
+[State 30029, D5A]
+type = VarSet
+;triggerall = fVar(39) = 0 ; ONにすると一番小さい値, OFFだと一番大きな値
+trigger1 = Var(55) >= 8 ; 9
+;trigger1 = Root,fVar(34) >= Var(55)
+trigger1 = PlayerID(Root,Var(46)),Vel Y != 0
+trigger1 = Root,P2BodyDist X - Const(Velocity.run.fwd.X) * (Var(55) - 5) + Root,facing * PlayerID(Root,Var(46)),facing * PlayerID(Root,Var(46)),Vel X * (Var(55) - 5) * (Root,fVar(31) >= 60) = [-10, 45] ;80 ;60
+trigger1 = Root,P2BodyDist Y+(PlayerID(Root,Var(46)),Vel Y*(Var(55)-Root,fVar(36))+(Root,fVar(39)*(Var(55)-Root,fVar(36))*((Var(55)-Root,fVar(36))-1)/2)) = [-10, 20] ;-50, -80
+fvar(32) = Var(55)
+
+;----------------------------------------------------------[]
+[State 30029, 絆という名の剣]
+type = VarSet
+;triggerall = fVar(39) = 0 ; ONにすると一番小さい値, OFFだと一番大きな値
+trigger1 = Var(55) >= 6
+trigger1 = Root,fVar(34) >= Var(55)
+trigger1 = PlayerID(Root,Var(46)),Vel Y != 0
+trigger1 = Root,P2BodyDist X - 8.0 * (Var(55) - 6) + Root,facing * PlayerID(Root,Var(46)),facing * PlayerID(Root,Var(46)),Vel X * (Var(55) - 6) * (Root,fVar(31) >= 60) = [-20, 20] ;80 ;60
+trigger1 = Root,P2BodyDist Y+(PlayerID(Root,Var(46)),Vel Y*(Var(55)-Root,fVar(36))+(Root,fVar(39)*(Var(55)-Root,fVar(36))*((Var(55)-Root,fVar(36))-1)/2)) = [-40, -5] ;-50, -80
+fvar(37) = Var(55)
+
+[State 30029, D5B]
+type = VarSet
+;triggerall = fVar(39) = 0 ; ONにすると一番小さい値, OFFだと一番大きな値
+trigger1 = Var(55) >= 10 ; 9
+trigger1 = Root,fVar(34) >= Var(55)
+trigger1 = Root,P2BodyDist X - Const(Velocity.run.fwd.X) * (Var(55) - 5) + Root,facing * PlayerID(Root,Var(46)),facing * PlayerID(Root,Var(46)),Vel X * (Var(55) - 5) * (Root,fVar(31) >= 50) = [-20, 50] ;80 ;60
+trigger1 = Root,P2BodyDist Y+(PlayerID(Root,Var(46)),Vel Y*(Var(55)-Root,fVar(36))+(Root,fVar(39)*(Var(55)-Root,fVar(36))*((Var(55)-Root,fVar(36))-1)/2)) = [-60, 20] ;-50, -80
+fvar(38) = Var(55)
+
+[State 30029, D5A]
+type = VarSet
+;triggerall = fVar(39) = 0 ; ONにすると一番小さい値, OFFだと一番大きな値
+trigger1 = Var(55) >= 8 ; 9
+trigger1 = Root,fVar(34) >= Var(55)
+trigger1 = Root,P2BodyDist X - Const(Velocity.run.fwd.X) * (Var(55) - 5) + Root,facing * PlayerID(Root,Var(46)),facing * PlayerID(Root,Var(46)),Vel X * (Var(55) - 5) * (Root,fVar(31) >= 50) = [-20, 40] ;80 ;60
+trigger1 = Root,P2BodyDist Y+(PlayerID(Root,Var(46)),Vel Y*(Var(55)-Root,fVar(36))+(Root,fVar(39)*(Var(55)-Root,fVar(36))*((Var(55)-Root,fVar(36))-1)/2)) = [-35, 10] ;-50, -80
+fvar(39) = Var(55)
+
+
+;変数の値に該当するヘルパーが存在しないならここでループカウンタ増加させてまた初めから
+[State 30029, ChangeState]
+type = ChangeState
+trigger1=!PlayerIDExist(var(3+var(55)))
+trigger1=var(55)<var(54)-1
+trigger1=var(55):=var(55)+1
+value = 30029
+
+;変数リセット
+;何故か使うとバグるVarRangeSet
+;[State 30029, VarSet]
+;type = VarSet
+;trigger1 = PrevStateNo != 30029
+;var(0) = 0
+;[Staet 30029, VarRangeSet]
+;type = VarRangeSet
+;trigger1 = PrevStateNo != 30029
+;value = 0
+;first = 58
+;last = 59
+;[Staet 30029, VarRangeSet]
+;type = VarRangeSet
+;trigger1 = PrevStateNo != 30029
+;fvalue = 0
+;first = 0
+;last = 21
+
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+var(0)=0
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+var(58) = 0
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+var(59)=0
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+fvar(0)=0
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+fvar(1)=0
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+fvar(2)=0
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+fvar(3)=0
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+fvar(4)=0
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+fvar(5)=0
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+fvar(6)=0
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+fvar(7)=0
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+fvar(8)=0
+[State 30029]
+type=varset
+trigger1=PrevStateNo!=30029
+fvar(9)=0
+
+[State 300029, Vel X]
+type = VarSet
+triggerall = PlayerIDExist(var(3+var(55)))
+trigger1 = PlayerID(var(3+var(55))),Vel X
+fvar(0) = PlayerID(var(3+var(55))),Vel X
+
+[State 300029, Vel Y]
+type = VarSet
+triggerall = PlayerIDExist(var(3+var(55)))
+trigger1 = PlayerID(var(3+var(55))),Vel Y
+fvar(1) = PlayerID(var(3+var(55))),Vel Y
+
+[State 30029, 地上波動]
+type = varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((var(58)) % 10) < 9
+trigger1 = playerID(var(3+var(55))),MoveType = A
+trigger1 = playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-100, 30]
+trigger1 = abs(playerID(var(3+var(55))),vel x) > 1
+trigger1 = playerID(var(3+var(55))),vel y < 1
+trigger1 = playerID(var(3+var(55))),facing * (root,pos x - playerID(var(3+var(55))),pos x) > -30 ;-40
+trigger1 = fVar(2) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 4 || 1
+trigger1 = fVar(3) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 8 || 1
+trigger1 = fVar(4) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 12 || 1
+trigger1 = fVar(5) := (-Root,Pos Y + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-70, 20]) || 1
+trigger1 = fVar(6) := (-Root,Pos Y - (Root,Const(Movement.Yaccel) * 8 * 9 / 2 + Root,Vel Y * 8) + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-50, 20]) || 1
+trigger1 = fVar(8) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 17 || 1
+var(58) = 1
+
+[State 30029, 空中波動]
+type = varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((var(58) / 10) % 10) < 9
+trigger1 = playerID(var(3+var(55))),MoveType = A
+trigger1 = playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-200, -100]
+trigger1 = abs(playerID(var(3+var(55))),vel x) > 1
+trigger1 = playerID(var(3+var(55))),vel y < 1
+trigger1 = playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x) > -30 ;-50
+trigger1 = fVar(2) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 4 || 1
+trigger1 = fVar(3) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 8 || 1
+trigger1 = fVar(4) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 12 || 1
+trigger1 = fVar(5) := (-Root,Pos Y + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-70, 20]) || 1
+trigger1 = fVar(6) := (-Root,Pos Y - (Root,Const(Movement.Yaccel) * 8 * 9 / 2 + Root,Vel Y * 8) + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-70, 20]) || 1
+trigger1 = fVar(8) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 12 || 1
+var(58) = 10
+
+[State 30029, 地上設置]
+type = varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((var(58) / 100) % 10) < 9
+trigger1 = playerID(var(3+var(55))),MoveType = A
+trigger1 = playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-100, 30]
+trigger1 = playerID(var(3+var(55))),vel x <= 1
+trigger1 = fVar(2) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 4 || 1
+trigger1 = fVar(3) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 8 || 1
+trigger1 = fVar(4) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 12 || 1
+var(58) = 100
+
+[State 30029, 空中設置]
+type = varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((var(58) / 1000) % 10)<  9
+trigger1 = playerID(var(3+var(55))),MoveType = A
+trigger1 = playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-200, -100]
+trigger1 = playerID(var(3+var(55))),vel x <= 1
+trigger1 = fVar(2) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 4 || 1
+trigger1 = fVar(3) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 8 || 1
+trigger1 = fVar(4) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 12 || 1
+var(58) = 1000
+
+[State 30029, 空中斬空]
+type = varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((var(58) / 10000) % 10) < 9
+trigger1 = playerID(var(3+var(55))),MoveType = A
+trigger1 = playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-200, 30]
+trigger1 = playerID(var(3+var(55))),vel x > 1
+trigger1 = playerID(var(3+var(55))),vel y >= 1
+trigger1 = fVar(2) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 4 || 1
+trigger1 = fVar(3) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 8 || 1
+trigger1 = fVar(4) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 12 || 1
+trigger1 = fVar(5) := (-Root,Pos Y + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-70, 20]) || 1
+trigger1 = fVar(6) := (-Root,Pos Y - (Root,Const(Movement.Yaccel) * 8 * 9 / 2 + Root,Vel Y * 8) + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-90, 20]) || 1
+trigger1 = fVar(7) := (-Root,Pos Y + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-130, -30]) || 1
+trigger1 = fVar(8) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 12 || 1
+var(58) = 10000
+
+[State 30029, 地上波動(近)]
+type = varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((var(58) / 100000) % 10) < 9
+trigger1 = playerID(var(3+var(55))),MoveType = A
+trigger1 = playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-100, 30]
+trigger1 = abs(playerID(var(3+var(55))),vel x) > 1
+trigger1 = playerID(var(3+var(55))),vel y < 1
+trigger1 = playerID(var(3+var(55))),facing * (root,pos x - playerID(var(3+var(55))),pos x) > -40 ;-40
+trigger1 = playerID(var(3+var(55))),facing*(root,pos x - playerID(var(3+var(55))),pos x) - playerID(var(3+var(55))),vel x * 6 <= 40
+;trigger1 = (-Root,Pos Y + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-60, 10])
+trigger1 = fVar(2) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 4 || 1
+trigger1 = fVar(5) := (-Root,Pos Y + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-70, 20]) || 1
+trigger1 = fVar(6) := (-Root,Pos Y - (Root,Const(Movement.Yaccel) * 4 * 5 / 2 + Root,Vel Y * 4) + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-90, 20]) || 1
+trigger1 = fVar(8) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 12 || 1
+var(58) = 100000
+
+[State 30029, 空中波動(近)]
+type = varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((var(58) / 1000000) % 10) < 9
+trigger1 = playerID(var(3+var(55))),MoveType = A
+trigger1 = playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-200, -100]
+trigger1 = abs(playerID(var(3+var(55))),vel x) > 1
+trigger1 = playerID(var(3+var(55))),vel y < 1
+trigger1 = playerID(var(3+var(55))),facing * (root,pos x - playerID(var(3+var(55))),pos x) > -40 ;-40
+trigger1 = playerID(var(3+var(55))),facing*(root,pos x - playerID(var(3+var(55))),pos x) - playerID(var(3+var(55))),vel x * 6 <= 40
+;trigger1 = (-Root,Pos Y + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-60, 10])
+trigger1 = fVar(2) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 4 || 1
+trigger1 = fVar(5) := (-Root,Pos Y + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-70, 20]) || 1
+trigger1 = fVar(6) := (-Root,Pos Y - (Root,Const(Movement.Yaccel) * 4 * 5 / 2 + Root,Vel Y * 4) + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-90, 10]) || 1
+var(58) = 1000000
+
+[State 30029, 空中斬空(近)]
+type = varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((var(58) / 10000000) % 10) < 9
+trigger1 = playerID(var(3+var(55))),MoveType = A
+trigger1 = playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-200, 30]
+trigger1 = playerID(var(3+var(55))),vel x > 1
+trigger1 = playerID(var(3+var(55))),vel y >= 1
+trigger1 = playerID(var(3+var(55))),facing*(root,pos x - playerID(var(3+var(55))),pos x) - playerID(var(3+var(55))),vel x * 6 <= 40
+trigger1 = (-Root,Pos Y + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-60, 10])
+trigger1 = fVar(5) := (-Root,Pos Y + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-70, 20]) || 1
+trigger1 = fVar(6) := (-Root,Pos Y - (Root,Const(Movement.Yaccel) * 4 * 5 / 2 + Root,Vel Y * 4) + playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-60, 10]) || 1
+trigger1 = fVar(8) := playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 12 || 1
+var(58) = 10000000
+
+[State 30029, 上から来るぞ！気をつけろ！]
+type = varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = !((var(58) / 1000000000) % 10)
+trigger1 = playerID(var(3+var(55))),MoveType = A
+trigger1 = playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 12 > -80
+trigger1 = abs(playerID(var(3+var(55))),vel x) <= 1
+trigger1 = playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x) > -40
+trigger1 = playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x * 10 = [-30, 40] ;-40
+trigger1 = abs(playerID(var(3+var(55))),vel y) > 2
+var(58) = 100000000
+
+[State 30029, 天仰]
+type = varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = !((var(58) / 1000000000) % 10)
+trigger1 = playerID(var(3+var(55))),MoveType = A
+trigger1 = playerID(var(3+var(55))),Pos Y+playerID(var(3+var(55))),vel y * 10 = [-100, 60]
+trigger1 = playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x) < 0
+trigger1 = abs(playerID(var(3+var(55))),vel x) < 0
+trigger1 = playerID(var(3+var(55))),facing*(root,pos x-playerID(var(3+var(55))),pos x)-playerID(var(3+var(55))),vel x*10 >= -50
+var(58) = 1000000000
+
+[State 30029, ビーム(?)]
+type = varset
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = !fvar(20)
+trigger1 = playerID(var(3+var(55))),MoveType = A && (PlayerID(Var(3+Var(55))),HitDefAttr=SCA,AA,AT,AP)
+trigger1 = playerID(var(3+var(55))),vel x = 0 && playerID(var(3+var(55))),vel y = 0
+trigger1 = playerID(var(3+var(55))),Pos X - PlayerID(Root,Var(46)),Pos X = [-40, 60]
+trigger1 = playerID(var(3+var(55))),Pos Y - PlayerID(Root,Var(46)),Pos Y = [-110, 50] ;20
+fvar(20) = 1
+
+[State 30029, 私はMoveType = Aです]
+type = varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((Var(59)) % 10) < 9
+trigger1 = (PlayerID(Var(3+Var(55))),MoveType = A)
+var(59) = var(59) + 1
+
+[State 30029, 超必殺技判定]
+type=varset
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((Var(59) / 10) % 10) < 9
+;trigger1 = playerID(var(3+var(55))),MoveType=A&&!playerID(var(3+var(55))),MoveContact
+trigger1 = (playerID(var(3+var(55))),hitdefattr = SCA, HA, HT, HP)
+var(59) = var(59) + 10
+
+[State 30029, 打撃判定]
+type=varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((Var(59) / 100) % 10) < 9
+;trigger1 = playerID(var(3+var(55))),MoveType=A&&!playerID(var(3+var(55))),MoveContact
+trigger1 = (playerID(var(3+var(55))),hitdefattr = SCA, NA, SA, HA)
+var(59) = var(59) + 100
+
+[State 30029, 投げ判定]
+type=varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((Var(59) / 1000) % 10) < 9
+;trigger1 = playerID(var(3+var(55))),MoveType = A && !playerID(var(3+var(55))),MoveContact
+trigger1 = (playerID(var(3+var(55))),hitdefattr = SCA, NT, ST, HT)
+var(59) = var(59) + 1000
+
+[State 30029, 飛び道具判定]
+type=varadd
+trigger1 = PlayerIDExist(var(3+var(55)))
+trigger1 = ((Var(59) / 10000) % 10) < 9
+;trigger1 = playerID(var(3+var(55))),MoveType = A && !playerID(var(3+var(55))),MoveContact
+trigger1 = (playerID(var(3+var(55))),hitdefattr = SCA, NP, SP, HP)
+var(59) = var(59) + 10000
+
+[State 30029, 飛び道具のStateNo取得]
+type = VarSet
+triggerall = PlayerIDExist(var(3+var(55)))
+trigger1 = PlayerID(var(3+var(55))),MoveType = A
+trigger1 = PlayerID(var(3+var(55))),StateNo >= 200
+trigger1 = (playerID(var(3+var(55))),hitdefattr = SCA, AA, AP, AT)
+fvar(10) = PlayerID(var(3+var(55))),StateNo
+
+;機能せず。 残念
+[State 30029, 飛び道具のHitPauseTime取得]
+type = VarSet
+triggerall = PlayerIDExist(var(3+var(55)))
+trigger1 = PlayerID(var(3+var(55))),MoveType = A
+trigger1 = PlayerID(var(3+var(55))),StateNo >= 200
+trigger1 = PlayerID(var(3+var(55))),HitPauseTime	; GetHitVar(hitshaketime)	; || PlayerID(var(3+var(55))),MoveContact
+fvar(11) = 100	; PlayerID(var(3+var(55))),GetHitVar(hitshaketime)
+
+[State 30029, 飛び道具のStateNo保存1]
+type = VarSet
+triggerall = PlayerIDExist(var(3+var(55)))
+triggerall = (floor(fVar(20)) / 100000) = 0
+triggerall = PlayerID(var(3+var(55))),StateNo != floor(fvar(20)) % 100000 && PlayerID(var(3+var(55))),StateNo != floor(fvar(20)) / 100000
+trigger1 = PlayerID(var(3+var(55))),MoveType = A
+trigger1 = PlayerID(var(3+var(55))),StateNo >= 200
+trigger1 = (playerID(var(3+var(55))),hitdefattr = SCA, AA, AP, AT)
+fvar(20) = ifelse(floor(fVar(20)) = 0, PlayerID(var(3+var(55))),StateNo, PlayerID(var(3+var(55))),StateNo * 100000)
+
+[State 30029, 初期化]
+type = VarSet
+trigger1 = 0
+fvar(10) = 0
+
+[State 30029, 初期化]
+type = VarSet
+trigger1 = 0
+fvar(11) = 0
+
+[State 30029, ループカウンタ増加、初めに戻る]
+type = ChangeState
+trigger1 = var(55) < var(54)
+trigger1 = var(55):=var(55) + 1 || 1
+value = 30029
+
+[State 30029, ClipBoard]
+type = DisplayToClipboard
+trigger1 = IsHelper
+IgnoreHitPause = 1
+text=" Var(59)=%d\tvar(58) = %d\tVar(0)=%d\tfVar(2)=%d\tfVar(3)=%d\t\n"
+params= var(59), var(58), Var(0), floor(fVar(2)), floor(fVar(3))
+
+[State 30029, ClipBoard]
+type = AppendToClipboard
+trigger1 = IsHelper
+IgnoreHitPause = 1
+text=" fvar(2)=%d\tfvar(3)=%d\tfvar(4)=%d\tfvar(5)=%d\tfvar(6)=%d\t\n"
+params= floor(fvar(2)), floor(fvar(3)), floor(fvar(4)), floor(fvar(5)), floor(fVar(6))
+
+[State 30029, ClipBoard]
+type = AppendToClipboard
+trigger1 = 0	; IsHelper
+IgnoreHitPause = 1
+text=" fvar(10)=%d\tfvar(11)=%d\tfvar(20)=%d\tfvar(3)=%d\tfvar(5)=%d\t\n"
+params= floor(fvar(10)), floor(fvar(11)), floor(fvar(20)), floor(fvar(3)), floor(fVar(5))
+
+[State 30029, 初期化]
+type = VarSet
+trigger1 = 1
+fvar(11) = 0
+
+[State 30029, カウンタ初期化]
+type = varset
+trigger1 = 1
+var(55) = 0
+
+[State 30029, カウンタ初期化]
+type = varset
+trigger1 = 1
+var(56) = 0
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+; ＡＩ起動用ヘルパー
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[StateDef 100000]
+anim=0
+ctrl=0
+
+[State 100000]
+type = assertspecial
+trigger1 = 1
+flag = invisible
+flag2 = noshadow
+
+[State 100000]
+type = NotHitBy
+value = SCA
+trigger1 = 1
+
+[State 100000, DestroySelf]
+type = selfstate
+trigger1 = !IsHelper
+value = 0
+ctrl = 1
+
+[State 100000, AI varset]
+type = varset
+triggerall = IsHelper
+trigger1 = command = "up" && root,command = "up"
+trigger2 = command = "down" && root,command = "down"
+trigger3 = command = "back" && root,command = "back"
+trigger4 = command = "fwd" && root,command = "fwd"
+trigger5 = command = "a" && root,command = "a"
+trigger6 = command = "b" && root,command = "b"
+trigger7 = command = "c" && root,command = "c"
+trigger8 = command = "x" && root,command = "x"
+trigger9 = command = "y" && root,command = "y"
+trigger10 = command = "z" && root,command = "z"
+trigger11 = command = "start" && root,command = "start"
+var(59) = -1
+
+[State 100000, AI varset]
+type = varset
+triggerall = IsHelper
+triggerall = var(59) != -1
+triggerall = RoundState = 2 && Root,ctrl
+trigger1 = root,command = "up"
+trigger2 = root,command = "down"
+trigger3 = root,command = "back"
+trigger4 = root,command = "fwd"
+trigger5 = root,command = "a"
+trigger6 = root,command = "b"
+trigger7 = root,command = "c"
+trigger8 = root,command = "x"
+trigger9 = root,command = "y"
+trigger10 = root,command = "z"
+trigger11 = root,command = "start"
+var(59) = 1
+
+[State 100000, AI varset]
+type=varset
+triggerall = IsHelper
+triggerall = var(59) != -1
+triggerall = RoundState = 2 && Root,ctrl
+trigger1=command !="up" && root,command="up"&&(roundstate=2&&root,ctrl)
+trigger2=command !="down" && root,command="down"&&(roundstate=2&&root,ctrl)
+trigger3=command !="back" && root,command="back"&&(roundstate=2&&root,ctrl)
+trigger4=command !="fwd" && root,command="fwd"&&(roundstate=2&&root,ctrl)
+trigger5=command !="a" && root,command="a"
+trigger6=command !="b" && root,command="b"
+trigger7=command !="c" && root,command="c"
+trigger8=command !="x" && root,command="x"
+trigger9=command !="y" && root,command="y"
+trigger10=command !="z" && root,command="z"
+trigger11=command !="start" && root,command="start"
+var(59) = 1
+
+[State 100000, destroyself]
+Type = DestroySelf
+triggerall = IsHelper
+trigger1 = root,Var(59) != 0
+trigger2 = Var(59) = -1
+

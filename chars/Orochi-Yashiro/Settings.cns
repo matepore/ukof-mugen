@@ -1,0 +1,630 @@
+[Statedef -3]
+
+;------------------------------ NEW AI Editable Level -------------------------
+;     Now we have 4 levels that work better against the players, 4 levels
+; that work better against other AI's, and the option to DISABLE AI.
+; Note that, even tough "VS AI" Levels can be used against players,
+; they have 2 major flaws:
+;  1 - more exploitable AI: once you find the "flaws", it's easy to win
+;  2 - more frustrating playing style: few (I'm included amongst these
+; few) can battle "VS AI" levels without being extremely boring.
+;    Also note that "VS player" levels will attack more, and with more
+; randomness, comminting more flaws that can be exploited. This will give
+; you a more "human" fight, and, for some people, easier.
+; When you choose any level beyond 8, you'll be prompted with a "warning"
+; message. Buggy results WILL occur.
+;------------------------------------------------------------------------------
+
+[State -3, AIlevel]       ;=== AI Type and Difficulty ===
+type = varset             ;= Change it here if you want =
+trigger1 = !var(21)       ;===== Current level is =======
+var(21) =                                8
+                                       ;(0 = disabled)
+                                       ;(1 = easy - VS player)
+                                       ;(2 = normal - VS player)
+                                       ;(3 = hard - VS player)
+                                       ;(4 = very hard - VS player)
+                                       ;(5 = easy - VS AI)
+                                       ;(6 = normal - VS AI)
+                                       ;(7 = hard - VS AI)
+                                       ;(8 = very hard - VS AI)
+
+; Language setting (0 = english; 1 = portuguese) - only for winquotes! --------
+
+[State -3, Language]          ;====== Language setting ======
+type = varset                 ;= Change it here if you want =
+trigger1 = roundstate = [0,1] ;===== present state is =======
+var(26) =                                    0
+                                           ;(0 = english/inglês)
+                                           ;(1 = portuguese/português)
+
+
+; Char mode setting -----------------------------------------------------------
+
+[State -3, Language]          ;==== Char modes' Settings ====
+type = varset                 ;= Change it here if you want =
+trigger1 = roundstate = [0,1] ;===== present state is =======
+var(0) =                                     1
+                                           ;(0 = Normal Yashiro)
+                                           ;(1 = Orochi Yashiro)
+                                           ;(2 = 2-in-1 Yashiro)
+
+; Drago Groove Selector -------------------------------------------------------
+
+[State -3, Language]          ;==== Drago Groove Selector ===
+type = varset                 ;= Change it here if you want =
+trigger1 = roundstate = [0,1] ;===== present state is =======
+var(51) =                                    0
+                                           ;(0 = With MAX Mode)
+                                           ;(1 = Without MAX Mode)
+
+;>>>>>>>>>>>>>>>>>>>>>>>>>>=========================<<<<<<<<<<<<<<<<|
+;|||||||||||||||||||||||||| END OF SETTINGS |||||||||||||||||||||||||
+;>>>>>>>>>>>>>>>>>>>>>>>>>>=========================<<<<<<<<<<<<<<<<|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;==============================================================================
+; States that are executed when in self's State file (use Statedef -3)
+;==============================================================================
+
+; Juggle Code ----------------------------------------------------------------
+[State 9998, Juggle Code]
+Type = Targetstate
+TriggerAll = Numtarget
+TriggerAll = !Target, HitShakeOver
+TriggerAll = StateNo != 450
+triggerAll = Target, stateno = [5000, 5079]
+TriggerAll = Target, GetHitvar(fall) = 1 || target, StateType = A
+Trigger1 = var(7)
+Trigger2 = projHit1010 = 1, [0,5]
+Trigger3 = projHit3000 = 1, [0,5]
+Trigger4 = projHit3100 = 1, [0,5]
+Trigger5 = NumHelper(9997)
+value = 6000
+ignorehitpause = 1
+
+; Air hit for normal attacks no control and no juggle coding ------------------
+
+[State -3, AirCorrection]
+type = targetstate
+Trigger1 = Numtarget
+trigger1 = Target, stateType = A
+trigger1 = Target, stateno = [5020, 5079]
+trigger1 = !Target, gethitvar(fall)
+trigger1 = !Target, hitshakeover
+trigger1 = stateno != 450; ==> Sweep kick
+value = 6010
+ignorehitpause = 1
+persistent = 0
+
+[State 1100, Juggle Code 2]
+Type = varSet
+Trigger1 = var(7)
+Trigger1 = NumHelper(9997) = 0
+var(7) = 0
+ignorehitpause = 1
+
+;Winane AI codes -----------------------------------------
+
+[State -3, SetAI]
+type = VarSet
+triggerall = !RoundState
+triggerall = IsHomeTeam
+trigger1 = (TeamSide = 2)
+trigger2 = (MatchNo > 1)
+var(58) = 1
+
+[State -3, AI Helper]
+type = Helper
+triggerAll = !ishelper
+triggerall = !var(58)
+triggerall = !NumHelper(9999)
+triggerall = (RoundState = 2)
+triggerall = Alive
+trigger1 = !NumPartner
+trigger2 = !(Partner,SelfAnimExist(9999))
+HelperType = normal
+name = "Yashiro's AI"
+ID = 9999
+pos = 9999999,99999
+StateNo = 9999
+KeyCtrl = 1
+PauseMoveTime = 999999999
+SuperMoveTime = 999999999
+
+[State -3, TurnBackOnAI]
+type = VarSet
+triggerAll = !ishelper
+trigger1 = (var(58) = -2)
+trigger1 = (RoundState = 2)
+trigger1 = Alive
+var(58) = 1
+
+[State 9741, ButtonTurnOffAI]
+type = VarSet
+trigger1 = var(58) = 1
+var(9) = var(21)
+
+[State 9741, ButtonTurnOffAI]
+type = VarSet
+trigger1 = var(58) != 1
+var(9) = 0
+
+[State -3, XOR]
+type = VarSet
+triggerAll = !ishelper
+triggerall = var(58)!=1
+triggerall = !var(56)
+triggerall = (var(57) = GameTime-1)
+trigger1 = (command = "a") ^^ (command = "a2")
+trigger2 = (command = "b") ^^ (command = "b2")
+trigger3 = (command = "c") ^^ (command = "c2")
+trigger4 = (command = "x") ^^ (command = "x2")
+trigger5 = (command = "y") ^^ (command = "y2")
+trigger6 = (command = "z") ^^ (command = "z2")
+trigger7 = (command = "start") ^^ (command = "start2")
+trigger8 = (command = "holda") ^^ (command = "holda2")
+trigger9 = (command = "holdb") ^^ (command = "holdb2")
+trigger10 = (command = "holdc") ^^ (command = "holdc2")
+trigger11 = (command = "holdx") ^^ (command = "holdx2")
+trigger12 = (command = "holdy") ^^ (command = "holdy2")
+trigger13 = (command = "holdz") ^^ (command = "holdz2")
+trigger14 = (command = "holdstart") ^^ (command = "holdstart2")
+trigger15 = (command = "holdfwd") ^^ (command = "holdfwd2")
+trigger16 = (command = "holdback") ^^ (command = "holdback2")
+trigger17 = (command = "holdup") ^^ (command = "holdup2")
+trigger18 = (command = "holddown") ^^ (command = "holddown2")
+trigger19 = (command = "recovery") ^^ (command = "recovery2")
+var(58) = 1
+
+[State -3, fiXOR]
+type = VarSet
+triggerAll = !ishelper
+trigger1 = !HitPauseTime
+trigger2 = (var(57) < GameTime-1)
+var(56) = HitPauseTime
+IgnoreHitPause = 1
+
+[State -3, GameTimeVar]
+type = VarSet
+triggerAll = !ishelper
+trigger1 = 1
+var(57) = GameTime
+IgnoreHitPause = 1
+
+[State -3, Orochi Air Accel]
+Type = Veladd
+TriggerAll = var(1) > 1
+TriggerAll = StateType = A
+TriggerAll = StateNo != 105
+TriggerAll = StateNo != [150, 155]
+TriggerAll = StateNo != 320
+Trigger1 = StateNo = [41,660]
+Trigger2 = StateNo = 1300
+y = .27
+
+[State -3, Attack Voice]
+type = PlaySnd
+Trigger1 = Time = 1
+Trigger1 = stateno = [200, 699]
+Trigger1 = Random > 600-250*var(2)
+Trigger1 = StateNo != 310
+Trigger1 = StateNo != 321
+Trigger1 = stateno != 340
+Trigger1 = stateno != 670
+Value = 0,var(2)
+Channel = 1
+
+[State -3, Attack FXSound]
+type = PlaySnd
+Trigger1 = Time = 1
+Trigger1 = stateno = [200, 699]
+Trigger1 = StateNo != 300
+Trigger1 = StateNo != 310
+Trigger1 = StateNo != 321
+Value = 1,var(2)
+Channel = 2
+
+[State -3, Jump Sound]
+type = PlaySnd
+Trigger1 = Time = 1
+Trigger1 = stateno = 50
+Value = 50,var(2)
+Channel = 3
+
+[State -3, Landing Sound]
+type = PlaySnd
+TriggerAll = Time = 1
+Trigger1 = stateno = 52
+Trigger2 = stateno = 106
+Trigger3 = stateno = 321
+Trigger4 = stateno = 1103
+Trigger5 = stateno = 1202
+Value = 52,0
+Channel = 3
+
+[State -3, OTG FX]
+type = Explod
+TriggerAll = Time = 1
+Trigger1 = stateno = 52
+Trigger2 = stateno = 106
+Trigger3 = stateno = 321
+Trigger4 = stateno = 1103
+Trigger5 = stateno = 1202
+anim = 8300
+pos = 0,0
+bindtime = 1
+ownpal = 1
+sprpriority = -3
+PauseMoveTime = 99
+SuperMoveTime = 99
+
+;Damage Adjust code ---------------------------------------------------------
+[State -3, main var]
+type = varset
+trigger1 = (MoveHit && HitDefAttr = SCA,AA,AP) || projhit = 1
+trigger1 = var(5) < 5
+trigger1 = var(9) <= 8
+trigger1 = StateNo != var(54)
+trigger1 = StateNo != [200,210]
+trigger1 = StateNo != [400,410]
+trigger1 = StateNo != [600,610]
+var(5) = var(5)+1
+ignorehitpause = 1
+persistent = 0
+
+[State -3, limiter var]
+type = varset
+trigger1 = (MoveHit && HitDefAttr = SCA,AA,AP) || projhit = 1
+var(54) = stateNo
+ignorehitpause = 1
+persistent = 0
+
+[State -3, Reset]
+type = Varset
+TriggerAll = var(5)
+trigger1 = moveguarded
+trigger2 = projguarded = 1
+trigger3 = p2movetype != H
+var(5) = 0
+ignorehitpause = 1
+
+[State -3, Reset]
+type = Varset
+TriggerAll = var(54)
+trigger1 = moveguarded
+trigger2 = projguarded = 1
+trigger3 = p2movetype != H
+trigger4 = ctrl
+var(54) = 0
+ignorehitpause = 1
+
+[State -3, Mulset]
+type = attackmulset
+trigger1 = 1
+value = (10-var(5))*.1+(.1*(var(9)-10)*(var(9) >= 10))
+ignorehitpause = 1
+
+; Play sound when getting hit -------------------------------------------------
+[State -3, Gethit Sound]
+type = PlaySnd
+triggerall = Random < 500
+triggerall = Time = 1
+triggerall = Alive = 1
+trigger1 = StateNo = 5000 || StateNo = 5010 || StateNo = 5020 || StateNo = 5070 || StateNo = 5100
+value = 5000,ifelse(GetHitVar(animtype) = 2, 2, ifelse(GetHitVar(animtype) = 1, 1, 0))
+Channel = 4
+
+;Remove Flames --------------------------------------------------------------
+[State -3, Remove Flames]
+type = RemoveExplod
+trigger1 = Stateno != 1100
+trigger1 = NumExplod(1150)
+ID = 1150
+
+;Guard Kill Code ------------------------------------------------------------
+[State -3, GuardKill]
+type = ChangeState
+trigger1 = PrevStateNo = [130,155]
+trigger1 = !Alive
+trigger1 = Stateno = 5000
+value = 5950
+ignorehitpause = 1
+
+[State -3, AssertSpecial]
+type = AssertSpecial
+trigger1 = PrevStateNo = [130,155]
+trigger1 = StateType != A
+Trigger1 = movetype != A
+flag = NoKOSnd
+ignorehitpause = 1
+
+; Guard Crush Countdown Adjust 2 ----------------------------------------------------
+[State -3, GCrushAdjust2 ]
+type = Varset
+trigger1 = var(12) > 1 && stateno != [150,155]
+trigger2 = var(12) = 0
+var(12) = 1
+ignorehitpause = 1
+
+;  Guard Crush increasing value -----------------------------------------------------
+[State -3, GCrushAdd ]
+type = Varadd
+triggerall = time = 1
+trigger1 = stateno = 150 && prevstateno != 152 && 154
+trigger2 = stateno = 152 && prevstateno != 150 && 154
+trigger3 = stateno = 154 && prevstateno != 150 && 152
+var(11) = floor((ifelse(GetHitVar(hitshaketime) <= 12,GetHitVar(hitshaketime)*10,125))/var(12))
+ignorehitpause = 1
+persistent = 0
+
+;  Guard Crush limitter --------------------------------------------------------------
+[State -3, GCrushLimit ]
+type = Varadd
+triggerall = time = 1
+trigger1 = stateno = 150 && prevstateno != 152 && 154
+trigger2 = stateno = 152 && prevstateno != 150 && 154
+trigger3 = stateno = 154 && prevstateno != 150 && 152
+var(12) = 1
+ignorehitpause = 1
+persistent = 0
+
+;  Guard Crush state -------------------------------------------------------------------
+[State -3, GCrushState ]
+type = ChangeState
+trigger1 = stateno = 150 || stateno = 152
+trigger1 = var(11) >= 1000
+value = 900
+ctrl = 0
+ignorehitpause = 1
+
+;  Dizzy State -------------------------------------------------------------------------
+[State -3, Dizzy state ]
+type = Changestate
+trigger1 = var(13) >= 1000
+Trigger1 = stateno = [5000,5099]
+trigger1 = !hitshakeover
+value = 6100
+ignorehitpause = 1
+
+;  AI optimization code 1: projectile limitter ------------------------------------------
+[State -3, AI Hadouken off ]
+type = Varset
+triggerall = var(9)
+triggerall = enemy,numproj >= 1 || (p2movetype = A && enemy,numhelper >= 1)
+Trigger1 = !NumProj
+trigger1 = movetype = H && !enemy,moveguarded
+trigger2 = !animtime
+Trigger2 = !NumProj
+Trigger2 = stateno = 1000
+trigger3 = p2MoveType != H
+trigger3 =(p2stateno = [3000,4999])||(p2stateno = [6000,9900])
+Trigger4 = stateno = 52
+Trigger5 = StateType = A
+trigger6 = Stateno = [5100,5210]
+var(22) = 1
+
+[State -3, AI Hadouken on ]
+type = Varset
+triggerall = var(9)
+trigger1 = enemy,moveguarded
+trigger2 = p2bodydist y < -80
+trigger3 = p2MoveType = H
+var(22) = 0
+
+;  AI optimization code 2: roll limitter ------------------------------------------------
+[State -3, Dodge limit ]
+type = Varset
+trigger1 = var(9)
+Trigger1 = !var(23)
+trigger1 = movetype = H
+var(23) = 1
+
+[State -3, Dodge limit ]
+type = Varset
+trigger1 = var(9)
+Trigger1 = var(23)
+trigger1 = !enemy,numproj
+trigger1 = enemy, p2dist x > 50
+trigger1 = p2movetype != A
+var(23) = 0
+
+;  AI optimization code 3: Enemy Size Detector ------------------------------------------
+[State -3, VERY Big Enemy]
+type = Varset
+trigger1 = var(9)
+Trigger1 = var(24) != 4
+trigger1 = Enemy, Const(size.head.pos.y) < -120
+var(24) = 4
+
+[State -3, Big Enemy]
+type = Varset
+triggerAll = var(9)
+TriggerAll = var(24) != 3
+trigger1 = Enemy, Const(size.head.pos.y) = [-120, -110]
+var(24) = 3
+
+[State -3, Medium&Default Enemy]
+type = Varset
+trigger1 = var(9)
+Trigger1 = var(24) != 2
+trigger1 = Enemy, Const(size.head.pos.y) = [-110, -90]
+trigger2 = Enemy, Const(size.head.pos.y) = 0
+var(24) = 2
+
+[State -3, Small Enemy]
+type = Varset
+trigger1 = var(9)
+Trigger1 = var(24) != 1
+trigger1 = Enemy, Const(size.head.pos.y) = [-90, -70]
+var(24) = 1
+
+[State -3, VERY Small Enemy]
+type = Varset
+trigger1 = var(9)
+Trigger1 = var(24)
+trigger1 = Enemy, Const(size.head.pos.y) = [-70, -1]
+var(24) = 0
+
+;  AI optimization code 4: "In the Enemy's back" Detector -------------------------------
+[State -3, In Enemy's Back]
+type = Varset
+triggerAll = var(9)
+TriggerAll = !var(25)
+trigger1 = Enemy, p2dist x < 0
+trigger2 = p2MoveType = H
+var(25) = 1
+
+[State -3, NOT In Enemy's Back]
+type = Varset
+trigger1 = var(9)
+Trigger1 = var(25)
+trigger1 = Enemy, p2dist x > 0
+trigger1 = p2MoveType != H
+var(25) = 0
+
+;  AI optimization code 5: Reu makes chars with Teleport as Attack type, ----------------
+;  Making the opponents try to counter, leaving then wide open for DM's -----------------
+;  This code equals the things for both AI - theirs and mine! --------- -----------------
+[State -3, Anti Cheap Reu code]
+type = StateTypeSet
+triggerAll = var(9)
+TriggerAll = Time = 1
+TriggerAll = Enemy, var(30)
+TriggerAll = Enemy, authorname = "Reu" || Enemy, authorname = "Reu and Kingtigre"
+trigger1 = StateNo = 100
+trigger2 = StateNo = [700, 770]
+trigger3 = StateNo = 1400
+trigger4 = StateNo = [5200, 5201]
+MoveType = A
+
+[State -3, Anti Cheap fall chars]
+type = varSet
+triggerAll = var(9)
+TriggerAll = !var(55)
+Trigger1 = Enemy, authorname = "Reu"
+Trigger2 = Enemy, authorname = "Reu and Kingtigre"
+Trigger3 = Enemy, authorname = "Warusaki3"
+var(55) = 1
+
+;  AI optimization code 6: Atemi Nage Optimizer -----------------------------------------
+[State -3, Atemi 1 - a ]
+type = Varset
+triggerall = !var(30)
+triggerall = var(9)
+trigger1 = enemy,hitdefattr = A,NA && enemy,vel y < 0
+trigger2 = enemy,hitdefattr = A,SA && enemy,vel y < -4
+trigger3 = p2dist x < 0
+var(30) = 1
+
+[State -3, Atemi 1 - b ]
+type = Varset
+triggerall = var(30)
+triggerall = var(9)
+trigger1 = p2movetype != A
+trigger2 = p2statetype != A
+var(30) = 0
+
+[State -3, Atemi 2 - a ]
+type = Varset
+triggerall = !var(31)
+triggerall = var(9)
+trigger1 = movetype = H || stateno = [5120,5202]
+trigger2 = stateno = [700,730]
+var(31) = 1
+
+[State -3, Atemi 2 - b ]
+type = Varset
+triggerall = var(31)
+triggerall = var(9)
+trigger1 = movetype = A
+trigger2 = p2movetype = H
+trigger3 = p2bodydist y < -100
+trigger4 = p2bodydist x > 95
+var(31) = 0
+
+;  AI Randomizer ------------------------------------------------------------------------
+[State -3, Random AI]
+type = VarRandom
+trigger1 = gametime%900 = 0
+trigger1 = var(9)
+v = 53
+range = 0,3
+ignorehitpause = 1
+
+;  AI Guard detector --------------------------------------------------------------------
+[State -3, enemy guard]
+type = VarAdd
+trigger1 = var(9)
+trigger1 = var(52) < 60
+trigger1 = EnemyNear, command = "holdback"
+trigger1 = p2Bodydist x < 100
+trigger1 = p2MoveType != H
+var(52) = 1
+ignorehitpause = 1
+
+[State -3, enemy guard]
+type = VarSet
+trigger1 = var(52) > 60
+var(52) = 60
+ignorehitpause = 1
+
+[State -3, enemy guard]
+type = Varadd
+trigger1 = var(52)
+trigger1 = EnemyNear, command != "holdback"
+var(52) = -1
+ignorehitpause = 1
+
+[State -3, enemy guard]
+type = VarSet
+trigger1 = var(52) < 0
+trigger2 = EnemyNear, command = "holdfwd"
+trigger2 = var(52) > 0
+var(52) = 0
+ignorehitpause = 1
+
+;  Recovery Roll optimizer --------------------------------------------------------------
+[State 1000, Roll Optimizer]
+Type = varSet
+Trigger1 = var(50)
+Trigger1 = StateNo != 5202
+Trigger1 = MoveType != H
+var(50) = 0
+
+;  Lin's Lifeadd code -------------------------------------------------------------------
+[State -3, Lin ]
+type = lifeadd
+triggerall = life >50 && time%5 = 0
+trigger1 = enemy,name = "lin"
+trigger1 = enemy,var(18) = 1
+value = -1

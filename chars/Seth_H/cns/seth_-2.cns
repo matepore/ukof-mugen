@@ -1,0 +1,1041 @@
+
+;###########################################################################
+[Statedef -2]
+;###########################################################################
+
+;*********************************************************************
+; 特殊ジャンプ管理
+;*********************************************************************
+[State -2, VarSet]
+type = VarSet
+trigger1 = Command = "holddown"
+var(4) = 10
+
+[State -2, VarSet]
+type = Varadd
+trigger1 = var(4) > 0 && StateNo != 40 && Command != "holddown"
+var(4) = -1
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = MoveType = H || StateNo = 11
+var(4) = 0
+
+;*********************************************************************
+; コマンド認識用ヘルパーの暴走防止
+;*********************************************************************
+[State -2, ChangeState]
+type = ChangeState
+trigger1 = IsHelper(99999)
+value = 99999
+ignorehitpause = 1
+
+;*********************************************************************
+; エフェクトの処理
+;*********************************************************************
+;===============================================================
+; エフェクト＆Var管理ヘルパーの呼び出し
+;===============================================================
+[State -2, Helper]
+type = Helper
+trigger1 = NumHelper(8000) = 0
+trigger1 = !IsHelper
+name = "effects & var"
+StateNo = 8000
+id = 8000
+pos = -9999, 9999
+postype = p1
+ownpal = 1
+bindtime = 1
+keyctrl = 0
+ignorehitpause = 1
+
+;===============================================================
+; エフェクト処理の設定
+;===============================================================
+[State -2, VarSet]
+type = VarSet
+triggerall = var(2) = 1
+triggerall = MoveHit
+triggerall = NumEnemy
+triggerall = Enemy(0),Movetype = H
+trigger1 = NumPartner = 0
+trigger2 = NumPartner = 1
+trigger2 = Partner,Name != "whip"
+trigger3 = NumPartner = 1
+trigger3 = Partner,Name = "whip"
+trigger3 = Partner,AuthorName = "HaiJin"
+trigger3 = Partner,Var(2) != 2
+var(2) = 2
+
+[State -2, VarSet]
+type = VarSet
+triggerall = var(3) = 1
+triggerall = MoveHit
+triggerall = NumEnemy > 1
+triggerall = Enemy(1),Movetype = H
+trigger1 = NumPartner = 0
+trigger2 = NumPartner = 1
+trigger2 = Partner,Name != "whip"
+trigger3 = NumPartner = 1
+trigger3 = Partner,Name = "whip"
+trigger3 = Partner,AuthorName = "HaiJin"
+trigger3 = Partner,Var(3) != 2
+var(3) = 2
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = var(2) != 1
+trigger1 = NumEnemy
+trigger1 = Enemy(0),Movetype != H
+trigger2 = var(2) = 1
+trigger2 = Movetype != A
+trigger3 = var(2) = 1
+trigger3 = NumPartner = 1
+trigger3 = Partner,Name = "whip"
+trigger3 = Partner,AuthorName = "HaiJin"
+trigger3 = Partner,Var(2) = 2
+var(2) = 0
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = var(3) != 1
+trigger1 = NumEnemy > 1
+trigger1 = Enemy(1),MoveType != H
+trigger2 = var(3) = 1
+trigger2 = MoveType != A
+trigger3 = var(3) = 1
+trigger3 = NumPartner = 1
+trigger3 = Partner,Name = "whip"
+trigger3 = Partner,AuthorName = "HaiJin"
+trigger3 = Partner,Var(3) = 2
+var(3) = 0
+
+;===============================================================
+; ボイスを再生
+;===============================================================
+
+;弱攻撃の風切り音
+[State -3, PlaySnd]
+type = PlaySnd
+triggerall = Time = 1
+trigger1 = stateno = 200
+trigger2 = stateno = 205
+trigger3 = stateno = 230
+trigger4 = stateno = 235
+trigger5 = stateno = 400
+trigger6 = stateno = 430
+trigger7 = stateno = 600
+trigger8 = stateno = 631
+trigger9 = stateno = 632
+value = s0, 0
+channel = 1
+
+;強攻撃の風切り音
+[State -3, PlaySnd]
+type = PlaySnd
+triggerall = Time = 1
+trigger1 = stateno = [210, 215]
+trigger2 = stateno = [240, 245]
+trigger3 = stateno = [410, 415]
+trigger4 = stateno = 440
+trigger5 = stateno = 610
+trigger6 = stateno = 640
+trigger7 = StateNo = [320, 325]
+value = s0, 1
+channel = 1
+
+;弱攻撃のボイス
+[State -3, PlaySnd]
+type = PlaySnd
+triggerall = AnimElem = 2,= 0
+triggerall = Random % 10 < 5 || (StateNo = [300, 399])
+trigger1 = stateno = [200, 205]
+trigger2 = stateno = [230, 235]
+trigger3 = stateno = [310, 315]
+trigger4 = stateno = 330
+trigger5 = stateno = 400
+trigger6 = stateno = 430
+trigger7 = stateno = 600
+trigger8 = stateno = [630, 635]
+value = s7, 0
+channel = 0
+
+;強攻撃のボイス
+[State -3, PlaySnd]
+type = PlaySnd
+triggerall = AnimElem = 2,= 1
+triggerall = Random % 10 < 7 || (StateNo = [300, 399])
+trigger1 = stateno = [210, 215]
+trigger2 = stateno = [240, 245]
+trigger3 = stateno = [300, 305]
+trigger4 = stateno = [320, 325]
+trigger5 = stateno = [410, 415]
+trigger6 = stateno = 440
+trigger7 = stateno = 610
+trigger8 = stateno = 640
+value = s7, 1
+channel = 0
+
+;ふっとばし攻撃のボイス
+[State -3, PlaySnd]
+type = PlaySnd
+trigger1 = StateNo = 250
+trigger1 = AnimElem = 2,= 1
+trigger2 = StateNo = 650
+trigger2 = AnimElem = 2,= 1
+trigger3 = StateNo = 811
+trigger3 = AnimElem = 2,= 1
+trigger4 = StateNo = 1422
+trigger4 = AnimElem = 2,= 1
+value = s250, 0
+channel = 0
+
+;喰らいボイス
+[State -3, PlaySnd]
+type = PlaySnd
+triggerall = Time = 0
+triggerall = random < 700
+trigger1 = stateno = 5000
+trigger2 = stateno = 5010
+trigger3 = stateno = 5020
+trigger4 = stateno = 5001
+trigger5 = stateno = 5002
+trigger6 = stateno = 5011
+trigger7 = stateno = 5012
+trigger8 = stateno = 5021
+trigger9 = stateno = 5022
+trigger10 = stateno = 5070
+trigger11 = stateno = 5160
+trigger12 = stateno = 5100
+trigger13 = stateno = 5160
+trigger14 = stateno = 5170
+trigger15 = stateno = 5101
+trigger16 = stateno = 5161
+trigger17 = stateno = 5171
+value = s5000, Random % 2
+channel = 3
+
+;===============================================================
+; ボイスを停止
+;===============================================================
+;===============================================================
+; ダッシュ効果音の停止
+;===============================================================
+[State -2, StopSnd]
+type = StopSnd
+trigger1 = StateNo != 100
+channel = 2
+
+[State -2, StopSnd]
+type = null	; StopSnd
+trigger1 = stateno != 195
+channel = 3
+
+[State -2, Stop Intro Voice]
+type = null	; StopSnd
+trigger1 = stateno != 191
+channel = 6
+
+[State -2, Stop Intro Voice]
+type = null	;StopSnd
+trigger1 = stateno != 191
+trigger1 = stateno != 6902
+channel = 7
+
+[State -2, StopSnd]
+type = StopSnd
+trigger1 = MoveType = H
+channel = 0
+
+[State -2, StopSnd]
+type = StopSnd
+trigger1 = MoveType = H
+channel = 1
+
+;*********************************************************************
+; 点滅処理
+;*********************************************************************
+
+[State -2, PalFX]
+type = PalFX
+trigger1 = var(8) % 2 = 0 && var(8) > 0
+add = 255,255,255
+time = 1
+ignorehitpause = 1
+
+[State -2, VarAdd]
+type = VarAdd
+trigger1 = var(8) > 0
+var(8) = -1
+ignorehitpause = 1
+
+[State -2, VarSet]
+type = VarSet
+trigger1 =  MoveType != A
+var(8) = 0
+ignorehitpause = 1
+
+
+;*********************************************************************
+; パワーMAXモード処理
+;*********************************************************************
+;===============================================================
+; MAXゲージ用ヘルパーの呼び出し
+;===============================================================
+[State -2, Helper]
+type = Helper
+trigger1 = Alive = 1
+trigger1 = NumHelper(8710) = 0
+trigger1 = !IsHelper
+id = 8710
+name = "MAX"
+sprpriority = 1
+pos = -9999, 9999
+postype = p1
+StateNo = 8710
+helpertype = normal
+keyctrl = 0 
+ownpal = 1
+
+;===============================================================
+; MAXゲージの消費
+;===============================================================
+[State -2, VarAdd]
+type = VarAdd
+trigger1 = fvar(0) > 0
+fvar(0) = -1
+;ignorehitpause = 1
+
+;===============================================================
+; MAXゲージの初期化
+;===============================================================
+[State -2, VarSet]
+type = VarSet
+trigger1 = fvar(0) < 0
+fvar(0) = 0
+ignorehitpause = 1
+
+;===============================================================
+; パワーMAXモードの解除
+;===============================================================
+[State -2, VarSet]
+type = VarSet
+trigger1 = fvar(0) <= 0
+trigger1 = StateNo != 3200 && StateNo != 3210 && (StateNo != 3201 || AnimElemTime(30) >= 0)
+var(6) = 0
+
+;===============================================================
+; パワーMAXモード時の点滅
+;===============================================================
+[State -2, PalFX]
+type = PalFX
+trigger1 = var(6) = 1 && fvar(0) && GameTime % 2 && !var(8)
+add = 96,96,0
+time = 1
+ignorehitpause = 1
+
+;===============================================================
+; パワーMAXモード時のパワーゲージ管理
+;===============================================================
+[State -2, VarSet]
+type = VarSet
+trigger1 = fvar(0) > 0
+trigger1 = var(6)
+trigger1 = MoveType != H
+var(7) = Power
+ignorehitpause = 1
+
+[State -2, PowerSet]
+type = PowerSet
+trigger1 = fvar(0) > 0
+trigger1 = var(6)
+trigger1 = MoveType = H
+value = var(7)
+ignorehitpause = 1
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = fvar(0) <= 0
+trigger1 = !var(6)
+var(7) = 0
+ignorehitpause = 1
+
+
+;*********************************************************************
+;*********************************************************************
+[State -2, VarAdd]
+type = VarAdd
+trigger1 = var(9) > 0
+var(9) = -1
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = MoveType != A && StateNo != [1100,1199]
+var(9) = 0
+
+;*********************************************************************
+; 空中ガード不可
+;*********************************************************************
+
+[State -2, AssertSpecial]
+type = AssertSpecial
+trigger1 = 0
+flag = NoAirGuard
+IgnoreHitPause = 1
+
+;*********************************************************************
+; 残像消去
+;*********************************************************************
+
+[State -2, AfterImageTime]
+type = AfterImageTime
+trigger1 = MoveType = H
+time = 0
+
+;================================================================================
+; ------- KOF Cornerpush System--------
+;================================================================================
+[State -2, Superpause Check]
+type = VarAdd
+trigger1 = var(29)
+var(29) = -1
+
+[State -2, Reset Time counter]
+type = VarSet
+trigger1 = movecontact = 1
+var(12) = 0
+
+[State -2, Accel]
+type = VarSet
+triggerall = roundstate = 2
+triggerall = var(29) <= 0
+triggerall = numtarget >= 1
+trigger1 = target, hitshakeover
+fvar(6) = (target, gethitvar(xvel)*exp((-0.1886)*((var(12)))))
+
+[State -2, Push]
+type = PosAdd
+triggerall = roundstate = 2
+triggerall = !var(29)
+triggerall = numtarget >= 1
+triggerall = (target, BackEdgeBodyDist <= 0) || (target, FrontEdgeBodyDist <= 0)
+triggerall = ProjContact = 0, < 50
+triggerall = stateno != [800, 829]
+triggerall = stateno != [900, 979]
+triggerall = (stateno != [3000, 3119]) || AnimElemTime(4) >= 0
+triggerall = stateno != [3010, 3019]
+triggerall = stateno != [3100, 3019]
+triggerall = stateno != [3200, 3999]
+;triggerall = numtarget(1000) = 0
+;triggerall = numtarget(1001) = 0
+triggerall = target,statetype != A
+trigger1 = Statetype != A
+x = ifelse(facing = -1, fvar(6), -fvar(6))
+
+[State -2, Increase]
+type = VarSet
+triggerall = numtarget >= 1
+triggerall = target, hitshakeover
+trigger1 = var(29) <= 0
+trigger1 = var(12)
+var(12) = var(12) + 1
+
+[State -2, Time counter]
+type = VarSet
+trigger1 = !var(12)
+trigger1 = fvar(6)
+var(12) = 1
+
+[State -2, Freeze Pos During Superpause]
+type = PosFreeze
+trigger1 = var(29)
+value = 1
+
+[State -2, Drop]
+type = VarSet
+triggerall = fvar(6)
+trigger1 = !numtarget
+trigger2 = projcontact = 1
+trigger3 = movecontact = 1
+fvar(6) = 0
+ignorehitpause = 1
+
+;*********************************************************************
+; カウンター処理
+;*********************************************************************
+;===============================================================
+; カウンターメッセージ用ヘルパーの呼び出し
+;===============================================================
+[State -2, Helper]
+type = Helper
+triggerall = var(1)
+trigger1 = MoveHit = 1
+trigger2 = NumHelper(1110)
+trigger2 = Helper(1110),MoveHit = 1
+name = "Counter"
+StateNo = 8700
+id = 8700
+pos = -9999, 9999
+postype = p1
+ignorehitpause = 1
+ownpal = 1
+supermovetime = 99999999999999
+pausemovetime = 99999999999999
+keyctrl = 0
+
+;===============================================================
+; カウンター時の画面フラッシュ
+;===============================================================
+[State -2, Envcolor]
+type = Envcolor
+triggerall = var(1)
+trigger1 = MoveHit = 1
+value = 255, 255, 255
+ignorehitpause = 1
+time = 1
+under = 1
+
+;===============================================================
+; カウンターヒットフラグの初期化
+;===============================================================
+[State -2, VarSet]
+type = VarSet
+trigger1 = 1
+var(1) = 0
+ignorehitpause = 1
+
+;===============================================================
+; カウンターヒットフラグがオンになる条件
+;===============================================================
+[State -2, VarSet]
+type = VarSet
+triggerall = NumEnemy
+triggerall = P2MoveType = A
+trigger1 = StateNo = [200, 3999]
+trigger1 = StateNo != 1201 && StateNo != 1211 && StateNo != 1301
+trigger1 = StateNo != 250 || AnimElem = 8,>= 0
+trigger1 = StateNo != 3301 && StateNo != 3401 && StateNo != 3501
+trigger1 = !NumTarget
+var(1) = 1
+ignorehitpause = 1
+
+;*********************************************************************
+; 攻撃力補正
+;*********************************************************************
+;===============================================================
+; 補正値を格納
+;===============================================================
+[State -2, VarSet]
+type = VarSet
+trigger1 = !NumTarget && P2MoveType != H
+trigger2 = NumTarget && StateNo = [3000, 3999]
+;trigger2 = (StateNo = [2000, 2999]) && StateNo != [2100, 2199]
+fvar(1) = ifelse(fvar(0) > 0, .75, 1.0)
+ignorehitpause = 1
+
+;===============================================================
+; レッドウィップ・ジェノサイドの攻撃力補正
+;===============================================================
+[State -2, VarSet]
+type = VarSet
+triggerall = NumTarget
+trigger1 = 0	; PrevStateNo = [310,314]
+fvar(1) = 0.75
+ignorehitpause = 1
+
+;===============================================================
+; スーパーキャンセル補正(現在未使用)
+;===============================================================
+;[State -2, VarSet]
+;type = VarSet
+;trigger1 = NumHelper(8500)
+;trigger1 = Helper(8500),time = 1 && PrevStateNo = [1000,2999]
+;trigger2 = NumHelper(8600)
+;trigger2 = Helper(8600),time = 1 && PrevStateNo = [1000,3999]
+;fvar(1) = fvar(1) * .8
+;ignorehitpause = 1
+
+;===============================================================
+; 半数補正
+;===============================================================
+;---------------------------------------------------------
+; 半数補正を判定
+;---------------------------------------------------------
+[State -2, VarSet]
+type = null	; VarSet
+triggerall = MoveContact
+trigger1 = StateNo = 215
+trigger1 = AnimElemTime(8) < 0
+trigger2 = StateNo = 410
+trigger2 = AnimElemTime(6) < 0
+trigger3 = StateNo = 505
+trigger3 = AnimElemTime(13) < 0
+trigger4 = StateNo = 1600 || StateNo = 1650
+var(17) = 2
+ignorehitpause = 1
+
+;---------------------------------------------------------
+; 半数補正の判定をリセット
+;---------------------------------------------------------
+[State -2, VarSet]
+type = null	; VarSet
+trigger1 = StateNo != 215 && StateNo != 410 && StateNo != 505 && StateNo != 1600 && StateNo != 1650
+trigger2 = StateNo = 215 && Time = 1
+trigger3 = StateNo = 410 && Time = 1
+trigger4 = StateNo = 505 && Time = 1
+trigger5 = (StateNo = 1600 || StateNo = 1650) && Time = 1
+var(17) = 1
+ignorehitpause = 1
+
+;===============================================================
+; 攻撃力補正の実行
+;===============================================================
+[State -2, AttackMulSet]
+type = AttackMulSet
+trigger1 = 1
+value = fvar(1) * IfElse(var(1), 1.25, 1.0)
+ignorehitpause = 1
+
+;Time = 0で発生した攻撃にはカウンター補正が入らない
+
+;*********************************************************************
+; 被喰らいや被ガード時の投げ無敵
+;*********************************************************************
+;===============================================================
+; 被地上喰らいから復帰した時の投げ無敵の設定
+;===============================================================
+[State -2, NotHitBy] ;Can't be thrown right after getting up
+type = NotHitBy
+triggerall = HitOver
+trigger1 = StateNo = [5000,5001]
+trigger2 = StateNo = [5010,5011]
+value = , NT,ST,HT
+time = 8
+ignorehitpause = 1
+persistent = 0
+
+;===============================================================
+; 被ガード中の投げ無敵の設定
+;===============================================================
+[State -2, NotHitBy] ;Can't be thrown right after getting up
+type = null	; NotHitBy
+triggerall = !HitOver
+trigger1 = StateNo = [150,153]
+value = , NT,ST,HT
+time = 1
+ignorehitpause = 1
+
+;===============================================================
+; 被ガードから復帰した時の投げ無敵の設定
+;===============================================================
+[State -2, NotHitBy] ;Can't be thrown right after getting up
+type = NotHitBy
+triggerall = HitOver
+trigger1 = StateNo = [150,153]
+value = , NT,ST,HT
+time = 8
+ignorehitpause = 1
+
+;*********************************************************************
+; 地上ヒットorガードから復帰した直後の相手を投げれなくする時間を設定
+;*********************************************************************
+[State -2, VarSet] ;Can't be thrown right after getting up
+type = VarSet
+triggerall = NumTarget
+triggerall = Target,HitOver
+trigger1 = p2StateNo = [5000,5001]
+trigger2 = p2StateNo = [5010,5011]
+var(20) = 8
+ignorehitpause = 1
+
+[State -2, VarSet] ;Can't be thrown right after getting up
+type = VarSet
+trigger1 = p2StateNo = [150,153]
+var(20) = 8
+
+;*********************************************************************
+; 投げ抜けフラグの初期化
+;*********************************************************************
+[State -2, VarSet]
+type = VarSet
+trigger1 = !NumTarget
+var(21) = 0
+ignorehitpause = 1
+
+;*********************************************************************
+; 自動リカバー(相手動作)
+;*********************************************************************
+[State -2, VarSet]
+type = VarSet
+triggerall = NumTarget
+triggerall = Target,Alive
+triggerall = Target,StateType = A
+triggerall = Target,GetHitVar(fall)
+triggerall = MoveHit
+trigger1 = StateNo = [200,299]
+trigger2 = StateNo = 400
+trigger3 = StateNo = [410, 416]
+trigger4 = StateNo = 430
+trigger5 = StateNo = [600,699]
+var(10) = 1
+ignorehitpause = 1
+
+[State -2, VarSet]
+type = VarSet
+trigger1 = !NumTarget
+var(10) = 0
+ignorehitpause = 1
+
+[State -2, VarSet]
+type = TargetState
+triggerall = NumTarget
+triggerall = Target,Alive
+triggerall = Target,HitOver
+triggerall = var(10)
+trigger1 = Target,StateNo = 5020
+trigger2 = Target,StateNo = 5030
+trigger3 = Target,StateNo = 5035
+trigger4 = Target,StateNo = 5050 && Target,Time < 2
+value = 9900
+ignorehitpause = 1
+
+;*********************************************************************
+; 追撃処理
+;*********************************************************************
+[State -2, VarSet]
+type = VarSet
+trigger1 = 1
+var(11) = -1
+ignorehitpause = 1
+
+[State -2, VarSet]
+type = VarSet
+triggerall = NumTarget
+triggerall = Target,MoveType = H && Target,StateNo != [150,155]
+triggerall = Target,GetHitVar(chainid)
+triggerall = Target,StateType = A
+trigger1 = Target,GetHitVar(chainid) = 1
+trigger1 = Target,Vel y > 0
+trigger2 = Target,GetHitVar(chainid) = [200,299]
+trigger3 = (Target,GetHitVar(chainid) = [300,399]) && Target,GetHitVar(chainid) != 325
+trigger4 = Target,GetHitVar(chainid) = [400,499]
+trigger5 = Target,GetHitVar(chainid) = [600,699]
+trigger6 = Target,GetHitVar(chainid) = 801 || Target,GetHitVar(chainid) = 930
+trigger7 = Target,GetHitVar(chainid) = 1050
+trigger8 = Target,GetHitVar(chainid) = [1100,  1113]	;[1100, 1199]
+trigger9 = Target,GetHitVar(chainid) = [1400, 1499]
+trigger10 = Target,GetHitVar(chainid) = [3000, 3099]
+trigger11 = Target,GetHitVar(chainid) = [3100, 3199]
+var(11) = Target,GetHitVar(chainid)
+ignorehitpause = 1
+
+;*********************************************************************
+; フィニッシュ処理
+;*********************************************************************
+[State -2, SuperFinish]
+type = Helper
+triggerall = !NumHelper(9990)
+trigger1 = Win && !WinTime
+trigger1 = RoundState = 3
+persistent = 0
+id = 9990
+name = "finish"
+pos = 160,0
+postype = left
+StateNo = 9990
+helpertype = normal
+keyctrl = 0
+ownpal = 1
+ignorehitpause = 1
+pausemovetime = 99999999999999
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+; ＡＩ用 StateDef -2
+
+;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+;var(30)~var(39)はまっさらなので学習に使用
+
+;----------------------------------------------------------[中段学習]
+[State -2, Middle Anim Learning]
+Type = VarAdd
+triggerall = !IsHelper
+triggerall = NumEnemy = 1
+triggerall = var(30) / 100000 = 0
+triggerall = PlayerID(Var(46)),Anim != var(30) % 100000 && PlayerID(Var(46)),Anim != var(30) / 100000
+triggerall = PlayerID(Var(46)),Anim < 100000
+triggerall = !(PlayerID(Var(46)),hitdefattr = SCA, AT)
+triggerall = PlayerID(Var(46)),StateNo >= 200 && PlayerID(Var(46)),MoveType = A && !PlayerID(Var(46)),ctrl
+;triggerall = (PlayerID(Var(46)),HitDefAttr = SCA, AA, AP) || ((Helper(20000+id),Var(16) / 100) % 10)
+triggerall = time = 0 && MoveType = H && StateNo >= 200
+trigger1 = PlayerID(Var(46)),StateType != A
+trigger1 = (Helper(20000+id),Var(8) % 10) = 2
+var(30) = ifelse(var(30) = 0, PlayerID(Var(46)),Anim, PlayerID(Var(46)),Anim * 100000)
+ignorehitpause = 1
+
+[State -2, Middle Time Learning]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(35) / 100000 = 0
+triggerall = Var(30) != 0
+triggerall = (PlayerID(Var(46)),Anim = Var(30) % 100000 && Var(35) % 100000 = 0) || (PlayerID(Var(46)),Anim = Var(30) / 100000 && Var(35) / 100000 = 0)
+triggerall = PlayerID(Var(46)),StateNo >= 200 && PlayerID(Var(46)),MoveType = A && !PlayerID(Var(46)),ctrl
+;triggerall = (PlayerID(Var(46)),HitDefAttr = SCA, AA, AP) || ((Helper(20000+id),Var(16) / 100) % 10)
+triggerall = time = 0 && MoveType = H && StateNo >= 200
+trigger1 = (Helper(20000+id),Var(8) % 10) = 2
+var(35) = ifelse(Var(35) = 0, PlayerID(Var(46)),Time, PlayerID(Var(46)),Time * 100000)
+ignorehitpause = 1
+
+[state -2, Middle Anim Reset]
+Type = VarSet
+triggerall = !IsHelper
+triggerall = var(30) != 0
+trigger1 = TeamMode = Turns
+trigger1 = RoundState != 2
+var(30) = 0
+ignorehitpause = 1
+
+[state -2, Middle Time Reset]
+Type = VarSet
+triggerall = !IsHelper
+triggerall = var(35) != 0
+trigger1 = TeamMode = Turns
+trigger1 = RoundState != 2
+var(35) = 0
+ignorehitpause = 1
+
+;----------------------------------------------------------[下段学習]
+[State -2, Low Anim Learning]
+Type = VarAdd
+triggerall = !IsHelper
+triggerall = NumEnemy = 1
+triggerall = var(31) / 100000 = 0
+triggerall = PlayerID(Var(46)),Anim != var(31) % 100000 && PlayerID(Var(46)),Anim != var(31) / 100000
+triggerall = PlayerID(Var(46)),Anim < 100000
+triggerall = !(PlayerID(Var(46)),hitdefattr = SCA, AT)
+triggerall = PlayerID(Var(46)),StateNo >= 200 && PlayerID(Var(46)),MoveType != H && !PlayerID(Var(46)),ctrl
+;triggerall = (PlayerID(Var(46)),HitDefAttr = SCA, AA, AP) || ((Helper(20000+id),Var(16) / 100) % 10)
+triggerall = time = 0 && MoveType = H && StateNo >= 200
+trigger1 = PlayerID(Var(46)),StateType != C
+trigger1 = (Helper(20000+id),Var(8) % 10) = 1
+var(31) = ifelse(var(31) = 0, PlayerID(Var(46)),Anim, PlayerID(Var(46)),Anim * 100000)
+ignorehitpause = 1
+
+[State -2, Low Time Learning]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = Var(36) / 100000 = 0
+triggerall = Var(31) != 0
+triggerall = (PlayerID(Var(46)),Anim = Var(31) % 100000 && Var(36) % 100000 = 0) || (PlayerID(Var(46)),Anim = Var(31) / 100000 && Var(36) / 100000 = 0)
+triggerall = PlayerID(Var(46)),StateNo >= 200 && PlayerID(Var(46)),MoveType != H && !PlayerID(Var(46)),ctrl
+;triggerall = (PlayerID(Var(46)),HitDefAttr = SCA, AA, AP) || ((Helper(20000+id),Var(16) / 100) % 10)
+triggerall = time = 0 && MoveType = H && StateNo >= 200
+trigger1 = (Helper(20000+id),Var(8) % 10) = 1
+var(36) = ifelse(Var(36) = 0, PlayerID(Var(46)),Time, PlayerID(Var(46)),Time * 100000)
+ignorehitpause = 1
+
+[State -2, Low Reset]
+Type = VarSet
+triggerall = !IsHelper
+triggerall = var(31) != 0
+trigger1 = TeamMode = Turns
+trigger1 = RoundState != 2
+var(31) = 0
+ignorehitpause = 1
+
+[State -2, Low Reset]
+Type = VarSet
+triggerall = !IsHelper
+triggerall = var(36) != 0
+trigger1 = TeamMode = Turns
+trigger1 = RoundState != 2
+var(36) = 0
+ignorehitpause = 1
+
+;----------------------------------------------------------[地上投げ学習]
+[State -2, Ground Throw StateNo Learning]
+Type = VarAdd
+triggerall = !IsHelper
+triggerall = NumEnemy = 1
+triggerall = var(32) / 100000 = 0
+triggerall = PlayerID(Var(46)),PrevStateNo != var(32) % 100000 && PlayerID(Var(46)),PrevStateNo != var(32) / 100000
+triggerall = PlayerID(Var(46)),MoveType = A && !PlayerID(Var(46)),ctrl && PlayerID(Var(46)),StateNo >= 200
+triggerall = PlayerID(Var(46)),PrevStateNo < 100000
+triggerall = MoveType = H && StateNo >= 200 && !ctrl
+triggerall = time = 0
+trigger1 = ((Helper(20000+id),Var(8) / 10) % 10) && !((Helper(20000+id),Var(8) / 100) % 10)
+var(32) = ifelse(var(32) = 0, PlayerID(Var(46)),PrevStateNo, PlayerID(Var(46)),PrevStateNo * 100000)
+ignorehitpause = 1
+
+[State -2, Ground Throw Time Learning]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = var(37) / 100000 = 0
+triggerall = PlayerID(Var(46)),PrevStateNo < 100000
+triggerall = PlayerID(Var(46)),MoveType != H
+triggerall = (PlayerID(Var(46)),PrevStateNo = var(32) % 100000 && var(37) % 100000 = 0) || (PlayerID(Var(46)),PrevStateNo = var(32) / 100000 && var(37) / 100000 = 0)
+trigger1 = PlayerID(Var(46)),Time = 1
+trigger1 = ((var(39)) % 10) = 2
+var(37) = ifelse(var(37) = 0, var(39) / 100000, (var(39) / 100000) * 100000)
+ignorehitpause = 1
+
+[State -2, Ground Throw Reset]
+Type = VarSet
+triggerall = !IsHelper
+triggerall = var(32) != 0
+trigger1 = TeamMode = Turns
+trigger1 = RoundState != 2
+var(32) = 0
+ignorehitpause = 1
+
+[State -2, Ground Throw Reset]
+Type = VarSet
+triggerall = !IsHelper
+triggerall = var(37) != 0
+trigger1 = TeamMode = Turns
+trigger1 = RoundState != 2
+var(37) = 0
+ignorehitpause = 1
+
+;----------------------------------------------------------[攻撃判定の無い技学習]
+[State -2, Attack Clsn1 Learning]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = var(33) / 100000 = 0
+triggerall = PlayerID(Var(46)),PrevStateNo < 100000
+triggerall = PlayerID(Var(46)),PrevStateNo >= 200 && PlayerID(Var(46)),PrevStateNo != [5000, 5999]
+triggerall = PlayerID(Var(46)),MoveType != H
+triggerall = PlayerID(Var(46)),PrevStateNo != var(33) % 100000 && PlayerID(Var(46)),PrevStateNo != var(33) / 100000
+trigger1 = PlayerID(Var(46)),StateNo != 52
+trigger1 = PlayerID(Var(46)),Time = 1
+trigger1 = ((var(39)) % 10)
+var(33) = ifelse(var(33) = 0, PlayerID(Var(46)),PrevStateNo, PlayerID(Var(46)),PrevStateNo * 100000)
+ignorehitpause = 1
+
+[State -2, Attack Clsn1 Reset]
+Type = VarSet
+triggerall = !IsHelper
+triggerall = RoundState = 2
+triggerall = var(33) != 0
+trigger1 = TeamMode = Turns
+trigger1 = RoundState != 2
+var(33) = 0
+ignorehitpause = 1
+
+;----------------------------------------------------------[被当て身学習]
+[State -2, Counter Learning]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = NumEnemy = 1
+triggerall = var(34) / 100000 = 0
+triggerall = PlayerID(Var(46)),Anim != var(34) % 100000 && PlayerID(Var(46)),Anim != var(34) / 100000
+triggerall = PlayerID(Var(46)),MoveType = A && !PlayerID(Var(46)),ctrl && PlayerID(Var(46)),StateNo >= 200
+triggerall = PlayerID(Var(46)),StateNo < 100000
+trigger1 = MoveReversed = 1
+var(34) = ifelse(var(34) = 0, PlayerID(Var(46)),Anim, PlayerID(Var(46)),Anim * 100000)
+ignorehitpause = 1
+
+[State -2, Counter Reset]
+Type = VarSet
+triggerall = !IsHelper
+triggerall = var(34) != 0
+trigger1 = TeamMode = Turns
+trigger1 = RoundState != 2
+var(34) = 0
+ignorehitpause = 1
+
+;----------------------------------------------------------[時間をカウント, 下準備]
+[State -2, Attack Clsn1 Judgement Reset]
+Type = VarSet
+triggerall = !IsHelper
+triggerall = RoundState = 2
+trigger1 = ((var(39)) % 10)
+var(39) = 0
+ignorehitpause = 1
+
+[State -2, Attack Time Judgement]
+type = VarAdd	; VarSet
+triggerall = !IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = PlayerID(Var(46)),MoveType = A && !PlayerID(Var(46)),ctrl && PlayerID(Var(46)),StateNo >= 200
+trigger1 = PlayerID(Var(46)),Time
+var(39) = 1 * 100000	; PlayerID(Var(46)),Time * 100000
+ignorehitpause = 1
+
+[State -2, Attack Time Judgement]
+type = VarSet
+triggerall = !IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = PlayerID(Var(46)),MoveType != A || PlayerID(Var(46)),StateNo < 200 || PlayerID(Var(46)),Time = 1
+trigger1 = 1
+var(39) = 100000	;((var(39) / 100000) * 100000) + 100000	; PlayerID(Var(46)),Time * 100000
+ignorehitpause = 1
+
+[State -2, Attack Clsn1 Judgement]
+type = VarAdd
+triggerall = !IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = ((var(39)) % 10) = 0
+triggerall = PlayerID(Var(46)),MoveType = A && !PlayerID(Var(46)),ctrl && PlayerID(Var(46)),StateNo >= 200
+triggerall = PlayerID(Var(46)),StateNo < 100000
+triggerall = MoveType != H || StateNo < 200 || (StateNo  = 5050 && CanRecover)
+;条件
+trigger1 = !(PlayerID(Var(46)),HitDefAttr = SCA, AA, AT, AP) && !((Helper(20000+id),Var(16) / 100) % 10)
+trigger1 = PlayerID(Var(46)),Time > 10
+var(39) = 1
+ignorehitpause = 1
+
+[State -2, Attack Clsn1 Judgement]
+type = VarSet
+triggerall = !IsHelper
+triggerall = NumEnemy = 1
+triggerall = RoundState = 2
+triggerall = !((var(39)) % 10)
+triggerall = PlayerID(Var(46)),MoveType = A && !PlayerID(Var(46)),ctrl && PlayerID(Var(46)),StateNo >= 200
+triggerall = PlayerID(Var(46)),StateNo < 100000
+triggerall = MoveType != H || StateNo < 200 || (StateNo = 5050 && CanRecover)
+;条件
+trigger1 = (PlayerID(Var(46)),HitDefAttr = SC, AT)
+var(39) = (var(39) / 100000) * 100000 + 2
+ignorehitpause = 1
+
+;----------------------------------------------------------[デバッグ表示]
+[State -2, Debug Display]
+Type = AppendToClipboard
+trigger1 = 1
+text = "P2StNo=%d\tP2BDX=%d\tP2BDY=%d\tvar(9)=%d\tH,var(48)=%d\n"
+params = P2StateNo, floor(P2BodyDist X), floor(P2BodyDist Y), floor(P2Dist X), floor(fVar(0))
+IgnoreHitPause = 1
+
+[State -2, Debug Display]
+Type = AppendToClipboard
+trigger1 = 1
+text = "fVar(23)=%d\tUKEMI=%d\tfVar(11)=%d\tVar(1)=%d\tfvar(39)=%d\t\n"
+params = floor(fVar(23)), floor(Helper(20000+id),Var(40)), floor(fVar(11)), floor(fVar(31)), floor(var(5))
+IgnoreHitPause = 1
+
+[State -2, Learning]
+Type = AppendToClipboard
+trigger1 = 0
+text = "Var(30)=%d\tvar(31)=%d\tvar(32)=%d\tvar(37)=%d\tvar(36)=%d\t\n"
+params = Var(30), var(31), var(32), var(37), var(36)
+IgnoreHitPause = 1
+
+[State -2, Learning]
+Type = AppendToClipboard
+trigger1 = 0
+text = "Var(1)=%d\tvar(31)=%d\tvar(32)=%d\tvar(33)=%d\tvar(31)=%d\t\n"
+params = Helper(20000+id),Var(1), Helper(20000+id),Var(22), var(32), var(33), var(31)
+IgnoreHitPause = 1

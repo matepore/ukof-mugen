@@ -1,0 +1,316 @@
+How & Where to use player options(开关用法说明)
+
+Orochi-EV 1.55
+
+------------------------------------------------------------------------------
+
+Poweradd adjustment multiplier
+能量修正参数：Orochi-EV-2.cns下
+[State -2, poweradd adjustment multiplier]
+type = VarSet
+trigger1 = 1
+fvar(10) = 1.0    《-----改变百分比，1.0=100%
+;poweradd adjustment multiplier (positive float is acceptable)
+;suggestions:
+;set to 0.25 - 0.3 if you want Orochi to gain power like a common character.
+;set to 1.0 if you want Orochi to gain power as a mighty BOSS.
+
+------------------------------------------------------------------------------
+
+Global damage adjustment multiplier
+伤害修正参数：Orochi-EV-2.cns下
+[State -2, global damage adjustment multiplier]
+type = VarSet
+trigger1 = 1
+fvar(3) = 1.0    《-----改变百分比，1.0=100%
+;global damage adjustment multiplier (positive float is acceptable)
+;suggestions:
+;set lower than 1.0 if you want Orochi to do damage like a common character.
+;set to 1.0 if you want Orochi to do damage as a mighty BOSS.
+;set higher than 1.0 if ... well, become a cheap char.
+
+------------------------------------------------------------------------------
+
+Stand Anim Select.
+站立姿势有两个形式：仿KOFM盘腿神蛟姿势、原作的KOF97原版姿势。姿势可选择，
+
+请以记事本打开States/Orochi-EV-2.cns，查看如下代码
+注意：KOFM姿势并未进行色表处理（过繁琐），非1、7、12号色表下可能颜色失真，不推荐使用。
+[State -2, Stand Anim Select]
+type = VarSet
+trigger1 = 1
+var(18) = 0
+;Stand Anim Select :
+站立动画选择
+; 0 --- Catalyst Stand Anim
+设置为0，将使用Catalyst灾难浩劫姿势（原作的KOF97原版姿势）
+; 1 --- KOFM Stand Anim with background anim from Mizuchi
+设置为1，将使用附带蛟的背景的KOFM姿势（仿KOFM盘腿神蛟姿势）
+
+------------------------------------------------------------------------------
+
+How to change the body shining frequency.
+增加var(28)用于调节大蛇全身闪烁特效的闪烁频率。
+
+[State -2, palfx shining cycle control]
+type = VarSet
+triggerall = 1
+trigger1 = 1
+var(28) = 16     《---修改此值
+;palfx shining cycle control :
+;must be positive interger or -1 !!   必须为正整数或-1
+;must lower than 52 !!   必须低于52
+;suggestion range: 10 - 30  建议值：10至30
+;shine faster when var(28) is lower  值越小闪烁越快
+;set to -1 to disable shining  设置为-1关闭闪烁
+
+------------------------------------------------------------------------------
+
+ 大蛇模型变回原版身高，贴图坐标自动对应变化。
+  调节方法：Orochi-EV.cns下
+    [Size]
+    xscale = 1.0
+    yscale = 1.0
+  两值皆为1.0为原版身高比例。
+  当修改为“xscale = 1.05”和“yscale = 1.07”时，为原作者OHerman拟定的身高比例（略微变得高大一些）。
+
+------------------------------------------------------------------------------
+
+  How to enable "infinite combo until p2 is nearly dead then ended with hypermoves".
+  重制原先工作不正常的“AI 无限连开启开关”
+  Orochi-EV-AI.cns下
+
+  [State -3, infinite combo until p2 is nearly dead then ended with hypermoves];永久无限连
+  type = null;varset     ;<=== if you want orochi AI to perform infinite Light Kick combo, change null to varset.
+  TriggerAll = var(59)
+  TriggerAll = fvar(39) >= 3
+  Trigger1 = EnemyNear(floor(fvar(36))),life >= 100
+  fvar(39)= 2
+  ignorehitpause = 1
+
+  开启方法，将null改为varset。关闭方法，改回null。
+  开启后，大蛇将施展无限的“轻脚--反射盾--轻脚”循环，最终以超杀终结对手。
+  注意!!在AI超反应等级设置为低于12的时候，无限连可能失败。
+
+------------------------------------------------------------------------------
+
+  AI Level.
+  暂时启用较为粗糙的 AI 等级设置系统。未来可能尝试加入更加可DIY化的一组开关用于AI调节。
+  Orochi-EV-AI.cns下
+
+  [State -3, AI Supernatual Reacting Level 1-12];AI超反应等级 1-12
+  Type = VarSet
+  ......
+  ......
+  ;trigger15 = 1     ;常時AI起動
+  var(59) = 12       ;var(59) AI超反应等级 1-12   <=====调整该值，范围1-12
+  ignorehitpause = 1
+
+  此处的AI等级开关，混合了AI超反应速度、AI随机性限制、mugen自带AI比例。
+  AI等级越高，则AI超反应速度越快，AI随机性越小，出招迅速精准。
+
+  AI等级越高，则AI越倾向于精确、迅速、判定鲜明的代码AI。最高12时完全为代码AI。
+  AI等级越低，则AI越倾向于mugen本身自带的随机乱数、胡乱出招的cmd AI。最低1时完全为cmd AI。
+  注意!!梦魇模式的独有技能“时间停止”阶段，AI开关的作用暂时失去，变回12级，时间停止结束后恢复正常。
+
+------------------------------------------------------------------------------
+
+  How to disable the "whole screen damage of half life" when <MAX soul extraction> has failed to catch opponent.
+  隐藏最终决战奥义“MAX掏魂·虚无”：
+  吸引结束仍未捕获时，触发全屏能量冲击，伤害固定为半血，防御后几乎无伤。
+  准则是“作为对手，施展时应不断后跳，远离大蛇；施展后应立即防御全屏冲击。”
+  如不喜此设定，请至Orochi-EV-H.cns，查找 [Statedef 2302]
+  继续向下可见：
+
+  [State 2302, Projectile]; ---- 全屏能量冲击
+  type = Projectile    《----改为type = NULL，关闭全屏能量冲击。（注意：冲击音效和屏幕曝光依旧在，可以不理会）
+  trigger1 = time = [0,19] 
+
+------------------------------------------------------------------------------
+
+  How to change Inner Mode Striker "respective" cooldown
+  里模式援护的冷却时间，现在可调。
+  调整方法：
+  打开Orochi-EV-2.cns，查看如下代码：
+
+[State -2, Inner Mode Striker "respective" cooldown (unit:tick, 60ticks=1second)]
+type = VarSet
+trigger1 = 1
+var(40) = 180   《----修改该值
+;Inner Mode Striker respective cooldown (positive integer is acceptable)
+;set to positive integer for Inner Mode Striker cooldown.(unit:tick, 60ticks=1second)
+;default value is 180 (=3 second). NOTE: in old version, default is 360.
+;In nightmare mode, respective cooldown is ALWAYS half of that in Inner Mode.
+
+  注意：
+  必须为正整数。
+  单位为帧，60帧为1秒，180帧即3秒。
+  默认180帧，但旧版默认是360帧。故实际上里模式被轻微加强了。如感觉不适，可以自行调节。
+  此值为里模式的冷却。梦魇模式的冷却恒为里模式的一半。
+
+------------------------------------------------------------------------------
+
+  How to change Inner Mode Striker "global" cooldown
+  里模式援护的“公共”冷却时间，现在可调。
+  调整方法：
+  打开Orochi-EV-2.cns，查看如下代码：
+
+[State -2, Inner Mode Striker "global" cooldown (unit:tick, 60ticks=1second)]
+type = VarSet
+trigger1 = 1
+var(41) = 90   《----修改该值
+;Inner Mode Striker global cooldown (positive integer or 0 is acceptable)
+;NOTE: diffrent from var(40) above, this var(41) is "global" cooldown.
+;NOTE: must be lower than var(40) above (otherwise may cause BUG).
+;set to positive integer for Inner Mode Striker cooldown.(unit:tick, 60ticks=1second)
+;set to 0, so there will be no global cooldown.
+;default value is 90 (=1.5 second). NOTE: in old version, default is 180.
+;In nightmare mode, global cooldown is ALWAYS 0.
+
+  注意：
+  必须为正整数或0。设置为即0取消公共冷却。
+  单位为帧，60帧为1秒，90帧即1.5秒。
+  默认90帧，但旧版默认是180帧。故实际上里模式被轻微加强了。如感觉不适，可以自行调节。
+  此值为里模式的公共冷却。梦魇模式无公共冷却。
+  注意，公共冷却必须小于等于冷却，否则将造成不可预知的BUG。
+
+------------------------------------------------------------------------------
+
+  How to enable "Once-Lose Enhance"
+  曾经某位mugen友人所提议的一败加强模式，现在可用。
+  调整方法：
+  打开Orochi-EV-2.cns，查看如下代码：
+
+[State -2, Once-Lose Enhance switch]
+type = VarSet
+trigger1 = 1
+var(42) = 222   《----修改该值   
+;Once-Lose Mode Enhance switch(three bit interger is acceptable,every bit must be 1 or 2)
+;high bit:
+;set to 2 , Disable normal mode(palno = 1 to 6) "Once-Lose Enhance"
+;set to 1 , Enable normal mode "Once-Lose Enhance"
+;therefore, when lose a round, Orochi will enter Inner Mode
+;middle bit:
+;set to 2 , Disable inner mode(palno = 7 to 11) "Once-Lose Enhance"
+;set to 1 , Enable inner mode "Once-Lose Enhance"
+;therefore, when lose a round, Orochi will enter Nightmare Mode
+;low bit:
+;set to 2 , Disable nightmare mode(palno = 12) "Once-Lose Enhance"
+;set to 1 , Enable nightmare mode "Once-Lose Enhance"
+;therefore, when lose a round, Orochi will become GOD.
+;For example:
+;121 means: enable normal mode "Once-Lose Enhance", disable inner mode "Once-Lose Enhance", enable nightmare mode "Once-Lose Enhance"
+;default is 222, thus disable all.
+
+  注意：
+  一共三位数字，每一位只能为1或2。
+  高位数字：
+      设置为2，关闭表模式一败加强。
+      设置为1，开启表模式一败加强。一败后进入里模式，启动援护。  
+  中位数字：
+      设置为2，关闭里模式一败加强。
+      设置为1，开启里模式一败加强。一败后进入梦魇模式，启动特别技能。
+  低位数字：
+      设置为2，关闭梦魇模式一败加强。
+      设置为1，开启梦魇模式一败加强。一败后神级化。
+  举例：
+      121表示，开启表模式一败加强，关闭里模式一败加强，开启梦魇模式一败加强。
+  默认为222，关闭任何模式的一败加强。
+
+------------------------------------------------------------------------------
+
+  How to use DIY-BGM
+  This feature is not recommended, see "Old Readme/Read Me Orochi-EV1.35.txt" for details.
+
+  如何使用自定义BGM
+  这个特性不被推荐使用，详见"旧版更新履历/Read Me Orochi-EV1.35.txt"
+
+------------------------------------------------------------------------------
+
+  How to enable/disable Team-Mode Only special skill
+
+  如何启用/关闭组队模式特别技能“大蛇的不洁生命”（设计主旨：复活队友）
+
+[Orochi's Unholy Life]
+
+In Orochi-EV-2.cns, you can chose to enable/disable this skill.
+This special skill ONLY available when in team-mode (thus you have a partner).
+
+在Orochi-EV-2.cns中查找如下代码：
+
+[State -2, TeamMode-Only Skill Enable switch]
+type = VarSet
+trigger1 = 1
+var(39) = 1    《---修改该值，1开启，2关闭
+;TeamMode-Only Skill Enable switch --- [Orochi's Unholy Life] made by Eagrose
+;must be 1 or 2
+;only functional when has partner (2vs1 or 2vs2)
+;set to 2 to Disable TeamMode-Only Skill
+;set to 1 to Enable TeamMode-Only Skill
+;-------------------------
+;[Orochi's Unholy Life]
+;In normal/inner mode:
+;Resurrect partner to half life, when partner is nearly dead, ONLY one chance
+;In nightmare mode:
+;Resurrect BOTH self and partner to half life, when self or partner is nearly dead, EACH one chance
+;Note: after successful resurrection, the one will enter an invincible recovery state until he retake control of himself.
+;The skill based on coding of "God chars", the resurrection might not always be successful, especially when enemy attacks very frequently.
+
+------------------------------------------------------------------------------
+
+  How to enable/disable True damage (ignore enemy's defence multiplier).
+  Based on "global damage adjustment multiplier".
+  如何启用“真实伤害”，忽视敌方的防御修正。
+
+True damage setting:
+Orochi-EV-2.cns:
+
+[State -2, global damage adjustment multiplier & true damage setting]
+type = VarSet
+trigger1 = 1
+;fvar(3) = 1.0       ;<---- if you use this setting doesn't ignore emeny's defence
+                     《----行前加分号，该行注释化，失去作用
+fvar(3) = fvar(9)*1.0  ;<---- this setting is used to ignore enemy's defence
+                       《-----行前不加分号，该行生效
+;--------------
+;New function:
+;if u use the second line (etc. "fvar(3) = fvar(9)*1.0") instead of the first line, the damage will ignore emeny's defence.
+;if u use the first line (etc. "fvar(3) = 1.0") instead of the second line, the damage will NOT ignore emeny's defence.
+;Note: the setting here ONLY used to ingore defence under CNS data.
+;Does NOT influence defence caused by "DefenceMulSet"
+;(DefenceMulSet must be ignored by using lifeadd/lifeset, and they're already in use)
+
+将原先的fvar(3) = 1.0注释化，不启用该行。启用第二行的参数，即开启该功能。
+若要关闭该功能，则将之注释化，不启用第二行，且启用第一行即可。
+fvar(9)的作用为忽视敌方CNS代码data下的防御修正。
+*号后面依旧为原先的全局伤害因子，可以正常调整全局伤害。
+注意！该开关只能忽视“data下的防御修正”，不能忽视敌方defencemulset造成的防御修正。
+这类修正只能通过lifeadd型生命操作才能忽视。
+
+-----------------------------------------------------------------
+  How to enable/disable Passive PowerAdd.
+  如何启用“被动能量获取”。
+
+Passive PowerAdd Multiplier:
+Orochi-EV-2.cns:
+
+[State -2, gethit damage to power, Passive PowerAdd Multiplier]
+type = PowerAdd
+triggerall = !ishelper
+trigger1 = alive
+trigger1 = life < floor(fvar(8))
+value = (floor(fvar(8))-life)*0  ;<----change the number after "*", it's a multiplier
+                                 ;<----修改"*"后的值（比如这里是数字0），这是一个倍率
+ignorehitpause = 1
+;Passive PowerAdd Multiplier:
+;this control automatic poweradd when self is hit by enemy.
+;the purpose of this setting is to show my disappointing for those high-damage but low-givepower cheap chars.
+;if you enable this, suggest value: 10 (when receive 1000 damage, get 10000 power)
+;you can set it higher. Or just set it to 0, thus disable it.
+;I do NOT suggest using this feature when playing with normal chars ! (so default is disabled, thus 0)
+
+作用：受到伤害时，获得伤害值乘以倍率的“被动能量”。
+若开启，建议值为10（受到1000伤害时获得10000能量），倍率设置为0则关闭该特性。
+此设置的目的，旨在和不自重人物对战时，对方所设置的攻击伤害巨大，却给予能量过少的问题，以进行平衡。
+默认关闭（设置为0）。与普通强凶人物对战时，不建议开启。
+-----------------------------------------------------------------

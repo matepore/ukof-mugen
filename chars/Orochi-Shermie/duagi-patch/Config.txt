@@ -1,0 +1,863 @@
+;\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+[Statedef -2]
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+;\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+
+;===========================================================================
+;                       AIレベル＆各種設定用記述
+;===========================================================================
+[State -2,AI Level]
+type = varset
+trigger1 = var(59)=-1
+;trigger2 = roundstate = 2 && ctrl
+
+var(59) = 10;ここを設定
+
+; var(59)の数値の変更でAIレベルが変化します。
+; レベルの幅は1～10。10が最高レベルです。0はAIなし。
+; trigger2の前の「;」を消すとAI常時起動になります。
+
+
+
+;AI超反応スイッチ
+[State -3,AI tc]
+type = varset
+triggerall = var(59)>0
+trigger1 = 1
+
+var(55) = 1;ここを設定
+
+; var(55)の数値の変更でAIの超反応反撃の設定ができます。
+; 1で超反応あり。
+; 0で超反応なし。
+
+
+
+;AI受け身canrecoverスイッチ
+[State -3,AI ukemi]
+type = varset
+triggerall = var(59)>0
+trigger1= 1
+
+var(40) = 1;ここを設定
+
+; var(40)の数値の変更でAIの受け身の設定ができます。
+; 1でcanrecover無視(本体記述そのまま)。
+; 0でcanrecover時のみ受け身。
+
+
+
+;勝利メッセージON/OFFスイッチ
+[State -3,win m]
+type = varset
+trigger1= 1
+
+var(41) = 1;ここを設定
+
+; var(41)の数値の変更で勝利メッセージの設定ができます。
+; 1で勝利メッセージあり。
+; 0で勝利メッセージなし。
+
+
+
+
+
+;--------------------------------------------------------------------------------------------------------------------------
+;ここから下はいじっちゃダメ
+;--------------------------------------------------------------------------------------------------------------------------
+[state -2, a];右向き設定
+type = varset
+trigger1 = var(10) = 0
+trigger1 = facing = 1
+v = 10
+value = 1
+
+[state -2, a];左向き設定
+type = varset
+trigger1 = var(10) = 0
+trigger1 = facing = -1
+v = 10
+value = 2
+
+[State -2, 1];ダッシュの音止め
+type = stopSnd
+trigger1 = stateno != 100
+;改変あり
+trigger2 = var(59)>0
+trigger2 = stateno != [98,100]
+channel = 1
+
+[State -2, 4];ハイジャンプ判定
+type = varadd
+trigger1 = 1
+v = 15
+value = -1
+
+[State -2, 1];踊る大地・ダッシュの音止め
+type = null;stopSnd
+trigger1 = stateno != 1800
+channel = 6
+
+[State -2, 1];シェルミーアックス・音止め
+type = stopSnd
+trigger1 = stateno != 1350 && stateno != 1400
+channel = 7
+
+[State -2, 1];ファイナルインパクト、吼える大地・音止め
+type = null;stopSnd
+trigger1 = movetype = H
+channel = 8
+
+[State -2, 1];挑発音止め
+type = stopSnd
+trigger1 = stateno != 199
+channel = 9
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;::::::::パレットによるモード判別(1でオロチ)
+[state -2, a];改変あり
+type = varset
+triggerall = stateno = 5900
+trigger1 = palno = 1
+trigger2 = palno = 2
+trigger3 = palno = 3
+trigger4 = palno = 4
+trigger5 = palno = 5
+trigger6 = palno = 6
+v = 1
+value = 1
+
+[state -2, a];改変あり
+type = varset
+triggerall = stateno = 5900
+trigger1 = palno = 7
+trigger2 = palno = 8
+trigger3 = palno = 9
+trigger4 = palno = 10
+trigger5 = palno = 11
+trigger6 = palno = 12
+v = 1
+value = 0
+
+[state -2, a]
+type = varset
+trigger1 = var(24) = 1
+v = 1
+value = 0
+
+[state -2, a]
+type = varset
+trigger1 = var(24) = 2
+v = 1
+value = 1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;::::::::カウンターヒット設定
+[state a]
+type = varset
+trigger1 = enemy,movetype = A
+v = 8
+value = 1
+ignorehitpause = 1
+
+[State a]
+type = EnvColor
+triggerall = stateno != [1250,1299]
+trigger1 = movehit = 1
+trigger1 = var(8) = 1
+persistent = 0
+ignorehitpause = 1
+time = 1
+value = 255,255,255
+under = 2
+
+[state a]
+type = varset
+trigger1 = enemy,movetype != A
+v = 8
+value = 0
+ignorehitpause = 1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;::::::::スロー処理
+
+[state -2, a];スロー処理をする時間のカウント
+type = varadd
+trigger1 = 1
+persistent = 0
+ignorehitpause = 1
+v = 4
+value = -1
+
+[state -2, a];スロー処理
+type = pause
+trigger1 = var(4) >= 1
+trigger1 = gametime % 2
+persistent = 0
+ignorehitpause = 1
+time = 1
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ダメージ時のエフェクト、サウンドの消去
+;//////////////////////////////////////////////////////////////////////////
+;ダッシュ終了時のエフェクトの消去
+[State 1];ブレスレットのエフェクト消去、主に通常動作
+type = removeexplod
+trigger1 = MoveType = H && stateno != [120,159]
+ID = 3000
+
+
+;ダメージ時の残像の消去
+[state a];
+type = afterimagetime
+trigger1 = MoveType = H
+time = 0
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;//////////////////////////////////////////////////////////////////////////
+;ダメージボイス
+[state a]
+type = PlaySnd
+triggerall = stateno = 5000 ||  stateno = 5010 || stateno = 5020
+triggerall = time = 0
+triggerall = alive = 1
+trigger1 = GetHitVar(animtype) = 0
+value = 5000,0+(random%4)
+persistent = 0
+
+[state a]
+type = PlaySnd
+triggerall = stateno = 5000 ||  stateno = 5010 || stateno = 5020
+triggerall = time = 0
+triggerall = alive = 1
+trigger1 = GetHitVar(animtype) = 1
+value = 5001,0+(random%4)
+persistent = 0
+
+[state a]
+type = PlaySnd
+triggerall = stateno = 5000 ||  stateno = 5010 || stateno = 5020
+triggerall = time = 0
+triggerall = alive = 1
+trigger1 = GetHitVar(animtype) = 2
+trigger2 = GetHitVar(animtype) = 3
+trigger3 = GetHitVar(animtype) = 4
+value = 5002,0+(random%4)
+persistent = 0
+
+
+;///////////////////////////////////////////////////////////////////////
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;コンボによるダメージ補正
+;//////////////////////////////////////////////////////////////////////////
+
+;-----------------------------------------------------------
+;改変あり・ダメージ補正(投げ)
+[State -2,nage]
+type = varset
+triggerall = roundstate = 2
+trigger1 = 1
+trigger1 = enemynear,movetype = H
+fvar(6) = enemynear,gethitvar(hitcount)*0.07
+ignorehitpause = 1
+
+[State -2, 4];
+type = varset
+trigger1 = stateno = 0 || stateno = 11 || (stateno = [20,22]) || (stateno = [98,105])
+trigger2 = movetype = H
+fvar(6) = 0
+ignorehitpause = 1
+
+;-----------------------------------------------------------
+;改変あり・ダメージ補正(コンボ)
+[state a];補正
+type = varset
+trigger1 = enemy,movetype = H
+trigger1 = enemy,gethitvar(hitcount) > 1
+fvar(7) = ((100.0-(35.0+(enemy,gethitvar(hitcount)/2.0)*5.0))/100.0)
+
+[state a];補正
+type = varset
+trigger1 = fvar(7) <= 0
+fvar(7) = 0.01
+
+[state a]
+type = attackmulset
+trigger1 = var(26) = 0
+value = (fvar(7) + fvar(2))*fvar(5)
+
+[state a]
+type = attackmulset
+trigger1 = var(26) = 1
+value = ((fvar(7) + fvar(2))*0.75)*fvar(5)
+
+[state a]
+type = attackmulset
+trigger1 = var(26) = 2
+value = ((fvar(7) + fvar(2))*0.5)*fvar(5)
+
+;-----------------------------------------------------------
+;改変あり・AI用重力加速度計測
+[state -2,yaccel]
+type = varset
+trigger1 = fvar(20) != enemynear(var(58)),const(movement.yaccel)
+trigger1 = enemynear(var(58)),stateno != [5000,5210]
+trigger1 = enemynear(var(58)),vel y != 0
+fv = 20
+value = enemynear(var(58)),const(movement.yaccel)
+ignorehitpause = 1
+
+[state -2,yaccel]
+type = varset
+trigger1 = fvar(20) != enemynear(var(58)),gethitvar(yaccel)
+trigger1 = enemynear(var(58)),stateno = [5000,5210]
+fv = 20
+value = enemynear(var(58)),gethitvar(yaccel);(打撃当てた時のyaccel値)
+ignorehitpause = 1
+
+;敵が空中じゃない時
+[state -2, yaccel]
+type = varset
+trigger1 = fvar(20) != 0
+trigger1 = enemynear(var(58)),vel y = 0
+fv = 20
+value = 0;(打撃当てた時のyaccel値)
+ignorehitpause = 1
+
+;AI記述追加
+;敵起き上がり時対投げ無効フラグ
+[State -2,tott]
+type = varset
+trigger1 = p2stateno = 5120 && enemynear(var(58)),animtime = -2
+var(42) = 1
+
+[State 30000]
+type = varadd
+trigger1 = var(42)
+var(42) = 1
+
+[State 30000]
+type = varset
+trigger1 = var(42) > 14
+var(42) = 0
+
+;-----------------------------------------------------------
+
+; 
+;ネバリ補正関係
+[state a];第一段階
+type = varset
+trigger1 = enemy,life >= 400
+v = 26
+value = 0
+
+[state a];第二段階
+type = varset
+trigger1 = enemy,life <= 399 && enemy,life >= 150
+v = 26
+value = 1
+
+[state a];第三段階
+type = varset
+trigger1 = enemy,life <= 149
+v = 26
+value = 2
+
+
+[state a];MAX発動補正
+type = varset
+trigger1 = var(20) = 0
+fvar(5) = 1.0
+
+[state a];MAX発動補正
+type = varset
+trigger1 = var(20) > 0
+fvar(5) = 0.9
+
+
+[state a]
+type = varset
+trigger1 = 1
+fvar(0) = 1.0
+
+[state a]
+type = varset
+trigger1 = 1
+fvar(2) = 0.0
+
+[state a]
+type = varset
+trigger1 = var(14) >= 1
+fvar(2) = 0.1
+
+;改変あり
+[state a];補正
+type = varset
+trigger1 = enemy,movetype = H
+trigger1 = enemy,gethitvar(hitcount) > 1
+;trigger1 = stateno != [2200,2299]
+fvar(0) = ((100.0-(25.0+(enemy,gethitvar(hitcount)/2.0)*5.0))/100.0)
+
+[state a];補正
+type = varset
+trigger1 = fvar(0) <= 0
+fvar(0) = 0.01
+
+[state a]
+type = attackmulset
+trigger1 = var(26) = 0
+value = (fvar(0) + fvar(2))*fvar(5)
+
+[state a]
+type = attackmulset
+trigger1 = var(26) = 1
+value = ((fvar(0) + fvar(2))*0.75)*fvar(5)
+
+[state a]
+type = attackmulset
+trigger1 = var(26) = 2
+value = ((fvar(0) + fvar(2))*0.5)*fvar(5)
+
+
+[state a]
+type = DefenceMulSet
+trigger1 = var(14) = 1
+value = 1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;勝利時のサウンドストップ
+;//////////////////////////////////////////////////////////////////////////
+;
+[State 1]
+type = null;AssertSpecial
+;triggerall = Win
+trigger1 = RoundState != 2 && RoundsExisted = 0
+trigger2 = RoundState >= 3 && RoundsExisted != 0
+flag = nomusic
+
+[State 181, 1];無敵
+type = null;NotHitBy
+trigger1 = RoundState != 2 && RoundsExisted = 0
+trigger2 = RoundState >= 3 && RoundsExisted != 0
+value = SCA
+time = 1
+
+[State 1]
+type = null;varset
+;triggerall = Win
+trigger1 = RoundState != 2
+v = 26
+value = 0
+
+[state a]
+type = null;stopsnd
+trigger1 = RoundState = 2
+channel = 2
+ignorehitpause = 1
+
+[state a];イントロ時ボイスの消去
+type = null;stopsnd
+trigger1 = RoundState = 2
+channel = 5
+ignorehitpause = 1
+
+
+[state a]
+type = null;playsnd
+trigger1 = WinKO
+trigger1 = RoundState = 3
+trigger1 = var(12) = 0
+IgnoreHitPause = 1
+persistent = 0
+value = 11,1
+
+[state a]
+type = null;varset
+trigger1 = RoundState = 3
+IgnoreHitPause = 1
+v = 12
+value = 1
+
+[state a]
+type = null;varset
+trigger1 = RoundState = 2
+IgnoreHitPause = 1
+v = 12
+value = 0
+
+
+[State a]
+type = AssertSpecial
+trigger1 = RoundState != 2
+flag = nobardisplay
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;特殊メッセージ
+;//////////////////////////////////////////////////////////////////////////
+[state a];オロチ四天王;改変あり
+type = varset
+triggerall = var(1) = 0
+trigger1 = p2name = "yashiro" || p4name = "yashiro"
+trigger2 = p2name = "Yashiro Nanakase" || p4name = "Yashiro Nanakase"
+trigger3 = p2name = "orochiyashiro" || p4name = "orochiyashiro"
+trigger4 = p2name = "orochi yashiro" || p4name = "orochi yashiro"
+trigger5 = p2name = "orochi_yashiro" || p4name = "orochi_yashiro"
+trigger6 = p2name = "chris" || p4name = "chris"
+trigger7 = p2name = "orochichris" || p4name = "orochichris"
+trigger8 = p2name = "orochi chris" || p4name = "orochi chris"
+trigger9 = p2name = "orochi_chris" || p4name = "orochi_chris"
+trigger10= p2name = "goenitz" || p4name = "goenitz" || p2name = "goenitz96" || p4name = "goenitz96"
+v = 9
+value = 3
+
+[state a];変な格好;改変あり
+type = varset
+triggerall = var(1) = 0
+trigger1 = p2name = "Mai" || p4name = "Mai"
+trigger2 = p2name = "Mai Shiranui" || p4name = "Mai Shiranui"
+trigger3 = p2name = "Angel" || p4name = "Angel"
+trigger4 = p2name = "Clone-Angel" || p4name = "Clone-Angel"
+trigger5 = p2name = "Felicia" || p4name = "Felicia"
+trigger6 = p2name = "Angelia Avallone" || p4name = "Angelia Avallone"
+trigger7 = p2name = "Cassandora" || p4name = "Cassandora"
+trigger8 = p2name = "Gill" || p4name = "Gill"
+trigger9 = p2name = "Urien" || p4name = "Urien"
+trigger10= p2name = "Karate Kenji" || p4name = "Karate Kenji"
+trigger11= p2name = "Krizalid" || p4name = "Krizalid"
+trigger12= p2name = "Cassandra" || p4name = "Cassandra"
+trigger13= p2name = "kira" || p4name = "kira" || p2name = "kirakira" || p4name = "kirakira"
+v = 9
+value = 4
+
+[state a];マチュア、バイス;改変あり
+type = varset
+triggerall = var(1) = 0
+trigger1 = p2name = "Mature" || p4name = "Mature"
+trigger2 = p2name = "Vice" || p4name = "Vice" || p2name = "cvsvice" || p4name = "cvsvice"
+v = 9
+value = 5
+
+[state a];オロチ
+type = varset
+trigger1 = p2name = "orochi" || p4name = "orochi"
+v = 9
+value = 6
+
+[state a];オロチ八傑集;改変あり
+type = varset
+triggerall = var(1) = 1
+trigger1 = p2name = "yashiro" || p4name = "yashiro"
+trigger2 = p2name = "Yashiro Nanakase" || p4name = "Yashiro Nanakase"
+trigger3 = p2name = "orochiyashiro" || p4name = "orochiyashiro"
+trigger4 = p2name = "orochi yashiro" || p4name = "orochi yashiro"
+trigger5 = p2name = "orochi_yashiro" || p4name = "orochi_yashiro"
+trigger6 = p2name = "chris" || p4name = "chris"
+trigger7 = p2name = "orochichris" || p4name = "orochichris"
+trigger8 = p2name = "orochi chris" || p4name = "orochi chris"
+trigger9 = p2name = "orochi_chris" || p4name = "orochi_chris"
+trigger10= p2name = "goenitz" || p4name = "goenitz" || p2name = "goenitz96" || p4name = "goenitz96"
+trigger11= p2name = "reas" || p4name = "reas" || p2name = "Schlussel" || p4name = "Schlussel"
+trigger12= p2name = "Mature" || p4name = "Mature"
+trigger13= p2name = "Vice" || p4name = "Vice" || p2name = "cvsvice" || p4name = "cvsvice"
+trigger14= p2Name = "yamazaki" || P4Name = "yamazaki"
+trigger15= p2Name = "Violent Yamazaki" || P4Name = "Violent Yamazaki"
+trigger16= p2Name = "Gaibel" || P4Name = "Gaibel"
+trigger17= p2name = "Wind" || p4name = "Wind" || p2name = "goeniko" || p4name = "goeniko"
+v = 9
+value = 23
+
+[state a];三種の神器
+type = varset
+triggerall = var(1) = 1
+trigger1 = p2name = "kyo" || p4name = "kyo"
+trigger2 = p2name = "kyo kusanagi" || p4name = "kyo kusanagi"
+trigger3 = p2name = "iori" || p4name = "iori"
+trigger4 = p2name = "iori yagami" || p4name = "iori yagami"
+trigger5 = p2name = "orochi iori" || p4name = "orochi iori"
+trigger6 = p2name = "iori Bogard" || p4name = "iori Bogard"
+trigger7 = p2name = "Yagami Iori" || p4name = "Yagami Iori"
+trigger8 = p2name = "d-Yagami" || p4name = "d-Yagami"
+trigger9 = p2name = "Chizuru" || p4name = "Chizuru"
+trigger10= p2name = "Chizuru Kagura" || p4name = "Chizuru Kagura"
+trigger11= p2name = "Chizuru&Maki" || p4name = "Chizuru&Maki"
+v = 9
+value = 24
+
+[state a];正義;改変あり
+type = varset
+triggerall = var(1) = 1
+trigger1 = p2name = "Kim" || p4name = "Kim" || p2name = "cvskim" || p4name = "cvskim"
+trigger2 = p2name = "Kim Kaphwan" || p4name = "Kim Kaphwan"
+trigger3 = p2name = "Kim Jae Hoon" || p4name = "Kim Jae Hoon"
+trigger4 = p2name = "Athena Asamiya" || p4name = "Athena Asamiya"
+trigger5 = p2name = "Athena" || p4name = "Athena"
+trigger6 = p2name = "Maylee" || p4name = "Maylee"
+trigger7 = p2name = "May lee" || p4name = "May lee"
+trigger8 = p2name = "justice" || p4name = "justice"
+trigger9 = p2name = "enya" || p4name = "enya"
+trigger10= p2name = "Griffon" || p4name = "Griffon"
+trigger11= p2name = "ky" || p4name = "ky"
+trigger12 = p2name = "Yuki" || p4name = "Yuki"
+v = 9
+value = 25
+
+
+[state a];MAX2
+type = varset
+trigger1 = var(9) != 23
+trigger1 = winko
+trigger1 = stateno = [2600,2699]
+v = 25
+value = 1
+
+
+;------------勝利イントロ時
+[state a];社
+type = varset
+trigger1 = p2name = "yashiro" || p4name = "yashiro"
+trigger2 = p2name = "Yashiro Nanakase" || p4name = "Yashiro Nanakase"
+trigger3 = p2name = "orochiyashiro" || p4name = "orochiyashiro"
+trigger4 = p2name = "orochi yashiro" || p4name = "orochi yashiro"
+trigger5 = p2name = "orochi_yashiro" || p4name = "orochi_yashiro"
+v = 27
+value = 1
+
+[state a];クリス
+type = varset
+trigger1 = p2name = "chris" || p4name = "chris"
+trigger2 = p2name = "orochichris" || p4name = "orochichris"
+trigger3 = p2name = "orochi chris" || p4name = "orochi chris"
+trigger4 = p2name = "orochi_chris" || p4name = "orochi_chris"
+v = 27
+value = 2
+
+[state a];男前
+type = varset
+triggerall = var(1) = 0;改変あり
+trigger1 = p2name = "kyo" || p4name = "kyo"
+trigger2 = p2name = "kyo kusanagi" || p4name = "kyo kusanagi"
+trigger3 = p2name = "iori" || p4name = "iori"
+trigger4 = p2name = "iori yagami" || p4name = "iori yagami"
+trigger5 = p2name = "orochi iori" || p4name = "orochi iori"
+trigger6 = p2name = "iori Bogard" || p4name = "iori Bogard"
+trigger7 = p2name = "Yagami Iori" || p4name = "Yagami Iori"
+trigger8 = p2name = "d-Yagami" || p4name = "d-Yagami"
+trigger9 = p2name = "ryo" || p4name = "ryo"
+trigger10= p2name = "ryo sakazaki" || p4name = "ryo sakazaki"
+trigger11= p2name = "RyuKoAct" || p4name = "RyuKoAct"
+trigger12= p2name = "Robert Garcia" || p4name = "Robert Garcia"
+trigger13= p2name = "Robert" || p4name = "Robert"
+trigger14= p2name = "Terry" || p4name = "Terry"
+trigger15= p2name = "Terry Bogard" || p4name = "Terry Bogard"
+trigger16= p2name = "Andy" || p4name = "Andy"
+trigger17= p2name = "Andy Bogard" || p4name = "Andy Bogard"
+trigger18= p2name = "Kim" || p4name = "Kim"
+trigger19= p2name = "Kim Kaphwan" || p4name = "Kim Kaphwan"
+trigger20= p2name = "K'" || p4name = "K'"
+trigger21= p2name = "AK'" || p4name = "AK'"
+trigger22= p2name = "Nao" || p4name = "Nao"
+trigger23= p2name = "kriz" || p4name = "kriz"
+trigger24= p2name = "KUSANAGI" || p4name = "KUSANAGI"
+trigger25= p2name = "clonekyo" || p4name = "clonekyo"
+trigger26= p2name = "clone kyo" || p4name = "clone kyo"
+trigger27= p2name = "kyo-1" || p4name = "kyo-1"
+trigger28= p2name = "kyo-2" || p4name = "kyo-2"
+trigger29= p2name = "Krizalid" || p4name = "Krizalid"
+trigger30= p2name = "Nameless" || p4name = "Nameless"
+trigger31= p2name = "DuoLon" || p4name = "DuoLon"
+trigger32= p2name = "Shen Woo" || p4name = "Shen Woo"
+trigger33= p2name = "Shen" || p4name = "Shen"
+trigger34= p2name = "Adel" || p4name = "Adel"
+trigger35= p2name = "Adelheid" || p4name = "Adelheid"
+trigger36= p2name = "O-Adel" || p4name = "O-Adel"
+trigger37= p2name = "K-BLOOD" || p4name = "K-BLOOD"
+trigger38= p2name = "Rock" || p4name = "Rock"
+trigger39= p2name = "Rock Howard" || p4name = "Rock Howard"
+trigger40= p2name = "Gato" || p4name = "Gato"
+trigger41= p2name = "Billy" || p4name = "Billy"
+trigger42= p2name = "Billy Kane" || p4name = "Billy Kane"
+trigger43= p2name = "Eiji" || p4name = "Eiji"
+trigger44= p2name = "Eiji Kisaragi" || p4name = "Eiji Kisaragi"
+trigger45= p2name = "Alfred" || p4name = "Alfred"
+trigger46= p2name = "Kim Dong Hwan" || p4name = "Kim Dong Hwan"
+trigger47= p2name = "Kim Jae Hoon" || p4name = "Kim Jae Hoon"
+trigger48= p2name = "Kain" || p4name = "Kain"
+trigger49= p2name = "Syo Kirishima" || p4name = "Syo Kirishima"
+trigger50= p2name = "Kaede" || p4name = "Kaede"
+trigger51= p2name = "Moriya" || p4name = "Moriya"
+trigger52= p2name = "Moriya Minakata" || p4name = "Moriya Minakata"
+trigger53= p2name = "Setsuna" || p4name = "Setsuna"
+trigger54= p2name = "Yuki" || p4name = "Yuki"
+trigger55= p2name = "Hanzo" || p4name = "Hanzo"
+trigger56= p2name = "Asura" || p4name = "Asura"
+trigger57= p2name = "Ryu" || p4name = "Ryu"
+trigger58= p2name = "Ken" || p4name = "Ken"
+trigger59= p2name = "Guy" || p4name = "Guy"
+trigger60= p2name = "Nash" || p4name = "Nash"
+trigger61= p2name = "Alex" || p4name = "Alex"
+trigger62= p2name = "Remy" || p4name = "Remy"
+trigger63= p2name = "Demitri" || p4name = "Demitri"
+trigger64= p2name = "Demitri Maximoff" || p4name = "Demitri Maximoff"
+trigger65= p2name = "Gallon" || p4name = "Gallon"
+trigger65= p2name = "Jon Talbain" || p4name = "Jon Talbain"
+trigger66= p2name = "Jedah" || p4name = "Jedah"
+trigger67= p2name = "Jedah Dohma" || p4name = "Jedah Dohma"
+trigger68= p2name = "jotaro" || p4name = "jotaro"
+trigger69= p2name = "Kujo Jotaro" || p4name = "Kujo Jotaro"
+trigger70= p2name = "Dio" || p4name = "Dio"
+trigger71= p2name = "Kyosuke" || p4name = "Kyosuke"
+trigger72= p2name = "cvskyosuke" || p4name = "cvskyosuke"
+trigger73= p2name = "Kyosuke Kagami" || p4name = "Kyosuke Kagami"
+trigger74= p2name = "Shinnosuke Kagami" || p4name = "Shinnosuke Kagami"
+trigger75= p2name = "William Lewis" || p4name = "William Lewis"
+trigger76= p2name = "Jimmy" || p4name = "Jimmy"
+trigger77= p2name = "James Lewis" || p4name = "James Lewis"
+trigger78= p2name = "Pepe" || p4name = "Pepe"
+trigger79= p2name = "Reiji" || p4name = "Reiji"
+trigger80= p2name = "Keith Wayne" || p4name = "Keith Wayne"
+trigger81= p2name = "Strider_Hiryu" || p4name = "Strider_Hiryu"
+trigger82= p2name = "Strider Hiryu" || p4name = "Strider Hiryu"
+trigger83= p2name = "Hiryu" || p4name = "Hiryu"
+trigger84= p2name = "Strider Hien" || p4name = "Strider Hien"
+trigger85= p2name = "Hien" || p4name = "Hien"
+trigger86= p2name = "Benimaru" || p4name = "Benimaru"
+trigger87= p2name = "Benimaru Nikaido" || p4name = "Benimaru Nikaido"
+trigger88= p2name = "cvsbenimaru" || p4name = "cvsbenimaru"
+trigger89= p2name = "cvscommando" || p4name = "cvscommando"
+trigger90= p2name = "cvsguy" || p4name = "cvsguy"
+trigger91= p2name = "cvshayato" || p4name = "cvshayato"
+trigger92= p2name = "cvsken" || p4name = "cvsken"
+trigger93= p2name = "cvskim" || p4name = "cvskim"
+trigger94= p2name = "cvskyo" || p4name = "cvskyo"
+trigger95= p2name = "cvsrock" || p4name = "cvsrock"
+trigger96= p2name = "cvsryo" || p4name = "cvsryo"
+trigger97= p2name = "cvsryu" || p4name = "cvsryu"
+trigger98= p2name = "cvsterry" || p4name = "cvsterry"
+trigger99= p2name = "Kenshiro" || p4name = "Kenshiro"
+trigger100= p2name = "Rei" || p4name = "Rei"
+trigger101= p2name = "Toki" || p4name = "Toki"
+trigger102= p2name = "Karate Kenji" || p4name = "Karate Kenji"
+trigger103= p2name = "Jhun Hoon" || p4name = "Jhun Hoon"
+trigger104= p2name = "ROUGA" || p4name = "ROUGA"
+trigger105= p2name = "Rouga zanma" || p4name = "Rouga zanma"
+trigger106= p2name = "burai yamamoto" || p4name = "burai yamamoto"
+trigger107= p2name = "REN" || p4name = "REN"
+trigger108= p2name = "8th Mad Dog" || p4name = "8th Mad Dog"
+trigger109= p2name = "Haiji Mibu" || p4name = "Haiji Mibu"
+trigger110= p2name = "Y'" || p4name = "Y'"
+trigger111= p2name = "sol" || p4name = "sol"
+trigger112= p2name = "order-Sol=Badguy" || p4name = "order-Sol=Badguy"
+trigger113= p2name = "ky" || p4name = "ky"
+trigger114= p2name = "johnny" || p4name = "johnny"
+trigger115= p2name = "AXL" || p4name = "AXL"
+trigger116= p2name = "chipp" || p4name = "chipp"
+v = 27
+value = 3
+
+[state a];改変あり フラグリセット
+type = varset
+triggerall = var(9)>0
+trigger1 = stateno = [190,198]
+var(9) = 0
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;MAX
+;//////////////////////////////////////////////////////////////////////////
+;---------------------[変数]
+[state -2 ,1];MAX発動時のパワーセット
+type = varset
+trigger1 = var(20) = 900
+v = 21
+value = power
+
+[state a]
+type = varadd
+trigger1 = var(20) > 0
+v = 20
+value = -1
+
+[state a]
+type = varset
+trigger1 = var(20) < 0
+v = 20
+value = 0
+
+[state a]
+type = powerset
+trigger1 = var(20) > 0
+trigger1 = stateno != [2000,2999]
+value = var(21)
+ignorehitpause = 1
+
+;---------------------[演出]
+[State a];点滅
+type = palfx
+trigger1 = var(20) > 0
+trigger1 = gametime % 2 = 0
+time = 1
+add = 126,126,0
+color = 1
+ignorehitpause = 1
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ゲージ
+;//////////////////////////////////////////////////////////////////////////
+;---------------------[ヘルパー]
+[state a];ＫＯ演出
+type = Helper
+trigger1 = numhelper(8010) = 0
+id = 8010
+name = "g"
+sprpriority = 1
+pos = 0,0
+postype = p1
+stateno = 8010
+helpertype = normal
+pausemovetime = 999999
+keyctrl = 1 
+ownpal = 1
+
+;---------------------[ヘルパー]
+[state a];ゲージ
+type = Helper
+trigger1 = numhelper(7500) = 0
+id = 7500
+name = "g"
+sprpriority = 1
+pos = 0,0
+postype = p1
+stateno = 7500
+helpertype = normal
+pausemovetime = 99999999
+supermovetime = 99999999
+keyctrl = 0 
+ownpal = 1
+
+
+
+;---------------------[ヘルパー]
+[state a];MAX発動ゲージ
+type = Helper
+trigger1 = numhelper(7550) = 0
+id = 7550
+name = "MAX"
+sprpriority = 1
+pos = 0,0
+postype = p1
+stateno = 7550
+helpertype = normal
+pausemovetime = 99999999
+supermovetime = 99999999
+keyctrl = 0 
+ownpal = 1
+

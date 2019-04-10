@@ -1,0 +1,995 @@
+;------------------------------------------------------------------------------|
+;************************* -2,-3 STATE DEFINICIONES ***************************|
+;------------------------------------------------------------------------------|
+
+;--------------------------------------------------------------------------------------------------------------------------------------
+[Statedef -2];(Que se ejecuta siempre, independientemente de que la conducta es controlada oponente) monitorea constantemente el estado
+;--------------------------------------------------------------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+;Intro and K.O. no Lifebars
+[State -2]
+type = assertspecial
+trigger1 = roundstate != 2
+trigger2 = Ctrl = 0 && (Anim = [0,2]) && MoveType != H
+flag = NoBarDisplay
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+;Extra Carteles KOF MEMORIAL LEVEL 2
+;-------------------------------------------------------------------------------
+;Perfect p1
+[State 1000, Explod]
+type = Explod
+triggerall = numexplod(7000) <= 0 && teamside = 1
+trigger1 = win = 1 && Life >= LifeMax
+trigger1 = stateno != [180,189]
+anim = f7000
+ID = 7000
+pos = -70,85
+postype = left
+bindtime = -1
+removetime = -2
+sprpriority = 9
+ontop = 1
+supermove = 1
+pausemove = 1
+pausemovetime = 99999
+supermovetime = 99999
+ignorehitpause = 1
+ownpal = 1
+
+;Perfect p2
+[State 1000, Explod]
+type = Explod
+triggerall = numexplod(7000) <= 0 && teamside = 2
+trigger1 = win = 1 && Life >= LifeMax
+trigger1 = stateno != [180,189]
+anim = f7000
+ID = 7000
+pos = -390,85
+postype = right
+bindtime = -1
+removetime = -2
+sprpriority = 9
+ontop = 1
+supermove = 1
+pausemove = 1
+pausemovetime = 99999
+supermovetime = 99999
+ignorehitpause = 1
+ownpal = 1
+
+;Lose cartel p1
+[State 1000, Explod]
+type = Explod
+triggerall = numexplod(7010) <= 0 && teamside = 1
+triggerall = win = 1 && stateno = [180,189]
+trigger1 = time = 0
+anim = f7010
+ID = 7010
+pos = 200,70
+postype = left
+bindtime = -1
+removetime = -2
+sprpriority = 9
+ontop = 1
+ownpal = 1
+
+;Lose cartel p2
+[State 1000, Explod]
+type = Explod
+triggerall = numexplod(7010) <= 0 && teamside = 2
+triggerall = win = 1 && stateno = [180,189]
+trigger1 = time = 0
+anim = f7010
+ID = 7010
+pos = 25,70
+postype = left
+bindtime = -1
+removetime = -2
+sprpriority = 9
+ontop = 1
+ownpal = 1
+
+;Winner p1
+[State 1000, Explod]
+type = Explod
+triggerall = numexplod(7015) <= 0 && teamside = 1
+triggerall = win = 1 && stateno = [180,189]
+trigger1 = time = 0
+anim = f7015
+ID = 7015
+pos = -310,200
+postype = left
+bindtime = -1
+removetime = -2
+sprpriority = 9
+ontop = 1
+ownpal = 1
+
+;Winner p1 Estatico
+[State 1000, Explod]
+type = Explod
+triggerall = numexplod(7020) <= 0 && teamside = 1
+triggerall = win = 1 && stateno = [180,189]
+trigger1 = time = 0
+anim = f7020
+ID = 7020
+pos = -8,202
+postype = left
+bindtime = -1
+removetime = -2
+sprpriority = 9
+ontop = 1
+ownpal = 1
+
+;Winner p2
+[State 1000, Explod]
+type = Explod
+triggerall = numexplod(7015) <= 0 && teamside = 2
+triggerall = win = 1 && stateno = [180,189]
+trigger1 = time = 0
+anim = f7016
+ID = 7015
+pos = -120,200
+postype = left
+bindtime = -1
+removetime = -2
+sprpriority = 9
+ontop = 1
+ownpal = 1
+
+;Winner p2 Estatico
+[State 1000, Explod]
+type = Explod
+triggerall = numexplod(7020) <= 0 && teamside = 2
+triggerall = win = 1 && stateno = [180,189]
+trigger1 = time = 0
+anim = f7021
+ID = 7020
+pos = 182,202
+postype = left
+bindtime = -1
+removetime = -2
+sprpriority = 9
+ontop = 1
+ownpal = 1
+
+;-------------------------------------------------------------------------------
+;Final KO Effect
+[State -2, Helper]
+type = Helper
+Triggerall = var(51) = 1
+triggerall = numhelper(9920) <= 0
+Triggerall = Teammode = Single || Teammode = Turns
+trigger1 = Roundstate = 3 && Winko && matchover
+helpertype = normal
+name = "Winpose"
+Id = 9920
+stateno = 9920
+pos = 0,0
+postype = p1
+facing = 1
+ignorehitpause = 1
+supermove = 1
+pausemove = 1
+pausemovetime = 99999
+supermovetime = 99999
+ownpal = 1
+
+[State -2, ChangeState]
+type = ChangeState
+Triggerall = var(51) = 1
+Triggerall = Teammode = Single || Teammode = Turns
+Triggerall = stateno = 180
+trigger1 = matchover && Winko
+value = 9925
+ctrl = 0
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+;KO Flash Effect
+[State -2, Helper]
+type = Helper
+triggerall = numhelper(9910) <= 0
+trigger1 = winKo = 1 && movehit && stateno = [899,4999]
+helpertype = normal
+name = "KO Flash"
+Id = 9910
+stateno = 9910
+pos = 0,0
+postype = p1
+facing = 1
+ignorehitpause = 1
+supermove = 1
+pausemove = 1
+pausemovetime = 99999
+supermovetime = 99999
+ownpal = 1
+
+[state -2, PlaySound]
+type = playsnd
+trigger1 = WinKO
+trigger1 = RoundState = 3
+trigger1 = var(27) = 0
+IgnoreHitPause = 1
+persistent = 0
+value = f5200,0
+volumescale = 255
+
+[state -2, varset]
+type = varset
+trigger1 = RoundState = 3
+IgnoreHitPause = 1
+v = 27
+value = 1
+
+[state -2, varset]
+type = varset
+trigger1 = RoundState = 2
+IgnoreHitPause = 1
+v = 27
+value = 0
+
+;-------------------------------------------------------------------------------
+;--------------------------First Attack-----------------------------------------
+;-------------------------------------------------------------------------------
+;First Attack
+[State -2, First Attack]
+type = Explod
+triggerall = numexplod(4170) <= 0 && teamside = 1
+triggerall = enemy,numexplod(4170) <= 0
+triggerall = p2movetype = H && p2stateno = [800,5070]
+trigger1 = NumPartner
+trigger1 = partner,numexplod(4170) <= 0
+trigger2 = !NumPartner
+ignorehitpause = 1
+persistent = 9
+anim = f4170
+id = 4170
+pos = 4,196
+postype = left
+bindtime = -1
+removetime = -2
+ontop = 1
+ownpal = 1
+supermove = 1
+pausemove = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+[State -2, First Attack]
+type = Explod
+triggerall = numexplod(4170) <= 0 && teamside = 2
+triggerall = enemy,numexplod(4170) <= 0
+triggerall = p2movetype = H && p2stateno = [800,5070]
+trigger1 = NumPartner
+trigger1 = partner,numexplod(4170) <= 0
+trigger2 = !NumPartner
+ignorehitpause = 1
+persistent = 9
+anim = f4170
+id = 4170
+pos = -92,196
+postype = right
+bindtime = -1
+removetime = -2
+ontop = 1
+ownpal = 1
+supermove = 1
+pausemove = 1
+supermovetime = 99999
+pausemovetime = 99999
+
+;-------------------------------------------------------------------------------
+;---------------------------Life Danger-----------------------------------------
+;-------------------------------------------------------------------------------
+;Life Danger
+[State -2, Life Danger]
+type = Explod
+triggerall = numexplod(4180) <= 0 && teamside = 1
+trigger1 = life <= LifeMax/4
+ignorehitpause = 1
+persistent = 0
+anim = f4180
+id = 4180
+pos = 4,196
+postype = left
+bindtime = -1
+ontop = 1
+ownpal = 1
+
+[State -2, Life Danger]
+type = Explod
+triggerall = numexplod(4180) <= 0 && teamside = 2
+trigger1 = life <= LifeMax/4
+ignorehitpause = 1
+persistent = 0
+anim = f4180
+id = 4180
+pos = -55,196
+postype = right
+bindtime = -1
+ontop = 1
+ownpal = 1
+
+[State -2, Remove Danger]
+type = RemoveExplod
+trigger1 = numexplod(4180) > 0
+trigger1 = life > LifeMax/4
+id = 4180
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+;---------------------------Hyper Available-------------------------------------
+;-------------------------------------------------------------------------------
+[State -2, Hyper Available]
+type = Explod
+triggerall = numexplod(4190) <= 0 && teamside = 1
+trigger1 = life <= LifeMax/2
+ignorehitpause = 1
+persistent = 0
+anim = f4190
+id = 4190
+pos = 4,196
+postype = left
+bindtime = -1
+ontop = 1
+ownpal = 1
+
+[State -2, Hyper Available]
+type = Explod
+triggerall = numexplod(4190) <= 0 && teamside = 2
+trigger1 = life <= LifeMax/2
+persistent = 0
+anim = f4190
+id = 4190
+pos = -116,196
+postype = right
+bindtime = -1
+ontop = 1
+ownpal = 1
+
+[State -2, Remove Danger]
+type = RemoveExplod
+trigger1 = numexplod(4190) > 0
+trigger1 = life > LifeMax/2
+id = 4190
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+
+;NumPartner Detection Under Simul Battle
+[State -2]
+type = VarSet
+trigger1 = Teammode = Single || Teammode = Turns
+var(28) = 0
+ignorehitpause = 1
+
+[State -2]
+type = varset
+triggerall = teammode = Simul
+trigger1 = NumPartner = 1
+trigger1 = Partner,Authorname = "LASH" || Partner,Authorname = "zzzasd" ||Partner,Authorname = "yagami+ihoo1836"
+trigger1 = ID < Partner,ID
+trigger2 = NumPartner = 1
+trigger2 = Partner,Authorname = "Ahuron" || Partner,Authorname = "jin" ||Partner,Authorname = "yagami+ihoo1836"
+trigger2 = ID < Partner,ID
+var(28) = 1
+ignorehitpause = 1
+
+;-----------------------------------------------------------------------------
+;------------------------------Burn Explods-----------------------------------
+;-----------------------------------------------------------------------------
+
+[State -2, 0]
+type = Varset
+trigger1 = stateno = [0,999]
+trigger1 = MoveContact = 1
+trigger2 = MoveGuarded = 1
+var(3) = 0
+ignorehitpause = 1
+
+[State -2, 0]
+type = Varadd
+trigger1 = var(3) > 0
+var(3) = -1
+ignorehitpause = 1
+
+[State 907, 0]
+type = varset
+trigger1 = p2stateno = 41490 && enemy,anim = 5110
+trigger2 = p2stateno = 4169 && enemy,anim = 5111
+trigger3 = p2stateno = 4128 && enemy,anim = 5111
+trigger4 = p2stateno = 4138 && enemy,anim = 5110
+trigger5 = p2stateno = 4238 && enemy,anim = 5110
+trigger6 = p2stateno = 4248 && enemy,anim = 5111
+trigger7 = p2stateno = 5951 && enemy,anim = 5950
+trigger8 = p2movetype != H
+var(3) = 0
+
+[State -2,explods]
+type = Explod
+triggerall = p2movetype = H
+trigger1 = Random < 70
+trigger1 = var(3) = [250,300]
+anim = 4500
+pos = 0,-50
+postype = p2
+sprpriority = 9
+bindtime = 1
+random = 100,100
+ownpal = 1
+ignorehitpause = 1
+
+[state a]
+type = Explod
+triggerall = p2Movetype = H
+triggerall = numexplod(4501) <= 6
+trigger1 = var(3) = [250,300]
+anim = 4501+random%2
+id = 4501
+sprpriority = 10
+postype = p2
+pos = -40 + random%80,-10 - random%90
+random = 65,90
+bindtime = 1
+supermovetime = 28
+pausemovetime = 28
+IgnoreHitPause = 1
+under = 0
+trans = addalpha
+alpha = 256,40
+
+[State -2, 1]
+type = Explod
+triggerall = random < 100
+triggerall = p2Movetype = H
+trigger1 = (gametime%2) = 1
+trigger1 = var(3) = [1,300]
+anim = 4503-random%1
+pos = 0,-50
+random = 65,90
+postype = p2
+ownpal = 1
+bindtime = 1
+ignorehitpause = 1
+sprpriority = 4
+
+;P2 en el Suelo
+[State 1000, explods]
+type = Explod
+triggerall = (p2stateno = [5100,5460]) && p2movetype = H
+trigger1 = var(3) > 0 && Random < 100
+anim = 4503
+pos = 0,0
+facing = -1
+postype = p2
+sprpriority = 999
+bindtime = 1
+random = 100,0
+ownpal = 1
+supermove = 1
+ignorehitpause = 1
+
+[State 1000, explods]
+type = Explod
+triggerall = (p2stateno = [5100,5460]) && p2movetype = H
+trigger1 = var(3) > 0 && Random < 100
+anim = 4504
+pos = 0,0
+postype = p2
+sprpriority = 999
+bindtime = 1
+random = 100,100
+ownpal = 1
+supermove = 1
+ignorehitpause = 1
+
+[State 0, VarSet]
+type = VarSet
+trigger1 = Numhelper(1510) = 1
+trigger1 = helper(1510),movehit
+var(3) = 300
+ignorehitpause = 1
+
+;---------------------------------------------------------------------------
+[State -2, Dir Facing]
+type = varset
+trigger1 = var(10) = 0
+trigger1 = facing = 1
+v = 10
+value = 1
+
+[State -2, Dir Facing]
+type = varset
+trigger1 = var(10) = 0
+trigger1 = facing = -1
+v = 10
+value = 2
+
+[State -2, Stop Running Sound]
+type = stopSnd
+trigger1 = stateno != 100
+channel = 1
+
+[State -2, 4]
+type = varadd
+trigger1 = 1
+v = 15
+value = -1
+
+[State -2, 1]
+type = stopSnd
+trigger1 = stateno != 1800
+channel = 6
+
+[State -2, 1]
+type = stopSnd
+trigger1 = movetype = H
+channel = 7
+
+[State -2, 1]
+type = stopSnd
+trigger1 = movetype = H
+channel = 8
+
+[State -2, Cheese KO]
+type = ChangeState
+triggerall = loseko && SelfAnimexist(5950)
+trigger1 = PrevStateNo = 130 || PrevStateNo = 131
+trigger2 = PrevStateNo = 140 || PrevStateNo = 141
+trigger3 = PrevStateNo = 120 || PrevStateNo = 121
+trigger4 = PrevStateNo = 150 || PrevStateNo = 151
+value = 5950
+
+; Dizzy countdown -------------------------------------------------------------
+[State -2, Dizzy count ]
+type = Varadd
+trigger1 = var(13) > 0
+trigger1 = movetype != H
+var(13) = -1
+Ignorehitpause = 1
+
+; Dizzy increasing value coding -----------------------------------------------
+[State -2, DizzyIncreasing ]
+type = Varadd
+triggerall = gethitvar(damage) > 0 && gethitvar(hitcount) > 0
+triggerall = StateNo = [5000,5100]
+trigger1 = enemy,movehit
+trigger2 = enemy,projhit = 1
+var(13) = floor((ifelse(GetHitVar(damage) <= 100,GetHitVar(damage),100))/gethitvar(hitcount))*2
+ignorehitpause = 1
+persistent = 0
+
+;  Dizzy State -----------------------------------------------------------------
+[State -2, Dizzy state ]
+type = Changestate
+trigger1 = var(13) >= 1000
+Trigger1 = stateno = [5000,5099]
+trigger1 = !hitshakeover
+value = 6100
+ignorehitpause = 1
+
+[State 5300, Dizzy Stars]
+type = Explod
+trigger1 = Roundstate = 2
+trigger1 = Anim = 5300
+trigger1 = !numexplod(5305)
+anim = 5305
+ID = 5305
+pos = 0,-93
+postype = p1
+bindtime = -1
+removetime = -1
+supermove = 1
+pausemove = 1
+scale = 0.7,0.7
+sprpriority = 2
+ownpal = 1
+removeongethit = 1
+ignorehitpause = 1
+
+[State -2, RemoveExplod]
+type = RemoveExplod
+trigger1 = Numexplod(5305) > 0
+trigger1 = Anim != 5300
+id = 5305
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+;Orochi Modo Y Normal Modo
+[State -2, Modo Normal]
+type = varset
+triggerall = stateno = 5900
+trigger1 = palno = 1
+trigger2 = palno = 2
+trigger3 = palno = 3
+trigger4 = palno = 4
+trigger5 = palno = 5
+trigger6 = palno = 6
+v = 1
+value = 0
+
+[State -2, Modo Orochi]
+type = varset
+triggerall = stateno = 5900
+trigger1 = palno = 7
+trigger2 = palno = 8
+trigger3 = palno = 9
+trigger4 = palno = 10
+trigger5 = palno = 11
+trigger6 = palno = 12
+v = 1
+value = 1
+
+[State -2, Transformacion Normal]
+type = varset
+trigger1 = var(24) = 1
+v = 1
+value = 0
+
+[State -2, Transformacion Orochi]
+type = varset
+trigger1 = var(24) = 2
+v = 1
+value = 1
+
+;==============================================================================|
+;------------------------------COUNTER HIT-------------------------------------|
+;==============================================================================|
+
+[State -2, Counter Hit Envcolor]
+type = EnvColor
+trigger1 = NumExplod(8250) = 0 && !Win = 1 && var(8) = 1 && movehit = 1
+value = 255,255,255
+persistent = 0
+time = 1
+ignorehitpause = 1
+under = 1
+
+;-----2K2-------------------------------------------------------------
+[State -2, Counter hit Logo (Player 1)]
+type = Explod
+triggerall = teamside = 1 && NumExplod(8250) = 0 && !Win = 1 && var(8) = 1
+trigger1 = stateno < 800 && movehit > 0
+trigger2 = stateno >= 900 && movehit > 0
+trigger3 = projhittime(0) >= 0 && projhittime(0) <= 10
+anim = f4150
+ID = 8250
+pos = 4,206
+postype = left
+sprpriority = 5
+ontop = 1
+shadow = 0,0,0
+ownpal = 1
+bindtime = -1
+ignorehitpause = 1
+
+[State -2, Counter hit Logo (Player 2)]
+type = Explod
+triggerall = teamside = 2 && NumExplod(8250) = 0 && !Win = 1 && var(8) = 1
+trigger1 = stateno < 800 && movehit > 0
+trigger2 = stateno >= 900 && movehit > 0
+trigger3 = projhittime(0) >= 0 && projhittime(0) <= 10
+anim = f4150
+ID = 8250
+pos = -62,206
+postype = right
+sprpriority = 5
+ontop = 1
+shadow = 0,0,0
+ownpal = 1
+bindtime = -1
+ignorehitpause = 1
+;-----2K2-------------------------------------------------------------
+
+[State -2, Counter hit varset (P2Attack setting)]
+type = Varset
+trigger1 = P2movetype = A && var(8) != -1 && !win = 1 && p2life != 0
+var(8) = 1
+ignorehitpause = 1
+
+[State -2, Counter hit varset (P2Attack setting)]
+type = Varset
+trigger1 = p2stateno = 5110
+trigger2 = p2stateno = 0
+trigger3 = NumExplod(8250) = 1
+var(8) = 0
+ignorehitpause = 1
+
+[State -2, Pause Var]
+type = varadd
+trigger1 = 1
+persistent = 0
+ignorehitpause = 1
+var(4) = -1
+
+[State -2, Pause]
+type = pause
+trigger1 = var(4) >= 1
+trigger1 = gametime % 2
+persistent = 0
+ignorehitpause = 1
+time = 1
+
+[State -2, DCVarReSet]
+type = VarSet
+triggerall = var(12)
+trigger1 = Stateno = 0
+trigger2 = Movetype = H
+var(12) = 0
+ignorehitpause = 1
+
+;-------------------------------------------------------------------------------
+;Rwmove Explods
+[State 1]
+type = removeexplod
+trigger1 = MoveType = H && stateno != [120,159]
+ID = 3000
+
+[State 1]
+type = removeexplod
+trigger1 = MoveType = H
+ID = 2200
+
+
+[State removeexplod]
+type = removeexplod
+trigger1 = anim != 1
+ID = 2
+
+[State removeexplod]
+type = removeexplod
+trigger1 = stateno != 199
+ID = 199
+
+;ダメージ時の残像の消去
+[state a];
+type = afterimagetime
+trigger1 = MoveType = H
+time = 0
+
+;-------------------------------------------------------------------------------
+;Hit Shake Sounds
+[State -2,PlaySnd]
+type =PlaySnd
+triggerall = Alive && Random%2 = 0
+triggerall = Time = 1
+triggerall = (StateNo = 5000 || StateNo = 5010 || StateNo = 5020)
+trigger1 = GethitVar(animtype)=[0,2]
+value = s11,ifelse((GethitVar(animtype)=[0,1]),0||1,4)
+persistent = 0
+
+[State -2,PlaySnd]
+type =PlaySnd
+triggerall = Alive && Random%2 = 0
+triggerall = Time = 1
+triggerall = (StateNo = 5000 || StateNo = 5010 || StateNo = 5020)
+trigger1 = GethitVar(animtype)=[0,2]
+value = s11,ifelse((GethitVar(animtype)=[4,5]),2,4)
+persistent = 0
+
+[State -2,PlaySnd]
+type =PlaySnd
+triggerall = Alive && Random%2 = 0
+triggerall = Time = 1
+triggerall = (StateNo = 5000 || StateNo = 5010 || StateNo = 5020)
+trigger1 = GethitVar(animtype)=[0,2]
+value = s11,ifelse((GethitVar(airtype)=[0,1]),0||1,2)
+persistent = 0
+
+[State -2,PlaySnd]
+type =PlaySnd
+triggerall = Alive && Random%2 = 0
+triggerall = Time = 1
+triggerall = (StateNo = 5000 || StateNo = 5010 || StateNo = 5020)
+trigger1 = GethitVar(animtype)=[0,2]
+value = s11,ifelse((GethitVar(airtype)=[4,5]),2,2)
+persistent = 0
+
+;ネバリ補正関係
+[state a];第一段階
+type = varset
+trigger1 = enemy,life >= 400
+v = 26
+value = 0
+
+[state a];第二段階
+type = varset
+trigger1 = enemy,life <= 399 && enemy,life >= 150
+v = 26
+value = 1
+
+[state a];第三段階
+type = varset
+trigger1 = enemy,life <= 149
+v = 26
+value = 2
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;特殊メッセージ
+;//////////////////////////////////////////////////////////////////////////
+[state a]
+type = varset
+triggerall = var(1) = 0
+trigger1 = p2name = "Shermie" || p4name = "Shermie"
+trigger2 = p2name = "orochiShermie" || p4name = "orochiShermie"
+trigger3 = p2name = "orochi Shermie" || p4name = "orochi Shermie"
+trigger4 = p2name = "orochi_Shermie" || p4name = "orochi_Shermie"
+v = 9
+value = 3
+
+[state a];クーラ
+type = varset
+triggerall = var(1) = 0
+trigger1 = p2name = "kula" || p4name = "kula"
+trigger2 = p2name = "Kula Diamond" || p4name = "Kula Diamond"
+v = 9
+value = 4
+
+[state a];顔怖い奴
+type = varset
+triggerall = var(1) = 0
+trigger1 = p2name = "Yamazaki" || p4name = "Yamazaki"
+trigger2 = p2name = "Ryuji Yamazaki" || p4name = "Ryuji Yamazaki"
+trigger3 = p2name = "Ryuji_Yamazaki" || p4name = "Ryuji_Yamazaki"
+trigger4 = p2name = "Violent Yamazaki" || p4name = "Violent Yamazaki"
+trigger5 = p2name = "gouki" || p4name = "gouki"
+trigger6 = p2name = "shin gouki" || p4name = "shin gouki"
+trigger7 = p2name = "akuma" || p4name = "akuma"
+trigger8 = p2name = "cvsgouki" || p4name = "cvsgouki"
+trigger9 = p2name = "gouki" || p4name = "gouki"
+trigger10= p2name = "Genjyuro" || p4name = "Genjyuro"
+trigger11= p2name = "JAGI" || p4name = "JAGI"
+trigger12= p2name = "misuzu" || p4name = "misuzu"
+trigger13= p2name = "Rare Akuma" || p4name = "Rare Akuma"
+trigger14= p2name = "Pocket Shin Gouki" || p4name = "Pocket Shin Gouki"
+trigger15= p2name = "Kabal" || p4name = "Kabal"
+trigger16= p2name = "Enja" || p4name = "Enja"
+trigger17= p2name = "shikyo" || p4name = "shikyo"
+trigger18= p2name = "mudman" || p4name = "mudman"
+trigger19= p2name = "trigger" || p4name = "trigger"
+trigger20= p2name = "Magaki" || p4name = "Magaki"
+v = 9
+value = 5
+
+[state a];顔変な奴
+type = varset
+triggerall = var(1) = 0
+trigger1 = p2name = "Ash" || p4name = "Ash"
+trigger2 = p2name = "Ash Crimson" || p4name = "Ash Crimson"
+trigger3 = p2name = "Dan" || p4name = "Dan"
+trigger4 = p2name = "Dan Hibiki" || p4name = "Dan Hibiki"
+trigger5 = p2name = "Iori Bogard" || p4name = "Iori Bogard"
+trigger6 = p2name = "Norimaro" || p4name = "Norimaro"
+trigger7 = p2Name = "golrio" || p4Name = "golrio"
+trigger8 = p2Name = "DJ" || p4Name = "DJ"
+trigger9 = p2Name = "Vega" || p4Name = "Vega"
+trigger10= p2Name = "Mukuro" || p4Name = "Mukuro"
+v = 9
+value = 6
+
+
+[state a];オロチ
+type = varset
+trigger1 = p2name = "orochi" || p4name = "orochi"
+v = 9
+value = 27
+
+[state a];レオナ
+type = varset
+triggerall = var(1) = 1
+trigger1 = p2name = "Tin's Leona" || p4name = "Tin's Leona"
+trigger2 = p2name = "Leona" || p4name = "Leona"
+trigger3 = p2name = "Another Leona" || p4name = "Another Leona"
+trigger4 = p2name = "Leona Heidern" || p4name = "Leona Heidern"
+v = 9
+value = 23
+
+[state a];ルガール
+type = varset
+triggerall = var(1) = 1
+trigger1 = p2name = "Rugal.B" || p4name = "Rugal.B"
+trigger2 = p2name = "Rugal2k2" || p4name = "Rugal2k2"
+trigger3 = p2name = "omega rugal98" || p4name = "omega rugal98"
+trigger4 = p2name = "omega rugal" || p4name = "omega rugal"
+trigger5 = p2name = "rugal" || p4name = "rugal"
+trigger6 = p2name = "Rugal_TLE" || p4name = "Rugal_TLE"
+v = 9
+value = 24
+
+[state a];神気取り
+type = varset
+triggerall = var(1) = 1
+trigger1 = p2name = "igniz" || p4name = "igniz"
+trigger2 = p2name = "gill" || p4name = "gill"
+trigger3 = p2name = "cvsg_rugal" || p4name = "cvsg_rugal"
+trigger4 = p2name = "suija" || p4name = "suija"
+trigger5 = p2name = "onslaught" || p4name = "onslaught"
+trigger6 = p2name = "Carlos" || p4name = "Carlos"
+trigger7 = p2name = "ZEUS" || p4name = "ZEUS"
+trigger8 = p2name = "Angelia Avallone" || p4name = "Angelia Avallone"
+v = 9
+value = 25
+
+[state a];サナギ
+type = varset
+triggerall = var(1) = 1
+trigger1 = p2name = "Krizalid" || p4name = "Krizalid"
+trigger2 = p2name = "Mildred_Avallone" || p4name = "Mildred_Avallone"
+v = 9
+value = 26
+
+
+[state a]
+type = varset
+trigger1 = winko
+trigger1 = stateno = 2600
+v = 25
+value = 1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;MAX
+;//////////////////////////////////////////////////////////////////////////
+;---------------------[変数]
+[state -2 ,1];MAX発動時のパワーセット
+type = varset
+trigger1 = var(20) = 900
+v = 21
+value = power
+
+[state a]
+type = varadd
+trigger1 = var(20) > 0
+v = 20
+value = -1
+
+[state a]
+type = varset
+trigger1 = var(20) < 0
+v = 20
+value = 0
+
+[state a]
+type = powerset
+trigger1 = var(20) > 0
+trigger1 = stateno != [2000,2999]
+value = var(21)
+ignorehitpause = 1
+
+;---------------------[演出]
+[State a];点滅
+type = palfx
+trigger1 = var(20) > 0
+trigger1 = gametime % 2 = 0
+time = 1
+add = 126,126,0
+color = 1
+ignorehitpause = 1
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ゲージ
+;//////////////////////////////////////////////////////////////////////////
+;---------------------[ヘルパー]
+
+;------------------------------------------------------
+;【デバッグ用】
+
+[State -2]
+Type = DisplayToClipBoard
+Trigger1 = 1
+Text = "(9)=%d,(58)=%d,f(21)=%d,f(22)=%d,GHX=%f\n"
+Params = var(9),var(58),Floor(fvar(21)),Floor(fvar(22)),((const(movement.yaccel))/2*5*5)+(vel Y*5)+(p2bodydist Y);GetHitVar(xvel))
+IgnoreHitPause = 1
+
+[State -2]
+type = AppendToClipboard
+trigger1 = 1
+text =  "P2X=%f,P2Y=%f,e_life=%d,e_Max=%d,v(16)=%d\n"
+params = p2bodydist X, p2bodydist Y, enemynear,life, enemynear,lifemax, var(15)
+IgnoreHitPause = 1
+
+

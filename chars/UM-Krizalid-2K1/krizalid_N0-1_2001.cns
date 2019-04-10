@@ -1,0 +1,273 @@
+;===========================================================================
+;P2ワイヤーフレーム・硬直
+[Statedef 294]
+type    = A
+movetype= H
+physics = N
+sprpriority = 1
+velset = 0,0
+
+[State 294, 1];無敵の状態を作る
+type = NotHitBy
+trigger1 = 1
+value = SCA
+
+[State 294, 2]
+type = ChangeAnim
+Trigger1 = Time = 0
+value = 5050
+
+[State 294, 3] 
+type = changeState
+trigger1 = time >= GetHitVar(hitshaketime)
+value = 295
+
+;---------------------------------------------------------------------------
+;P2ワイヤーフレーム・吹き飛び
+[Statedef 295]
+type    = A
+movetype= H
+physics = N
+sprpriority = 1
+velset = -15,-4
+
+[State 295, 1];無敵の状態を作る
+type = NotHitBy
+trigger1 = 1
+value = SCA
+
+[State 295, 2]
+type = ChangeAnim2
+Trigger1 = Time = 0
+value = 295
+
+[State 295, 3]
+type = VelAdd
+Trigger1 = time != 0
+y = .52
+
+
+[State 295, 4] 
+type = changeState
+trigger1 = backedgedist < 20
+value = 296
+
+[State 295, 5] 
+type = changeState
+triggerall = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 998
+
+;---------------------------------------------------------------------------
+;P2ワイヤーフレーム・壁ヒット
+[Statedef 296]
+type    = A
+movetype= H
+physics = N
+sprpriority = 1
+velset = 0,0
+
+[State 296, PS]
+type = PlaySnd
+trigger1 = Time = 0
+value = F7,2
+
+[State 295, 1];無敵の状態を作る
+type = NotHitBy
+trigger1 = 1
+value = SCA
+
+[State 295, 2]
+type = ChangeAnim2
+Trigger1 = Time = 0
+value = 296
+
+[State 295, 3] 
+type = changeState
+trigger1 = animtime = 0
+value = 297
+
+
+;---------------------------------------------------------------------------
+;P2ワイヤーフレーム・跳ね返り
+[Statedef 297]
+type    = A
+movetype= H
+physics = N
+sprpriority = 1
+velset = 2,-13;-17
+
+[state 297, 1]
+type = turn
+trigger1 = time = 0
+
+[State 297, 2]
+type = ChangeAnim
+Trigger1 = Time = 0
+value = 5050
+
+[State 297, 3]
+type = VelAdd
+Trigger1 = time != 0
+y = .52
+
+[State 297, 4] 
+type = selfState
+triggerall = Vel Y > 0
+trigger1 = Pos Y >= 0
+value = 5100
+
+;---------------------------------------------------------------------------
+;P2防御崩し
+[Statedef 997]
+type = S
+movetype = H
+physics = N
+velset = 0,0
+ctrl = 0
+
+[State 997, 1]
+type = EnvColor
+trigger1 = Time = 0
+time = 2
+value = 248,248,248
+under = 1
+ignorehitpause = 1
+
+[State 997, 2]
+type = ChangeAnim2
+trigger1 = Time = 0
+value = 997
+
+[State 997, 3]
+type = posadd
+trigger1 = Time < 12
+x = ifelse(time%2=0,-1,1)
+
+
+[State 997, 4]
+type = velset
+trigger1 = Time = 12
+x = -6.5
+
+[State 997, 5]
+type = velmul
+trigger1 = Time > 12
+x = .9
+
+[State 997, 6]
+type = SelfState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+
+;---------------------------------------------------------------------------
+;P2滑り
+[Statedef 998]
+type    = S
+movetype= H
+physics = N
+velset = -12,0
+sprpriority = 1
+
+[State 998, PS]
+type = PlaySnd
+trigger1 = Time = 0
+value = F7,2
+
+[state 998, 1]
+type = posset
+trigger1 = time = 0
+y = 0
+
+[state 998, 2]
+type = velmul
+trigger1 = 1
+x = 0.85
+
+[State 998, 3]
+type = ChangeAnim2
+Trigger1 = Time = 0
+value = 998
+
+[State 998, 4] 
+type = changestate
+trigger1 = time = 20
+value = 999
+
+
+;---------------------------------------------------------------------------
+;P2ダウン
+[Statedef 999]
+type    = A
+movetype= H
+physics = N
+velset = 0,0
+sprpriority = 1
+
+[State 999, 1]
+type = ChangeAnim
+Trigger1 = Time = 0
+value = 5110
+
+[State 999, 2];カメラ固定
+type = screenbound
+trigger1 = 1
+value = 1
+movecamera = 1
+
+
+[State 999, 3] 
+type = SelfState
+trigger1 = time = 1
+value = 5110 
+
+;===========================================================================
+;---------------------------------------------------------------------------
+; CPU用・前弱Ｋ
+[Statedef 447]
+type = S
+movetype = A
+physics = S
+juggle = 1
+ctrl = 0
+velset = 0,0
+anim = 446
+sprpriority = 2
+ 
+[State 446, Hit.D]
+type = HitDef
+trigger1 = AnimElem = 6
+attr = S, NA                        
+animtype  = Heavy  
+damage    = 50,0  
+guardflag = M            
+pausetime = 12,13                
+sparkno = s7005             
+guard.sparkno = S7025
+sparkxy = -20,-30           
+hitsound   = s1,3            
+guardsound = s2,0
+ground.type = low    
+ground.slidetime = 11        
+ground.hittime  = 22        
+ground.velocity = -5            
+air.velocity = -3,-4          
+air.hittime = 5                  
+;fall = 1                      
+
+envshake.time = 10
+envshake.ampl = -4
+envshake.freq = 30
+
+[State 446, 音を鳴らす]
+type = PlaySnd
+trigger1 = AnimElem = 5
+value = s7,4
+
+[State 446, C.State]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1

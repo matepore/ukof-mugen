@@ -1,0 +1,848 @@
+;=====================================================================
+;  CNS File For "Refuse Hinako Shijo"                Made By OG子 OGヲ
+;                                       Ver. 1.0            2007/10/01
+;=====================================================================
+
+;=====================================================================
+; Stuff to do
+;=====================================================================
+;---------------------------------------------------------------------------
+; ここから下は-3のステートを書いてください。相手ステート内では発動しません。
+;---------------------------------------------------------------------------
+
+[Statedef -3]
+
+;---------------------------------------------------------------------
+; ラウンド開始時の初期化状態か
+;---------------------------------------------------------------------
+[State -3, Is Init]
+type		= VarSet
+trigger1	= !IsHelper
+trigger2	= IsHelper(60000)
+var(50)		= 0
+ignorehitpause	= 1
+
+[State -3, Is Init]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= RoundState = 0
+trigger1	= (StateNo = [180, 189])
+trigger2	= (StateNo = 5500)
+trigger3	= (StateNo = 5900)
+var(50)		= 1
+ignorehitpause	= 1
+
+[State -3, Is Init]
+type		= VarSet
+triggerall	= IsHelper(60000)
+triggerall	= RoundState = 0
+trigger1	= (Root,StateNo = [180, 189])
+trigger2	= (Root,StateNo = 5500)
+trigger3	= (Root,StateNo = 5900)
+var(50)		= 1
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; InGuardDist設定
+;---------------------------------------------------------------------
+[State -3, GuardDist Reset]
+type		= VarSet
+triggerall	= !IsHelper
+trigger1	= 1
+var(19)		= (Var(19) | 128 | 256) - (128 | 256)
+ignorehitpause	= 1
+
+[State -3, Front GuardDist]
+type		= PosAdd
+triggerall	= !IsHelper
+trigger1	= 1
+x			= 100
+ignorehitpause	= 1
+
+[State -3, Front GuardDist]
+type		= VarSet
+triggerall	= !IsHelper
+trigger1	= InGuardDist
+var(19)		= (Var(19) | 128)
+ignorehitpause	= 1
+
+[State -3, Back GuardDist]
+type		= PosAdd
+triggerall	= !IsHelper
+trigger1	= 1
+x			= -225
+ignorehitpause	= 1
+
+[State -3, Back GuardDist]
+type		= VarSet
+triggerall	= !IsHelper
+trigger1	= InGuardDist
+var(19)		= (Var(19) | 256)
+ignorehitpause	= 1
+
+[State -3, Pos Reset]
+type		= PosAdd
+triggerall	= !IsHelper
+trigger1	= 1
+x			= 125
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; AI SUB
+;---------------------------------------------------------------------
+[State -3, Guard Flag Reset]
+type		= VarSet
+triggerall	= !IsHelper
+trigger1	= 1
+var(0)		= 0
+ignorehitpause	= 1
+
+[State -3, Guard Flag Set]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= RoundState = 2
+triggerall	= Ctrl || (StateNo = 120) || (StateNo = [130, 132]) || (StateNo = 140) || (StateNo = [150, 155])
+triggerall	= NumEnemy
+triggerall	= (Var(1) & 32) && !(Var(25) & 1024) && NumHelper(20000) && NumHelper(30000)
+triggerall	= !Helper(30000),Var(3) && !Helper(30000),Var(7) && !(Var(18) & 1008)
+triggerall	= (Helper(20000),Var(40) = 0) || (Helper(20000),Var(40) = 20) || (Helper(20000),Var(40) = 21)
+trigger1	= 0
+trigger2	= (Helper(20000),Var(39) >= 8)
+trigger3	= Random < 250 && Random >= (1004 - 14*Helper(20000),Var(39)*Helper(20000),Var(39))
+trigger4	= (StateNo = [130, 132]) || (StateNo = 140)
+trigger4	= Random < 250 && Random >= (700 - 100*Helper(20000),Var(39))
+var(0)		= 1
+ignorehitpause	= 1
+
+;------------------- 立ち(空中)ガード
+[State -3, Stand Guard]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(0) = 1
+triggerall	= (InGuardDist || (Var(19) & 128) || (Var(19) & 256))
+trigger1	= (EnemyNear,StateType = A)
+trigger2	= (EnemyNear,Time > 11) && !(EnemyNear,HitDefAttr = C, AA) && Random < 750
+trigger3	= EnemyNear,NumProj > 0 && (EnemyNear,StateType = A)
+trigger4	= NumEnemy >= 2 && (EnemyNear,StateType = A)
+trigger4	= EnemyNear(0),NumProj > 0 || EnemyNear(1),NumProj > 0
+var(0)		= 2
+ignorehitpause	= 1
+
+;------------------- 屈ガード
+[State -3, Crouch Guard]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(0) = 1
+trigger1	= (InGuardDist || (Var(19) & 128) || (Var(19) & 256))
+var(0)		= 3
+ignorehitpause	= 1
+
+;------------------- ガード操作
+[State -3, Guard Stand]
+type		= VarSet
+triggerall	= !IsHelper
+trigger1	= Var(0) = 2
+trigger2	= Var(0) = 3
+var(34)		= (Var(34) | 16)
+ignorehitpause	= 1
+
+[State -3, Guard Crouch]
+type		= VarSet
+triggerall	= !IsHelper
+trigger1	= Var(0) = 3
+var(34)		= (Var(34) | 32)
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; check
+;---------------------------------------------------------------------
+;------------------- キー
+[State -3, Key]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) <= 0
+triggerall	= !Var(50)
+trigger1	= 1
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 各種ビットフラグ
+[State -3, Bit]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(1) & (Var(59) * 268435456)) != (Var(59) * 268435456)
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 汎用ステートタイマー
+[State -3, State Timer]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= Var(4) - Var(59) < 0
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 保持HP
+[State -3, Life Buf]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(6) & (Var(59) * 268435456)) != (Var(59) * 268435456)
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 総合ヒット数カウンタ
+[State -3, Combo Count]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(7) & (Var(59) * 268435456)) != (Var(59) * 268435456)
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 最大HP
+[State -3, MaxLife]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(12) & (Var(59) * 268435456)) != (Var(59) * 268435456)
+var(59)		= 1
+ignorehitpause	= 1
+
+[State -3, MaxLife Buf]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(13) & (Var(59) * 268435456)) != (Var(59) * 268435456)
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 被連続技用総ダメージ
+[State -3, Enemy Total Combo Damage]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= Var(14) - Var(59) < 0
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 盾
+[State -3, Shield]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= Var(15) - Var(59) < 0
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 各種ビットフラグ2
+[State -3, Bit2]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(16) & Var(59)) != Var(59)
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 真の保持HP
+[State -3, Life Buf2]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(17) & (Var(59) * 268435456)) != (Var(59) * 268435456)
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 各種ビットフラグ3
+[State -3, Bit3]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(18) & Var(59)) != Var(59)
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 各種ビットフラグ4
+[State -3, Bit4]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(19) & (Var(59) * 268435456)) != (Var(59) * 268435456)
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 被連続技用総ダメージ(パワーゲージ)
+[State -3, Enemy Total Combo Damage Power]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= Var(21) - Var(59) < 0
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- ユーザーコンフィグ
+[State -3, User Config]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(22) & Var(59)) != Var(59)
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 保持パワーゲージ
+[State -3, Power Buf]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(23) - Var(59)) < 0
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- ゲームタイマー
+[State -3, GameTime]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(24) - Var(59)) < 0
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- AIコマンド入力補完用ビットフラグ
+[State -3, AI Command Bit]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(25) & (Var(59) * 268435456)) != (Var(59) * 268435456)
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- キャンセル可能状態
+[State -3, Cancel Enable]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(28) & Var(59)) != Var(59)
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- ターゲットのID
+[State -3, TargetID]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(30) - Var(59)) < 0
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- 各種ビットフラグ5
+[State -3, Bit5]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(32) & (Var(59) * 268435456)) != (Var(59) * 268435456)
+var(59)		= 1
+ignorehitpause	= 1
+
+;------------------- AIコマンド入力補完用ビットフラグ2
+[State -3, AI Command Bit2]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(34) & Var(59)) != Var(59)
+var(59)		= 1
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; conversion
+;---------------------------------------------------------------------
+;------------------- 汎用ステートタイマー
+[State -3, State Timer]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(4)		= (Var(4) - Var(59))
+ignorehitpause	= 1
+
+;------------------- 保持HP
+[State -3, Life Buf]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(6)		= (Var(6) | (Var(59) * 268435456)) - (Var(59) * 268435456)
+ignorehitpause	= 1
+
+;------------------- 最大HP
+[State -3, MaxLife]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(12)		= (Var(12) | (Var(59) * 268435456)) - (Var(59) * 268435456)
+ignorehitpause	= 1
+
+[State -3, MaxLife Buf]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(13)		= (Var(13) | (Var(59) * 268435456)) - (Var(59) * 268435456)
+ignorehitpause	= 1
+
+;------------------- 被連続技用総ダメージ
+[State -3, Enemy Total Combo Damage]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(14)		= (Var(14) - Var(59))
+ignorehitpause	= 1
+
+;------------------- 盾
+[State -3, Shield]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(15)		= (Var(15) - Var(59))
+ignorehitpause	= 1
+
+;------------------- 真の保持HP
+[State -3, Life Buf2]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(17)		= (Var(17) | (Var(59) * 268435456)) - (Var(59) * 268435456)
+ignorehitpause	= 1
+
+;------------------- 被連続技用総ダメージ(パワーゲージ)
+[State -3, Enemy Total Combo Damage Power]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(21)		= (Var(21) - Var(59))
+ignorehitpause	= 1
+
+;------------------- 保持パワーゲージ
+[State -3, Power Buf]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(23)		= (Var(23) - Var(59))
+ignorehitpause	= 1
+
+;------------------- ゲームタイマー
+[State -3, GameTime]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(24)		= (Var(24) - Var(59))
+ignorehitpause	= 1
+
+;------------------- ターゲットのID
+[State -3, TargetID]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(30)		= (Var(30) - Var(59))
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; AI専用フラグ
+;---------------------------------------------------------------------
+[State -3, AI]
+type		= VarSet
+triggerall	= !IsHelper || (IsHelper(20000) && Var(0) = 20000)
+trigger1	= 1
+var(58)		= 0
+ignorehitpause	= 1
+
+[State 20010, AI]
+type		= VarSet
+triggerall	= !IsHelper || (IsHelper(20000) && Var(0) = 20000)
+trigger1	= Command = "AI00"
+trigger2	= Command = "AI01"
+trigger3	= Command = "AI02"
+trigger4	= Command = "AI03"
+trigger5	= Command = "AI04"
+trigger6	= Command = "AI05"
+trigger7	= Command = "AI06"
+trigger8	= Command = "AI07"
+trigger9	= Command = "AI08"
+trigger10	= Command = "AI09"
+trigger11	= Command = "AI10"
+trigger12	= Command = "AI11"
+trigger13	= Command = "AI12"
+trigger14	= Command = "AI13"
+trigger15	= Command = "AI14"
+trigger16	= Command = "AI15"
+trigger17	= Command = "AI16"
+trigger18	= Command = "AI17"
+trigger19	= Command = "AI18"
+trigger20	= Command = "AI19"
+trigger21	= Command = "AI20"
+trigger22	= Command = "AI21"
+trigger23	= Command = "AI22"
+trigger24	= Command = "AI23"
+trigger25	= Command = "AI24"
+trigger26	= Command = "AI25"
+trigger27	= Command = "AI26"
+trigger28	= Command = "AI27"
+trigger29	= Command = "AI28"
+trigger30	= Command = "AI29"
+trigger31	= Command = "AI30"
+trigger32	= Command = "AI31"
+trigger33	= Command = "AI32"
+trigger34	= Command = "AI33"
+trigger35	= Command = "AI34"
+trigger36	= Command = "AI35"
+trigger37	= Command = "AI36"
+trigger38	= Command = "AI37"
+trigger39	= Command = "AI38"
+trigger40	= Command = "AI39"
+trigger41	= Command = "AI40"
+trigger42	= Command = "AI41"
+trigger43	= Command = "AI42"
+trigger44	= Command = "AI43"
+trigger45	= Command = "AI44"
+trigger46	= Command = "AI45"
+trigger47	= Command = "AI46"
+trigger48	= Command = "AI47"
+trigger49	= Command = "AI48"
+trigger50	= Command = "AI49"
+trigger51	= Command = "AI50"
+var(58)		= 1
+ignorehitpause	= 1
+
+[State -3, AI Init Check]
+type		= VarSet
+triggerall	= (IsHelper(20000) && Var(0) = 20000)
+triggerall	= !(Root,Var(19) & 512)
+triggerall	= RoundState = 2
+triggerall	= !(Root,HitPauseTime || Root,MoveContact || Root,MoveReversed)
+triggerall	= !(Root,Var(2) & 4194304)
+triggerall	= (Root,Var(32) & 7) >= 3
+trigger1	= (Root,Command = "x") && !(Command = "x")
+trigger2	= (Root,Command = "y") && !(Command = "y")
+trigger3	= (Root,Command = "z") && !(Command = "z")
+trigger4	= (Root,Command = "a") && !(Command = "a")
+trigger5	= (Root,Command = "b") && !(Command = "b")
+trigger6	= (Root,Command = "c") && !(Command = "c")
+trigger7	= (Root,Command = "U") && !(Command = "U")
+trigger8	= (Root,Command = "D") && !(Command = "D")
+trigger9	= (Root,Command = "F") && !(Command = "F")
+trigger10	= (Root,Command = "B") && !(Command = "B")
+var(58)		= 1
+ignorehitpause	= 1
+
+[State -3, AI Init Check]
+type		= ParentVarSet
+triggerall	= (IsHelper(20000) && Var(0) = 20000)
+triggerall	= !(Root,Var(19) & 512)
+triggerall	= RoundState = 2
+triggerall	= !(Root,Var(2) & 4194304)
+trigger1	= (Root,Command = "x")
+trigger2	= (Root,Command = "y")
+trigger3	= (Root,Command = "z")
+trigger4	= (Root,Command = "a")
+trigger5	= (Root,Command = "b")
+trigger6	= (Root,Command = "c")
+trigger7	= (Root,Command = "U")
+trigger8	= (Root,Command = "D")
+trigger9	= (Root,Command = "F")
+trigger10	= (Root,Command = "B")
+trigger11	= (Root,HitPauseTime || Root,MoveContact || Root,MoveReversed)
+trigger12	= (HitPauseTime || MoveContact || MoveReversed)
+var(19)		= (Parent,Var(19) | 512)
+ignorehitpause	= 1
+
+[State -3, Debug]
+type		= Null;AppendToClipboard
+triggerall	= !IsHelper
+triggerall	= !(Var(1) & 32)
+trigger1	= Var(58)
+text		= "AI "
+ignorehitpause	= 1
+
+[State -3, Debug]
+type		= Null;AppendToClipboard
+triggerall	= (IsHelper(20000) && Var(0) = 20000)
+triggerall	= !(Root,Var(1) & 32)
+trigger1	= Var(58)
+text		= "AI "
+ignorehitpause	= 1
+
+[State -3, AI]
+type		= VarSet
+triggerall	= !IsHelper
+trigger1	= Var(58)
+var(1)		= (Var(1) | 32)
+ignorehitpause	= 1
+
+[State -3, AI]
+type		= ParentVarSet
+triggerall	= (IsHelper(20000) && Var(0) = 20000)
+trigger1	= Var(58)
+var(1)		= (Parent,Var(1) | 32)
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; ステータス奪取前判定解除
+;---------------------------------------------------------------------
+[State -3, State Steal Check]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(1)		= (Var(1) | 2048)
+ignorehitpause	= 1
+
+[State -3, State Steal Check]
+type		= VarSet
+triggerall	= IsHelper
+trigger1	= 1
+var(1)		= (Var(1) | 2048)
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; Sound
+;---------------------------------------------------------------------
+;------------------- 通常ダメージ
+[State -3, PlaySnd]
+type		= PlaySnd
+triggerall	= !IsHelper
+triggerall	= !Var(50)
+triggerall	= Random < 600
+triggerall	= Time = 1
+triggerall	= Alive
+triggerall	= StateNo = 5000 || StateNo = 5010 || StateNo = 5020
+trigger1	= GetHitVar(animtype) = 0
+value		= 5000, Random % 4
+channel		= 0
+volume		= 200
+ignorehitpause	= 1
+
+[State -3, PlaySnd]
+type		= PlaySnd
+triggerall	= !IsHelper
+triggerall	= !Var(50)
+triggerall	= Random < 600
+triggerall	= Time = 1
+triggerall	= Alive
+triggerall	= StateNo = 5000 || StateNo = 5010 || StateNo = 5020
+trigger1	= GetHitVar(animtype) = 1
+value		= 5100, Random % 4
+channel		= 0
+volume		= 200
+ignorehitpause	= 1
+
+[State -3, PlaySnd]
+type		= PlaySnd
+triggerall	= !IsHelper
+triggerall	= !Var(50)
+triggerall	= Random < 600
+triggerall	= Time = 1
+triggerall	= Alive
+triggerall	= StateNo = 5000 || StateNo = 5010 || StateNo = 5020
+trigger1	= GetHitVar(animtype) = [2, 5]
+value		= 5200, Random % 3
+channel		= 0
+volume		= 200
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; 被連続技用、総ダメージリセット
+;---------------------------------------------------------------------
+[State -3, Enemy Total Combo Damage Timer Decrease]
+type		= VarAdd
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= (Var(16) & 28672) = [1, 28672)
+var(16)		= -(28672 / 7)
+ignorehitpause	= 1
+
+; 7Fの値がセットしてある状態から、-1F分引いて、6Fに初期化する
+[State -3, Enemy Total Combo Damage Timer Decrease Init]
+type		= VarAdd
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+triggerall	= (Var(16) & 28672) = 28672
+trigger1	= Ctrl && MoveType != H
+var(16)		= -2*(28672 / 7)
+ignorehitpause	= 1
+
+[State -3, Enemy Total Combo Damage]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= !(Var(16) & 28672)
+var(14)		= 0
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; 被連続技用、総ダメージリセット(パワーゲージ用)
+;---------------------------------------------------------------------
+[State -3, Enemy Total Combo Damage Power]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= MoveType != H
+var(21)		= 0
+ignorehitpause	= 1
+
+;---------------------------------------------------------------------
+; resume conversion
+;---------------------------------------------------------------------
+;------------------- 汎用ステートタイマー
+[State -3, State Timer]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(4)		= Var(4) + Var(59)
+ignorehitpause	= 1
+
+;------------------- 保持HP
+[State -3, Life Buf]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(6)		= Var(6) | (Var(59) * 268435456)
+ignorehitpause	= 1
+
+;------------------- 最大HP
+[State -3, MaxLife]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(12)		= Var(12) | (Var(59) * 268435456)
+ignorehitpause	= 1
+
+[State -3, MaxLife Buf]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(13)		= Var(13) | (Var(59) * 268435456)
+ignorehitpause	= 1
+
+;------------------- 被連続技用総ダメージ
+[State -3, Enemy Total Combo Damage]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(14)		= Var(14) + Var(59)
+ignorehitpause	= 1
+
+;------------------- 盾
+[State -3, Shield]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(15)		= Var(15) + Var(59)
+ignorehitpause	= 1
+
+;------------------- 真の保持HP
+[State -3, Life Buf2]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(17)		= Var(17) | (Var(59) * 268435456)
+ignorehitpause	= 1
+
+;------------------- 被連続技用総ダメージ(パワーゲージ)
+[State -3, Enemy Total Combo Damage Power]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(21)		= Var(21) + Var(59)
+ignorehitpause	= 1
+
+;------------------- 保持パワーゲージ
+[State -3, Power Buf]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(23)		= Var(23) + Var(59)
+ignorehitpause	= 1
+
+;------------------- ゲームタイマー
+[State -3, GameTime]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(24)		= Var(24) + Var(59)
+ignorehitpause	= 1
+
+;------------------- ターゲットのID
+[State -3, TargetID]
+type		= VarSet
+triggerall	= !IsHelper
+triggerall	= Var(59) != 1
+triggerall	= !Var(50)
+trigger1	= 1
+var(30)		= Var(30) + Var(59)
+ignorehitpause	= 1

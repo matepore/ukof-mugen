@@ -1,0 +1,1577 @@
+;================================================================================
+;コモンステート
+;================================================================================
+
+[Data]
+life = 3000
+attack = 100
+defence = 100
+power = 5000
+fall.defence_up = 50
+liedown.time = 60
+airjuggle = 15
+sparkno = 0
+guard.sparkno = 0
+KO.echo = 0
+volume = 100
+IntPersistIndex = 9
+FloatPersistIndex = 39
+
+[Size]
+xscale = 1
+yscale = 1
+ground.back = 15
+ground.front = 16
+air.back = 12
+air.front = 12
+height = 60
+attack.dist = 160
+proj.attack.dist = 90
+proj.doscale = 0
+head.pos = -5, -90
+mid.pos = -5, -60
+shadowoffset = 0
+draw.offset = 0,0
+
+[Velocity]
+walk.fwd  = 2.8
+walk.back = -3
+run.fwd  = 6.2
+run.back = -4.5,-5.5
+jump.neu = 0,-10
+jump.back = -3
+jump.fwd = 3
+runjump.back = -4,-11
+runjump.fwd = 4,-11
+airjump.neu = 0,-8.2
+airjump.back = -2.55
+airjump.fwd = 2.5
+
+[Movement]
+airjump.num = 0
+airjump.height = 35
+yaccel = .59
+stand.friction = .8
+crouch.friction = .8
+
+;---------------------------------------------------------------------------
+; Stand
+[Statedef 0]
+type = S
+physics = S
+sprpriority = 0
+
+[State 0, 1]
+type = ChangeAnim
+trigger1 = Anim != 0 && Anim != 5
+trigger2 = Anim = 5 && AnimTime = 0 ;Turn anim over
+value = 0
+
+[State 0, 2]
+type = VelSet
+trigger1 = Time = 0
+y = 0
+
+[State 0, 2]
+type = PosSet
+trigger1 = Time = 0
+y = 0
+
+[State 0, 3] ;Stop moving if low velocity or 4 ticks pass
+type = VelSet
+trigger1 = abs(vel x) < 2
+trigger2 = Time = 4
+x = 0
+
+[State 0, 4] ;Are you dead?
+type = ChangeState
+trigger1 = !alive
+value = 5050
+
+;-------------------------------------------------------------
+; Jump Start
+[Statedef 40]
+type = S
+physics = S
+anim = 40
+ctrl = 0
+sprpriority = 1
+
+[State 40, 10]
+type = ChangeState
+trigger1 = Var(9)
+trigger1 = Time = 0
+value = 0
+ctrl = 1
+
+[State 40, 1]
+type = VarSet
+trigger1 = Time = 0
+sysvar(1) = 0
+
+[State 40, 2]
+type = VarSet
+trigger1 = Time = 0
+var(5) = 0
+
+[State 40, 3]
+type = VarSet
+trigger1 = command = "longjump"
+trigger2 = prevstateno = 101 && command = "holdfwd"
+var(5) = 1
+
+[State 40, 4]
+type = VarSet
+trigger1 = command = "holdfwd"
+sysvar(1) = 1
+
+[State 40, 5]
+type = VarSet
+trigger1 = command = "holdback"
+sysvar(1) = -1
+
+[State 40, 6]
+type = VelSet
+trigger1 = AnimTime = 0
+x = ifelse(sysvar(1)=0, const(velocity.jump.neu.x), ifelse(sysvar(1)=1, const(velocity.jump.fwd.x), const(velocity.jump.back.x)))
+y = const(velocity.jump.y)
+
+[State 40, 9]
+type = ChangeState
+trigger1 = AnimTime = 0 && command != "holdup"
+value = 950
+ctrl = 1
+
+[State 40, 10]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 50
+ctrl = 1
+
+; Jump Up
+[Statedef 50]
+type    = A
+physics = A
+
+[State 50, 1]
+type = VarSet
+trigger1 = Time = 0
+sysvar(1) = 0
+
+[State 50, 2]
+type = VelSet
+trigger1 = Time = 0 && Var(5)
+x = IfElse(vel x = 0,0,IfElse(vel x < 0,-5,6))
+
+[State 50, 3]
+type = ChangeAnim
+trigger1 = Time = 0
+value = ifelse((vel x)=0, 41, ifelse((vel x)>0, 42, 43))
+
+[State 50, 4]
+type = AfterImage
+trigger1 = Time = 0 && Var(5) && Vel X != 0
+time = 10
+trans = add1
+timegap = 1
+framegap = 2
+length = 8
+palbright = 12,12,12
+palcontrast = 225,225,225
+palpostbright = 0,0,0
+paladd = 0,0,0
+palmul = 1,1,1
+
+; Short jump
+[Statedef 950]
+type = A
+movetype = I
+physics = A
+anim = 950
+
+[State 950, 1]
+type = VelSet
+trigger1 = Time = 0
+x = IfElse(vel x = 0,0,IfElse(vel x < 0,-3.1,3.4))
+y = -6.5
+
+[State 950, 2]
+type = VelSet
+trigger1 = Time = 0 && Var(5)
+x = IfElse(vel x = 0,0,IfElse(vel x < 0,-5,5))
+
+[State 950, 3]
+type = AfterImage
+trigger1 = Time = 0 && Var(5) && Vel X != 0
+time = 10
+trans = add1
+timegap = 1
+framegap = 2
+length = 8
+palbright = 0,0,0
+palcontrast = 128,128,128
+palmul = 1,1,1
+
+[State 950, 4]
+type = ChangeState
+trigger1 = Pos Y >= 0 && Vel Y > 0
+value = 52
+
+; Jump Land
+[Statedef 52]
+type    = S
+physics = S
+ctrl = 1
+anim = 47
+velset = 0,0
+facep2 = 1
+
+[State 52, Landing Sound]
+type = PlaySnd
+trigger1 = Time = 0
+value = 40, 1
+
+[State 52, 1]
+type = VelSet
+trigger1 = Time = 0
+y = 0
+
+[State 52, 2]
+type = PosSet
+trigger1 = Time = 0
+y = 0
+
+[State 52, 4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;-----RUN
+[Statedef 100]
+type = S
+movetype = I
+physics = S
+anim = 100
+velset = 0
+ctrl = 0
+
+[State 100, 1]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 101
+
+[Statedef 101]
+type = S
+movetype = I
+physics = S
+anim = 101
+ctrl = 0
+
+[State 100, 1]
+type = VelSet
+trigger1 = 1
+x = const(velocity.run.fwd.x)
+
+[State 100, 0]
+type = PlaySnd
+trigger1 = AnimElem = 1
+value = 100,0
+loop = 1
+channel = 1
+
+[State 101, 3]
+type = ChangeState
+triggerall = !var(59)
+trigger1 = command = "holdup"
+value = 40
+
+[State 100, 5.1]
+type = ChangeState
+triggerall = !var(59)
+trigger1 = AnimElem = 1, > 0
+trigger1 = command != "holdfwd"
+value = 102
+
+[State 100, 5.1]
+type = ChangeState
+triggerall = var(59)
+trigger1 = AnimElem = 1, > 0
+Trigger1 = inguarddist
+Trigger2 = EnemyNear,MoveType!=H
+Trigger2 = P2BodyDist X<=90
+Trigger2 = P2BodyDist Y>=-120
+Trigger3 = P2BodyDist X<=10
+value = 102
+
+[Statedef 102]
+type = S
+movetype = I
+physics = S
+anim = 100
+
+[State 102, 1]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+; RUN_BACK2 (land)
+[Statedef 106]
+type    = S
+physics = S
+ctrl = 0
+anim = 100
+
+[State 106, 1]
+type = VelSet
+trigger1 = Time = 0
+y = 0
+
+[State 106, 2]
+type = PosSet
+trigger1 = Time = 0
+y = 0
+
+[State 106, 3]
+type = MakeDust
+trigger1 = Time = 2
+pos = -5,-2
+spacing = 1
+
+[State 106, 4]
+type = ChangeState
+trigger1 = Time = 4
+value = 0
+ctrl = 1
+;---------------------------------------------------------------------------
+; HIT_BOUNCE (hit ground)
+[Statedef 5100]
+type    = L
+movetype= H
+physics = N
+
+[State 5100, 1]
+type = VelSet
+trigger1 = Time = 0
+trigger1 = GetHitVar(fall.yvel) = 0
+trigger1 = vel x > 1
+x = 1
+
+[State 5100, EnvShake]
+type = FallEnvShake
+trigger1 = Time = 0
+
+[State 5100, Var] ;Save fall velocity
+type = VarSet
+trigger1 = Time = 0
+;trigger1 = GetHitVar(fall.yvel) = 0
+sysvar(1) = floor(vel y)
+
+[State 5100, 2] ;Hit ground anim (normal)
+type = ChangeAnim
+triggerall = time = 0
+trigger1 = (anim != [5051,5059]) && (anim != [5061,5069])
+trigger2 = !SelfAnimExist(5100 + (anim % 10))
+value = 5100
+
+[State 5100, 3] ;Hit ground anim (for hit up)
+type = ChangeAnim
+trigger1 = time = 0
+trigger1 = (anim = [5051,5059]) || (anim = [5061,5069])
+trigger1 = SelfAnimExist(5100 + (anim % 10))
+value = 5100 + (anim % 10)
+
+[State 5100, 4]
+type = PosSet
+trigger1 = Time = 0
+y = 0
+
+[State 5100, 5]
+type = VelSet
+trigger1 = Time = 0
+y = 0
+
+[State 5100, 6] ;Reduce speed
+type = VelMul
+trigger1 = Time = 0
+x = 0.75
+
+[State 5100, 7]
+type = ChangeState
+trigger1 = Time = 0
+trigger1 = GetHitVar(fall.yvel) = 0
+value = 5110 ;HIT_LIEDOWN
+
+[State 5100, 8]
+type = GameMakeAnim
+trigger1 = Time = 1
+;value = 61
+;pos = 0, 0
+;under = 1
+value = 60 + (sysvar(1) > 5) + (sysvar(1) > 14)
+pos = 0, 0
+under = sysvar(1) <= 10
+
+[State 5100, 9]
+type = HitFallDamage
+trigger1 = Time = 3
+
+[State 5100, 10]
+type = PlaySnd
+trigger1 = Time = 1
+;value = F7, 0 ;Hit ground
+value = F7, (sysvar(1) > 5) + (sysvar(1) > 14)
+
+[State 5100, 11]
+type = PosFreeze
+trigger1 = 1
+
+[State 5100, 12]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 5101
+
+[State 5100, 13]
+type = ForceFeedback
+trigger1 = Time = 0
+waveform = sinesquare
+ampl = 128,-3,-.2,.005
+time = 20
+
+; HITA_UP_T (transition)
+[Statedef 5035]
+type    = A
+movetype= H
+physics = N
+
+[State 5035, 1]
+type = ChangeAnim
+trigger1 = Time = 0
+trigger1 = SelfAnimExist(5035)
+trigger1 = Anim != [5051,5059] ;Not if in hit up anim
+trigger1 = Anim != 5090 ;Not if hit off ground anim
+value = 5035
+
+[State 5035, 2]
+type = VelAdd
+trigger1 = 1
+y = GetHitVar(yaccel)
+
+[State 5035, 3]
+type = ChangeState
+triggerall = !HitFall
+trigger1 = HitOver  ;Hit is over
+trigger2 = AnimTime = 0 ;Animation over
+trigger3 = Vel Y > 0    ;Hit ground
+trigger3 = Pos Y >= 10  ;.
+trigger4 = Time = 0     ;No transition anim
+trigger4 = Anim != 5035 ;.
+value = 5040 ;HITA_RECOV
+
+[State 5035, 4]
+type = ChangeState
+triggerall = HitFall
+trigger1 = HitOver  ;Hit is over
+trigger2 = AnimTime = 0 ;Anim is over
+trigger3 = Vel Y > 0    ;Hit ground
+trigger3 = Pos Y >= 10  ;.
+trigger4 = Time = 0     ;No transition anim
+trigger4 = Anim != 5035 ;.
+value = 5050 ;HITA_FALL
+
+; HITA_FALL (knocked up, falling)
+[Statedef 5050]
+type    = A
+movetype= H
+physics = N
+
+[State 5050, 1] ;Change anim when done with transition
+type = ChangeAnim
+trigger1 = AnimTime = 0
+trigger1 = Anim = 5035
+trigger2 = Time = 0     ;If no transition anim
+trigger2 = Anim != 5035
+trigger2 = (Anim != [5051, 5059]) && (Anim != [5061, 5069])
+trigger2 = Anim != 5090 ;Not if hit off ground anim
+value = 5050
+
+[State 5050, 2] ;Coming down anim
+type = ChangeAnim
+trigger1 = anim = [5050,5059]
+trigger1 = Vel Y >= ifelse(anim = 5050, 1, -2)
+trigger1 = SelfAnimExist(anim+10)
+value = anim+10
+persistent = 0
+
+[State 5050, 3] ;Gravity
+type = VelAdd
+trigger1 = 1
+y = GetHitVar(yaccel)
+
+[State 5050, 4] ;Recover near ground
+type = ChangeState
+triggerall = Vel Y > 0
+triggerall = Pos Y >= -20
+triggerall = alive
+triggerall = CanRecover
+trigger1 = Command = "recovery"
+trigger2 = var(59) && Random <= Var(59)*100 
+value = 5200 ;HITFALL_RECOVER
+
+[State 5050, 5]; Recover in mid air
+type = ChangeState
+triggerall = Vel Y > -1
+triggerall = alive
+triggerall = CanRecover
+trigger1 = Command = "recovery"
+trigger2 = var(59) && Random <= Var(59)*100 
+trigger2 = P2BodyDist X > 120
+value = 5210 ;HITFALL_AIRRECOVER
+
+[State 5050, 6]
+type = ChangeState
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= ifelse((anim = [5051,5059]) || (anim = [5061,5069]), 0, 25)
+value = 5100 ;HIT_BOUNCE
+
+; HIT_TRIP2 (fall through air)
+[Statedef 5071]
+type    = A
+movetype= H
+physics = N
+
+[State 5071, 1]
+type = HitVelSet
+trigger1 = Time = 0
+x = 1
+y = 1
+
+[State 5071, 2] ;Acceleration
+type = VelAdd
+trigger1 = 1
+y = GetHitVar(yaccel)
+
+[State 5071, 3] ;Hit ground
+trigger1 = Vel Y > 0
+trigger1 = Pos Y >= 15
+type = ChangeState
+value = 5110
+;---------------------------------------------------------------------------
+; Lose by Time Over
+[Statedef 170]
+type = S
+ctrl = 0
+anim = 170
+velset = 0,0
+
+[State 170, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+;---------------------------------------------------------------------------
+; Win state decider
+[Statedef 180]
+type = S
+
+[State 190, 2]
+type = ChangeState
+triggerall = Time = 0
+triggerall = matchover
+trigger1 = var(10) = 1
+value = 185
+
+[State 190, varrandom]
+type = VarRandom
+trigger1 = time = 0
+v = 8
+range = 0,7
+
+[State 180, 2]
+type = ChangeState
+triggerall = Time = 0
+trigger1 = Var(8) = [0,1]
+trigger2 = matchover
+trigger2 = Var(10) = 2
+value = 181
+
+[State 180, 2]
+type = ChangeState
+trigger1 = Time = 0
+trigger1 = Var(8) = [2,3]
+value = 182
+
+[State 180, 2]
+type = ChangeState
+trigger1 = Time = 0
+trigger1 = Var(8) = [4,5]
+value = 183
+
+[State 180, 2]
+type = ChangeState
+trigger1 = Time = 0
+trigger1 = Var(8) = [6,7]
+value = 184
+;---------------------------------------------------------------------------
+; Win pose 1
+[Statedef 181]
+type = S
+ctrl = 0
+anim = 181
+velset = 0,0
+
+[State 200, 1]
+type = PlaySnd
+trigger1 = AnimElem = 6
+value = 181,0
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 181, round]
+type = AssertSpecial
+trigger1 = time < 160
+flag = roundnotover
+
+; Win pose 2
+[Statedef 182]
+type = S
+ctrl = 0
+anim = 182
+velset = 0,0
+
+[State 200, 1]
+type = PlaySnd
+trigger1 = AnimElem = 4
+value = 1600,0
+
+[State 200, 1]
+type = PlaySnd
+trigger1 = AnimElem = 5
+value = 40,0
+
+[State 200, 1]
+type = PlaySnd
+trigger1 = AnimElem = 9
+value = 40,1
+
+[State 200, 1]
+type = PlaySnd
+trigger1 = AnimElem = 11
+value = 193,0
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = 22
+y = -9
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = [23,25]
+y = -8
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = 26
+y = -7
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = [27,28]
+y = -6
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = 29
+y = -5
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = [30,32]
+y = -4
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = 33
+y = -3
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = [34,35]
+y = -2
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = 36
+y = -1
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = 39
+y = 1
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = [40,42]
+y = 2
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = 43
+y = 3
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = [44,46]
+y = 4
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = 47
+y = 5
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = [48,50]
+y = 6
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = 51
+y = 7
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = [52,55]
+y = 8
+
+[State 1605, vel]
+type = posadd
+trigger1 = time = 55
+y = 9
+
+[State 1605, vel]
+type = posset
+trigger1 = time = 56
+y = 0
+
+[State 181, round]
+type = AssertSpecial
+trigger1 = time < 160
+flag = roundnotover
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+; Win pose 3
+[Statedef 183]
+type = S
+ctrl = 0
+anim = 183
+velset = 0,0
+
+[State 200, 1]
+type = PlaySnd
+trigger1 = AnimElem = 3
+value = 1600,0
+
+[State 181, round]
+type = AssertSpecial
+trigger1 = time < 60
+flag = roundnotover
+
+; Win pose 4
+[Statedef 184]
+type = S
+ctrl = 0
+anim = 184
+velset = 0,0
+
+[State 200, 1]
+type = PlaySnd
+trigger1 = AnimElem = 9
+value = 193,0
+
+[State 181, round]
+type = AssertSpecial
+trigger1 = time < 120
+flag = roundnotover
+
+; Win pose 5
+[Statedef 185]
+type = S
+ctrl = 0
+anim = 185
+velset = 0,0
+
+[State 181, 1]
+type = NotHitBy
+trigger1 = 1
+value = SCA
+time = 1
+
+[State 181, round]
+type = AssertSpecial
+trigger1 = time < 100
+flag = roundnotover
+
+;---------------------------------------------------------------------------
+;---------------------------------------------------------------------------
+; Initialize (at the start of the round)
+[Statedef 5900]
+type = S
+
+[State 190, 2]
+type = ChangeState
+triggerall = TeamMode = Turns
+triggerall = roundno > 1
+triggerall = RoundsExisted = 0
+trigger1 = p2name = "Adon" || p4name = "Adon"
+trigger2 = p2name = "Sagat" || p4name = "Sagat"
+value = 196
+
+[State 5900, turn]
+type = ChangeState
+trigger1 = TeamMode = Turns
+trigger1 = roundno > 1
+trigger1 = RoundsExisted > 0
+value = 199
+
+[State 5900, turn]
+type = ChangeState
+trigger1 = TeamMode = Turns
+trigger1 = roundno > 1
+trigger1 = RoundsExisted = 0
+value = 187
+
+[State 5900, 1] ;Clear all int variables
+type = VarRangeSet
+trigger1 = roundno = 1
+value = 0
+
+[State 5900, 2] ;Clear all float variables
+type = VarRangeSet
+trigger1 = roundno = 1
+fvalue = 0
+
+[State 5900, 3] ;Intro
+type = ChangeState
+trigger1 = roundno = 1
+value = 190
+
+; Introduction
+
+[Statedef 190]
+type = S
+
+[State 190,特殊1]
+type = ChangeState
+triggerall = Time = 0
+trigger1 = P2Name = "Sagat" || P4Name = "Sagat"
+trigger2 = P2Name = "cvsdan" || P4Name = "cvsdan"
+trigger3 = P2Name = "Dan Hibiki" || P4Name = "Dan Hibiki"
+trigger4 = P2Name = "Dan_TLE" || P4Name = "Dan_TLE"
+value = 191
+
+[State 190,特殊2]
+type = ChangeState
+triggerall = Time = 0
+trigger1 = P2Name = "Terry Bogard" || P4Name = "Terry Bogard" || P2Name = "Terry" || P4Name = "Terry"
+trigger2 = P2Name = "GSP_Terry" || P4Name = "GSP_Terry"
+trigger3 = P2Name = "Andy Bogard" || P4Name = "Andy Bogard" || P2Name = "Andy" || P4Name = "Andy" 
+trigger4 = P2Name = "Kim Kaphwan" || P4Name = "Kim Kaphwan" || P2Name = "Kim" || P4Name = "Kim"
+value = 192
+
+[State 190,特殊3]
+type = ChangeState
+triggerall = Time = 0
+trigger1 = P2Name = "King" || P4Name = "King" || P2Name = "cvsking" || P4Name = "cvsking"
+trigger2 = P2Name = "SAMCHAY" || P4Name = "SAMCHAY"
+trigger3 = P2Name = "adon" || P4Name = "adon"
+trigger4 = P2name = "Hwa Jai" || P4name = "Hwa Jai"
+value = 193
+
+[State 190,特殊4]
+type = ChangeState
+triggerall = Time = 0
+trigger1 = P2Name = "Geese" || P4Name = "Geese" || P2Name = "GEESE" || P4Name = "GEESE" || P2Name = "geese" || P4Name = "geese"  || P2Name = "cvsgeese" || P4Name = "cvsgeese"
+trigger2 = P2Name = "Krauser" || P4Name = "Krauser" || P2Name = "KRAUSER" || P4Name = "KRAUSER"
+value = 194
+
+[State 190,]
+type = ChangeState
+trigger1 = Time = 0
+value = ifelse(Random < 140,199,ifelse(Random < 280,194,ifelse(Random<420,196,ifelse(Random<560,197,198))))
+
+[Statedef 191,特殊1]
+type = S
+ctrl = 0
+anim = 191
+velset = 0,0
+
+[State 192,1]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+flag2 = nobardisplay
+
+[State 182, 2]
+type = PlaySnd
+triggerall = AnimElem = 2,=1
+trigger1 = P2Name = "cvsdan" || P4Name = "cvsdan"
+trigger2 = P2Name = "Dan Hibiki" || P4Name = "Dan Hibiki"
+trigger3 = P2Name = "Dan_TLE" || P4Name = "Dan_TLE"
+value = 191,1
+channel = 3
+
+[State 182, 2]
+type = PlaySnd
+triggerall = AnimElem = 5,=1
+trigger1 = P2Name = "Sagat" || P4Name = "Sagat"
+value = 191,2
+channel = 3
+
+[State 191, 4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;-----------------------
+[Statedef 192,特殊2]
+type = S
+ctrl = 0
+anim = 192
+velset = 0,0
+
+[State 191, 1]
+type = ChangeAnim
+trigger1 = RoundState = 0
+value = 192
+
+[State 191, 2]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 192, snd]
+type = PlaySnd
+trigger1 = animelem = 10
+value = 210,0
+
+[State 192, snd]
+type = PlaySnd
+trigger1 = animelem = 4
+value = 192,0
+
+[State 191, 4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;-----------------------
+[Statedef 193,特殊3]
+type = S
+ctrl = 0
+anim = 193
+velset = 0,0
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = AnimElem = 15
+value = 193,0
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = AnimElem = 28
+value = 40,0
+
+[State 705, 2]
+type = Explod
+trigger1 = animelem = 28
+anim = 10193
+ID = 193
+sprpriority = 3
+postype = p1
+pos = -50,-130
+bindtime = -1
+
+[State 191, 1]
+type = ChangeAnim
+trigger1 = RoundState = 0
+value = 193
+
+[State 191, 2]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191, 4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;-----------------------
+[Statedef 194,特殊4]
+type = S
+ctrl = 0
+anim = 194
+velset = 0,0
+
+[State 191, 1]
+type = ChangeAnim
+trigger1 = RoundState = 0
+value = 194
+
+[State 191, 2]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem = 3
+trigger2 = animelem = 7
+value = 200,0
+
+[State 191, 3]
+type = PlaySnd
+trigger1 = animelem = 16
+value = 191,0
+
+[State 191, 4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;-----------------------
+[Statedef 196]
+type = S
+ctrl = 0
+anim = 196
+velset = 0,0,0
+
+[State 192,1]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+flag2 = nobardisplay
+
+[State 182, 2]
+type = PlaySnd
+trigger1 = AnimElem = 5,=0
+value = 196,0
+
+[State 182, 2]
+type = PlaySnd
+trigger1 = AnimElem = 5,=0
+value = 196,1
+
+[State 810,Explod]
+type = Explod
+trigger1 = AnimElem = 8
+anim = 10196
+pos = 0,0
+vel = -3,-1.5
+accel = -.05,.1
+postype = P1
+sprpriority = 3
+bindtime = 1
+ownpal = 1
+
+[State 191,4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;-----------------------
+[Statedef 197]
+type = S
+ctrl = 0
+anim = 197
+velset = 0,0,0
+
+[State 192,1]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+flag2 = nobardisplay
+
+[State 182, 2]
+type = PlaySnd
+trigger1 = AnimElem = 5,=0
+value = 196,0
+
+[State 182, 2]
+type = PlaySnd
+trigger1 = AnimElem = 5,=0
+value = 196,1
+
+[State 810,Explod]
+type = Explod
+trigger1 = AnimElem = 8
+anim = 10197
+pos = 0,0
+vel = -3,-1.5
+accel = -.05,.1
+postype = P1
+sprpriority = 3
+bindtime = 1
+ownpal = 1
+
+[State 191,4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;-----------------------
+[Statedef 198]
+type = S
+ctrl = 0
+anim = 198
+velset = 0,0,0
+
+[State 192,1]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+flag2 = nobardisplay
+
+[State 182, 2]
+type = PlaySnd
+trigger1 = AnimElem = 22,=0
+value = 196,0
+
+[State 182, 2]
+type = PlaySnd
+trigger1 = AnimElem = 22,=0
+value = 196,1
+
+[State 810,Explod]
+type = Explod
+trigger1 = AnimElem = 24
+anim = 10198
+pos = 0,0
+vel = -3,-1.5
+accel = -.05,.1
+postype = P1
+sprpriority = 3
+bindtime = 1
+ownpal = 1
+
+[State 191,4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;-----------------------
+[Statedef 199,]
+type = S
+ctrl = 0
+anim = 190
+velset = 0,0
+
+[State 191, 2]
+type = AssertSpecial
+trigger1 = 1
+flag = Intro
+
+[State 192, snd]
+type = PlaySnd
+trigger1 = animelem = 3
+trigger2 = animelem = 5
+value = 210,0
+
+[State 192, snd]
+type = PlaySnd
+trigger1 = animelem = 6
+value = 1500,1
+
+[State 191,4]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+
+;-------------------------------TAUNT
+[Statedef 195]
+type = S
+movetype = A
+physics = S
+anim = 195
+ctrl = 0
+
+[State 195, 1]
+type = PlaySnd
+trigger1 = AnimElem = 3
+value = 195,0
+
+[State 195, 3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;-------------------------------KOF recovery
+;----------------------------------------------
+[Statedef 370]
+type = S
+physics = S
+anim = 370
+poweradd = 0
+velset = 0,0
+ctrl = 0
+
+[State 350, snd]
+type = PlaySnd
+trigger1 = AnimElem = 1
+value = 350,0
+
+[State 360, pos]
+type = posset
+trigger1 = 1
+y = 0
+
+[State 705, 1]
+type = velset
+trigger1 = Time = [2,19]
+x = -4.5
+
+[State 220, 3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+;------------------------------------------------------------------------
+;----------------------------------DODGES--------------------------------
+;------------------------------------------------------------------------
+;--------KOF98 forward
+[Statedef 350]
+type = S
+physics = S
+anim = 350
+sprpriority = -1
+poweradd = 0
+velset = 0,0
+ctrl = 0
+
+[State 360, push]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 350, snd]
+type = PlaySnd
+trigger1 = AnimElem = 1
+value = 350,0
+
+[State 350, hit]
+type = HitBy
+trigger1 = 1
+value =  , AT
+
+[State 350, hit]
+type = NotHitBy
+trigger1 = 1
+value = , AA, AP
+
+[State 350, snd]
+type = Poweradd
+trigger1 = prevstateno = 150 || prevstateno = 151
+trigger1 = AnimElem = 1
+value = -1000
+
+[State 3050, Super B]
+type = AfterImage
+trigger1 = AnimElem = 2
+time = 2
+
+[State 3050, Super C]
+type = AfterImageTime
+trigger1 = AnimElemTime(2) >= 0
+time = 2
+
+[State 9520, 51]
+type = EnvColor
+trigger1 = animelem = 1
+trigger1 = prevstateno = 150 || prevstateno = 151
+value = 200,200,200
+time = 3
+
+[State 705, 1]
+type = velset
+trigger1 = Time = [9,25]
+x = 5
+
+[State 220, 3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+;--------KOF98 backward
+[Statedef 360]
+type = S
+physics = S
+anim = 360
+poweradd = 0
+sprpriority = -1
+velset = 0,0
+ctrl = 0
+
+[State 360, push]
+type = PlayerPush
+trigger1 = 1
+value = 0
+
+[State 350, hit]
+type = HitBy
+trigger1 = 1
+value =  , AT
+
+[State 350, hit]
+type = NotHitBy
+trigger1 = 1
+value = , AA, AP
+
+[State 350, snd]
+type = PlaySnd
+trigger1 = AnimElem = 1
+value = 350,0
+
+[State 350, snd]
+type = Poweradd
+trigger1 = prevstateno = 150 || prevstateno = 151
+trigger1 = AnimElem = 1
+value = -1000
+
+[State 3050, Super B]
+type = AfterImage
+trigger1 = AnimElem = 2
+time = 2
+
+[State 3050, Super C]
+type = AfterImageTime
+trigger1 = AnimElemTime(2) >= 0
+time = 2
+
+[State 9520, 51]
+type = EnvColor
+trigger1 = animelem = 1
+trigger1 = prevstateno = 150 || prevstateno = 151
+value = 200,200,200
+time = 3
+
+[State 705, 1]
+type = velset
+trigger1 = Time = [9,25]
+x = -5
+
+[State 220, 3]
+type = ChangeState
+trigger1 = AnimTime = 0
+value = 0
+ctrl = 1
+
+
+;---------------------------------------------------------------------------
+; States that are always executed (use statedef -2)
+;---------------------------------------------------------------------------
+[Statedef -2]
+
+[State -2, デバッグ表示]
+type = DisplayToClipboard
+trigger1 = 1
+text = "V0=%d, V1=%d, V4=%d, V5=%d, V8=%d"
+params = var(0),var(1),var(4),var(5),var(8)
+ignorehitpause = 1
+
+;表示を横に加える
+[State -2, デバッグ表示その2]
+type = AppendToClipboard
+trigger1 = 1
+text = " V14=%d, V15=%d, V16=%d, V30=%d, V59=%d"
+params = var(14),var(15),var(16),var(30),var(59)
+ignorehitpause = 1
+
+;表示を下に加える
+[State -2, デバッグ表示その3]
+type = AppendToClipboard
+trigger1 = 1
+text = " V9=%d, V23=%d, V24=%d, V32=%d, V21=%d"
+params = var(9),var(23),var(24),var(32),var(21)
+ignorehitpause = 1
+
+;表示を下に加える
+[State -2, デバッグ表示その3]
+type = AppendToClipboard
+trigger1 = 1
+text = " V17=%d"
+params = var(17)
+ignorehitpause = 1
+
+[State 9520, 51]
+type = EnvColor
+trigger1 = projhit3000 = 1
+value = 240,240,240
+time = 1
+
+[State -2,]
+type = Varadd
+trigger1 = projhit3300 = 1
+var(14) = 1
+
+[State -2, run sound]
+type = stopsnd
+trigger1 = stateno != 101
+channel = 1
+
+;-----------------------------------------
+; Thanks to Sander for letting me use his Counter code!
+;==================================================================================
+; ------- COUNTER HIT --------
+;===============================================
+[State -2, COUNTER HIT1]
+type = VarSet
+trigger1 = enemy, movetype = A
+ignorehitpause = 1
+var(15) = 1
+
+[State -2, COUNTER HIT2]
+type = VarSet
+trigger1 = enemy, movetype = I || var(16) >= 1
+ignorehitpause = 1
+var(15) = 0
+
+[State -2, COUNTER HIT3]
+type = VarSet
+trigger1 = var(16) > 10 && enemy, movetype = H
+ignorehitpause = 1
+var(15) = 0
+
+[State -2, COUNTER HIT4]
+type = VarSet
+trigger1 = var(15) = 1 && movehit
+ignorehitpause = 1
+var(16) = 1
+
+[State -2, COUNTER HIT5]
+type = Varadd
+trigger1 = var(16) >= 1
+ignorehitpause = 1
+var(16) = 1
+
+[State -2, COUNTER HIT6]
+type = VarSet
+trigger1 = var(16) >= 22 && movehit
+trigger2 = p2movetype != H
+trigger3 = movetype = H
+trigger4 = var(16) >= 22 && stateno = 1002
+ignorehitpause = 1
+var(16) = 0
+
+[State -2, COUNTER HIT7]
+type = Assertspecial
+trigger1 = var(16) > 0 
+flag = Nojugglecheck
+;---------------------------
+;コンボ補正
+
+[state -2]
+type = varset
+trigger1 = enemy,ctrl
+trigger2 = StateNo = [3400,3410]
+fvar(0) = 1.0
+
+[state -2];補正
+type = varset
+triggerall = enemy,movetype = H
+trigger1 = StateNo = [1000,1999]
+trigger1 = PrevStateNo = [200,499]
+fvar(0) = 0.80
+
+[state -2];補正
+type = varset
+triggerall = enemy,movetype = H
+triggerall = StateNo = 3000
+trigger1 = PrevStateNo = [200,499]
+trigger2 = PrevStateNo = [1000,1999]
+fvar(0) = 0.66
+
+[state -2]
+type = attackmulset
+trigger1 = 1
+value = fvar(0)
+
+;---------------------------
+;トレモ
+
+[state -2]
+type = powerset
+trigger1 = P2name = "Training"
+value = PowerMax
+
+[state -2,トレモ]
+type = varset
+trigger1 = PrevStateNo = [190,199]
+trigger1 = RoundState = [0,1]
+trigger1 = Power >= PowerMax
+v = 0
+value = 1
+
+;-------------------------------------------
+;エクシード
+
+[State -2, エクシード1P]
+type = Explod
+triggerall = roundstate = 2
+triggerall = teamside = 1
+triggerall = Numexplod(8501) = 0
+trigger1 = (Life <= floor(LifeMax/2) && var(50) = 0) || Var(0) = 1
+anim = 8501
+id = 8501
+postype = Left
+pos = 10,205
+ownpal = 1
+bindtime = -1
+ignorehitpause = 1
+sprpriority = 6
+ontop = 1
+persistent = 1
+facing = 1
+pausemovetime=-1
+removetime = -1
+
+[State -2, エクシード2P]
+type = Explod
+triggerall = roundstate = 2
+triggerall = teamside = 2
+triggerall = Numexplod(8501) = 0
+trigger1 = (Life <= floor(LifeMax/2) && var(50) = 0) || Var(0) = 1
+anim = 8501
+id = 8501
+postype = Right
+pos = -26,205
+ownpal = 1
+bindtime = -1
+ignorehitpause = 1
+sprpriority = 6
+ontop = 1
+persistent = 1
+facing = 1
+pausemovetime=-1
+removetime = -1
+
+[State -2,エクシード]
+type = RemoveExplod
+triggerall = var(0) = 0
+trigger1 = Life > floor(LifeMax/2) && var(50) = 0
+trigger2 = var(50) > 0
+trigger3 = roundstate != 2
+id = 8501
